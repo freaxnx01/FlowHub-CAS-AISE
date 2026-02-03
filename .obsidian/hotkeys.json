@@ -1,0 +1,11 @@
+{
+  "editor:insert-codeblock": [
+    {
+      "modifiers": [
+        "Alt",
+        "Mod"
+      ],
+      "key": "C"
+    }
+  ]
+}
