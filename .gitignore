@@ -1,4 +1,15 @@
-.obsidian/workspace.json
-.obsidian/workspace
+# Plugin‑Listen ignorieren (kein Auto‑Install)
+.obsidian/community-plugins.json
+.obsidian/core-plugins.json  
+.obsidian/core-plugins-migration.json
+
+# Plugin‑Daten ignorieren
+.obsidian/plugins/
+
+# Optional: Workspace/Caches (device‑spezifisch)
+.obsidian/workspace*
+.obsidian/cache/
+
+# Misc
 .trash/
 .DS_Store
