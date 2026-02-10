@@ -1,5 +1,28 @@
 
-# FlowHub - Management Summary
+## Notes
+
+AutoVerschopper
+Quotes
+Bücher
+Geolocations, Besuchter Orte, Ferien, Ausflüge
+Ausflüge J, Vorschläge nach Datum/Saison/Wetter, Auswahl in Kalender eintragen, gemachte nicht mehr vorschlagen, Fotos taggen
+Heise ct artikel merken zum Nachschlagen
+Shopping list, abgleich mit Amazon/Galaxus, inventory (homebox)
+Movies
+Wenn Einsortierungsskill fehlt, autom. Erstellung, Vorschlag
+Abgleich mit todoist
+Anbindung Steam, Games
+Alle Infoschnipsel welche über Signal reinkommen
+Bücher Sammlung
+RAG auf Obsidian
+DMS paperless-ngx
+Gesundheitsdaten
+Einsortierung kb
+Belege/quittungen
+Budget
+Prefix, slash commands
+
+## FlowHub - Management Summary
 
 ## Problem
 
