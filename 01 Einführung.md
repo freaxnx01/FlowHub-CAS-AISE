@@ -1,5 +1,13 @@
 
-## Leseempfehlung
+## TODO
+
+- [ ] Leseempfehlungen
+- [ ] UML: PDF lesen
+- [ ] UML: PlantUML ausprobieren
+- [ ] Upload Projektbeschreibung
+- [ ] Kotlin Testprojekt mit IntelliJ
+
+## Leseempfehlungen
 
 - [ ] In [1] Beyond Vibe Coding
 	- [ ] Kapitel 1: Introduction: What Is Vibe Coding?
