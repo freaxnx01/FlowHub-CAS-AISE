@@ -9,7 +9,7 @@
 
 ## Block 1, Februar
 
-- [ ] Nacharbeitung Inhalt/Umfang?
+- [x] Nacharbeitung Inhalt/Umfang?
 - [ ] O'Reilly: Safari App / HTML/PDF Export?
 - [ ] UML PDF lesen
 - [ ] Kotlin Testprojekt mit IntelliJ
