@@ -16,3 +16,19 @@ Dies ist eine starke Existenzabhängigkeit. Das Teil ist existentiell an das Gan
  * Beispiel: Ein Haus und seine Räume. Wird das Haus abgerissen, verschwinden auch die Räume.
  * Symbol: \blacklozenge
 Soll ich dir ein konkretes Code-Beispiel zeigen, um den Unterschied in der Implementierung zu verdeutlichen?
+
+
+## PlantUML
+
+
+### Seque
+
+### Generate UML for current diagram
+
+
+```
+![Hello World](https://www.plantuml.com/plantuml/svg/LOmn3eCm34NtdC8Nu0AeGeIfIwSEp57uGX6EAROpSFkAJcLzx-cDvaczLQOdc7UQT-Kbs5RaapHLUll987Cj-Qh-3Ou6oNZ1BAs8N5Qf4ASCSMY8r0qqzRTlf4VtOoMCaALL_W80 "Hello World")
+```
+
+
+![Hello World](https://www.plantuml.com/plantuml/svg/LOmn3eCm34NtdC8Nu0AeGeIfIwSEp57uGX6EAROpSFkAJcLzx-cDvaczLQOdc7UQT-Kbs5RaapHLUll987Cj-Qh-3Ou6oNZ1BAs8N5Qf4ASCSMY8r0qqzRTlf4VtOoMCaALL_W80 "Hello World")
