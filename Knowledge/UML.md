@@ -24,22 +24,62 @@ Soll ich dir ein konkretes Code-Beispiel zeigen, um den Unterschied in der Imple
 ### Class diagram
 
 ```
-sequence.plantuml
+class.puml
 ```
 
 ```
-@startuml Hello World
+@startuml Domain Model
+
 skinparam Style strictuml
 skinparam SequenceMessageAlignment center
-A -> B: Hello World
-A <- B: Hi
+hide empty members
+
+class Document {
+  +int Id
+  +string Title
+  +DateTime CreatedDate
+  +string CreatedBy
+  +byte[] Content
+  --
+  +void Save()
+  +void Delete()
+  +Document GetById(int id)
+}
+
+class DocumentRepository {
+  -IDbConnection connection
+  --
+  +Document FindById(int id)
+  +void Insert(Document doc)
+  +void Update(Document doc)
+  +void Delete(int id)
+}
+
+class DocumentService {
+  -DocumentRepository repo
+  --
+  +Document CreateDocument(DocumentDto dto)
+  +void UpdateDocument(int id, DocumentDto dto)
+  +void DeleteDocument(int id)
+}
+
+DocumentService --> DocumentRepository
+DocumentRepository --> Document
+
 @enduml
 ```
 
+
+```
+![Domain Model](https://www.plantuml.com/plantuml/svg/TP1DJiD038NtSmelMvLS0PKs0cNH3Iqhn68wyrH6P3nXngaK8Ux2MJWPoa-ZjgGx-_dP_knb4XsbzYNbmMl7j0aMfLBfmt6be_QqbQO49OdEjBxp2ZvhiC46AUa37aftO0yMCc11LE_EWk0hQSZ3xn6JKgRKAL4UJDqvlzJl3oqS2nMs2zizVA2TanATa6l1pddGEa8BR9kVEmTvrNJYlX6ylj4wi82bbR9C4IsEmLdQwYDcyyxNvJbAo4aPaPuWgwQminRAsRdwleP-HXMIan2R7ZyhylqwCCE82qnc38Vr5zCV7TkByIDDmGbHPgFJ1dDMVQci5jog3fVSHDuY7ft1m3jnI4GLfd3xxvxISNqkWQo4VtoZiIUveziDFV9LGuT-3PrbznE_LnDNd3kLMe9jxSi_ "Domain Model")
+```
+
+![Domain Model](https://www.plantuml.com/plantuml/svg/TP1DJiD038NtSmelMvLS0PKs0cNH3Iqhn68wyrH6P3nXngaK8Ux2MJWPoa-ZjgGx-_dP_knb4XsbzYNbmMl7j0aMfLBfmt6be_QqbQO49OdEjBxp2ZvhiC46AUa37aftO0yMCc11LE_EWk0hQSZ3xn6JKgRKAL4UJDqvlzJl3oqS2nMs2zizVA2TanATa6l1pddGEa8BR9kVEmTvrNJYlX6ylj4wi82bbR9C4IsEmLdQwYDcyyxNvJbAo4aPaPuWgwQminRAsRdwleP-HXMIan2R7ZyhylqwCCE82qnc38Vr5zCV7TkByIDDmGbHPgFJ1dDMVQci5jog3fVSHDuY7ft1m3jnI4GLfd3xxvxISNqkWQo4VtoZiIUveziDFV9LGuT-3PrbznE_LnDNd3kLMe9jxSi_ "Domain Model")
 ### Sequence diagram
 
+
 ```
-sequence.plantuml
+sequence.puml
 ```
 
 ```
@@ -50,8 +90,6 @@ A -> B: Hello World
 A <- B: Hi
 @enduml
 ```
-
-### Generate UML for current diagram
 
 
 ```
