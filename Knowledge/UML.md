@@ -21,7 +21,35 @@ Soll ich dir ein konkretes Code-Beispiel zeigen, um den Unterschied in der Imple
 ## PlantUML
 
 
-### Seque
+### Class diagram
+
+```
+sequence.plantuml
+```
+
+```
+@startuml Hello World
+skinparam Style strictuml
+skinparam SequenceMessageAlignment center
+A -> B: Hello World
+A <- B: Hi
+@enduml
+```
+
+### Sequence diagram
+
+```
+sequence.plantuml
+```
+
+```
+@startuml Hello World
+skinparam Style strictuml
+skinparam SequenceMessageAlignment center
+A -> B: Hello World
+A <- B: Hi
+@enduml
+```
 
 ### Generate UML for current diagram
 
