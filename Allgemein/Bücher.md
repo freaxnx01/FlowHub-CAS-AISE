@@ -18,22 +18,22 @@
 
 ### [1] Beyond Vibe Coding
 
-- Kapitel 1: Introduction: What Is Vibe Coding?
-- Kapitel 2: The Art of the Prompt: Communicating Effectively with AI
+- [ ] Kapitel 1: Introduction: What Is Vibe Coding?
+- [ ] Kapitel 2: The Art of the Prompt: Communicating Effectively with AI
 
 ### [2] Coding with AI
 
-- Kapitel 1: Introducing generative AI
-- Kapitel 2: First steps with AI-assisted coding
+- [ ] Kapitel 1: Introducing generative AI
+- [ ] Kapitel 2: First steps with AI-assisted coding
 
 ### [3] Head First Software Architecture
 
-- Kapitel 1: Software Architecture
-- Kapitel 2: Architectural Characteristics
+- [ ] Kapitel 1: Software Architecture
+- [ ] Kapitel 2: Architectural Characteristics
 
 ### [9] Generative AI for Software Development
 
-- Kapitel 1: Code Generation and Autocompletion
+- [ ] Kapitel 1: Code Generation and Autocompletion
 
 ---
 
@@ -41,23 +41,23 @@
 
 ### [1] Beyond Vibe Coding
 
-- Kapitel 3: The 70% Problem: AI-Assisted Workflows
-- Kapitel 4: Beyond the 70%: Maximizing Human Contribution
+- [ ] Kapitel 3: The 70% Problem: AI-Assisted Workflows
+- [ ] Kapitel 4: Beyond the 70%: Maximizing Human Contribution
 
 ### [2] Coding with AI
 
-- Kapitel 3: Design and discovery
-- Kapitel 4: Coding the first version of our application
-- Kapitel 7: Building user interfaces with ChatGPT
+- [ ] Kapitel 3: Design and discovery
+- [ ] Kapitel 4: Coding the first version of our application
+- [ ] Kapitel 7: Building user interfaces with ChatGPT
 
 ### [3] Head First Software Architecture
 
-- Kapitel 3: The Two Laws of Software Architecture
-- Kapitel 4: Logical Components
+- [ ] Kapitel 3: The Two Laws of Software Architecture
+- [ ] Kapitel 4: Logical Components
 
 ### [4] Quarkus in Action
 
-- Kapitel 6: Exposing and securing web applications
+- [ ] Kapitel 6: Exposing and securing web applications
 
 ---
 
@@ -65,23 +65,23 @@
 
 ### [1] Beyond Vibe Coding
 
-- Kapitel 5: Understand Generated Code: Review, Refine, Own
-- Kapitel 6: AI-Driven Prototyping: Tools and Technique
+Kapitel 5: Understand Generated Code: Review, Refine, Own
+Kapitel 6: AI-Driven Prototyping: Tools and Technique
 
 ### [2] Coding with AI
 
-- Kapitel 5: Using Blackbox AI to generate base code
+Kapitel 5: Using Blackbox AI to generate base code
 
 ### [3] Head First Software Architecture
 
-- Kapitel 5: Architectural Styles: Categorization and Philosophies
-- Kapitel 10: Microservices Architecture: Bit by Bit
-- Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
+Kapitel 5: Architectural Styles: Categorization and Philosophies
+Kapitel 10: Microservices Architecture: Bit by Bit
+Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
 
 ### [4] Quarkus in Action
 
-- Kapitel 4: Handling communications
-- Kapitel 9: Quarkus messaging
+- [ ] Kapitel 4: Handling communications
+- [ ] Kapitel 9: Quarkus messaging
 
 ---
 
