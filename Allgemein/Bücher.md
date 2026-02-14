@@ -14,17 +14,18 @@
 
 [5] High-Performance Web Apps with FastAPI - nur Nachschlagen
 
+
 ## Block 1: Einführung
 
 ### [1] Beyond Vibe Coding
 
-- [ ] Kapitel 1: Introduction: What Is Vibe Coding?
+- [x] Kapitel 1: Introduction: What Is Vibe Coding?
 - [ ] Kapitel 2: The Art of the Prompt: Communicating Effectively with AI
 
 ### [2] Coding with AI
 
-- [ ] Kapitel 1: Introducing generative AI
-- [ ] Kapitel 2: First steps with AI-assisted coding
+- [x] Kapitel 1: Introducing generative AI
+- [x] Kapitel 2: First steps with AI-assisted coding
 
 ### [3] Head First Software Architecture
 
@@ -33,7 +34,7 @@
 
 ### [9] Generative AI for Software Development
 
-- [ ] Kapitel 1: Code Generation and Autocompletion
+- [x] Kapitel 1: Code Generation and Autocompletion
 
 ---
 
@@ -65,18 +66,18 @@
 
 ### [1] Beyond Vibe Coding
 
-Kapitel 5: Understand Generated Code: Review, Refine, Own
-Kapitel 6: AI-Driven Prototyping: Tools and Technique
+- [ ] Kapitel 5: Understand Generated Code: Review, Refine, Own
+- [ ] Kapitel 6: AI-Driven Prototyping: Tools and Technique
 
 ### [2] Coding with AI
 
-Kapitel 5: Using Blackbox AI to generate base code
+- [ ] Kapitel 5: Using Blackbox AI to generate base code
 
 ### [3] Head First Software Architecture
 
-Kapitel 5: Architectural Styles: Categorization and Philosophies
-Kapitel 10: Microservices Architecture: Bit by Bit
-Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
+- [ ] Kapitel 5: Architectural Styles: Categorization and Philosophies
+- [ ] Kapitel 10: Microservices Architecture: Bit by Bit
+- [ ] Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
 
 ### [4] Quarkus in Action
 
@@ -89,21 +90,21 @@ Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
 
 ### [1] Beyond Vibe Coding
 
-- Kapitel 7: Building Web Applications with AI
+- [ ] Kapitel 7: Building Web Applications with AI
 
 ### [2] Coding with AI
 
-- Kapitel 9: Prompt engineering
+- [ ] Kapitel 9: Prompt engineering
 
 ### [6] Grokking Relational Database Design
 
-- Kapitel 2: Related tables and more
-- Kapitel 3: Overview of database design
+- [ ] Kapitel 2: Related tables and more
+- [ ] Kapitel 3: Overview of database design
 
 ### [4] Quarkus in Action
 
-- Kapitel 7: Database access
-- Kapitel 8: Reactive programming
+- [ ] Kapitel 7: Database access
+- [ ] Kapitel 8: Reactive programming
 
 ---
 
@@ -111,22 +112,22 @@ Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
 
 ### [1] Beyond Vibe Coding
 
-- Kapitel 8: Security, Maintainability, and Reliability
-- Kapitel 9: The Ethical Implications of Vibe Coding
+- [ ] Kapitel 8: Security, Maintainability, and Reliability
+- [ ] Kapitel 9: The Ethical Implications of Vibe Coding
 
 ### [7] Kubernetes for Developers
 
-- Kapitel 1: Kubernetes for application deployment
-- Kapitel 2: Containerizing apps
+- [ ] Kapitel 1: Kubernetes for application deployment
+- [ ] Kapitel 2: Containerizing apps
 
 ### [8] AI Integration in Software Development and Operations
 
-- Kapitel 8: AI in Continuous Delivery
+- [ ] Kapitel 8: AI in Continuous Delivery
 
 ### [4] Quarkus in Action
 
-- Kapitel 10: Cloud-native application patterns
-- Kapitel 11: Quarkus application in the cloud
+- [ ] Kapitel 10: Cloud-native application patterns
+- [ ] Kapitel 11: Quarkus application in the cloud
 
 **Zusätzliche Online-Ressourcen:**
 
