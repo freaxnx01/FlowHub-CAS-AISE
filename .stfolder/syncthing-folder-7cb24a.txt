@@ -1,5 +1,5 @@
 # This directory is a Syncthing folder marker.
 # Do not delete.
 
-folderID: xopkw-ccimq
-created: 2026-02-15T18:31:39+01:00
+folderID: 9lmka-regwv
+created: 2026-02-15T18:59:15+01:00
