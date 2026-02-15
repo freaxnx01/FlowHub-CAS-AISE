@@ -1,17 +1,9 @@
 
-CAS = Certificate of Advanced Studies
-ETCS-Credits = European Credit Transfer System
-MAS = Master of Advanced Studies
-
-
-EDA	Event Driven Architecture
-
-gRPC	(Google) Remote Procedure Call, Service-to-Service communication (e.g. [ OrderService ]  ─── gRPC ───>  [ InventoryService ])
-
-
-
 | Word                                   | One-sentence technical summary                                                                                                                                                                                             |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EDA                                    | Event Driven Architecture                                                                                                                                                                                                  |
+| gRPC                                   | (Google) Remote Procedure Call, Service-to-Service communication (e.g. [ OrderService ]  ─── gRPC ───>  [ InventoryService ])                                                                                              |
+| SSR, CSR                               | SSR (Server-Side Rendering) und CSR (Client-Side Rendering)                                                                                                                                                                |
 | Unified Inference Platforms            | Platforms that provide a unified application programming interface, lifecycle management, scaling, and observability for running machine learning and large language model inference workloads in production environments. |
 | SDLC (Software Development Life Cycle) | A formalized process that defines the phases, practices, and controls for planning, designing, implementing, testing, deploying, and maintaining software systems.                                                         |
 | Hexagonal Architecture                 | A software architecture pattern (also called Ports and Adapters) that decouples core domain logic from external technologies such as databases, user interfaces, and messaging systems.                                    |
@@ -21,3 +13,9 @@ gRPC	(Google) Remote Procedure Call, Service-to-Service communication (e.g. [ Or
 | SRE (Site Reliability Engineering)     | An engineering discipline that applies software engineering techniques, automation, and service-level objectives to design and operate highly reliable and scalable systems.                                               |
 
 
+
+## Organisation
+
+CAS = Certificate of Advanced Studies
+ETCS-Credits = European Credit Transfer System
+MAS = Master of Advanced Studies
