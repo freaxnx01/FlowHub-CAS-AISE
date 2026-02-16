@@ -37,7 +37,7 @@
 - [x] Kapitel 4: Logical Components
 - [x] Kapitel 5: Architectural Styles: Categorization and Philosophies
 - [x] Kapitel 10: Microservices Architecture: Bit by Bit
-- [ ] Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
+- [x] Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
 
 ---
 
