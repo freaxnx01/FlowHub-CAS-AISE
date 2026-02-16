@@ -7,7 +7,7 @@
 
 - [x] Kapitel 1: Introduction: What Is Vibe Coding?
 - [x] Kapitel 2: The Art of the Prompt: Communicating Effectively with AI
-- [ ] Kapitel 3: The 70% Problem: AI-Assisted Workflows
+- [x] Kapitel 3: The 70% Problem: AI-Assisted Workflows
 - [ ] Kapitel 4: Beyond the 70%: Maximizing Human Contribution
 - [ ] Kapitel 5: Understand Generated Code: Review, Refine, Own
 - [ ] Kapitel 6: AI-Driven Prototyping: Tools and Technique
