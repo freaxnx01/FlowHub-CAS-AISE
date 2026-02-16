@@ -9,7 +9,7 @@
 - [x] Kapitel 2: The Art of the Prompt: Communicating Effectively with AI
 - [x] Kapitel 3: The 70% Problem: AI-Assisted Workflows
 - [x] Kapitel 4: Beyond the 70%: Maximizing Human Contribution
-- [ ] Kapitel 5: Understand Generated Code: Review, Refine, Own
+- [x] Kapitel 5: Understand Generated Code: Review, Refine, Own
 - [ ] Kapitel 6: AI-Driven Prototyping: Tools and Technique
 - [ ] Kapitel 7: Building Web Applications with AI
 - [ ] Kapitel 8: Security, Maintainability, and Reliability
