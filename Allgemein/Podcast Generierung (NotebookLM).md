@@ -8,7 +8,7 @@
 - [x] Kapitel 1: Introduction: What Is Vibe Coding?
 - [x] Kapitel 2: The Art of the Prompt: Communicating Effectively with AI
 - [x] Kapitel 3: The 70% Problem: AI-Assisted Workflows
-- [ ] Kapitel 4: Beyond the 70%: Maximizing Human Contribution
+- [x] Kapitel 4: Beyond the 70%: Maximizing Human Contribution
 - [ ] Kapitel 5: Understand Generated Code: Review, Refine, Own
 - [ ] Kapitel 6: AI-Driven Prototyping: Tools and Technique
 - [ ] Kapitel 7: Building Web Applications with AI
@@ -38,7 +38,7 @@
 - [x] Kapitel 5: Architectural Styles: Categorization and Philosophies
 - [x] Kapitel 10: Microservices Architecture: Bit by Bit
 - [x] Kapitel 11: Event-Driven Architecture: Asynchronous Adventures
-
+ 
 ---
 
 ## [4] Quarkus in Action (7 Kapitel)
