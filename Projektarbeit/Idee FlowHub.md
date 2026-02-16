@@ -3,7 +3,14 @@
 
 - FlowHub
 - IntelliFlow
-## Notes
+## Claude Code Project Notes
+
+```
+Option C: Hybrid (MEINE EMPFEHLUNG!)
+Skill Definition (skill.md):
+```
+
+## Skills
 
 AutoVerschopper
 Quotes
