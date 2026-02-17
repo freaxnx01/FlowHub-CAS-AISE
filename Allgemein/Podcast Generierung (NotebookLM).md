@@ -75,7 +75,7 @@
 
 ## [9] Generative AI for Software Development (1 Kapitel)
 
-- [ ] Kapitel 1: Code Generation and Autocompletion
+- [x] Kapitel 1: Code Generation and Autocompletion
 
 ---
 
