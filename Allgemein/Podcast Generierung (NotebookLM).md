@@ -13,7 +13,7 @@
 - [x] Kapitel 6: AI-Driven Prototyping: Tools and Technique
 - [x] Kapitel 7: Building Web Applications with AI
 - [x] Kapitel 8: Security, Maintainability, and Reliability
-- [ ] Kapitel 9: The Ethical Implications of Vibe Coding
+- [x] Kapitel 9: The Ethical Implications of Vibe Coding
 
 ---
 
