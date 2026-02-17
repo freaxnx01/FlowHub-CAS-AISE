@@ -10,7 +10,7 @@
 - [x] Kapitel 3: The 70% Problem: AI-Assisted Workflows
 - [x] Kapitel 4: Beyond the 70%: Maximizing Human Contribution
 - [x] Kapitel 5: Understand Generated Code: Review, Refine, Own
-- [ ] Kapitel 6: AI-Driven Prototyping: Tools and Technique
+- [x] Kapitel 6: AI-Driven Prototyping: Tools and Technique
 - [ ] Kapitel 7: Building Web Applications with AI
 - [ ] Kapitel 8: Security, Maintainability, and Reliability
 - [ ] Kapitel 9: The Ethical Implications of Vibe Coding
