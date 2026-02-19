@@ -12,6 +12,8 @@ Skill Definition (skill.md):
 
 ## Skills
 
+Neue I
+
 AutoVerschopper
 Quotes
 Bücher
