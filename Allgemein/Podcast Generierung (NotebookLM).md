@@ -73,7 +73,7 @@ Try Videoübersichtw
 
 ## [8] AI Integration in Software Development and Operations (1 Kapitel)
 
-- [ ] Kapitel 8: AI in Continuous Delivery
+- [x] Kapitel 8: AI in Continuous Delivery
 
 ---
 
