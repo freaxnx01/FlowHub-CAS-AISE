@@ -43,9 +43,9 @@
 
 ## [4] Quarkus in Action (7 Kapitel)
 
-Try Videoübersicht
+Videos
 
-- [ ] Kapitel 4: Handling communications
+- [x] Kapitel 4: Handling communications
 - [ ] Kapitel 6: Exposing and securing web applications
 - [ ] Kapitel 7: Database access
 - [ ] Kapitel 8: Reactive programming
