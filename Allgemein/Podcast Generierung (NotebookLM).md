@@ -43,9 +43,7 @@
 
 ## [4] Quarkus in Action (7 Kapitel)
 
-PDF Image! converting
-
-Try Videoübersichtw
+Try Videoübersicht
 
 - [ ] Kapitel 4: Handling communications
 - [ ] Kapitel 6: Exposing and securing web applications
@@ -66,8 +64,8 @@ Try Videoübersichtw
 
 ## [7] Kubernetes for Developers (2 Kapitel)
 
-- [ ] Kapitel 1: Kubernetes for application deployment
-- [ ] Kapitel 2: Containerizing apps
+- [x] Kapitel 1: Kubernetes for application deployment
+- [x] Kapitel 2: Containerizing apps
 
 ---
 
