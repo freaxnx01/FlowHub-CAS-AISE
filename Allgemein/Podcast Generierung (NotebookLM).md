@@ -58,7 +58,7 @@ PDF Image!
 ## [6] Grokking Relational Database Design (2 Kapitel)
 
 - [x] Kapitel 2: Related tables and more
-- [ ] Kapitel 3: Overview of database design
+- [x] Kapitel 3: Overview of database design
 
 ---
 
