@@ -12,7 +12,12 @@ Skill Definition (skill.md):
 
 ## Skills
 
-Neue I
+Neue Skill-Ideen:
+
+- Kontakinfos (Adresse, Email, Phone) -> Google Contacts
+
+
+---
 
 AutoVerschopper
 Quotes
