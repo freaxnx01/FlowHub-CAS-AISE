@@ -46,8 +46,8 @@
 Videos
 
 - [x] Kapitel 4: Handling communications
-- [ ] Kapitel 6: Exposing and securing web applications
-- [ ] Kapitel 7: Database access
+- [x] Kapitel 6: Exposing and securing web applications
+- [x] Kapitel 7: Database access
 - [ ] Kapitel 8: Reactive programming
 - [ ] Kapitel 9: Quarkus messaging
 - [ ] Kapitel 10: Cloud-native application patterns
