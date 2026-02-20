@@ -31,6 +31,8 @@
 
 ## [3] Head First Software Architecture (7 Kapitel)
 
+Videos
+
 - [x] Kapitel 1: Software Architecture
 - [x] Kapitel 2: Architectural Characteristics
 - [x] Kapitel 3: The Two Laws of Software Architecture
@@ -51,7 +53,7 @@ Videos
 - [x] Kapitel 8: Reactive programming
 - [x] Kapitel 9: Quarkus messaging
 - [x] Kapitel 10: Cloud-native application patterns
-- [ ] Kapitel 11: Quarkus application in the cloud
+- [x] Kapitel 11: Quarkus application in the cloud
 
 ---
 
