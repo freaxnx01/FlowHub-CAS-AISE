@@ -50,7 +50,7 @@ Videos
 - [x] Kapitel 7: Database access
 - [x] Kapitel 8: Reactive programming
 - [x] Kapitel 9: Quarkus messaging
-- [ ] Kapitel 10: Cloud-native application patterns
+- [x] Kapitel 10: Cloud-native application patterns
 - [ ] Kapitel 11: Quarkus application in the cloud
 
 ---
