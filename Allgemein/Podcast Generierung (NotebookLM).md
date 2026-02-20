@@ -31,7 +31,7 @@
 
 ## [3] Head First Software Architecture (7 Kapitel)
 
-Videos
+Videos 
 
 - [x] Kapitel 1: Software Architecture
 - [x] Kapitel 2: Architectural Characteristics
