@@ -14,13 +14,10 @@
 
 TODO
 
-- Gruppeneinteilung
 
-- Sichten Materialien und Ergebnisse der Präsenzveranstaltung 1
+- [ ] Projektbeschreibung ändern auf .NET, Upload
+- [ ] Sichten Materialien und Ergebnisse der Präsenzveranstaltung 1
 
-- Projektbeschreibung auf .NET, Upload
-
-- JetBrains AI künden?
 
 ---
 
