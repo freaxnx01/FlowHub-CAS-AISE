@@ -1,25 +1,12 @@
 
-## Vorbereitung
 
-### TODO
-
-- [x] Leseempfehlungen
-- [x] UML: PDF lesen
-- [x] UML: PlantUML ausprobieren
-- [x] Upload Projektbeschreibung
-- [x] Kotlin Testprojekt mit IntelliJ
-
-
-## PVA
-
-TODO
-
+## TODO
 
 - [ ] Sichten Materialien und Ergebnisse der Präsenzveranstaltung 1
 - [ ] Projektbeschreibung ändern auf .NET, Upload
 
+## Notes
 
----
 
 FlowHub
 
@@ -94,8 +81,3 @@ Nicht funktionale Anforderungen bestimmen die Architektur
 - Sicherheit
 
 - Verfügbarkeit
-
-...
-
-## Nachbearbeitung
-
