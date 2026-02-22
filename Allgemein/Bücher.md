@@ -136,14 +136,6 @@
 
 ---
 
-## Zusätzliche Online-Ressourcen (Block 5)
 
-- [ ] Wikipedia DevOps
-- [ ] Atlassian DevOps
-- [ ] CI/CD-Leitfaden für GitLab
-- [ ] Quarkus LangChain4j
-- [ ] Agentic AI with Quarkus
-
----
 
 **Fortschritt:** 0/34 Kapitel gelesen
