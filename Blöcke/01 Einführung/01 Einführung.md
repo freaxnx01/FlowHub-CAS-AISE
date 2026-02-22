@@ -6,7 +6,7 @@
 - [x] Leseempfehlungen
 - [x] UML: PDF lesen
 - [x] UML: PlantUML ausprobieren
-- [ ] Upload Projektbeschreibung
+- [x] Upload Projektbeschreibung
 - [x] Kotlin Testprojekt mit IntelliJ
 
 
@@ -15,8 +15,8 @@
 TODO
 
 
-- [ ] Projektbeschreibung ändern auf .NET, Upload
 - [ ] Sichten Materialien und Ergebnisse der Präsenzveranstaltung 1
+- [ ] Projektbeschreibung ändern auf .NET, Upload
 
 
 ---
