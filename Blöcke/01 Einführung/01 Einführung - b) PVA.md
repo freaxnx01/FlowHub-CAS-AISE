@@ -1,32 +1,10 @@
 
 
-## TODO
-
-- [ ] Sichten Materialien und Ergebnisse der Präsenzveranstaltung 1
-- [ ] Projektbeschreibung ändern auf .NET, Upload
 
 ## Notes
 
 
-FlowHub
 
-.NET 10 / C# / Blazor
-
-vscode
-
-Claude Code CLI (Opus?)
-
-Git Repo
-
-Branches
-
-               dev
-
-               main
-
-Test-driven approach: Generate Tests first, after creation of test while implementing, test aren't changed
-
-Git Merge Conflict von AI erledigen lassen
 
 ---
 
@@ -44,7 +22,6 @@ Recherche
 
 - CC /brainstorm?
 
-- CC yolo cmd?
 
 - /plugins -> talent-factory claude plugins
 
@@ -62,22 +39,3 @@ Recherche
 
 ---
 
-Architektur
-
-Monolith: Eine Deployment Einheit
-
-Microservice:
-
-- Daten sind beim Service (im Bauch)
-
-- Customer -> REST sync -> Sales: Nach Definition kein Microservice mehr
-
-- Wenn über eine Message Queue (async) ist es Microservice
-
-- Netzwerk dazwischen: nicht deterministisch
-
-Nicht funktionale Anforderungen bestimmen die Architektur
-
-- Sicherheit
-
-- Verfügbarkeit
