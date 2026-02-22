@@ -1,9 +1,6 @@
 
-## Allgemein
-
-- [x] Planung Lernen
-- [x] O'Reilly: Safari App / HTML/PDF Export?
-- [x] WLAN ZH speichern https://www.ffhs.ch/de/intern/support/faq/detail/kann-ich-mich-bei-der-ffhs-mit-dem-eduroam-netzwerk-verbinden
-- [x] Entscheiden Prüfungsformat home-based/on-campus
-- [x] Anmeldung https://www.ffhs.ch/de/alumni-ffhs
-
+```dataview
+TASK
+WHERE !completed
+GROUP BY file.link
+```
