@@ -1,6 +1,7 @@
 
 ## Recherche
 
+- [ ] Recherche
 - Lösung um alle Repos/Projekte zu vektorisieren und als Know-How Claude zur Verfügung zu stellen
 - Linear für Issue Erstellung
 - Anthropic’s Agent SDK
