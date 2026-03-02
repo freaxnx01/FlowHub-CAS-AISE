@@ -5,22 +5,32 @@
 ### Articles - read later
 
 > Example:
+> 
+> - https://www.heise.de/select/ct/2026/4/2533109542020998570
+> - https://www.heise.de/ratgeber/Fluechtige-SSH-Schluessel-mit-opkssh-und-OpenID-Connect-generieren-10639864.html
 
 ### Homelab, Services to try out
 
 > Example:
+> 
+> - https://vikunja.io/
+> - https://wekan.fi/
 
 ### Books (& Books IT)
 
 > Example:
+> - https://www.exlibris.ch/de/buecher-buch/english-books/linus-torvalds/just-for-fun/id/9780066620732/
+> - https://www.galaxus.ch/de/s18/product/eine-kurze-geschichte-der-menschheit-deutsch-yuval-noah-harari-2015-sachbuecher-7003551?offertype=retail&offerid=406802&adtype=pla&gad_campaignid=19973634931
 
 ### Movies/TV
 
 > Example:
 > 
-> The Imitation Game – Ein streng geheimes Leben https://share.google/1vwEtMUiRriic4nNi
-> Star Trek https://share.google/338RxCPCv9Ytm0wgA> 
+> - The Imitation Game – Ein streng geheimes Leben https://share.google/1vwEtMUiRriic4nNi
+> - Star Trek https://share.google/338RxCPCv9Ytm0wgA> 
 
+
+### Knowledge Base ()
 ### DMS
 
 > Example:
@@ -35,5 +45,7 @@ Enrichment: Author, AuthorInfo
 
 > Example:
 > 
+> Shannons Zitat zur Informationstheorie
+> https://g.co/gemini/share/917675e7a359
 
 
