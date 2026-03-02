@@ -5,4 +5,4 @@ https://docs.paperless-ngx.com/
 https://wallabag.org/
 https://wekan.fi/
 
-https://obsidian.md/
+https://gitlab.freaxnx01.ch/ (Repo with Obsidian Markdown files)

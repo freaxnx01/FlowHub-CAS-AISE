@@ -1,10 +1,6 @@
 
 ## Notes
 
-FlowHub
-
-.NET 10 / C# / Blazor
-
 
 Git Repo
 
