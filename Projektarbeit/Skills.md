@@ -46,6 +46,8 @@ Example:
 
 ## Proposal for a new skill
 
+Wenn die Katogerisierung keinen bestehenden Skill zuwesein kann, schlägt das System einen neuen Skill vor.
+
 ### Quotes
 
 Enrichment: Author, AuthorInfo
