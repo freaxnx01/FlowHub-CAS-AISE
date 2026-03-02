@@ -13,7 +13,7 @@
 > Example:
 > 
 > - https://adguard.com/de/welcome.html
-> - 
+> - https://jellyfin.org/
 
 ### Books (& Books IT) (vikunja)
 
