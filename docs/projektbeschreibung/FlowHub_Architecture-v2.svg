@@ -1,0 +1,270 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 980" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <!-- Arrow marker -->
+    <marker id="arrow-teal" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2ECC71"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3498DB"/>
+    </marker>
+    <marker id="arrow-dark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000022"/>
+    </filter>
+    <!-- Subtle shadow for inner boxes -->
+    <filter id="shadow-sm" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#00000018"/>
+    </filter>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- BACKGROUND -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect width="1200" height="980" fill="#F7F9FC"/>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <text x="600" y="48" text-anchor="middle" font-size="26" font-weight="700" fill="#1A2B40" letter-spacing="0.5">FlowHub Systemarchitektur</text>
+  <text x="600" y="70" text-anchor="middle" font-size="13" fill="#7F8C8D">.NET 10 / C# / ASP.NET Core · Blazor SSR · Microsoft.Extensions.AI</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 1. INPUT LAYER -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="60" y="88" width="1080" height="90" rx="14" fill="#D6EAF8" stroke="#3498DB" stroke-width="2" filter="url(#shadow)"/>
+  <text x="600" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#1A5276">&#x1F4F1;  INPUT-LAYER</text>
+  <text x="600" y="141" text-anchor="middle" font-size="13" fill="#2471A3">Telegram Bot  ·  Text + Datei + Foto</text>
+  <text x="600" y="161" text-anchor="middle" font-size="11.5" fill="#5D8AA8" font-style="italic">Einziger Eingang · "Capture without friction"</text>
+
+  <!-- Arrow Input → Backend -->
+  <line x1="600" y1="178" x2="600" y2="202" stroke="#3498DB" stroke-width="3" marker-end="url(#arrow-blue)"/>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 2. BACKEND CONTAINER -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="60" y="205" width="1080" height="460" rx="14" fill="#D5F5E3" stroke="#27AE60" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="340" y="232" text-anchor="middle" font-size="15" font-weight="700" fill="#1E8449">&#x2699;&#xFE0F;  FLOWHUB BACKEND</text>
+  <text x="340" y="250" text-anchor="middle" font-size="12" fill="#27AE60">.NET 10 / C# / ASP.NET Core</text>
+
+  <!-- ── Telegram Bot Service box ── -->
+  <rect x="80" y="265" width="170" height="80" rx="10" fill="#FFFFFF" stroke="#27AE60" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="165" y="293" text-anchor="middle" font-size="13" font-weight="600" fill="#1E8449">&#x1F916; Telegram Bot</text>
+  <text x="165" y="312" text-anchor="middle" font-size="11.5" fill="#555">Service</text>
+  <text x="165" y="329" text-anchor="middle" font-size="10.5" fill="#888">Webhook Handler</text>
+
+  <!-- Arrow Telegram → Skill-System -->
+  <line x1="250" y1="305" x2="278" y2="305" stroke="#27AE60" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+
+  <!-- ── SKILL-SYSTEM box ── -->
+  <rect x="280" y="258" width="530" height="392" rx="12" fill="#FEF9E7" stroke="#F39C12" stroke-width="2" filter="url(#shadow-sm)"/>
+  <text x="545" y="283" text-anchor="middle" font-size="14" font-weight="700" fill="#B7770D">&#x1F3AF;  SKILL-SYSTEM</text>
+  <text x="545" y="300" text-anchor="middle" font-size="11" fill="#CA8A04">SkillRegistry  ·  lädt SKILL.md Files  ·  Dependency Injection</text>
+
+  <!-- Skills grid: 4 columns × 2 rows -->
+  <!-- Row 1 -->
+  <!-- ArticleSkill -->
+  <rect x="298" y="312" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="357" y="334" text-anchor="middle" font-size="18">&#x1F4F0;</text>
+  <text x="357" y="352" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">ArticleSkill</text>
+  <text x="357" y="368" text-anchor="middle" font-size="10" fill="#888">→ Wallabag</text>
+
+  <!-- HomelabSkill -->
+  <rect x="426" y="312" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="485" y="334" text-anchor="middle" font-size="18">&#x1F3E0;</text>
+  <text x="485" y="352" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">HomelabSkill</text>
+  <text x="485" y="368" text-anchor="middle" font-size="10" fill="#888">→ Wekan</text>
+
+  <!-- BookSkill -->
+  <rect x="554" y="312" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="613" y="334" text-anchor="middle" font-size="18">&#x1F4DA;</text>
+  <text x="613" y="352" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">BookSkill</text>
+  <text x="613" y="368" text-anchor="middle" font-size="10" fill="#888">→ Vikunja</text>
+
+  <!-- MovieSkill -->
+  <rect x="682" y="312" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="741" y="334" text-anchor="middle" font-size="18">&#x1F3AC;</text>
+  <text x="741" y="352" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">MovieSkill</text>
+  <text x="741" y="368" text-anchor="middle" font-size="10" fill="#888">→ Vikunja</text>
+
+  <!-- Row 2 -->
+  <!-- DocumentSkill -->
+  <rect x="298" y="390" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="357" y="412" text-anchor="middle" font-size="18">&#x1F4C4;</text>
+  <text x="357" y="430" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">DocumentSkill</text>
+  <text x="357" y="446" text-anchor="middle" font-size="10" fill="#888">→ paperless-ngx</text>
+
+  <!-- KnowledgeSkill -->
+  <rect x="426" y="390" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="485" y="412" text-anchor="middle" font-size="18">&#x1F9E0;</text>
+  <text x="485" y="430" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">KnowledgeSkill</text>
+  <text x="485" y="446" text-anchor="middle" font-size="10" fill="#888">→ Obsidian/GitLab</text>
+
+  <!-- QuoteSkill -->
+  <rect x="554" y="390" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="613" y="412" text-anchor="middle" font-size="18">&#x1F4AC;</text>
+  <text x="613" y="430" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">QuoteSkill</text>
+  <text x="613" y="446" text-anchor="middle" font-size="10" fill="#888">→ Obsidian/GitLab</text>
+
+  <!-- GenericSkill -->
+  <rect x="682" y="390" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="741" y="412" text-anchor="middle" font-size="18">&#x1F4E5;</text>
+  <text x="741" y="430" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">GenericSkill</text>
+  <text x="741" y="446" text-anchor="middle" font-size="10" fill="#888">→ Inbox (PostgreSQL)</text>
+
+  <!-- Skill-Vorschlag banner -->
+  <rect x="298" y="468" width="502" height="36" rx="8" fill="#FFF3CD" stroke="#FFC107" stroke-width="1.5"/>
+  <text x="549" y="482" text-anchor="middle" font-size="11" font-weight="600" fill="#856404">&#x1F4A1; Skill-Vorschlag</text>
+  <text x="549" y="497" text-anchor="middle" font-size="10.5" fill="#856404">Unbekannter Input → neuen Skill vorschlagen · SKILL.md generieren</text>
+
+  <!-- Confidence / SkillDispatcher label -->
+  <rect x="298" y="514" width="502" height="28" rx="6" fill="#FEF3E2" stroke="#E67E22" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="549" y="532" text-anchor="middle" font-size="10.5" fill="#784212">SkillDispatcher · Keyword-Match → AI Confidence-Score (0.0–1.0) → Direkt / Rückfrage</text>
+
+  <!-- ── AI-LAYER box ── -->
+  <rect x="832" y="258" width="190" height="150" rx="10" fill="#FCF3CF" stroke="#F1C40F" stroke-width="2" filter="url(#shadow-sm)"/>
+  <text x="927" y="282" text-anchor="middle" font-size="13" font-weight="700" fill="#9A7D0A">&#x1F916;  AI-LAYER</text>
+  <line x1="852" y1="290" x2="1002" y2="290" stroke="#F1C40F" stroke-width="1"/>
+  <text x="927" y="310" text-anchor="middle" font-size="11.5" fill="#7D6608">M.E.AI Abstraction</text>
+  <text x="927" y="328" text-anchor="middle" font-size="11" fill="#555">Ollama (lokal)</text>
+  <text x="927" y="344" text-anchor="middle" font-size="11" fill="#555">Llama 3.x</text>
+  <text x="927" y="360" text-anchor="middle" font-size="11" fill="#555">Anthropic API (Fallback)</text>
+  <text x="927" y="376" text-anchor="middle" font-size="11" fill="#555">Confidence-Scoring</text>
+  <text x="927" y="392" text-anchor="middle" font-size="10" fill="#888" font-style="italic">Provider via Config wechselbar</text>
+
+  <!-- ── REST CLIENTS box ── -->
+  <rect x="832" y="424" width="190" height="166" rx="10" fill="#FDEDEC" stroke="#E74C3C" stroke-width="2" filter="url(#shadow-sm)"/>
+  <text x="927" y="448" text-anchor="middle" font-size="13" font-weight="700" fill="#922B21">&#x1F527;  REST CLIENTS</text>
+  <text x="927" y="463" text-anchor="middle" font-size="10" fill="#C0392B" font-style="italic">via Refit (typsicher)</text>
+  <line x1="852" y1="470" x2="1002" y2="470" stroke="#E74C3C" stroke-width="1"/>
+  <text x="927" y="490" text-anchor="middle" font-size="11.5" fill="#555">WallabagClient</text>
+  <text x="927" y="508" text-anchor="middle" font-size="11.5" fill="#555">WekanClient</text>
+  <text x="927" y="526" text-anchor="middle" font-size="11.5" fill="#555">VikunjaClient</text>
+  <text x="927" y="544" text-anchor="middle" font-size="11.5" fill="#555">PaperlessClient</text>
+  <text x="927" y="562" text-anchor="middle" font-size="11.5" fill="#555">GitLabClient</text>
+  <text x="927" y="580" text-anchor="middle" font-size="10" fill="#888" font-style="italic">ISkillHandler → Port-Abstraktion</text>
+
+  <!-- Bidirectional arrow Skills ↔ AI -->
+  <line x1="810" y1="340" x2="832" y2="340" stroke="#F39C12" stroke-width="2" marker-end="url(#arrow-dark)"/>
+  <line x1="832" y1="330" x2="810" y2="330" stroke="#F1C40F" stroke-width="2" marker-end="url(#arrow-dark)"/>
+
+  <!-- Arrow Skills → REST Clients -->
+  <line x1="810" y1="490" x2="832" y2="490" stroke="#E74C3C" stroke-width="2" marker-end="url(#arrow-dark)"/>
+
+  <!-- ── Blazor SSR box ── -->
+  <rect x="80" y="550" width="720" height="100" rx="10" fill="#E8F8F5" stroke="#1ABC9C" stroke-width="2" filter="url(#shadow-sm)"/>
+  <text x="440" y="580" text-anchor="middle" font-size="14" font-weight="700" fill="#0E6655">&#x1F5A5;&#xFE0F;  Blazor SSR  ·  Admin-Dashboard</text>
+  <text x="440" y="600" text-anchor="middle" font-size="11.5" fill="#1ABC9C">Server-Side Rendering  ·  .NET-native  ·  kein JavaScript-Framework</text>
+  <text x="440" y="618" text-anchor="middle" font-size="11" fill="#7DCEA0" font-style="italic">Inbox-Verwaltung  ·  Skill-Konfiguration  ·  Verarbeitungs-Logs</text>
+  <text x="440" y="638" text-anchor="middle" font-size="11" fill="#7DCEA0" font-style="italic">Skill-Vorschlag Review  ·  Pending Inputs</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 3. ARROWS Backend → Bottom layers -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- → Persistence -->
+  <line x1="230" y1="665" x2="230" y2="700" stroke="#2ECC71" stroke-width="3" marker-end="url(#arrow-teal)"/>
+  <!-- → Homelab -->
+  <line x1="600" y1="665" x2="600" y2="700" stroke="#2ECC71" stroke-width="3" marker-end="url(#arrow-teal)"/>
+  <!-- REST Clients → Homelab -->
+  <line x1="927" y1="665" x2="927" y2="700" stroke="#2ECC71" stroke-width="3" marker-end="url(#arrow-teal)"/>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 4. PERSISTENCE -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="60" y="703" width="280" height="130" rx="14" fill="#E8DAEF" stroke="#8E44AD" stroke-width="2" filter="url(#shadow)"/>
+  <text x="200" y="730" text-anchor="middle" font-size="14" font-weight="700" fill="#6C3483">&#x1F4BE;  PERSISTENCE</text>
+  <line x1="85" y1="738" x2="315" y2="738" stroke="#8E44AD" stroke-width="1"/>
+  <text x="200" y="757" text-anchor="middle" font-size="12" fill="#512E5F">PostgreSQL 16</text>
+  <text x="200" y="774" text-anchor="middle" font-size="11" fill="#7D3C98" font-style="italic">FlowHub Inbox · EF Core · Migrations</text>
+  <text x="200" y="795" text-anchor="middle" font-size="12" fill="#512E5F">Redis 7</text>
+  <text x="200" y="812" text-anchor="middle" font-size="11" fill="#7D3C98" font-style="italic">Pending Inputs · Session-State</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 5. HOMELAB -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <rect x="380" y="703" width="660" height="130" rx="14" fill="#FDEBD0" stroke="#E67E22" stroke-width="2" filter="url(#shadow)"/>
+  <text x="710" y="730" text-anchor="middle" font-size="14" font-weight="700" fill="#A04000">&#x1F3E1;  HOMELAB  ·  Proxmox Self-Hosted</text>
+  <line x1="405" y1="738" x2="1015" y2="738" stroke="#E67E22" stroke-width="1"/>
+
+  <!-- Homelab service badges -->
+  <!-- Wallabag -->
+  <rect x="400" y="748" width="115" height="72" rx="8" fill="#FFFFFF" stroke="#E67E22" stroke-width="1.5"/>
+  <text x="457" y="769" text-anchor="middle" font-size="16">&#x1F516;</text>
+  <text x="457" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Wallabag</text>
+  <text x="457" y="803" text-anchor="middle" font-size="10" fill="#888">Read-Later</text>
+  <text x="457" y="816" text-anchor="middle" font-size="9.5" fill="#aaa">wallabag.org</text>
+
+  <!-- Wekan -->
+  <rect x="524" y="748" width="115" height="72" rx="8" fill="#FFFFFF" stroke="#E67E22" stroke-width="1.5"/>
+  <text x="581" y="769" text-anchor="middle" font-size="16">&#x1F4CB;</text>
+  <text x="581" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Wekan</text>
+  <text x="581" y="803" text-anchor="middle" font-size="10" fill="#888">Kanban</text>
+  <text x="581" y="816" text-anchor="middle" font-size="9.5" fill="#aaa">wekan.fi</text>
+
+  <!-- Vikunja -->
+  <rect x="648" y="748" width="115" height="72" rx="8" fill="#FFFFFF" stroke="#E67E22" stroke-width="1.5"/>
+  <text x="705" y="769" text-anchor="middle" font-size="16">&#x2705;</text>
+  <text x="705" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Vikunja</text>
+  <text x="705" y="803" text-anchor="middle" font-size="10" fill="#888">Task-Management</text>
+  <text x="705" y="816" text-anchor="middle" font-size="9.5" fill="#aaa">vikunja.io</text>
+
+  <!-- paperless-ngx -->
+  <rect x="772" y="748" width="115" height="72" rx="8" fill="#FFFFFF" stroke="#E67E22" stroke-width="1.5"/>
+  <text x="829" y="769" text-anchor="middle" font-size="16">&#x1F5C2;&#xFE0F;</text>
+  <text x="829" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#333">paperless-ngx</text>
+  <text x="829" y="803" text-anchor="middle" font-size="10" fill="#888">DMS</text>
+  <text x="829" y="816" text-anchor="middle" font-size="9.5" fill="#aaa">paperless-ngx.com</text>
+
+  <!-- GitLab + Obsidian -->
+  <rect x="896" y="748" width="130" height="72" rx="8" fill="#FFFFFF" stroke="#E67E22" stroke-width="1.5"/>
+  <text x="961" y="769" text-anchor="middle" font-size="16">&#x1F4D3;</text>
+  <text x="961" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#333">GitLab + Obsidian</text>
+  <text x="961" y="803" text-anchor="middle" font-size="10" fill="#888">Knowledge Base</text>
+  <text x="961" y="816" text-anchor="middle" font-size="9.5" fill="#aaa">gitlab.freaxnx01.ch</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LEGEND -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <text x="60" y="862" font-size="12" font-weight="600" fill="#555">Legende:</text>
+
+  <!-- Input Layer -->
+  <rect x="60" y="872" width="18" height="18" rx="4" fill="#D6EAF8" stroke="#3498DB" stroke-width="1.5"/>
+  <text x="85" y="885" font-size="11.5" fill="#444">Input Layer</text>
+
+  <!-- Backend -->
+  <rect x="175" y="872" width="18" height="18" rx="4" fill="#D5F5E3" stroke="#27AE60" stroke-width="1.5"/>
+  <text x="200" y="885" font-size="11.5" fill="#444">Backend</text>
+
+  <!-- Skills -->
+  <rect x="280" y="872" width="18" height="18" rx="4" fill="#FEF9E7" stroke="#F39C12" stroke-width="1.5"/>
+  <text x="305" y="885" font-size="11.5" fill="#444">Skills</text>
+
+  <!-- AI -->
+  <rect x="370" y="872" width="18" height="18" rx="4" fill="#FCF3CF" stroke="#F1C40F" stroke-width="1.5"/>
+  <text x="395" y="885" font-size="11.5" fill="#444">AI-Layer</text>
+
+  <!-- REST Clients -->
+  <rect x="470" y="872" width="18" height="18" rx="4" fill="#FDEDEC" stroke="#E74C3C" stroke-width="1.5"/>
+  <text x="495" y="885" font-size="11.5" fill="#444">REST Clients</text>
+
+  <!-- Blazor -->
+  <rect x="590" y="872" width="18" height="18" rx="4" fill="#E8F8F5" stroke="#1ABC9C" stroke-width="1.5"/>
+  <text x="615" y="885" font-size="11.5" fill="#444">Blazor SSR</text>
+
+  <!-- Persistence -->
+  <rect x="700" y="872" width="18" height="18" rx="4" fill="#E8DAEF" stroke="#8E44AD" stroke-width="1.5"/>
+  <text x="725" y="885" font-size="11.5" fill="#444">Persistence</text>
+
+  <!-- Homelab -->
+  <rect x="820" y="872" width="18" height="18" rx="4" fill="#FDEBD0" stroke="#E67E22" stroke-width="1.5"/>
+  <text x="845" y="885" font-size="11.5" fill="#444">Homelab (Self-Hosted)</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <line x1="60" y1="908" x2="1140" y2="908" stroke="#BDC3C7" stroke-width="1"/>
+  <text x="600" y="928" text-anchor="middle" font-size="11" fill="#95A5A6">FlowHub – CAS AI-Assisted Software Engineering (FFHS FS26)  ·  Andreas Imboden  ·  Februar 2026</text>
+  <text x="600" y="945" text-anchor="middle" font-size="10.5" fill="#BDC3C7">Alle Services Self-Hosted auf Proxmox  ·  Anthropic API als KI-Fallback  ·  Docker Compose Deployment</text>
+</svg>

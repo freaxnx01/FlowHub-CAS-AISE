@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" style="background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <!-- Definitions -->
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-size="24" font-weight="700" fill="#1e293b">
+    FlowHub Systemarchitektur
+  </text>
+  
+  <!-- Layer 1: INPUT -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="60" width="700" height="60" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+    <text x="400" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#1e40af">
+      📱 INPUT-LAYER
+    </text>
+    <text x="400" y="100" text-anchor="middle" font-size="11" fill="#1e40af">
+      Telegram Bot (Text + Datei/Foto)
+    </text>
+  </g>
+
+  <!-- Arrow -->
+  <line x1="400" y1="120" x2="400" y2="150" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <defs>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#3b82f6" />
+    </marker>
+  </defs>
+
+  <!-- Layer 2: BACKEND -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="150" width="700" height="240" rx="8" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+    <text x="400" y="170" text-anchor="middle" font-size="12" font-weight="600" fill="#065f46">
+      ⚙️ FLOWHUB BACKEND (Quarkus / Kotlin)
+    </text>
+    
+    <!-- Telegram Bot Service -->
+    <rect x="70" y="185" width="140" height="50" rx="6" fill="white" stroke="#10b981" stroke-width="1.5"/>
+    <text x="140" y="205" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">Telegram Bot</text>
+    <text x="140" y="220" text-anchor="middle" font-size="9" fill="#065f46">Service</text>
+    
+    <!-- Skills Box -->
+    <rect x="230" y="185" width="500" height="195" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="480" y="203" text-anchor="middle" font-size="11" font-weight="600" fill="#92400e">
+      🎯 SKILL-SYSTEM
+    </text>
+    
+    <!-- SkillRegistry -->
+    <rect x="250" y="210" width="210" height="35" rx="4" fill="white" stroke="#f59e0b" stroke-width="1"/>
+    <text x="355" y="225" text-anchor="middle" font-size="9" font-weight="500" fill="#92400e">SkillRegistry</text>
+    <text x="355" y="237" text-anchor="middle" font-size="8" fill="#92400e">(lädt SKILL.md Files)</text>
+    
+    <!-- Skills -->
+    <rect x="250" y="255" width="100" height="45" rx="4" fill="white" stroke="#f59e0b" stroke-width="1"/>
+    <text x="300" y="268" text-anchor="middle" font-size="9" fill="#92400e">🎬 Movie</text>
+    <text x="300" y="280" text-anchor="middle" font-size="9" fill="#92400e">Skill</text>
+    <text x="300" y="292" text-anchor="middle" font-size="7" fill="#92400e">Handler</text>
+    
+    <rect x="360" y="255" width="100" height="45" rx="4" fill="white" stroke="#f59e0b" stroke-width="1"/>
+    <text x="410" y="268" text-anchor="middle" font-size="9" fill="#92400e">📰 TechArticle</text>
+    <text x="410" y="280" text-anchor="middle" font-size="9" fill="#92400e">Skill</text>
+    <text x="410" y="292" text-anchor="middle" font-size="7" fill="#92400e">Handler</text>
+    
+    <rect x="250" y="310" width="100" height="45" rx="4" fill="white" stroke="#f59e0b" stroke-width="1"/>
+    <text x="300" y="323" text-anchor="middle" font-size="9" fill="#92400e">📄 Document</text>
+    <text x="300" y="335" text-anchor="middle" font-size="9" fill="#92400e">Skill</text>
+    <text x="300" y="347" text-anchor="middle" font-size="7" fill="#92400e">Handler</text>
+    
+    <rect x="360" y="310" width="100" height="45" rx="4" fill="white" stroke="#f59e0b" stroke-width="1"/>
+    <text x="410" y="323" text-anchor="middle" font-size="9" fill="#92400e">📥 Generic</text>
+    <text x="410" y="335" text-anchor="middle" font-size="9" fill="#92400e">Skill</text>
+    <text x="410" y="347" text-anchor="middle" font-size="7" fill="#92400e">Handler</text>
+    
+    <!-- AI Layer -->
+    <rect x="480" y="210" width="120" height="60" rx="4" fill="#f3e8ff" stroke="#a855f7" stroke-width="1"/>
+    <text x="540" y="225" text-anchor="middle" font-size="9" font-weight="600" fill="#6b21a8">🤖 AI-LAYER</text>
+    <text x="540" y="238" text-anchor="middle" font-size="8" fill="#6b21a8">LangChain4j</text>
+    <text x="540" y="250" text-anchor="middle" font-size="8" fill="#6b21a8">Ollama (lokal)</text>
+    <text x="540" y="262" text-anchor="middle" font-size="8" fill="#6b21a8">Skill-Erkennung</text>
+    
+    <!-- REST Clients -->
+    <rect x="610" y="210" width="110" height="60" rx="4" fill="#fce7f3" stroke="#ec4899" stroke-width="1"/>
+    <text x="665" y="225" text-anchor="middle" font-size="9" font-weight="600" fill="#9f1239">🔌 REST CLIENTS</text>
+    <text x="665" y="238" text-anchor="middle" font-size="8" fill="#9f1239">TodoistClient</text>
+    <text x="665" y="250" text-anchor="middle" font-size="8" fill="#9f1239">WallabagClient</text>
+    <text x="665" y="262" text-anchor="middle" font-size="8" fill="#9f1239">PaperlessClient</text>
+    
+    <!-- Arrow from Telegram to Skills -->
+    <line x1="210" y1="210" x2="230" y2="210" stroke="#10b981" stroke-width="2" marker-end="url(#arrowGreen)"/>
+    <defs>
+      <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <polygon points="0 0, 10 3, 0 6" fill="#10b981" />
+      </marker>
+    </defs>
+  </g>
+
+  <!-- Arrow down -->
+  <line x1="200" y1="390" x2="200" y2="420" stroke="#10b981" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <line x1="400" y1="390" x2="400" y2="420" stroke="#10b981" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <line x1="600" y1="390" x2="600" y2="420" stroke="#10b981" stroke-width="3" marker-end="url(#arrowGreen)"/>
+
+  <!-- Layer 3: PERSISTENCE & SERVICES -->
+  <g filter="url(#shadow)">
+    <!-- FlowHub DB -->
+    <rect x="70" y="420" width="200" height="70" rx="8" fill="#e9d5ff" stroke="#a855f7" stroke-width="2"/>
+    <text x="170" y="440" text-anchor="middle" font-size="11" font-weight="600" fill="#6b21a8">
+      💾 PERSISTENCE
+    </text>
+    <text x="170" y="458" text-anchor="middle" font-size="9" fill="#6b21a8">
+      PostgreSQL
+    </text>
+    <text x="170" y="473" text-anchor="middle" font-size="9" fill="#6b21a8">
+      Redis
+    </text>
+    
+    <!-- Homelab -->
+    <rect x="300" y="420" width="200" height="70" rx="8" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+    <text x="400" y="440" text-anchor="middle" font-size="11" font-weight="600" fill="#7c2d12">
+      🏠 HOMELAB
+    </text>
+    <text x="400" y="458" text-anchor="middle" font-size="9" fill="#7c2d12">
+      Wallabag
+    </text>
+    <text x="400" y="473" text-anchor="middle" font-size="9" fill="#7c2d12">
+      paperless-ngx
+    </text>
+    
+    <!-- Cloud -->
+    <rect x="530" y="420" width="200" height="70" rx="8" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+    <text x="630" y="440" text-anchor="middle" font-size="11" font-weight="600" fill="#075985">
+      ☁️ CLOUD
+    </text>
+    <text x="630" y="458" text-anchor="middle" font-size="9" fill="#075985">
+      Todoist
+    </text>
+    <text x="630" y="473" text-anchor="middle" font-size="9" fill="#075985">
+      (SaaS)
+    </text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(50, 520)">
+    <text x="0" y="0" font-size="10" font-weight="600" fill="#64748b">Legende:</text>
+    <circle cx="10" cy="18" r="4" fill="#3b82f6"/>
+    <text x="20" y="22" font-size="9" fill="#64748b">Input Layer</text>
+    
+    <circle cx="100" cy="18" r="4" fill="#10b981"/>
+    <text x="110" y="22" font-size="9" fill="#64748b">Backend</text>
+    
+    <circle cx="180" cy="18" r="4" fill="#f59e0b"/>
+    <text x="190" y="22" font-size="9" fill="#64748b">Skills</text>
+    
+    <circle cx="250" cy="18" r="4" fill="#a855f7"/>
+    <text x="260" y="22" font-size="9" fill="#64748b">AI + DB</text>
+    
+    <circle cx="330" cy="18" r="4" fill="#ea580c"/>
+    <text x="340" y="22" font-size="9" fill="#64748b">Homelab</text>
+    
+    <circle cx="420" cy="18" r="4" fill="#0ea5e9"/>
+    <text x="430" y="22" font-size="9" fill="#64748b">Cloud</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="400" y="580" text-anchor="middle" font-size="8" fill="#94a3b8">
+    FlowHub – CAS AI-Assisted Software Engineering (FFHS FS26)
+  </text>
+</svg>
