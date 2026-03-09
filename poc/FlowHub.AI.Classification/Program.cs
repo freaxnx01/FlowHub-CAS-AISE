@@ -5,7 +5,7 @@ using FlowHub.AI.Classification.Services;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
+    .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("appsettings.json", optional: false)
     .AddJsonFile("appsettings.Development.json", optional: true)
     .AddEnvironmentVariables()
