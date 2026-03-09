@@ -419,3 +419,6 @@ FodyWeavers.xsd
 
 # LibreOffice lock files
 .~lock.*#
+
+# Local development settings
+appsettings.Development.json
