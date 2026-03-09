@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="*" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="*" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="*" />
   </ItemGroup>
 
