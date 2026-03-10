@@ -2,4 +2,4 @@
 
 ## Live Demo
 
-- [Master-Detail Page (GitHub Pages)](https://freaxnx01.github.io/FlowHub-CAS-AISE/master-detail.html)
+- [Master-Detail Page (GitHub Pages)](https://github.freaxnx01.ch/FlowHub-CAS-AISE/vorbereitung/2%20Frontend/Master-Detail-Seite/master-detail.html)
