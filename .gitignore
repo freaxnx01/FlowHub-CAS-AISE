@@ -422,3 +422,5 @@ FodyWeavers.xsd
 
 # Local development settings
 appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
