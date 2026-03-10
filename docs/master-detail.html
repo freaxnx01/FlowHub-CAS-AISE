@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Master-Detail – AISE Übung</title>
+  <style>
+    /* ─── CSS Custom Properties ──────────────────────────────────── */
+    :root {
+      --bg:        #f4f4f0;
+      --surface:   #ffffff;
+      --border:    #d8d8d4;
+      --accent:    #c0392b;
+      --accent-dk: #922b21;
+      --text:      #1a1a1a;
+      --muted:     #6b6b6b;
+      --row-hover: #fef9f9;
+      --row-sel:   #fdecea;
+      --header-bg: #2c2c2c;
+      --tab-bg:    #e8e8e4;
+      --radius:    6px;
+      --shadow:    0 2px 8px rgba(0,0,0,.10);
+      --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --font-mono: 'Courier New', Courier, monospace;
+    }
+
+    /* ─── Reset & Base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ─── Page Header ────────────────────────────────────────────── */
+    .page-header {
+      background: var(--header-bg);
+      color: #fff;
+      padding: 20px 32px 18px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+    .page-header h1 { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
+    .page-header span { font-size: 12px; color: #aaa; font-family: var(--font-mono); }
+
+    /* ─── Tab Nav ────────────────────────────────────────────────── */
+    .tab-nav {
+      display: flex;
+      gap: 2px;
+      background: var(--header-bg);
+      padding: 0 32px;
+      border-bottom: 3px solid var(--accent);
+    }
+    .tab-btn {
+      padding: 10px 18px 9px;
+      border: none;
+      background: transparent;
+      color: #aaa;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -3px;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-btn:hover { color: #ddd; }
+    .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+    /* ─── Tab Panels ─────────────────────────────────────────────── */
+    .tab-panel { display: none; padding: 28px 32px 40px; }
+    .tab-panel.active { display: block; }
+
+    /* ─── Approach Badge ─────────────────────────────────────────── */
+    .approach-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 3px;
+      margin-bottom: 6px;
+    }
+    .approach-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      border-left: 3px solid var(--accent);
+      background: #fff8f8;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      line-height: 1.6;
+    }
+    .approach-desc code {
+      font-family: var(--font-mono);
+      background: #f0e8e8;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: var(--accent-dk);
+    }
+
+    /* ─── Master-Detail Grid Layout ─────────────────────────────── */
+    .md-grid {
+      display: grid;
+      grid-template-rows: auto auto;
+      gap: 20px;
+    }
+
+    /* ─── Card ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      background: #f9f9f7;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      writing-mode: initial;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-body { padding: 20px 24px; }
+
+    /* ─── Form Grid ──────────────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      row-gap: 12px;
+      column-gap: 12px;
+      align-items: center;
+      max-width: 600px;
+    }
+    .form-grid label {
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .form-grid input,
+    .form-grid select {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-family: var(--font-sans);
+      background: var(--surface);
+      transition: border-color .15s, box-shadow .15s;
+      width: 100%;
+    }
+    .form-grid input:focus,
+    .form-grid select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(192,57,43,.12);
+    }
+    .form-grid select { max-width: 220px; }
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding-top: 4px;
+    }
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, transform .08s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dk); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-sm {
+      padding: 4px 12px;
+      font-size: 12px;
+    }
+
+    /* ─── Table ──────────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 12px;
+      background: #f5f5f2;
+      border-bottom: 2px solid var(--border);
+    }
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .data-table tr:hover td { background: var(--row-hover); }
+    .data-table tr.selected td { background: var(--row-sel); }
+    .data-table tr.selected td:first-child {
+      border-left: 3px solid var(--accent);
+      padding-left: 9px;
+    }
+
+    /* ─── Status Toast ───────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #222;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ─── Spinner ────────────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #ddd;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Code Comment Banner ────────────────────────────────────── */
+    .code-note {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #888;
+      background: #f9f9f7;
+      border: 1px dashed #ddd;
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      margin-top: 14px;
+    }
+
+    /* ─── New-row indicator ──────────────────────────────────────── */
+    tr.new-row td { animation: fadeIn .4s ease; }
+    @keyframes fadeIn { from { background: #fde; } to { background: inherit; } }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  PAGE HEADER                                                   -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<header class="page-header">
+  <h1>Master-Detail-Seite</h1>
+  <span>AISE FS26 · Personenverwaltung · 4 Ansätze</span>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB NAVIGATION                                                -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('approach1', this)">① HTML-Form (Full Reload)</button>
+  <button class="tab-btn" onclick="showTab('approach2', this)">② Ajax Partial Update</button>
+  <button class="tab-btn" onclick="showTab('approach3', this)">③ fetch() / XHR</button>
+  <button class="tab-btn" onclick="showTab('approach4', this)">④ JavaScript State</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  ANSATZ 1 — HTML-Form, ganzseitiger Request                   -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="tab-panel active" id="approach1">
+  <div class="approach-badge">Ansatz 1</div>
+  <div class="approach-desc">
+    <strong>HTML-Form mit vollem Server-Roundtrip:</strong>
+    Das Formular sendet einen <code>POST</code>-Request an den Server.
+    Der Server verarbeitet die Daten und sendet die <em>gesamte</em> HTML-Seite neu zurück.
+    Einfachste Variante — kein JavaScript nötig, aber jedes Speichern lädt die ganze Seite neu.
+    <br><em>Hier simuliert: Der «Server» ist ein <code>&lt;form action=""&gt;</code> mit
+    <code>method="get"</code>, das die URL-Parameter ausliest und die Tabelle neu rendert.</em>
+  </div>
+
+  <div class="md-grid">
+    <!-- MASTER: Formular -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Master</span>
+        <span class="card-title" id="a1-form-title">Neue Person erfassen</span>
+      </div>
+      <div class="card-body">
+        <!--
+          In einer echten Applikation:
+            <form action="/persons" method="post">
+          Der Server liest die Felder, speichert sie und leitet auf dieselbe
+          Seite zurück (Post/Redirect/Get-Muster).
+        -->
+        <form id="a1-form" onsubmit="return false;">
+          <input type="hidden" id="a1-id" value="" />
+          <div class="form-grid">
+            <label for="a1-name">Name</label>
+            <input type="text" id="a1-name" name="name" placeholder="Vorname Nachname" />
+
+            <label for="a1-strasse">Strasse</label>
+            <input type="text" id="a1-strasse" name="strasse" placeholder="Musterstrasse 1" />
+
+            <label for="a1-ort">Ort</label>
+            <input type="text" id="a1-ort" name="ort" placeholder="Zürich" />
+
+            <label for="a1-land">Land</label>
+            <select id="a1-land" name="land">
+              <option>Schweiz</option>
+              <option>Deutschland</option>
+              <option>Österreich</option>
+              <option>Liechtenstein</option>
+            </select>
+
+            <div></div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" onclick="a1Submit()">Speichern</button>
+              <button type="button" class="btn btn-ghost" onclick="a1Cancel()">Abbrechen</button>
+            </div>
+          </div>
+        </form>
+        <div class="code-note">
+          // Echtes Pendant: &lt;form action="/api/persons" method="post"&gt; → Server antwortet mit komplettem HTML
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL: Tabelle -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Detail</span>
+        <span class="card-title">Personenliste</span>
+      </div>
+      <div class="card-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Strasse</th><th>Ort</th><th>Land</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="a1-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  ANSATZ 2 — Ajax Partial Update (innerHTML-Ersatz)            -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" id="approach2">
+  <div class="approach-badge">Ansatz 2</div>
+  <div class="approach-desc">
+    <strong>Ajax Partial Update:</strong>
+    Beim Klick auf eine Tabellenzeile sendet der Browser einen
+    <code>XMLHttpRequest</code> (oder <code>fetch</code>) an den Server.
+    Der Server gibt <em>nur das Formular-HTML</em> zurück — nicht die ganze Seite.
+    Der Browser ersetzt den <code>#master-region</code>-Container mit dem Server-HTML.
+    Klassisches AJAX-Muster (ca. 2005–2015).
+    <br><em>Hier simuliert: Der «Server» gibt ein vorgefertigtes HTML-Fragment zurück.</em>
+  </div>
+
+  <div class="md-grid">
+    <!-- MASTER: wird per Ajax ersetzt -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Master</span>
+        <span class="card-title">Formular <span id="a2-ajax-indicator"></span></span>
+      </div>
+      <div id="a2-master-region" class="card-body">
+        <!-- Dieser Bereich wird durch den Ajax-Response ersetzt -->
+        <div style="color:var(--muted); font-size:13px; padding: 8px 0;">
+          ← Wählen Sie eine Person aus der Liste aus
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL: Tabelle -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Detail</span>
+        <span class="card-title">Personenliste <em style="font-size:11px;color:var(--muted)">(Zeile klicken → Ajax-Request)</em></span>
+      </div>
+      <div class="card-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Strasse</th><th>Ort</th><th>Land</th>
+            </tr>
+          </thead>
+          <tbody id="a2-tbody"></tbody>
+        </table>
+        <div class="code-note">
+          // XMLHttpRequest GET /api/persons/{id}/form → Server antwortet mit HTML-Fragment
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  ANSATZ 3 — fetch() / XMLHttpRequest, JSON-API               -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" id="approach3">
+  <div class="approach-badge">Ansatz 3</div>
+  <div class="approach-desc">
+    <strong>fetch() mit JSON-API:</strong>
+    Beim Zeilen-Klick ruft JavaScript <code>fetch('/api/persons/{id}')</code> auf.
+    Der Server antwortet mit JSON. JavaScript liest das JSON aus und befüllt die
+    Formularfelder direkt im DOM — kein HTML vom Server, nur Daten.
+    Moderner Standardansatz für Web-Apps ohne Framework.
+    <br><em>Hier simuliert: <code>fetch()</code> wird gegen eine lokale Mock-Funktion ersetzt,
+    die nach 300 ms ein Promise mit JSON auflöst.</em>
+  </div>
+
+  <div class="md-grid">
+    <!-- MASTER: Formular -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Master</span>
+        <span class="card-title" id="a3-form-title">
+          Neue Person <span id="a3-loading"></span>
+        </span>
+      </div>
+      <div class="card-body">
+        <form id="a3-form" onsubmit="return false;">
+          <input type="hidden" id="a3-id" />
+          <div class="form-grid">
+            <label for="a3-name">Name</label>
+            <input type="text" id="a3-name" placeholder="Vorname Nachname" required />
+
+            <label for="a3-strasse">Strasse</label>
+            <input type="text" id="a3-strasse" placeholder="Musterstrasse 1" />
+
+            <label for="a3-ort">Ort</label>
+            <input type="text" id="a3-ort" placeholder="Zürich" />
+
+            <label for="a3-land">Land</label>
+            <select id="a3-land">
+              <option>Schweiz</option>
+              <option>Deutschland</option>
+              <option>Österreich</option>
+              <option>Liechtenstein</option>
+            </select>
+
+            <div></div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" onclick="a3Submit()">Speichern</button>
+              <button type="button" class="btn btn-ghost" onclick="a3Cancel()">Abbrechen</button>
+            </div>
+          </div>
+        </form>
+        <div class="code-note">
+          // fetch('/api/persons/' + id).then(r =&gt; r.json()).then(data =&gt; fillForm(data))
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL: Tabelle -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Detail</span>
+        <span class="card-title">Personenliste</span>
+      </div>
+      <div class="card-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Strasse</th><th>Ort</th><th>Land</th>
+            </tr>
+          </thead>
+          <tbody id="a3-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  ANSATZ 4 — Reines JavaScript State Management               -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="tab-panel" id="approach4">
+  <div class="approach-badge">Ansatz 4</div>
+  <div class="approach-desc">
+    <strong>JavaScript State Management (kein Server-Roundtrip):</strong>
+    Alle Daten leben im Browser-Speicher (<code>persons[]</code> Array).
+    Auswahl, Editieren, Hinzufügen und Löschen passieren vollständig im Client.
+    Die UI wird reaktiv neu gerendert, wenn sich der State ändert — Grundprinzip
+    von React, Vue, Svelte. Kein Netzwerkaufruf nötig.
+  </div>
+
+  <div class="md-grid">
+    <!-- MASTER: Formular -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Master</span>
+        <span class="card-title" id="a4-form-title">Neue Person</span>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <label for="a4-name">Name</label>
+          <input type="text" id="a4-name" placeholder="Vorname Nachname" />
+
+          <label for="a4-strasse">Strasse</label>
+          <input type="text" id="a4-strasse" placeholder="Musterstrasse 1" />
+
+          <label for="a4-ort">Ort</label>
+          <input type="text" id="a4-ort" placeholder="Zürich" />
+
+          <label for="a4-land">Land</label>
+          <select id="a4-land">
+            <option>Schweiz</option>
+            <option>Deutschland</option>
+            <option>Österreich</option>
+            <option>Liechtenstein</option>
+          </select>
+
+          <div></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="a4Save()">Speichern</button>
+            <button class="btn btn-ghost" onclick="a4Cancel()">Abbrechen</button>
+          </div>
+        </div>
+        <div class="code-note">
+          // state.persons = [...state.persons, newPerson]; render(); — Kein Server, alles im Browser
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL: Tabelle -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Detail</span>
+        <span class="card-title">Personenliste
+          <span style="color:var(--muted);font-size:11px;margin-left:8px;" id="a4-count"></span>
+        </span>
+      </div>
+      <div class="card-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Strasse</th><th>Ort</th><th>Land</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="a4-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TOAST NOTIFICATION                                           -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                                   -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<script>
+/* ── Gemeinsame Mock-Daten ─────────────────────────────────────── */
+const MOCK_DATA = [
+  { id: 1, name: 'Anna Meier',      strasse: 'Bahnhofstr. 12',   ort: 'Zürich',    land: 'Schweiz' },
+  { id: 2, name: 'Beat Müller',     strasse: 'Seestrasse 45',    ort: 'Luzern',    land: 'Schweiz' },
+  { id: 3, name: 'Clara Schmid',    strasse: 'Hauptgasse 7',     ort: 'Bern',      land: 'Schweiz' },
+  { id: 4, name: 'David Keller',    strasse: 'Ringstrasse 3',    ort: 'Basel',     land: 'Schweiz' },
+  { id: 5, name: 'Eva Zimmermann',  strasse: 'Dorfplatz 1',      ort: 'Zug',       land: 'Schweiz' },
+];
+
+/* ── Toast Hilfsfunktion ───────────────────────────────────────── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ── Tab Navigation ────────────────────────────────────────────── */
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANSATZ 1 — HTML-Form (simulierter Full-Page-Reload)
+══════════════════════════════════════════════════════════════════ */
+let a1Data = structuredClone(MOCK_DATA);
+let a1NextId = 6;
+let a1Selected = null;
+
+function a1Render() {
+  const tbody = document.getElementById('a1-tbody');
+  tbody.innerHTML = a1Data.map(p => `
+    <tr data-id="${p.id}" class="${a1Selected === p.id ? 'selected' : ''}"
+        onclick="a1Select(${p.id})">
+      <td>${p.name}</td>
+      <td>${p.strasse}</td>
+      <td>${p.ort}</td>
+      <td>${p.land}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="a1Delete(event,${p.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function a1Select(id) {
+  a1Selected = id;
+  const p = a1Data.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('a1-id').value = p.id;
+  document.getElementById('a1-name').value = p.name;
+  document.getElementById('a1-strasse').value = p.strasse;
+  document.getElementById('a1-ort').value = p.ort;
+  document.getElementById('a1-land').value = p.land;
+  document.getElementById('a1-form-title').textContent = 'Person bearbeiten: ' + p.name;
+  a1Render();
+}
+
+function a1Submit() {
+  const name = document.getElementById('a1-name').value.trim();
+  if (!name) { showToast('⚠ Name ist erforderlich'); return; }
+  const id = document.getElementById('a1-id').value;
+  const person = {
+    id: id ? parseInt(id) : a1NextId++,
+    name: name,
+    strasse: document.getElementById('a1-strasse').value,
+    ort: document.getElementById('a1-ort').value,
+    land: document.getElementById('a1-land').value,
+  };
+  if (id) {
+    const idx = a1Data.findIndex(x => x.id === person.id);
+    a1Data[idx] = person;
+  } else {
+    a1Data.push(person);
+  }
+  /*
+   * Echtes Verhalten:
+   *   Browser schickt POST /persons → Server speichert → 302 Redirect → GET /persons
+   *   → Server rendert GESAMTE Seite mit aktualisierter Liste
+   */
+  a1Cancel();
+  a1Render();
+  showToast('✓ Gespeichert (simulierter Full-Reload)');
+}
+
+function a1Cancel() {
+  a1Selected = null;
+  document.getElementById('a1-form').reset();
+  document.getElementById('a1-id').value = '';
+  document.getElementById('a1-form-title').textContent = 'Neue Person erfassen';
+  a1Render();
+}
+
+function a1Delete(e, id) {
+  e.stopPropagation();
+  a1Data = a1Data.filter(x => x.id !== id);
+  if (a1Selected === id) a1Cancel();
+  else a1Render();
+  showToast('Person gelöscht');
+}
+
+a1Render();
+
+
+/* ══════════════════════════════════════════════════════════════════
+   ANSATZ 2 — Ajax Partial Update
+   (simuliert XMLHttpRequest → Server gibt HTML-Fragment zurück)
+══════════════════════════════════════════════════════════════════ */
+let a2Data = structuredClone(MOCK_DATA);
+let a2NextId = 6;
+
+/* Simuliert Server-Antwort: gibt HTML-String zurück */
+function mockServerHtmlFragment(person) {
+  return `
+    <form onsubmit="a2Submit(event, ${person.id})">
+      <div class="form-grid">
+        <label>Name</label>
+        <input type="text" id="a2-name" value="${person.name}" required />
+        <label>Strasse</label>
+        <input type="text" id="a2-strasse" value="${person.strasse}" />
+        <label>Ort</label>
+        <input type="text" id="a2-ort" value="${person.ort}" />
+        <label>Land</label>
+        <select id="a2-land">
+          ${['Schweiz','Deutschland','Österreich','Liechtenstein'].map(c =>
+            `<option${c === person.land ? ' selected' : ''}>${c}</option>`).join('')}
+        </select>
+        <div></div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Speichern</button>
+          <button type="button" class="btn btn-ghost" onclick="a2ResetForm()">Abbrechen</button>
+        </div>
+      </div>
+    </form>
+    <div class="code-note">// GET /api/persons/${person.id}/form → Server liefert NUR dieses HTML-Fragment</div>`;
+}
+
+/* Simuliert XMLHttpRequest mit Latenz */
+function mockXHR(id) {
+  return new Promise(resolve => setTimeout(() => {
+    resolve(a2Data.find(x => x.id === id));
+  }, 300));
+}
+
+function a2RenderTable() {
+  document.getElementById('a2-tbody').innerHTML = a2Data.map(p => `
+    <tr data-id="${p.id}" onclick="a2LoadPerson(${p.id})">
+      <td>${p.name}</td>
+      <td>${p.strasse}</td>
+      <td>${p.ort}</td>
+      <td>${p.land}</td>
+    </tr>`).join('');
+}
+
+async function a2LoadPerson(id) {
+  /* Schritt 1: Lade-Indikator zeigen */
+  document.getElementById('a2-ajax-indicator').innerHTML = '<span class="spinner"></span>';
+  document.getElementById('a2-master-region').style.opacity = '0.4';
+
+  /* Schritt 2: Simulierter XMLHttpRequest an den Server */
+  const person = await mockXHR(id);
+
+  /* Schritt 3: Nur den #master-region mit Server-HTML ersetzen */
+  document.getElementById('a2-master-region').innerHTML = mockServerHtmlFragment(person);
+  document.getElementById('a2-master-region').style.opacity = '1';
+  document.getElementById('a2-ajax-indicator').innerHTML = '';
+
+  // Aktive Zeile markieren
+  document.querySelectorAll('#a2-tbody tr').forEach(r =>
+    r.classList.toggle('selected', parseInt(r.dataset.id) === id));
+
+  showToast('Ajax: Formular-Fragment vom Server geladen');
+}
+
+function a2Submit(e, id) {
+  e.preventDefault();
+  const idx = a2Data.findIndex(x => x.id === id);
+  a2Data[idx] = {
+    ...a2Data[idx],
+    name: document.getElementById('a2-name').value,
+    strasse: document.getElementById('a2-strasse').value,
+    ort: document.getElementById('a2-ort').value,
+    land: document.getElementById('a2-land').value,
+  };
+  a2RenderTable();
+  a2ResetForm();
+  showToast('✓ Ajax POST gespeichert, Tabelle aktualisiert');
+}
+
+function a2ResetForm() {
+  document.getElementById('a2-master-region').innerHTML =
+    '<div style="color:var(--muted);font-size:13px;padding:8px 0;">← Wählen Sie eine Person aus der Liste aus</div>';
+  document.querySelectorAll('#a2-tbody tr').forEach(r => r.classList.remove('selected'));
+}
+
+a2RenderTable();
+
+
+/* ══════════════════════════════════════════════════════════════════
+   ANSATZ 3 — fetch() mit JSON-API
+══════════════════════════════════════════════════════════════════ */
+let a3Data = structuredClone(MOCK_DATA);
+let a3NextId = 6;
+let a3Selected = null;
+
+/* Simuliert fetch('/api/persons/{id}') → Promise<JSON> */
+function mockFetch(id) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const p = a3Data.find(x => x.id === id);
+      p ? resolve(p) : reject(new Error('Not found'));
+    }, 300);
+  });
+}
+
+function a3RenderTable() {
+  document.getElementById('a3-tbody').innerHTML = a3Data.map(p => `
+    <tr data-id="${p.id}" class="${a3Selected === p.id ? 'selected' : ''}"
+        onclick="a3LoadPerson(${p.id})">
+      <td>${p.name}</td>
+      <td>${p.strasse}</td>
+      <td>${p.ort}</td>
+      <td>${p.land}</td>
+    </tr>`).join('');
+}
+
+async function a3LoadPerson(id) {
+  document.getElementById('a3-loading').innerHTML = '<span class="spinner"></span>';
+
+  try {
+    // Entspricht: const data = await fetch('/api/persons/' + id).then(r => r.json())
+    const data = await mockFetch(id);
+
+    /* JavaScript befüllt die Felder direkt — kein HTML vom Server */
+    document.getElementById('a3-id').value    = data.id;
+    document.getElementById('a3-name').value  = data.name;
+    document.getElementById('a3-strasse').value = data.strasse;
+    document.getElementById('a3-ort').value   = data.ort;
+    document.getElementById('a3-land').value  = data.land;
+    document.getElementById('a3-form-title').textContent = 'Bearbeiten: ' + data.name;
+
+    a3Selected = id;
+    a3RenderTable();
+    showToast('fetch() → JSON empfangen, Formular befüllt');
+  } catch (err) {
+    showToast('Fehler: ' + err.message);
+  } finally {
+    document.getElementById('a3-loading').innerHTML = '';
+  }
+}
+
+function a3Submit() {
+  const name = document.getElementById('a3-name').value.trim();
+  if (!name) { showToast('⚠ Name ist erforderlich'); return; }
+  const id = parseInt(document.getElementById('a3-id').value);
+  const person = {
+    id: id || a3NextId++,
+    name: name,
+    strasse: document.getElementById('a3-strasse').value,
+    ort: document.getElementById('a3-ort').value,
+    land: document.getElementById('a3-land').value,
+  };
+  if (id) {
+    a3Data[a3Data.findIndex(x => x.id === id)] = person;
+  } else {
+    a3Data.push(person);
+  }
+  // Echtes Pendant: fetch('/api/persons', { method: 'POST', body: JSON.stringify(person) })
+  a3Cancel();
+  a3RenderTable();
+  showToast('✓ fetch() POST gesendet, Tabelle aktualisiert');
+}
+
+function a3Cancel() {
+  a3Selected = null;
+  document.getElementById('a3-id').value = '';
+  document.getElementById('a3-name').value = '';
+  document.getElementById('a3-strasse').value = '';
+  document.getElementById('a3-ort').value = '';
+  document.getElementById('a3-land').value = 'Schweiz';
+  document.getElementById('a3-form-title').textContent = 'Neue Person';
+  a3RenderTable();
+}
+
+a3RenderTable();
+
+
+/* ══════════════════════════════════════════════════════════════════
+   ANSATZ 4 — JavaScript State Management
+   Reaktives Render-Pattern (Grundprinzip von React/Vue)
+══════════════════════════════════════════════════════════════════ */
+
+/* Zentraler State — einzige «Source of Truth» */
+const state = {
+  persons: structuredClone(MOCK_DATA),
+  selectedId: null,
+  nextId: 6,
+};
+
+/* render() wird bei jeder State-Änderung aufgerufen */
+function a4Render() {
+  const tbody = document.getElementById('a4-tbody');
+  tbody.innerHTML = state.persons.map(p => `
+    <tr data-id="${p.id}" class="${state.selectedId === p.id ? 'selected' : ''}"
+        onclick="a4Select(${p.id})">
+      <td>${p.name}</td>
+      <td>${p.strasse}</td>
+      <td>${p.ort}</td>
+      <td>${p.land}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="a4Delete(event,${p.id})">✕</button></td>
+    </tr>`).join('');
+
+  document.getElementById('a4-count').textContent =
+    state.persons.length + ' Einträge';
+}
+
+function a4Select(id) {
+  state.selectedId = id;
+  const p = state.persons.find(x => x.id === id);
+  document.getElementById('a4-name').value    = p.name;
+  document.getElementById('a4-strasse').value = p.strasse;
+  document.getElementById('a4-ort').value     = p.ort;
+  document.getElementById('a4-land').value    = p.land;
+  document.getElementById('a4-form-title').textContent = 'Bearbeiten: ' + p.name;
+  a4Render();
+}
+
+function a4Save() {
+  const name = document.getElementById('a4-name').value.trim();
+  if (!name) { showToast('Name ist erforderlich'); return; }
+
+  const person = {
+    id: state.selectedId || state.nextId++,
+    name,
+    strasse: document.getElementById('a4-strasse').value,
+    ort:     document.getElementById('a4-ort').value,
+    land:    document.getElementById('a4-land').value,
+  };
+
+  if (state.selectedId) {
+    /* Update: State immutabel ersetzen */
+    state.persons = state.persons.map(p => p.id === state.selectedId ? person : p);
+  } else {
+    /* Hinzufügen: neues Array */
+    state.persons = [...state.persons, person];
+  }
+
+  a4Cancel();
+  a4Render();
+  showToast('✓ State aktualisiert, UI neu gerendert');
+}
+
+function a4Cancel() {
+  state.selectedId = null;
+  ['a4-name','a4-strasse','a4-ort'].forEach(id =>
+    document.getElementById(id).value = '');
+  document.getElementById('a4-land').value = 'Schweiz';
+  document.getElementById('a4-form-title').textContent = 'Neue Person';
+  a4Render();
+}
+
+function a4Delete(e, id) {
+  e.stopPropagation();
+  state.persons = state.persons.filter(p => p.id !== id);
+  if (state.selectedId === id) a4Cancel();
+  else a4Render();
+  showToast('Person aus State entfernt');
+}
+
+a4Render();
+</script>
+</body>
+</html>
