@@ -23,3 +23,11 @@
 ### [4] Quarkus in Action
 
 - [ ] Kapitel 6: Exposing and securing web applications
+
+
+## Learnings
+
+UI with AI
+
+Visualize, Use Text-to-Diagram tools like Mermaid to check logic flows
+Use ASCII Art to fix layout (Wireframe)
