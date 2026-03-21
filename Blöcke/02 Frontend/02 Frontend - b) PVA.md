@@ -14,7 +14,7 @@ https://github.github.com/gh-aw/
 Product Requirements Document (PRD)
 i18n: ch-de: no scharfes S
 i18n: Read users default language. Give possibility to switch between DE | EN
-UI: Support for dark mode
+UI: Support for dark mode, Get Default from Browser/System, Let user switch in UI
 UI: Responsive Desgin?
 
 MudBlazor Icon Library?
