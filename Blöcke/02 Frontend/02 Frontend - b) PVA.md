@@ -13,6 +13,7 @@ Product Requirements Document (PRD)
 i18n: ch-de: no scharfes S
 i18n: Read users default language. Give possibility to switch between DE | EN
 UI: Support for dark mode
+UI: Responsive Desgin?
 
 ai-instructions mit symlinks ins repo (oder git submodule?)
 
