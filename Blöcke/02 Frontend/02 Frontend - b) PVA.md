@@ -20,5 +20,8 @@ Makefile
 make run-frontend
 -> dotnet run ...
 
+Superpowers
+Visual Companion
+
 
 
