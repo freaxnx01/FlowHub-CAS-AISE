@@ -17,6 +17,8 @@ i18n: Read users default language. Give possibility to switch between DE | EN
 UI: Support for dark mode
 UI: Responsive Desgin?
 
+MudBlazor Icon Library?
+
 ai-instructions mit symlinks ins repo (oder git submodule?)
 
 Makefile
