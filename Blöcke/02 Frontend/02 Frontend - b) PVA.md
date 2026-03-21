@@ -3,6 +3,8 @@
 
 fly.io (deployment), CLI & MCP
 
+grepai Vectorize Project
+
 OpenClaw Kimi K2.5 -> MiniMax M2.5
 MiniMax M2.5 is roughly 2× cheaper on input ($0.20 vs $0.45) and nearly 2× cheaper on output ($1.17 vs $2.20) vs Kimi K2.5.
 
