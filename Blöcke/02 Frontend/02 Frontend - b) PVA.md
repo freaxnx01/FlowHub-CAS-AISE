@@ -28,5 +28,9 @@ make run-frontend
 Superpowers
 Visual Companion
 
+Bewertungskriterium -> MD -> CAS Project
+
+
+
 
 
