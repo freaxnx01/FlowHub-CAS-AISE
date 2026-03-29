@@ -166,6 +166,20 @@ Types: `feat`, `fix`, `test`, `refactor`, `chore`, `docs`, `ci`, `perf`
 
 ---
 
+## Clean Code Principles
+
+- **Small methods** — each method does one thing at one level of abstraction; aim for ≤20 lines
+- **Guard clauses** — validate and return/throw early at the top; avoid nested `if/else` pyramids
+- **Command-Query Separation** — a method either performs an action (command, returns `void`/`Task`) or returns data (query), never both
+- **No flag arguments** — avoid `bool` parameters that switch behaviour; split into two clearly named methods instead
+- **Meaningful names** — names reveal intent; no abbreviations (`cnt`, `mgr`, `svc`) except universally understood ones (`id`, `url`, `dto`)
+- **One level of abstraction per method** — don't mix high-level orchestration with low-level detail in the same method; extract helpers
+- **Fail fast** — detect invalid state as early as possible and throw specific exceptions; don't let bad data travel deep into the call stack
+- **DRY (Don't Repeat Yourself)** — if the same logic exists in two places, extract it; but prefer duplication over the wrong abstraction — wait until the pattern is clear before generalising
+- **No dead code** — delete unreachable branches, unused parameters, and vestigial methods; git has history
+
+---
+
 ## What NOT to Generate
 
 - No `using` statements for namespaces covered by `global using`
@@ -174,3 +188,61 @@ Types: `feat`, `fix`, `test`, `refactor`, `chore`, `docs`, `ci`, `perf`
 - No magic strings — use `const` or `nameof()`
 - No direct `HttpClient` instantiation — always via `IHttpClientFactory`
 - No secrets, connection strings, or credentials in source files
+
+---
+
+## UI Development Workflow (Mandatory Phase Order)
+
+**Never skip phases. Never write component code before wireframe approval.**
+
+| Phase | Command | Gate |
+|---|---|---|
+| 1 — Brainstorm | `/ui-brainstorm` | ASCII wireframe approved |
+| 2 — Flow | `/ui-flow` | Mermaid diagrams approved |
+| 3 — Build | `/ui-build` | Shell → logic → interactions → polish |
+| 4 — Review | `/ui-review` | Checklist passes |
+
+### Phase 1 — ASCII Wireframe (`/ui-brainstorm`)
+
+Before writing any UI code, create an ASCII wireframe showing:
+- Overall layout (AppBar, Drawer, main content area)
+- Key MudBlazor regions (DataGrid, Form, Dialog, etc.)
+- Primary actions (buttons, FABs)
+- Empty state and loading state placeholders
+
+Use box-drawing characters for clarity:
+```
+┌─────────────────────────────────────┐
+│ AppBar                              │
+├──────────┬──────────────────────────┤
+│ Drawer   │ Main Content             │
+│          │                          │
+└──────────┴──────────────────────────┘
+```
+
+Save approved wireframes to `docs/design/<feature-name>/wireframe.md`.
+
+### Phase 2 — Mermaid Flow Diagrams (`/ui-flow`)
+
+After wireframe approval, map the logic with Mermaid diagrams:
+
+**Diagram 1 — User Journey** (`flowchart TD`):
+- All entry points, user decisions, branching paths
+- Error states (validation errors, API failures, 403/404)
+- Empty states, success states, exit points
+- Confirmation dialogs for destructive actions
+
+**Diagram 2 — Component & State Map**:
+- Component hierarchy (parent → children)
+- State ownership and data flow direction
+- Service injection points and API call triggers
+
+Save approved diagrams to `docs/design/<feature-name>/flow.md`.
+
+### What to Check Before Writing UI Code
+
+- [ ] Does a similar component already exist in `/src/Shared/`?
+- [ ] Has the ASCII wireframe been approved?
+- [ ] Has the Mermaid flow been approved?
+- [ ] Are you building the shell first (no business logic yet)?
+- [ ] Does the component need a bUnit test?

@@ -8,11 +8,11 @@ Agent context for Claude Code. Read this before taking any action in this reposi
 
 ## Project Overview
 
-<!-- TODO: Fill in per project -->
-**Name:** `<project-name>`  
-**Purpose:** `<one-line description>`  
-**Architecture:** Modular Monolith (Hexagonal within modules where needed)  
-**Status:** `<active development / maintenance>`
+**Name:** FlowHub
+**Purpose:** Project work for CAS AISE — incremental full-stack .NET app built across 5 course blocks
+**Architecture:** Modular Monolith (Hexagonal within modules where needed)
+**Status:** Active development
+**Course context:** See [`.ai/cas-instructions.md`](.ai/cas-instructions.md) for block schedule, implementation rhythm, and grading criteria
 
 ---
 
@@ -339,6 +339,20 @@ refactor(shared): extract correlation ID middleware
 ```
 
 Types: `feat` `fix` `test` `refactor` `chore` `docs` `ci` `perf`
+
+---
+
+## Clean Code Principles
+
+- **Small methods** — each method does one thing at one level of abstraction; aim for ≤20 lines
+- **Guard clauses** — validate and return/throw early at the top; avoid nested `if/else` pyramids
+- **Command-Query Separation** — a method either performs an action (command, returns `void`/`Task`) or returns data (query), never both
+- **No flag arguments** — avoid `bool` parameters that switch behaviour; split into two clearly named methods instead
+- **Meaningful names** — names reveal intent; no abbreviations (`cnt`, `mgr`, `svc`) except universally understood ones (`id`, `url`, `dto`)
+- **One level of abstraction per method** — don't mix high-level orchestration with low-level detail in the same method; extract helpers
+- **Fail fast** — detect invalid state as early as possible and throw specific exceptions; don't let bad data travel deep into the call stack
+- **DRY (Don't Repeat Yourself)** — if the same logic exists in two places, extract it; but prefer duplication over the wrong abstraction — wait until the pattern is clear before generalising
+- **No dead code** — delete unreachable branches, unused parameters, and vestigial methods; git has history
 
 ---
 
