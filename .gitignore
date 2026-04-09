@@ -424,3 +424,6 @@ FodyWeavers.xsd
 appsettings.Development.json
 appsettings.Local.json
 appsettings.Production.json
+
+# Git worktrees
+.worktrees/
