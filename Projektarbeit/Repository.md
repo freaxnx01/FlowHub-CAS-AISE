@@ -23,3 +23,7 @@ Code repository for the **FlowHub** project work — built incrementally across 
 | Implementation specs & plans (`docs/superpowers/`) | Organisation, deadlines, admin |
 
 The repo's `CLAUDE.md` has a **Knowledge Base (Obsidian Vault)** section pointing back here.
+
+## See also
+
+- [[Glossary]] — FlowHub project vocabulary (Capture, Skill, Channel, Integration, …) — **read this before naming anything in code or thesis**.
