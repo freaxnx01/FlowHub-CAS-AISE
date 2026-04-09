@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>FlowHub.Core</RootNamespace>
+    <AssemblyName>FlowHub.Core</AssemblyName>
+  </PropertyGroup>
+
+</Project>

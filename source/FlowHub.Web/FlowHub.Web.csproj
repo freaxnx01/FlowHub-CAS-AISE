@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>FlowHub.Web</RootNamespace>
+    <AssemblyName>FlowHub.Web</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlowHub.Core\FlowHub.Core.csproj" />
+  </ItemGroup>
+
+</Project>

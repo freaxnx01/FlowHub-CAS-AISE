@@ -1,0 +1,19 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UI -->
+    <PackageVersion Include="MudBlazor" Version="8.5.1" />
+
+    <!-- Test data generation -->
+    <PackageVersion Include="Bogus" Version="35.6.1" />
+
+    <!-- Logging / observability (placeholder, not yet wired in Block 2) -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+  </ItemGroup>
+
+</Project>

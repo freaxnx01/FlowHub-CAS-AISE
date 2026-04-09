@@ -1,0 +1,35 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="ml-2">FlowHub</MudText>
+        <MudSpacer />
+        @* TODO Phase 3 Step 3 — QuickCaptureField (WebChannel quick-add) *@
+        <MudText Typo="Typo.body2" Color="Color.Inherit" Class="mx-4">[ quick capture placeholder ]</MudText>
+        <MudSpacer />
+        @* TODO Phase 3 Step 3 — UserMenu (avatar + theme + logout) *@
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Edge="Edge.End" />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Mini" OpenMiniOnHover="false" Elevation="1">
+        <MudNavMenu>
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="captures" Icon="@Icons.Material.Filled.GridView">Captures</MudNavLink>
+            <MudNavLink Href="captures/new" Icon="@Icons.Material.Filled.Add">New Capture</MudNavLink>
+            <MudNavLink Href="skills" Icon="@Icons.Material.Filled.Settings">Skills</MudNavLink>
+            <MudNavLink Href="integrations" Icon="@Icons.Material.Filled.SwapHoriz">Integrations</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
