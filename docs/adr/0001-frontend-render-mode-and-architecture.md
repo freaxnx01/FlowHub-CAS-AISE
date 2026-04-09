@@ -166,6 +166,7 @@ The implementation work this ADR unblocks:
 3. **Per-page work** via the mandatory UI workflow: `/ui-brainstorm` → `/ui-flow` → `/ui-build` → `/ui-review`, in the MVP order: Dashboard → New Capture → Captures list. Stretch: Capture detail → Skills → Integrations.
 4. **Component tests** via bUnit against the Bogus stubs.
 5. **No auth wiring against a real Authentik client** in Block 2 — a placeholder OIDC config + a dev-mode bypass is enough; the real client registration happens in Block 5 (Deployment) when the service is exposed.
+   - **Dev bypass implementation:** a `DevAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>` returning a fixed `ClaimsPrincipal` ("Dev Operator", configurable roles via `Dev__Auth__Roles` env var). Registered **only** when `builder.Environment.IsDevelopment()` — production code path goes through the OIDC scheme. **Never** use `[AllowAnonymous]` sprinkles to bypass auth in dev — the real auth pipeline must run in dev so `[Authorize]`, `User.IsInRole(...)`, and `AuthorizationStateProvider` behave identically to production. bUnit tests use bUnit's own `AuthorizationContext` test helper and do not depend on `Program.cs` at all.
 
 Each numbered item above will be its own short brainstorm → plan → implementation cycle. This ADR is the umbrella decision; it does not replace the per-feature planning.
 
