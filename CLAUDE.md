@@ -37,20 +37,35 @@ The CAS coursework, FlowHub concept, and project decisions live in a separate Ob
 
 ## Essential Commands
 
-### Build & Run
+### Make targets (preferred)
+
+The repo ships a `Makefile` with the common dev tasks. Plain `make` with no target prints help.
+
+```bash
+make            # show help
+make run        # run FlowHub.Web on http://localhost:5070 (no hot reload)
+make watch      # run FlowHub.Web with hot reload (dotnet watch)
+make build      # build the full solution
+make test       # run all tests
+make test-watch # watch component tests
+make restore    # restore NuGet packages
+make clean      # remove build artifacts
+make format     # apply dotnet format
+```
+
+`make run` and `make watch` set `ASPNETCORE_URLS=http://localhost:5070` and pass `--no-launch-profile` so they ignore `launchSettings.json`. Use these in preference to running `dotnet run` directly — the paths and env vars stay consistent.
+
+### Underlying dotnet commands
 
 ```bash
 # Restore dependencies
-dotnet restore
+dotnet restore FlowHub.slnx
 
-# Build (warnings as errors)
-dotnet build -c Release
+# Build (warnings as errors per Directory.Build.props)
+dotnet build FlowHub.slnx
 
-# Run locally (with override for dev DB/ports)
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
-
-# Run host directly
-dotnet run --project src/Host
+# Run FlowHub.Web directly
+dotnet run --project source/FlowHub.Web --no-launch-profile
 ```
 
 **PDB symbols:** Release builds include embedded PDB symbols (`<DebugType>embedded</DebugType>` in `Directory.Build.props`) so that exception stack traces contain source file names and line numbers in production.
@@ -59,43 +74,36 @@ dotnet run --project src/Host
 
 ```bash
 # All tests
-dotnet test
+dotnet test FlowHub.slnx
 
-# Unit tests only
-dotnet test tests/<Module>.UnitTests
-
-# Integration tests (requires Docker for Testcontainers)
-dotnet test tests/<Module>.IntegrationTests
-
-# Blazor component tests
-dotnet test tests/<Module>.ComponentTests
-
-# E2E (requires running stack)
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
-dotnet test tests/E2E
-docker-compose down
+# Specific test project
+dotnet test tests/FlowHub.Web.ComponentTests
 
 # With coverage
-dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
+dotnet test FlowHub.slnx --collect:"XPlat Code Coverage" --results-directory ./coverage
 ```
+
+Test naming convention: `MethodName_StateUnderTest_ExpectedBehavior` (CA1707 is suppressed for test projects so the underscores compile).
 
 ### Database Migrations
 
+> ⏳ **Block 4** — EF Core persistence isn't wired yet. The commands below describe the eventual workflow once `FlowHub.Persistence` lands in Block 4. Currently all data is in-memory Bogus stubs.
+
 ```bash
-# Add migration (replace <Module> and <MigrationName>)
+# Add migration
 dotnet ef migrations add <MigrationName> \
-  --project src/Modules/<Module>/Infrastructure \
-  --startup-project src/Host
+  --project source/FlowHub.Persistence \
+  --startup-project source/FlowHub.Web
 
 # Apply to local DB
 dotnet ef database update \
-  --project src/Modules/<Module>/Infrastructure \
-  --startup-project src/Host
+  --project source/FlowHub.Persistence \
+  --startup-project source/FlowHub.Web
 
 # Generate SQL script (for production review)
 dotnet ef migrations script \
-  --project src/Modules/<Module>/Infrastructure \
-  --startup-project src/Host \
+  --project source/FlowHub.Persistence \
+  --startup-project source/FlowHub.Web \
   --output migrations.sql
 ```
 
@@ -113,57 +121,62 @@ dotnet list package --outdated
 
 ## Repository Structure
 
+The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modular Monolith `src/Modules/<Module>/` pattern described in the upstream template. This decision is recorded in **ADR 0001** (Q1 = keep flat). Several `source/FlowHub.*/` and `tests/FlowHub.*Tests/` folders are placeholders for capabilities that land in later blocks.
+
 ```
 .
-├── src/
-│   ├── Modules/
-│   │   └── <ModuleName>/
-│   │       ├── Domain/
-│   │       ├── Application/
-│   │       │   ├── Ports/
-│   │       │   │   ├── Driving/
-│   │       │   │   └── Driven/
-│   │       │   └── UseCases/
-│   │       └── Infrastructure/
-│   │           └── Persistence/
-│   │               └── Migrations/
-│   ├── Shared/
-│   └── Host/                    ← ASP.NET Core entry point
+├── source/
+│   ├── FlowHub.Core/                  ← domain types + driving ports (Capture, Skill, Health…)
+│   ├── FlowHub.Web/                   ← Blazor Web App, Interactive Server (per ADR 0001)
+│   │   ├── Auth/DevAuthHandler.cs     ← dev-only auth bypass (real OIDC in Block 5)
+│   │   ├── Components/
+│   │   │   ├── App.razor, Routes.razor, _Imports.razor
+│   │   │   ├── Layout/                ← MainLayout, QuickCaptureField
+│   │   │   ├── Pages/                 ← @page components (Dashboard.razor at /)
+│   │   │   ├── DashboardCards/        ← page-specific cards
+│   │   │   └── Shared/                ← reusable cross-page components (LifecycleBadge, HealthDot)
+│   │   ├── Stubs/                     ← Bogus-backed stub services for Block 2
+│   │   └── Program.cs
+│   ├── FlowHub.AI/                    ← (placeholder — AI classification, future block)
+│   ├── FlowHub.Integrations/          ← (placeholder — Wallabag, Wekan, Vikunja, …)
+│   ├── FlowHub.Persistence/           ← (placeholder — EF Core, Block 4)
+│   ├── FlowHub.Skills/                ← (placeholder — Skill implementations)
+│   └── FlowHub.Telegram/              ← (placeholder — Telegram channel)
 ├── tests/
-│   ├── <Module>.UnitTests/
-│   ├── <Module>.IntegrationTests/
-│   ├── <Module>.ComponentTests/  ← bUnit
-│   └── E2E/                      ← Playwright
-├── bruno/                         ← Bruno API request collections
+│   ├── FlowHub.Web.ComponentTests/    ← bUnit + xunit + FluentAssertions + NSubstitute
+│   ├── FlowHub.Core.Tests/            ← (placeholder)
+│   ├── FlowHub.Integrations.Tests/    ← (placeholder)
+│   └── FlowHub.Skills.Tests/          ← (placeholder)
+├── poc/
+│   ├── FlowHub.AI.Classification/     ← standalone POC, has its own .sln
+│   └── FlowHub-CAS-AISE.sln           ← POC-only solution (not the root sln)
 ├── docs/
-│   ├── design/                    ← UI wireframes & Mermaid flows per feature
-│   │   └── <feature-name>/
-│   │       ├── wireframe.md       ← Phase 1 output (ASCII wireframe)
-│   │       └── flow.md            ← Phase 2 output (Mermaid diagrams)
-│   ├── adr/                       ← Architecture Decision Records
-│   └── ai-notes/                  ← AI agent working notes
+│   ├── adr/                           ← Architecture Decision Records (ADR 0001 = Frontend)
+│   ├── design/<feature>/              ← UI workflow output
+│   │   ├── wireframe.md               ← Phase 1 output (/ui-brainstorm)
+│   │   └── flow.md                    ← Phase 2 output (/ui-flow)
+│   ├── superpowers/specs/             ← brainstorming design specs
+│   ├── superpowers/plans/             ← implementation plans
+│   └── from-ai/                       ← AI agent working notes
 ├── .ai/
-│   ├── base-instructions.md      ← canonical conventions reference
-│   └── skills/
-│       ├── commit.md             ← /commit slash command
-│       ├── push.md               ← /push slash command
-│       ├── ui-brainstorm.md      ← Phase 1: wireframe
-│       ├── ui-flow.md            ← Phase 2: Mermaid flows
-│       ├── ui-build.md           ← Phase 3: build
-│       └── ui-review.md          ← Phase 4: review
+│   ├── base-instructions.md           ← canonical conventions reference
+│   ├── cas-instructions.md            ← CAS course rhythm and grading
+│   └── skills/                        ← /commit, /push, /ui-*, /update-ai-instructions
+├── .claude/commands/                   ← Claude Code slash command shims
 ├── .github/
 │   ├── copilot-instructions.md
 │   └── workflows/
-├── docker-compose.yml
-├── docker-compose.override.yml
-├── Directory.Build.props
-├── Directory.Packages.props
-├── global.json
-├── CLAUDE.md                     ← this file
-├── CHANGELOG.md                  ← Keep a Changelog format
-├── README.md                     ← repo root
-└── SKILL.md                      ← OpenClaw
+├── global.json                         ← .NET 10 SDK pin
+├── Directory.Build.props               ← nullable, warnings as errors, embedded PDB
+├── Directory.Packages.props            ← central package management
+├── FlowHub.slnx                        ← root solution (new XML format)
+├── Makefile                            ← dev task targets (run, watch, build, test, …)
+├── CLAUDE.md                           ← this file
+├── README.md
+└── SKILL.md                            ← OpenClaw skill definition
 ```
+
+**Note:** The `## Docker` section further down describes a `docker-compose.yml`-based workflow that lands in **Block 5 (Deployment)** — those files don't exist yet. Current dev workflow is `make run` / `make watch` directly against the host machine.
 
 ---
 
