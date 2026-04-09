@@ -1,0 +1,21 @@
+@namespace FlowHub.Web.Components.Shared
+
+<MudIcon Icon="@_icon" Color="@_color" Size="Size.Small" />
+
+@code {
+    [Parameter, EditorRequired] public HealthStatus Status { get; set; }
+
+    private string _icon = Icons.Material.Filled.Circle;
+    private Color _color = Color.Default;
+
+    protected override void OnParametersSet()
+    {
+        (_icon, _color) = Status switch
+        {
+            HealthStatus.Healthy => (Icons.Material.Filled.CheckCircle, Color.Success),
+            HealthStatus.Degraded => (Icons.Material.Filled.Warning, Color.Warning),
+            HealthStatus.Down => (Icons.Material.Filled.Error, Color.Error),
+            _ => (Icons.Material.Filled.Help, Color.Default),
+        };
+    }
+}

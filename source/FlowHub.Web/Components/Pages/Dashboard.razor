@@ -3,30 +3,30 @@
 
 <PageTitle>FlowHub — Dashboard</PageTitle>
 
+@if (_loadError is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">
+        Could not load dashboard data: @_loadError
+        <MudButton Variant="Variant.Text" OnClick="LoadAsync" Class="ml-2">Retry</MudButton>
+    </MudAlert>
+}
+
 <MudStack Spacing="4">
 
-    @* TODO Phase 3 Step 2 — NeedsAttentionCard *@
-    <MudPaper Class="pa-4" Outlined="true">
-        <MudText Typo="Typo.subtitle1">Needs attention — placeholder</MudText>
-    </MudPaper>
+    <NeedsAttentionCard Counts="_failureCounts"
+                        OnOrphanClick="NavigateToOrphans"
+                        OnUnhandledClick="NavigateToUnhandled" />
 
-    @* TODO Phase 3 Step 2 — RecentCapturesCard (MudDataGrid<Capture>) *@
-    <MudPaper Class="pa-4" Outlined="true">
-        <MudText Typo="Typo.subtitle1">Recent captures — placeholder</MudText>
-    </MudPaper>
+    <RecentCapturesCard Captures="_recent"
+                        OnRowClick="NavigateToCapture"
+                        OnViewAllClick="NavigateToAllCaptures" />
 
     <MudGrid>
         <MudItem xs="12" md="6">
-            @* TODO Phase 3 Step 2 — SkillHealthCard *@
-            <MudPaper Class="pa-4" Outlined="true">
-                <MudText Typo="Typo.subtitle1">Skill health — placeholder</MudText>
-            </MudPaper>
+            <SkillHealthCard Skills="_skills" OnManageClick="NavigateToSkills" />
         </MudItem>
         <MudItem xs="12" md="6">
-            @* TODO Phase 3 Step 2 — IntegrationHealthCard *@
-            <MudPaper Class="pa-4" Outlined="true">
-                <MudText Typo="Typo.subtitle1">Integration health — placeholder</MudText>
-            </MudPaper>
+            <IntegrationHealthCard Integrations="_integrations" OnManageClick="NavigateToIntegrations" />
         </MudItem>
     </MudGrid>
 

@@ -1,0 +1,38 @@
+@namespace FlowHub.Web.Components.DashboardCards
+
+<MudCard Outlined="true">
+    <MudCardContent>
+        <MudText Typo="Typo.subtitle1" Class="mb-2">Skill health</MudText>
+        @if (Skills is null)
+        {
+            @for (var i = 0; i < 4; i++)
+            {
+                <MudSkeleton Width="100%" Class="mb-1" />
+            }
+        }
+        else if (Skills.Count == 0)
+        {
+            <MudText Typo="Typo.body2">No skills configured yet — no activity to show.</MudText>
+        }
+        else
+        {
+            <MudStack Spacing="1">
+                @foreach (var skill in Skills)
+                {
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <HealthDot Status="@skill.Status" />
+                        <MudText Typo="Typo.body2" Style="min-width:140px;">@skill.Name</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Default">@skill.Status.ToString().ToLowerInvariant()</MudText>
+                        <MudSpacer />
+                        <MudText Typo="Typo.body2" Color="Color.Default">@skill.RoutedToday</MudText>
+                    </MudStack>
+                }
+            </MudStack>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" EndIcon="@Icons.Material.Filled.ArrowForward" OnClick="OnManageClickInternal">
+            Manage skills
+        </MudButton>
+    </MudCardActions>
+</MudCard>

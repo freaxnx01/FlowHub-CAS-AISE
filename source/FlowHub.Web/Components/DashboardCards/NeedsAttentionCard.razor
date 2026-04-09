@@ -1,0 +1,44 @@
+@namespace FlowHub.Web.Components.DashboardCards
+
+<MudCard Outlined="true">
+    <MudCardContent>
+        <MudText Typo="Typo.subtitle1" Class="mb-2">Needs attention</MudText>
+        @if (Counts is null)
+        {
+            <MudSkeleton Width="60%" />
+            <MudSkeleton Width="40%" />
+        }
+        else if (!Counts.AnyFailures)
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText Typo="Typo.body2">All captures routed successfully — nothing to review</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudStack Spacing="1">
+                @if (Counts.OrphanCount > 0)
+                {
+                    <MudButton Variant="Variant.Text"
+                               StartIcon="@Icons.Material.Filled.Warning"
+                               Color="Color.Warning"
+                               OnClick="OnOrphanClickInternal"
+                               Class="justify-start">
+                        @Counts.OrphanCount orphan @(Counts.OrphanCount == 1 ? "capture" : "captures")
+                    </MudButton>
+                }
+                @if (Counts.UnhandledCount > 0)
+                {
+                    <MudButton Variant="Variant.Text"
+                               StartIcon="@Icons.Material.Filled.HelpOutline"
+                               Color="Color.Warning"
+                               OnClick="OnUnhandledClickInternal"
+                               Class="justify-start">
+                        @Counts.UnhandledCount unhandled @(Counts.UnhandledCount == 1 ? "capture" : "captures")
+                    </MudButton>
+                }
+            </MudStack>
+        }
+    </MudCardContent>
+</MudCard>

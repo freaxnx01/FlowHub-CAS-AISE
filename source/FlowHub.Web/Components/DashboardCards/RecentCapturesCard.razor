@@ -1,0 +1,69 @@
+@namespace FlowHub.Web.Components.DashboardCards
+
+<MudCard Outlined="true">
+    <MudCardContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+            <MudText Typo="Typo.subtitle1">Recent captures</MudText>
+            <MudSpacer />
+            <MudButton Variant="Variant.Text" EndIcon="@Icons.Material.Filled.ArrowForward" OnClick="OnViewAllClickInternal">
+                View all
+            </MudButton>
+        </MudStack>
+
+        @if (Captures is null)
+        {
+            @for (var i = 0; i < 5; i++)
+            {
+                <MudSkeleton Height="32px" Class="mb-1" />
+            }
+        }
+        else if (Captures.Count == 0)
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="pa-6">
+                <MudIcon Icon="@Icons.Material.Filled.Inbox" Size="Size.Large" Color="Color.Default" />
+                <MudText Typo="Typo.body2" Align="Align.Center">
+                    No captures yet. Send something via Telegram, or use the quick-capture field in the bar above.
+                </MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudDataGrid T="Capture"
+                         Items="@Captures"
+                         Dense="true"
+                         Hover="true"
+                         RowClick="OnRowClickInternal">
+                <Columns>
+                    <PropertyColumn Property="x => x.CreatedAt" Title="When" SortBy="x => x.CreatedAt">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2">@FormatRelative(context.Item.CreatedAt)</MudText>
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.Source" Title="Ch">
+                        <CellTemplate>
+                            <MudIcon Icon="@(context.Item.Source == ChannelKind.Telegram ? Icons.Material.Filled.Send : Icons.Material.Filled.Computer)"
+                                     Size="Size.Small" />
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.Stage" Title="State">
+                        <CellTemplate>
+                            <LifecycleBadge Stage="@context.Item.Stage" />
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.Content" Title="Content">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2" Style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;">
+                                @context.Item.Content
+                            </MudText>
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.MatchedSkill" Title="Skill">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2">@(context.Item.MatchedSkill ?? "—")</MudText>
+                        </CellTemplate>
+                    </PropertyColumn>
+                </Columns>
+            </MudDataGrid>
+        }
+    </MudCardContent>
+</MudCard>

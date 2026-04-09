@@ -1,0 +1,23 @@
+@namespace FlowHub.Web.Components.Shared
+
+<MudChip T="string" Size="Size.Small" Color="@_color" Variant="Variant.Filled">@_label</MudChip>
+
+@code {
+    [Parameter, EditorRequired] public LifecycleStage Stage { get; set; }
+
+    private Color _color = Color.Default;
+    private string _label = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        (_label, _color) = Stage switch
+        {
+            LifecycleStage.Raw => ("raw", Color.Default),
+            LifecycleStage.Classified => ("classified", Color.Info),
+            LifecycleStage.Routed => ("routed", Color.Success),
+            LifecycleStage.Orphan => ("orphan", Color.Warning),
+            LifecycleStage.Unhandled => ("unhandled", Color.Warning),
+            _ => ("?", Color.Default),
+        };
+    }
+}

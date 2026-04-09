@@ -1,4 +1,7 @@
+using FlowHub.Core.Captures;
+using FlowHub.Core.Health;
 using FlowHub.Web.Components;
+using FlowHub.Web.Stubs;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +13,11 @@ builder.Services
 
 // MudBlazor — only component library per CLAUDE.md.
 builder.Services.AddMudServices();
+
+// Block 2 stub services — replaced with real implementations in Block 3.
+builder.Services.AddSingleton<ICaptureService, CaptureServiceStub>();
+builder.Services.AddSingleton<ISkillRegistry, SkillRegistryStub>();
+builder.Services.AddSingleton<IIntegrationHealthService, IntegrationHealthServiceStub>();
 
 var app = builder.Build();
 
