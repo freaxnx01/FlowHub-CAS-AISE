@@ -16,6 +16,25 @@ Agent context for Claude Code. Read this before taking any action in this reposi
 
 ---
 
+## Knowledge Base (Obsidian Vault)
+
+The CAS coursework, FlowHub concept, and project decisions live in a separate Obsidian vault. This vault is the source of truth for everything **except** code.
+
+- **Path:** `/mnt/c/Users/freax/Documents/Obsidian/cas-aise/`
+- **Mode:** Read-only from this repo. Writes happen only when CWD is the vault (per the global vault convention in `~/.claude/CLAUDE.md`).
+- **Back-link:** `Projektarbeit/Repository.md` in the vault points back here.
+
+**Primary focus paths** — grep/read these first when project background is needed:
+
+- `Projektarbeit/` — thesis & FlowHub concept (`Idee FlowHub.md`, `Dev.md`, `Skills.md`, `External Services.md`)
+- `Blöcke/` — course block notes that drive the incremental build
+
+**Secondary** (search on demand): `Knowledge/`, `Allgemein/`, `Organisation/`, `Notes.md`, `TODO.md`.
+
+**Read trigger:** Before answering questions about CAS scope, modules, deadlines, project decisions, or the FlowHub concept, grep the vault first.
+
+---
+
 ## Essential Commands
 
 ### Build & Run
