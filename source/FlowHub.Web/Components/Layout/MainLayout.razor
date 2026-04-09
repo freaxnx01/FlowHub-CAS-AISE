@@ -7,20 +7,22 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                       Color="Color.Inherit"
-                       Edge="Edge.Start"
-                       OnClick="ToggleDrawer"
-                       title="Toggle navigation" />
+        <MudTooltip Text="Toggle navigation">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Inherit"
+                           Edge="Edge.Start"
+                           OnClick="ToggleDrawer" />
+        </MudTooltip>
         <MudText Typo="Typo.h6" Class="ml-2">FlowHub</MudText>
         <MudSpacer />
         <QuickCaptureField />
         <MudSpacer />
         @* TODO Block 5 — UserMenu (avatar + theme toggle + OIDC logout) *@
-        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle"
-                       Color="Color.Inherit"
-                       Edge="Edge.End"
-                       title="Dev Operator" />
+        <MudTooltip Text="Dev Operator (Block 5: real OIDC logout)">
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle"
+                           Color="Color.Inherit"
+                           Edge="Edge.End" />
+        </MudTooltip>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Mini" OpenMiniOnHover="false" Elevation="1">
