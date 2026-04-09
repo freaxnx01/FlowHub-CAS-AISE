@@ -1,0 +1,14 @@
+@namespace FlowHub.Web.Components.Layout
+
+<MudTextField T="string"
+              @bind-Value="_input"
+              Placeholder="+ Quick capture: paste URL or type…"
+              Variant="Variant.Outlined"
+              Margin="Margin.Dense"
+              Class="mx-4"
+              Style="max-width:560px;"
+              Adornment="Adornment.End"
+              AdornmentIcon="@(_isSubmitting ? Icons.Material.Filled.HourglassTop : Icons.Material.Filled.KeyboardReturn)"
+              OnAdornmentClick="SubmitAsync"
+              OnKeyDown="OnKeyDownAsync"
+              Disabled="_isSubmitting" />

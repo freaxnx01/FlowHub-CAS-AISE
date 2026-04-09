@@ -3,4 +3,7 @@
     <Project Path="source/FlowHub.Core/FlowHub.Core.csproj" />
     <Project Path="source/FlowHub.Web/FlowHub.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FlowHub.Web.ComponentTests/FlowHub.Web.ComponentTests.csproj" />
+  </Folder>
 </Solution>

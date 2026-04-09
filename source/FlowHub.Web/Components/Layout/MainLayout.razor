@@ -7,14 +7,20 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="ToggleDrawer"
+                       title="Toggle navigation" />
         <MudText Typo="Typo.h6" Class="ml-2">FlowHub</MudText>
         <MudSpacer />
-        @* TODO Phase 3 Step 3 — QuickCaptureField (WebChannel quick-add) *@
-        <MudText Typo="Typo.body2" Color="Color.Inherit" Class="mx-4">[ quick capture placeholder ]</MudText>
+        <QuickCaptureField />
         <MudSpacer />
-        @* TODO Phase 3 Step 3 — UserMenu (avatar + theme + logout) *@
-        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Edge="Edge.End" />
+        @* TODO Block 5 — UserMenu (avatar + theme toggle + OIDC logout) *@
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle"
+                       Color="Color.Inherit"
+                       Edge="Edge.End"
+                       title="Dev Operator" />
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Mini" OpenMiniOnHover="false" Elevation="1">
