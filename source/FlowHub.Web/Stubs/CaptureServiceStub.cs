@@ -88,13 +88,15 @@ public sealed class CaptureServiceStub : ICaptureService
 
     private static LifecycleStage PickStage(Faker rng, int index)
     {
-        // Distribution biased towards Routed but with a couple of failures
-        // so the dashboard's Needs Attention widget has something to show.
+        // Distribution: mostly Completed, one Routed (in-flight), two Orphan,
+        // one Unhandled — so the dashboard's Needs Attention widget has something
+        // to show and the grid demonstrates all lifecycle states.
         return index switch
         {
             2 or 8 => LifecycleStage.Orphan,
             4 => LifecycleStage.Unhandled,
-            _ => LifecycleStage.Routed,
+            6 => LifecycleStage.Routed,
+            _ => LifecycleStage.Completed,
         };
     }
 

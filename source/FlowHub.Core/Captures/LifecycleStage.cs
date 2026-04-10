@@ -12,10 +12,13 @@ public enum LifecycleStage
     /// <summary>AI has assigned a category / target Skill.</summary>
     Classified,
 
-    /// <summary>Successfully handed off to a Skill.</summary>
+    /// <summary>Handed off to a Skill (in-flight, processing).</summary>
     Routed,
 
-    /// <summary>A Skill exists, but processing failed.</summary>
+    /// <summary>Skill processed and Integration write succeeded (happy terminal state).</summary>
+    Completed,
+
+    /// <summary>Skill or Integration failed during processing.</summary>
     Orphan,
 
     /// <summary>No matching Skill — triggers a Skill suggestion.</summary>

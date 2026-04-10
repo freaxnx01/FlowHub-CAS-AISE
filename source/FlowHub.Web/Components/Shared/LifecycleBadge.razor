@@ -14,7 +14,8 @@
         {
             LifecycleStage.Raw => ("raw", Color.Default),
             LifecycleStage.Classified => ("classified", Color.Info),
-            LifecycleStage.Routed => ("routed", Color.Success),
+            LifecycleStage.Routed => ("routed", Color.Info),
+            LifecycleStage.Completed => ("completed", Color.Success),
             LifecycleStage.Orphan => ("orphan", Color.Warning),
             LifecycleStage.Unhandled => ("unhandled", Color.Warning),
             _ => ("?", Color.Default),
