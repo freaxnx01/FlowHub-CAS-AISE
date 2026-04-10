@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-generated
-updated: 2026-04-09
+updated: 2026-04-10
 ---
 
 # FlowHub Glossary
@@ -32,9 +32,10 @@ The central FlowHub noun. A single piece of incoming content from any channel �
 |---|---|---|
 | 1 | **raw Capture** | Just arrived, no classification yet |
 | 2 | **classified Capture** | AI has assigned a category / target Skill |
-| 3 | **routed Capture** | Successfully handed off to a Skill |
-| 4 | **orphan Capture** | A Skill exists, but processing failed |
-| 5 | **unhandled Capture** | No matching Skill — triggers a Skill suggestion |
+| 3 | **routed Capture** | Handed off to a Skill (in-flight, processing) |
+| 4 | **completed Capture** | Skill processed + Integration write succeeded (happy terminal state) |
+| 5 | **orphan Capture** | Skill or Integration failed during processing |
+| 6 | **unhandled Capture** | No matching Skill — triggers a Skill suggestion |
 
 ### Channel
 
