@@ -46,6 +46,14 @@ public sealed class CaptureServiceStub : ICaptureService
             .ToList();
     }
 
+    public Task<IReadOnlyList<Capture>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<Capture> all = _captures
+            .OrderByDescending(c => c.CreatedAt)
+            .ToList();
+        return Task.FromResult(all);
+    }
+
     public Task<IReadOnlyList<Capture>> GetRecentAsync(int count, CancellationToken cancellationToken = default)
     {
         IReadOnlyList<Capture> recent = _captures

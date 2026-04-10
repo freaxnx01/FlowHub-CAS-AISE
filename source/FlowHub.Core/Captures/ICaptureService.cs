@@ -7,6 +7,8 @@ namespace FlowHub.Core.Captures;
 /// </summary>
 public interface ICaptureService
 {
+    Task<IReadOnlyList<Capture>> GetAllAsync(CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<Capture>> GetRecentAsync(int count, CancellationToken cancellationToken = default);
 
     Task<FailureCounts> GetFailureCountsAsync(CancellationToken cancellationToken = default);
