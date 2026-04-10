@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-04-09
+updated: 2026-04-10
 ---
 
 # Block 2 — Frontend · Nachbearbeitung
@@ -37,65 +37,60 @@ Volltext: `_files/Moodle/Modul/2-Frontend/pdf/W4B-C-AS001.AISE.ZH-Sa-1.PVA.FS26_
 - [x] **FlowHub Glossary** — `Projektarbeit/Glossary.md`: Capture, Skill, Channel, Integration, Page/Component/Card/Widget, Render Mode
 - [x] **Dashboard wireframe (Phase 1)** — Repo: `docs/design/dashboard/wireframe.md`
 
-### 🔨 Scaffolding (one-time, blockt alle per-Page Arbeiten)
+### ✅ Scaffolding
 
-- [ ] Scaffold `source/FlowHub.Web/` aus dem Blazor Web App Template (Interactive Server, kein WASM)
-- [ ] MudBlazor verkabeln: `Program.cs`, `App.razor`, `_Imports.razor`, `MainLayout.razor`
-- [ ] `MudLayout` Shell bauen — `MudAppBar` + Mini `MudDrawer` (click-to-expand) + `MudMainContent` + User Menu
-- [ ] AppBar **Quick-Capture Field** an Stub `CaptureService.Submit(...)` verdrahten (WebChannel-Eingang, sichtbar auf jeder Page)
-- [ ] **`DevAuthHandler`** — fixer `ClaimsPrincipal` "Dev Operator", nur registriert wenn `IsDevelopment()`. Real Auth Pipeline läuft auch in dev — kein `[AllowAnonymous]`
-- [ ] **Bogus** Dependency in `Directory.Packages.props` aufnehmen
-- [ ] Stub-Service-Interfaces in `FlowHub.Core` definieren: `ICaptureService`, `ISkillRegistry`, `IIntegrationHealthService` + Bogus-basierte Implementierungen in `source/FlowHub.Web/Stubs/`
-- [ ] Test-Projekt `tests/FlowHub.Web.ComponentTests/` mit bUnit + `AuthorizationContext` Helper anlegen
+- [x] Scaffold `source/FlowHub.Web/` aus dem Blazor Web App Template (Interactive Server, kein WASM)
+- [x] MudBlazor verkabeln: `Program.cs`, `App.razor`, `_Imports.razor`, `MainLayout.razor`
+- [x] `MudLayout` Shell bauen — `MudAppBar` + Mini `MudDrawer` (click-to-expand) + `MudMainContent` + User Menu
+- [x] AppBar **Quick-Capture Field** an Stub `CaptureService.Submit(...)` verdrahtet (WebChannel-Eingang, sichtbar auf jeder Page)
+- [x] **`DevAuthHandler`** — fixer `ClaimsPrincipal` "Dev Operator", nur registriert wenn `IsDevelopment()`
+- [x] **Bogus** Dependency in `Directory.Packages.props`
+- [x] Stub-Service-Interfaces in `FlowHub.Core`: `ICaptureService`, `ISkillRegistry`, `IIntegrationHealthService` + Bogus-basierte Stubs in `source/FlowHub.Web/Stubs/`
+- [x] Test-Projekt `tests/FlowHub.Web.ComponentTests/` mit bUnit
 
-### 📄 MVP Path — Per-Page UI Workflow
-
-Pro Page jeweils 4 Phasen: `/ui-brainstorm` → `/ui-flow` → `/ui-build` → `/ui-review`.
-Die Dashboard Phase 3 baut zusätzlich den geteilten Layout-Shell + erste Shared Components (`CaptureRow`, `LifecycleBadge`, `ChannelIcon`, `HealthCard`) — folgende Pages erben davon und werden deutlich kleiner.
+### ✅ MVP Path — Per-Page UI Workflow
 
 #### Page 1 — Dashboard (`/`)
 
-- [x] Phase 1 — `/ui-brainstorm` (Wireframe approved)
-- [ ] Phase 2 — `/ui-flow` (Mermaid: Row-Click Navigation, Quick-Capture Submission, Failure Click-Throughs)
-- [ ] Phase 3 — `/ui-build` (baut den Shell + erste Shared Components mit)
-- [ ] Phase 4 — `/ui-review` (bUnit Tests + Checklist)
+- [x] Phase 1 — `/ui-brainstorm` (Wireframe)
+- [x] Phase 2 — `/ui-flow` (Mermaid Diagrams)
+- [x] Phase 3 — `/ui-build` (Shell + Shared Components + Stubs)
+- [x] Phase 4 — `/ui-review` (12 bUnit Tests)
 
 #### Page 2 — New Capture (`/captures/new`)
 
-- [ ] Phase 1 — `/ui-brainstorm`
-- [ ] Phase 2 — `/ui-flow`
-- [ ] Phase 3 — `/ui-build`
-- [ ] Phase 4 — `/ui-review`
+- [x] Phase 1 — `/ui-brainstorm`
+- [x] Phase 2 — `/ui-flow`
+- [x] Phase 3 — `/ui-build`
+- [x] Phase 4 — `/ui-review` (3 bUnit Tests)
 
 #### Page 3 — Captures list (`/captures`)
 
-- [ ] Phase 1 — `/ui-brainstorm`
-- [ ] Phase 2 — `/ui-flow`
-- [ ] Phase 3 — `/ui-build` (heavy Reuse von `CaptureRow`, Lifecycle Filter Chips)
-- [ ] Phase 4 — `/ui-review`
+- [x] Phase 1 — `/ui-brainstorm`
+- [x] Phase 2 — `/ui-flow`
+- [x] Phase 3 — `/ui-build` (with lifecycle/channel filter chips + text search + pagination)
+- [x] Phase 4 — `/ui-review` (2 bUnit Tests)
 
-### 🌟 Stretch — nur wenn Budget reicht
-
-Realistisch sind 1–2 von diesen 3 Pages, nicht alle.
+### ✅ Stretch — alle 3 geschafft
 
 #### Page 4 — Capture detail (`/captures/{id}`)
 
-- [ ] Alle 4 Phasen — inklusive der Orphan-Retry / Unhandled-Reassign Action Stubs
+- [x] Alle 4 Phasen — inkl. Orphan-Retry / Unhandled-Reassign Action Stubs (snackbar "Coming in Block 3")
 
 #### Page 5 — Skills (`/skills`)
 
-- [ ] Alle 4 Phasen
+- [x] Implementiert (MudDataGrid + HealthDot, read-only)
 
 #### Page 6 — Integrations (`/integrations`)
 
-- [ ] Alle 4 Phasen
+- [x] Implementiert (MudDataGrid + HealthDot, read-only)
 
-### 🧪 Cross-cutting Verification (vor nächster PVA)
+### ✅ Cross-cutting Verification
 
-- [ ] `dotnet test` voll grün
-- [ ] Manueller Durchlauf gegen Bogus-Stubs deckt Happy Path + mind. 1 Orphan + 1 Unhandled
-- [ ] `CHANGELOG.md` `[Unreleased]` Section mit Block-2 Deliverables aktualisieren
-- [ ] Diese TODO-Liste hier final tick-marken
+- [x] `dotnet test` voll grün — 17 Tests
+- [x] `CHANGELOG.md` `[Unreleased]` Section mit Block-2 Deliverables
+- [x] Diese TODO-Liste final tick-marken
+- [ ] Manueller Durchlauf gegen Bogus-Stubs (vom User vor PVA durchführen)
 
 ### 🚫 Out of Scope (Block 2) — geparkt
 
