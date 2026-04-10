@@ -3,6 +3,46 @@
 
 <PageTitle>FlowHub — Skills</PageTitle>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-    Skills management — coming in Phase 1–4 of Page 5 (Block 2 stretch).
-</MudAlert>
+<MudText Typo="Typo.h5" Class="mb-4">Skills</MudText>
+
+@if (_loadError is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">
+        Could not load skills: @_loadError
+        <MudButton Variant="Variant.Text" OnClick="LoadAsync" Class="ml-2">Retry</MudButton>
+    </MudAlert>
+}
+else if (_skills is null)
+{
+    @for (var i = 0; i < 4; i++)
+    {
+        <MudSkeleton Height="48px" Class="mb-2" />
+    }
+}
+else if (_skills.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+        No skills configured yet. Skills will appear here once they are registered in Block 3.
+    </MudAlert>
+}
+else
+{
+    <MudDataGrid T="SkillHealth"
+                 Items="@_skills"
+                 Dense="true"
+                 Hover="true"
+                 SortMode="SortMode.Single">
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Skill" />
+            <PropertyColumn Property="x => x.Status" Title="Status">
+                <CellTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <HealthDot Status="@context.Item.Status" />
+                        <MudText Typo="Typo.body2">@context.Item.Status.ToString().ToLowerInvariant()</MudText>
+                    </MudStack>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.RoutedToday" Title="Routed today" />
+        </Columns>
+    </MudDataGrid>
+}

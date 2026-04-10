@@ -3,6 +3,50 @@
 
 <PageTitle>FlowHub — Integrations</PageTitle>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-    Integrations management — coming in Phase 1–4 of Page 6 (Block 2 stretch).
-</MudAlert>
+<MudText Typo="Typo.h5" Class="mb-4">Integrations</MudText>
+
+@if (_loadError is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">
+        Could not load integrations: @_loadError
+        <MudButton Variant="Variant.Text" OnClick="LoadAsync" Class="ml-2">Retry</MudButton>
+    </MudAlert>
+}
+else if (_integrations is null)
+{
+    @for (var i = 0; i < 4; i++)
+    {
+        <MudSkeleton Height="48px" Class="mb-2" />
+    }
+}
+else if (_integrations.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+        No integrations configured yet. Integrations will appear here once they are wired in Block 3.
+    </MudAlert>
+}
+else
+{
+    <MudDataGrid T="IntegrationHealth"
+                 Items="@_integrations"
+                 Dense="true"
+                 Hover="true"
+                 SortMode="SortMode.Single">
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Integration" />
+            <PropertyColumn Property="x => x.Status" Title="Status">
+                <CellTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <HealthDot Status="@context.Item.Status" />
+                        <MudText Typo="Typo.body2">@context.Item.Status.ToString().ToLowerInvariant()</MudText>
+                    </MudStack>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.LastWriteAt" Title="Last write">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2">@FormatLastWrite(context.Item)</MudText>
+                </CellTemplate>
+            </PropertyColumn>
+        </Columns>
+    </MudDataGrid>
+}
