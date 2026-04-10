@@ -3,4 +3,16 @@
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(Layout.MainLayout)">
+            <MudContainer MaxWidth="MaxWidth.Small" Class="pa-8 mt-8">
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
+                    This page hasn't been built yet — it's coming in a later step of Block 2.
+                </MudAlert>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/">
+                    Back to Dashboard
+                </MudButton>
+            </MudContainer>
+        </LayoutView>
+    </NotFound>
 </Router>

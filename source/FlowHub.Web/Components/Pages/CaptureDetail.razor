@@ -1,0 +1,12 @@
+@page "/captures/{Id:guid}"
+@rendermode InteractiveServer
+
+<PageTitle>FlowHub — Capture Detail</PageTitle>
+
+<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+    Capture detail for @Id — coming in Phase 1–4 of Page 4 (Block 2 stretch).
+</MudAlert>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+}
