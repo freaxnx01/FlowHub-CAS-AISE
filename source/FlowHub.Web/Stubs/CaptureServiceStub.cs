@@ -42,8 +42,15 @@ public sealed class CaptureServiceStub : ICaptureService
                 Content: SampleContent[i % SampleContent.Length],
                 CreatedAt: now.AddMinutes(-(i * rng.Random.Int(2, 8) + rng.Random.Int(0, 3))),
                 Stage: PickStage(rng, i),
-                MatchedSkill: PickSkill(rng, i)))
+                MatchedSkill: PickSkill(rng, i),
+                FailureReason: PickFailureReason(i)))
             .ToList();
+    }
+
+    public Task<Capture?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var capture = _captures.FirstOrDefault(c => c.Id == id);
+        return Task.FromResult(capture);
     }
 
     public Task<IReadOnlyList<Capture>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -109,4 +116,11 @@ public sealed class CaptureServiceStub : ICaptureService
 
         return SkillNames[index % SkillNames.Length];
     }
+
+    private static string? PickFailureReason(int index) => index switch
+    {
+        2 => "Wallabag API returned 503 Service Unavailable — the Integration was unreachable.",
+        8 => "Vikunja write timed out after 30 s — the list could not be updated.",
+        _ => null,
+    };
 }

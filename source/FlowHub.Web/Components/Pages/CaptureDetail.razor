@@ -3,10 +3,125 @@
 
 <PageTitle>FlowHub — Capture Detail</PageTitle>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-    Capture detail for @Id — coming in Phase 1–4 of Page 4 (Block 2 stretch).
-</MudAlert>
+<MudButton Variant="Variant.Text"
+           StartIcon="@Icons.Material.Filled.ArrowBack"
+           OnClick="@(() => Navigation.NavigateTo("/captures"))"
+           Class="mb-2">
+    Back to Captures
+</MudButton>
 
-@code {
-    [Parameter] public Guid Id { get; set; }
+@if (_loadError is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">
+        Could not load capture: @_loadError
+        <MudButton Variant="Variant.Text" OnClick="LoadAsync" Class="ml-2">Retry</MudButton>
+    </MudAlert>
+}
+else if (_isLoading)
+{
+    <MudCard Outlined="true" Style="max-width:800px;">
+        <MudCardHeader>
+            <MudSkeleton Width="200px" />
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Content</MudText>
+            <MudSkeleton Width="100%" Height="40px" Class="mb-4" />
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Metadata</MudText>
+            <MudSkeleton Width="60%" Class="mb-1" />
+            <MudSkeleton Width="60%" Class="mb-1" />
+            <MudSkeleton Width="60%" />
+        </MudCardContent>
+    </MudCard>
+}
+else if (_capture is null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-4">
+        Capture not found. It may have been deleted.
+    </MudAlert>
+}
+else
+{
+    <MudCard Outlined="true" Style="max-width:800px;">
+        <MudCardHeader>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Style="width:100%;">
+                <LifecycleBadge Stage="@_capture.Stage" />
+                <MudIcon Icon="@(_capture.Source == ChannelKind.Telegram ? Icons.Material.Filled.Send : Icons.Material.Filled.Computer)"
+                         Size="Size.Small" />
+                <MudText Typo="Typo.body2">@FormatRelative(_capture.CreatedAt)</MudText>
+                <MudSpacer />
+                <MudText Typo="Typo.body2">
+                    Skill: @(_capture.MatchedSkill ?? "—")
+                    @if (_capture.Stage == LifecycleStage.Orphan) { <text> (failed)</text> }
+                </MudText>
+            </MudStack>
+        </MudCardHeader>
+
+        <MudCardContent>
+            @* Failure alert — only for Orphan / Unhandled *@
+            @if (_capture.Stage == LifecycleStage.Orphan)
+            {
+                <MudAlert Severity="Severity.Warning" Class="mb-4">
+                    Routing failed: @(_capture.FailureReason ?? "Unknown error")
+                </MudAlert>
+            }
+            else if (_capture.Stage == LifecycleStage.Unhandled)
+            {
+                <MudAlert Severity="Severity.Info" Class="mb-4">
+                    No Skill matched this Capture. The AI classifier could not determine a category.
+                </MudAlert>
+            }
+
+            @* Content *@
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Content</MudText>
+            <MudText Typo="Typo.body1" Class="mb-4" Style="white-space:pre-wrap;word-break:break-word;">@_capture.Content</MudText>
+
+            @* Metadata *@
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Metadata</MudText>
+            <MudStack Spacing="0" Class="mb-4">
+                <MudText Typo="Typo.body2"><strong>ID:</strong> @_capture.Id</MudText>
+                <MudText Typo="Typo.body2"><strong>Created:</strong> @_capture.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss") UTC</MudText>
+                <MudText Typo="Typo.body2"><strong>Source:</strong> @_capture.Source</MudText>
+                <MudText Typo="Typo.body2"><strong>Stage:</strong> @_capture.Stage</MudText>
+                <MudText Typo="Typo.body2"><strong>Skill:</strong> @(_capture.MatchedSkill ?? "—")</MudText>
+            </MudStack>
+
+            @* Actions — only for Orphan / Unhandled *@
+            @if (_capture.Stage is LifecycleStage.Orphan or LifecycleStage.Unhandled)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mb-2">Actions</MudText>
+                <MudStack Row="true" Spacing="2">
+                    @if (_capture.Stage == LifecycleStage.Orphan)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   StartIcon="@Icons.Material.Filled.Refresh"
+                                   OnClick="StubAction">
+                            Retry routing
+                        </MudButton>
+                    }
+
+                    <MudMenu Label="@(_capture.Stage == LifecycleStage.Orphan ? "Reassign skill" : "Assign skill")"
+                             Variant="Variant.Outlined"
+                             StartIcon="@Icons.Material.Filled.Edit"
+                             EndIcon="@Icons.Material.Filled.ArrowDropDown">
+                        @if (_skills is not null)
+                        {
+                            @foreach (var skill in _skills)
+                            {
+                                <MudMenuItem OnClick="StubAction">@skill.Name</MudMenuItem>
+                            }
+                        }
+                    </MudMenu>
+
+                    <MudSpacer />
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Default"
+                               StartIcon="@Icons.Material.Filled.Block"
+                               OnClick="StubAction">
+                        Ignore
+                    </MudButton>
+                </MudStack>
+            }
+        </MudCardContent>
+    </MudCard>
 }
