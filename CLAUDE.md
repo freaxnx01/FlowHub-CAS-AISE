@@ -161,7 +161,7 @@ The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modul
 ├── .ai/
 │   ├── base-instructions.md           ← canonical conventions reference
 │   ├── cas-instructions.md            ← CAS course rhythm and grading
-│   └── skills/                        ← /commit, /push, /ui-*, /update-ai-instructions
+│   └── skills/                        ← /commit, /push, /flowhub-*, /ui-*, /update-ai-instructions
 ├── .claude/commands/                   ← Claude Code slash command shims
 ├── .github/
 │   ├── copilot-instructions.md
