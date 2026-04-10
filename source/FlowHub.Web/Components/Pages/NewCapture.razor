@@ -3,6 +3,61 @@
 
 <PageTitle>FlowHub — New Capture</PageTitle>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-    New Capture form — coming in Phase 1–4 of Page 2 (Block 2 MVP).
-</MudAlert>
+<MudText Typo="Typo.h5" Class="mb-4">New Capture</MudText>
+
+@if (_skillsLoadError is not null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-4">
+        Could not load skills: @_skillsLoadError — Skill override is disabled, AI will classify automatically.
+    </MudAlert>
+}
+
+<MudCard Outlined="true" Style="max-width:700px;">
+    <MudCardContent>
+        <MudForm @ref="_form">
+            <MudTextField T="string"
+                          @bind-Value="_content"
+                          Label="Content"
+                          Required="true"
+                          RequiredError="Content is required"
+                          Lines="5"
+                          Placeholder="Paste a URL, type a quote, or describe what you want to capture."
+                          HelperText="Paste a URL, type a quote, or describe what you want to capture."
+                          Variant="Variant.Outlined"
+                          Class="mb-4"
+                          Disabled="_isSubmitting" />
+
+            <MudSelect T="string"
+                       @bind-Value="_selectedSkill"
+                       Label="Skill override (optional)"
+                       HelperText="Leave on 'Let AI decide' for automatic classification. Override only if you know which Skill should handle this."
+                       Variant="Variant.Outlined"
+                       Disabled="_isSubmitting || _skills is null"
+                       Class="mb-4">
+                <MudSelectItem T="string" Value="@string.Empty">— Let AI decide —</MudSelectItem>
+                @if (_skills is not null)
+                {
+                    @foreach (var skill in _skills)
+                    {
+                        <MudSelectItem T="string" Value="@skill.Name">@skill.Name</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+        </MudForm>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@(_isSubmitting ? Icons.Material.Filled.HourglassTop : Icons.Material.Filled.KeyboardReturn)"
+                   OnClick="SubmitAsync"
+                   Disabled="_isSubmitting">
+            @(_isSubmitting ? "Submitting…" : "Submit")
+        </MudButton>
+        <MudButton Variant="Variant.Text"
+                   OnClick="Cancel"
+                   Disabled="_isSubmitting"
+                   Class="ml-2">
+            Cancel
+        </MudButton>
+    </MudCardActions>
+</MudCard>
