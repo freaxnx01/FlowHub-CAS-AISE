@@ -90,7 +90,7 @@ Volltext: `_files/Moodle/Modul/2-Frontend/pdf/W4B-C-AS001.AISE.ZH-Sa-1.PVA.FS26_
 - [x] `dotnet test` voll grün — 17 Tests
 - [x] `CHANGELOG.md` `[Unreleased]` Section mit Block-2 Deliverables
 - [x] Diese TODO-Liste final tick-marken
-- [ ] Manueller Durchlauf gegen Bogus-Stubs (vom User vor PVA durchführen)
+- [x] ~~Manueller Durchlauf~~ → automatisiert via 14 bUnit Smoke Tests (`SmokeTests.cs`), 31/31 grün
 
 ### 🚫 Out of Scope (Block 2) — geparkt
 
