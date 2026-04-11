@@ -13,3 +13,5 @@
 # Misc
 .trash/
 .DS_Store
+# direnv
+.envrc
