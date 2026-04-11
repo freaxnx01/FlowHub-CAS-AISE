@@ -45,25 +45,25 @@ flowchart TD
 flowchart TD
     Default[Default state]
     Action{User action}
-    RowClick[Navigate /captures/{id}]
-    OrphanClick[Navigate /captures?lc=orphan]
-    UnhandClick[Navigate /captures?lc=unhandled]
-    ViewAll[Navigate /captures]
-    SkillsLink[Navigate /skills]
-    IntegrLink[Navigate /integrations]
-    DrawerNav[Navigate other Page<br/>from drawer]
+    RowClick["Navigate /captures/{id}"]
+    OrphanClick["Navigate /captures?lc=orphan"]
+    UnhandClick["Navigate /captures?lc=unhandled"]
+    ViewAll["Navigate /captures"]
+    SkillsLink["Navigate /skills"]
+    IntegrLink["Navigate /integrations"]
+    DrawerNav["Navigate other Page<br/>from drawer"]
     UserMenu{User menu}
-    Theme[Toggle theme<br/>persisted in cookie]
-    Logout[OIDC sign-out<br/>→ Authentik logout endpoint]
-    Profile[Profile dialog<br/>placeholder Block 2]
+    Theme["Toggle theme<br/>persisted in cookie"]
+    Logout["OIDC sign-out<br/>to Authentik logout endpoint"]
+    Profile["Profile dialog<br/>placeholder Block 2"]
 
     Default --> Action
     Action -- click capture row --> RowClick
     Action -- click orphan count --> OrphanClick
     Action -- click unhandled count --> UnhandClick
-    Action -- click View all → --> ViewAll
-    Action -- click Manage skills → --> SkillsLink
-    Action -- click Manage integr → --> IntegrLink
+    Action -- click View all --> ViewAll
+    Action -- click Manage skills --> SkillsLink
+    Action -- click Manage integrations --> IntegrLink
     Action -- click drawer item --> DrawerNav
     Action -- click avatar --> UserMenu
     UserMenu --> Theme

@@ -15,7 +15,7 @@ flowchart TD
     Drawer[Drawer: click 'Captures']
     DashOrphan[Dashboard: click orphan count]
     DashUnhand[Dashboard: click unhandled count]
-    DashViewAll[Dashboard: click 'View all →']
+    DashViewAll["Dashboard: click View all"]
     DirectURL[Direct URL /captures or /captures?lc=orphan]
     Render[Captures.razor renders]
     ReadQP[Read ?lc= query param<br/>SupplyParameterFromQuery]
@@ -60,7 +60,7 @@ flowchart TD
     ShowFiltered[Grid shows filtered rows<br/>Results counter updates]
     NoMatch[No-match empty state:<br/>'No captures match' + Clear filters]
     RowClick[Click a row]
-    NavDetail[NavigateTo /captures/{id}]
+    NavDetail["NavigateTo /captures/{id}"]
 
     Ready --> Action
     Action --> ClickLC & ClickCH & TypeSearch & ClearSearch & ClearAll & RowClick

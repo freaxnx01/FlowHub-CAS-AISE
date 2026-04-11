@@ -15,7 +15,7 @@ flowchart TD
     DashRow[Dashboard: click capture row]
     ListRow[Captures list: click row]
     Snackbar[Snackbar 'Open' link after quick-capture]
-    DirectURL[Direct URL /captures/{id}]
+    DirectURL["Direct URL /captures/{id}"]
     Render[CaptureDetail.razor renders]
     Load[OnInitializedAsync:<br/>ICaptureService.GetByIdAsync]
     Result{Load OK?}
