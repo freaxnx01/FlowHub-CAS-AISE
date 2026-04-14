@@ -19,6 +19,7 @@ Follow the canonical skill body in `.ai/skills/flowhub-triage.md` exactly. It co
 
 ## Hard rules
 
+- **Tracking label.** After each successful move, apply `flowhub-triaged` label (id 17) via `PUT /api/v1/tasks/{id}/labels` with `{"label_id":17}`. Non-critical — warn on failure but don't stop.
 - **Move-only.** Never `DELETE` a task or a project from this skill. The Vikunja memory file warns that project deletes cascade to all child tasks.
 - **No invented project ids.** Only ids returned from the live project list are legal targets.
 - **No state changes without `y`.** Plan-then-apply: print the proposal table once, ask `[y / N / edit]`, only then apply.

@@ -155,6 +155,18 @@ NEW_ID=$(curl -s -X PUT \
 
 For **`skip`**: do nothing.
 
+After each successful **`move`** or **`create+move`**, apply the `flowhub-triaged` label to the task:
+
+```bash
+curl -s -w "\n__HTTP_%{http_code}__" -X PUT \
+  -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"label_id":17}' \
+  "https://todo.home.freaxnx01.ch/api/v1/tasks/$TASK_ID/labels"
+```
+
+The label `flowhub-triaged` (id 17, color `#7b68ee`) already exists in Vikunja. If the label assignment fails, log a warning but do **not** stop the apply loop — the move already succeeded and the label is non-critical tracking metadata.
+
 After each row, print one line:
 
 ```
