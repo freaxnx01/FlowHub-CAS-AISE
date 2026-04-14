@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-04-11
+updated: 2026-04-14
 ---
 
 # Block 3 — Services · Vorbereitung
@@ -55,18 +55,41 @@ Zwei offizielle Vorbereitungs-Aufträge aus Moodle:
 >
 > **Ausserhalb des FlowHub-Repos** (Moodle-Auftrag empfiehlt explizit "dies ausserhalb Ihrer Projektarbeit zu tun"). Zielort: separates Sandbox-Repo oder `poc/` Unterordner.
 
-- [ ] Sandbox-Projekt anlegen (z.B. `poc/FlowHub.Services.Playground/` oder separates Repo)
-- [ ] **Synchroner REST-Service** — ASP.NET Core Minimal API, liefert fiktive Daten, Scalar/Swagger UI
-- [ ] **REST-Client** — `HttpClient` + `IHttpClientFactory` oder Refit, typed client gegen obigen Service
-- [ ] **gRPC-Service + Client** — `Grpc.AspNetCore`, Proto-File definieren, generierte Stubs
-- [ ] **Async / Event-basiert** — mindestens eine dieser Varianten:
-  - [ ] In-Process Event Bus: `MediatR` Publish/Notify oder `System.Threading.Channels`
-  - [ ] Out-of-Process Messaging: MassTransit mit RabbitMQ (Docker Container lokal)
-- [ ] KI-Assistent (Claude Code) für Generierung einsetzen — Erfahrungen notieren für PVA-Reflexion
-- [ ] **Reflexion dokumentieren** (kurze Notiz in diesem File oder `notes.md` im Sandbox-Repo):
+**Scaffold-Status:** ✅ gebaut mit Claude am 2026-04-13/14, liegt in `poc/restful-api-playground/` im FlowHub-Repo.
+
+Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
+- OrderService: REST (`:5001`) + gRPC Server (`:5003`) + MassTransit Publisher
+- NotificationService: REST (`:5002`) + MassTransit Consumer + gRPC Client
+- RabbitMQ via Docker Compose (`:5672` + `:15672` Management UI)
+- 10 xUnit-Tests (OrderStore, OrderGrpcService, NotificationStore, OrderPlacedConsumer mit MassTransit Test Harness)
+
+### ✅ Done (Scaffold)
+
+- [x] Sandbox-Projekt unter `poc/restful-api-playground/` angelegt
+- [x] **Synchroner REST-Service** — OrderService ASP.NET Core Minimal API + Scalar UI
+- [x] **gRPC-Service + Client** — `Grpc.AspNetCore` (Server in OrderService, Client via `AddGrpcClient` in NotificationService)
+- [x] **Async / Event-basiert** — MassTransit + RabbitMQ (Docker)
+- [x] **Tests** — 10 Tests, alle grün (`make test` im Playground-Ordner)
+
+### 🔲 Offen — manueller End-to-End-Test
+
+- [ ] `docker --version` prüfen / Docker Desktop läuft
+- [ ] **Terminal 1:** `cd poc/restful-api-playground && make infra-up` (RabbitMQ starten)
+- [ ] **Terminal 2:** `make order-service` (auf :5001 REST + :5003 gRPC)
+- [ ] **Terminal 3:** `make notification-service` (auf :5002)
+- [ ] **Terminal 4:** `make demo` — POSTet Order, wartet 2s, GET Notifications
+- [ ] Erwartetes Ergebnis: Notification enthält `"3x Widget for Alice"`
+- [ ] Rabbit Management UI öffnen: http://localhost:15672 (guest/guest) — Queue `OrderPlacedConsumer` mit 1 verarbeiteter Message sehen
+- [ ] Scalar docs anschauen: http://localhost:5001/scalar und http://localhost:5002/scalar
+- [ ] `make infra-down` zum Aufräumen
+
+### 🔲 Offen — Reflexion / KI-Erfahrungen
+
+- [ ] KI-Assistent (Claude Code) Erfahrungen notieren für PVA-Reflexion
+- [ ] Kurze Notiz in `poc/restful-api-playground/REFLECTION.md` oder hier:
   - Wann detaillierte Arbeitsanweisung an KI, wann schrittweise Delegation?
-  - Welche Probleme bei generiertem Code beobachtet?
-  - Sync vs. async — wo welche Variante?
+  - Welche Probleme bei generiertem Code beobachtet? (z.B. CentralPackageManagement-Fehler, `AddOpenApi` fehlende Package, Grpc.Tools PrivateAssets)
+  - Sync vs. async — wo welche Variante? (REST für Client-Aufruf, gRPC für Service-zu-Service typed, RabbitMQ für entkoppelte Broadcasts)
 
 ### 📝 Projektarbeit-Vorbereitung (optional, für Block 3 Nachbearbeitung)
 
