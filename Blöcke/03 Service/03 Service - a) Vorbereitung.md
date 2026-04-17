@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-04-14
+updated: 2026-04-17
 ---
 
 # Block 3 — Services · Vorbereitung
@@ -28,12 +28,12 @@ Zwei offizielle Vorbereitungs-Aufträge aus Moodle:
 
 #### [1] Beyond Vibe Coding
 
-- [ ] Kapitel 5: Understand Generated Code — Review, Refine, Own
-- [ ] Kapitel 6: AI-Driven Prototyping — Tools and Technique
+- [x] Kapitel 5: Understand Generated Code — Review, Refine, Own
+- [x] Kapitel 6: AI-Driven Prototyping — Tools and Technique
 
 #### [2] Coding with AI
 
-- [ ] Kapitel 5: Using Blackbox AI to generate base code
+- [x] Kapitel 5: Using Blackbox AI to generate base code
 
 #### [3] Head First Software Architecture
 
