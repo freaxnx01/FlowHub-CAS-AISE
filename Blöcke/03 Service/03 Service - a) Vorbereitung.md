@@ -98,9 +98,9 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
 - [ ] FlowHub API-Surface skizzieren — welche Endpoints brauchen die bestehenden Blazor-Pages?
   - `GET /api/captures`, `POST /api/captures`, `GET /api/captures/{id}`, `POST /api/captures/{id}/retry`, …
   - `GET /api/skills`, `GET /api/integrations`
-- [ ] Entscheiden: Bleibt FlowHub ein Modular Monolith (ADR 0001), oder echte Microservice-Aufteilung für Block 3?
-  - Moodle-Auftrag fordert "Microservices", ADR 0001 sagt Modular Monolith. → Entscheid in ADR 0002 dokumentieren.
-  - **Entwurf vorhanden:** `docs/adr/0002-service-architecture-and-async-communication.md` (Status: Proposed, 2026-04-17). Schlägt Modular Monolith + MassTransit-Async-Pipeline + REST-API für Nicht-UI-Clients vor; gRPC und physischer Service-Split abgelehnt. Vor Block-3-Nachbereitung auf "Accepted" setzen.
+- [x] Entscheiden: Bleibt FlowHub ein Modular Monolith (ADR 0001), oder echte Microservice-Aufteilung für Block 3?
+  - Moodle-Auftrag fordert "Microservices", ADR 0001 sagt Modular Monolith. → Entscheid in ADR 0002 dokumentiert.
+  - **Entscheid:** `docs/adr/0002-service-architecture-and-async-communication.md` (Status: **Accepted**, 2026-04-17). Modular Monolith bleibt; MassTransit-Async-Pipeline für Capture-Enrichment / Skill-Routing; REST-API für Nicht-UI-Clients in `source/FlowHub.Api/`; gRPC und physischer Service-Split abgelehnt.
 - [ ] Kandidaten für asynchrone Kommunikation in FlowHub identifizieren (z.B. Capture-Enrichment, Skill-Routing als Event-Pipeline)
 
 ---
@@ -109,7 +109,7 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
 
 - Repo: [[Repository]] — `github.com/freaxnx01/FlowHub-CAS-AISE`
 - ADR 0001: `docs/adr/0001-frontend-render-mode-and-architecture.md`
-- ADR 0002 (Entwurf): `docs/adr/0002-service-architecture-and-async-communication.md`
+- ADR 0002: `docs/adr/0002-service-architecture-and-async-communication.md`
 - POC-Reflexion: `poc/restful-api-playground/REFLECTION.md`
 - Block 2 Nachbearbeitung: [[02 Frontend - c) Nachbearbeitung]]
 - Block 3 Nachbearbeitung: [[03 Service - c) Nachbearbeitung]]
