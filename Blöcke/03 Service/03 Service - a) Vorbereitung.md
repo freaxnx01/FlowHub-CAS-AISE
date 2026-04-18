@@ -91,9 +91,9 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
   - Welche Probleme bei generiertem Code beobachtet? (z.B. CentralPackageManagement-Fehler, `AddOpenApi` fehlende Package, Grpc.Tools PrivateAssets)
   - Sync vs. async — wo welche Variante? (REST für Client-Aufruf, gRPC für Service-zu-Service typed, RabbitMQ für entkoppelte Broadcasts)
 
-### 📝 Projektarbeit-Vorbereitung (optional, für Block 3 Nachbearbeitung)
+### 📝 Projektarbeit-Vorbereitung (optional, für Block 3 Nachbereitung)
 
-> Kein Moodle-Pflichtteil, aber sinnvoll um in die Nachbearbeitung mit klarem Plan zu starten.
+> Kein Moodle-Pflichtteil, aber sinnvoll um in die Nachbereitung mit klarem Plan zu starten.
 
 - [ ] FlowHub API-Surface skizzieren — welche Endpoints brauchen die bestehenden Blazor-Pages?
   - `GET /api/captures`, `POST /api/captures`, `GET /api/captures/{id}`, `POST /api/captures/{id}/retry`, …
@@ -111,5 +111,5 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
 - ADR 0001: `docs/adr/0001-frontend-render-mode-and-architecture.md`
 - ADR 0002: `docs/adr/0002-service-architecture-and-async-communication.md`
 - POC-Reflexion: `poc/restful-api-playground/REFLECTION.md`
-- Block 2 Nachbearbeitung: [[02 Frontend - c) Nachbearbeitung]]
-- Block 3 Nachbearbeitung: [[03 Service - c) Nachbearbeitung]]
+- Block 2 Nachbereitung: [[02 Frontend - c) Nachbereitung]]
+- Block 3 Nachbereitung: [[03 Service - c) Nachbereitung]]

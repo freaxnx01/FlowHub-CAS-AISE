@@ -4,7 +4,7 @@ tags:
 updated: 2026-04-10
 ---
 
-# Block 2 — Frontend · Nachbearbeitung
+# Block 2 — Frontend · Nachbereitung
 
 **Phase budget:** 26 h
 **PVA war:** 2026-03-21
