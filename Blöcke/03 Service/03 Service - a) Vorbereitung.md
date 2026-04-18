@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-04-17
+updated: 2026-04-18
 ---
 
 # Block 3 — Services · Vorbereitung
@@ -37,17 +37,17 @@ Zwei offizielle Vorbereitungs-Aufträge aus Moodle:
 
 #### [3] Head First Software Architecture
 
-- [ ] Kapitel 5: Architectural Styles — Categorization and Philosophies
-- [ ] Kapitel 10: Microservices Architecture — Bit by Bit
-- [ ] Kapitel 11: Event-Driven Architecture — Asynchronous Adventures
+- [x] Kapitel 5: Architectural Styles — Categorization and Philosophies
+- [x] Kapitel 10: Microservices Architecture — Bit by Bit
+- [x] Kapitel 11: Event-Driven Architecture — Asynchronous Adventures
 
 #### Leitfragen (aus Moodle) — beim Lesen im Kopf behalten
 
-- [ ] Nach welchen Kriterien lassen sich Architekturstile kategorisieren?
-- [ ] Was zeichnet eine Microservice-Architektur aus, und wann ist sie besonders geeignet?
-- [ ] Was sind Vor- und Nachteile asynchroner Kommunikation?
-- [ ] Welche Probleme können bei KI-generiertem Code entstehen, und wie vermeidet man sie?
-- [ ] Wie nutze ich AI-Prototyping, um schrittweise das gewünschte Resultat zu erhalten?
+- [x] Nach welchen Kriterien lassen sich Architekturstile kategorisieren?
+- [x] Was zeichnet eine Microservice-Architektur aus, und wann ist sie besonders geeignet?
+- [x] Was sind Vor- und Nachteile asynchroner Kommunikation?
+- [x] Welche Probleme können bei KI-generiertem Code entstehen, und wie vermeidet man sie?
+- [x] Wie nutze ich AI-Prototyping, um schrittweise das gewünschte Resultat zu erhalten?
 
 ### 🛠 Praktische Übung: RESTful API (sync + async)
 
@@ -71,17 +71,17 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
 - [x] **Async / Event-basiert** — MassTransit + RabbitMQ (Docker)
 - [x] **Tests** — 10 Tests, alle grün (`make test` im Playground-Ordner)
 
-### 🔲 Offen — manueller End-to-End-Test
+### ✅ Done — manueller End-to-End-Test
 
-- [ ] `docker --version` prüfen / Docker Desktop läuft
-- [ ] **Terminal 1:** `cd poc/restful-api-playground && make infra-up` (RabbitMQ starten)
-- [ ] **Terminal 2:** `make order-service` (auf :5001 REST + :5003 gRPC)
-- [ ] **Terminal 3:** `make notification-service` (auf :5002)
-- [ ] **Terminal 4:** `make demo` — POSTet Order, wartet 2s, GET Notifications
-- [ ] Erwartetes Ergebnis: Notification enthält `"3x Widget for Alice"`
-- [ ] Rabbit Management UI öffnen: http://localhost:15672 (guest/guest) — Queue `OrderPlacedConsumer` mit 1 verarbeiteter Message sehen
-- [ ] Scalar docs anschauen: http://localhost:5001/scalar und http://localhost:5002/scalar
-- [ ] `make infra-down` zum Aufräumen
+- [x] `docker --version` prüfen / Docker Desktop läuft
+- [x] **Terminal 1:** `cd poc/restful-api-playground && make infra-up` (RabbitMQ starten)
+- [x] **Terminal 2:** `make order-service` (auf :5001 REST + :5003 gRPC)
+- [x] **Terminal 3:** `make notification-service` (auf :5002)
+- [x] **Terminal 4:** `make demo` — POSTet Order, wartet 2s, GET Notifications
+- [x] Erwartetes Ergebnis: Notification enthält `"3x Widget for Alice"`
+- [x] Rabbit Management UI öffnen: http://localhost:15672 (guest/guest) — Queue `OrderPlacedConsumer` mit 1 verarbeiteter Message sehen
+- [x] Scalar docs anschauen: http://localhost:5001/scalar und http://localhost:5002/scalar
+- [x] `make infra-down` zum Aufräumen
 
 ### 🔲 Offen — Reflexion / KI-Erfahrungen
 
