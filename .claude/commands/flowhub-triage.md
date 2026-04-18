@@ -2,7 +2,9 @@ Read open tasks from the user's Vikunja Inbox, propose target projects from the 
 
 Args: $ARGUMENTS
 
-Optional `--limit N` (default 25) caps how many inbox tasks are processed in one run.
+**Flags:**
+- `--limit N` (default **10**) — caps how many inbox tasks are processed in one run.
+- `--simulate` — don't move tasks; attach `triage-target:<...>` + `triage-conf:<high|medium|low>` labels instead. Already-simulated tasks (those carrying any `triage-target:*` label) are skipped on subsequent runs.
 
 Follow the canonical skill body in `.ai/skills/flowhub-triage.md` exactly. It contains the credential lookup, project + task fetching, classification rules, proposal table format, edit walk, and apply loop.
 
@@ -14,6 +16,10 @@ Follow the canonical skill body in `.ai/skills/flowhub-triage.md` exactly. It co
 - Inbox tasks: `GET /api/v1/projects/{inbox_id}/tasks?per_page=100` (filter `done=false`)
 - Move task: `POST /api/v1/tasks/{id}` body `{"title":..., "project_id":N}` — **`title` is mandatory** (412 otherwise)
 - Create project: `PUT /api/v1/projects` body `{"title":...}`
+- Download attachment (for image enrichment): `GET /api/v1/tasks/{task_id}/attachments/{attachment_id}` → raw bytes
+- Label lookup: `GET /api/v1/labels?s=<title>` (substring match)
+- Create label: `PUT /api/v1/labels` body `{"title":..., "hex_color":"..."}`
+- Attach label to task: `PUT /api/v1/tasks/{id}/labels` body `{"label_id":N}`
 - Token source: Passbolt resource id `c9e732ce-7737-49a7-9879-dd81258083af`
 - Passbolt master password: read from your memory file `passbolt-password.md` at runtime; never write to disk
 

@@ -2,7 +2,11 @@
 
 Read open tasks from the user's Vikunja Inbox, propose target projects from the live project list, and (on the user's accept) move them.
 
-**Optional flag:** `$ARGUMENTS` may contain `--limit N` to cap how many inbox tasks are processed in one run (default 25).
+**Flags in `$ARGUMENTS`:**
+
+- `--limit N` — cap how many inbox tasks are processed in one run (**default 10**).
+- `--simulate` — do not move tasks. On accept, attach two labels per task instead: `triage-target:<project-or-action>` and `triage-conf:<high|medium|low>`. Inbox fetches in this mode automatically exclude any task that already carries a `triage-target:*` label (idempotent — safe to re-run).
+- `--only-issues` — after classification, hide any row whose action ≠ `issue`. Use this to focus the proposal table on issue candidates (typically QuickTask-origin dev todos) and avoid mixing move/create+move rows into the same batch.
 
 > **Sibling skill:** `/flowhub-capture` writes new captures into the Inbox. This skill only reads + reorganises; it never creates new tasks (only new projects, on explicit accept).
 
@@ -46,34 +50,96 @@ Read it and remember every `(id, title)` pair *except* the inbox itself. This is
 
 ### Step 4 — Load open inbox tasks
 
+The Vikunja inbox can easily exceed one page. **Always paginate** — `per_page` is capped server-side and a single request will silently drop later tasks.
+
 ```bash
-curl -s -H "Authorization: Bearer $VIKUNJA_TOKEN" \
-  "https://todo.home.freaxnx01.ch/api/v1/projects/$INBOX_ID/tasks?per_page=100" \
-  > /tmp/flowhub-inbox.json
+page=1
+> /tmp/flowhub-inbox.jsonl
+while :; do
+  resp=$(curl -s -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+    "https://todo.home.freaxnx01.ch/api/v1/projects/$INBOX_ID/tasks?per_page=200&page=$page")
+  n=$(echo "$resp" | python3 -c 'import json,sys; print(len(json.load(sys.stdin)))')
+  [ "$n" = "0" ] && break
+  echo "$resp" | python3 -c 'import json,sys
+for t in json.load(sys.stdin): print(json.dumps(t))' >> /tmp/flowhub-inbox.jsonl
+  page=$((page+1))
+  [ "$page" -gt 20 ] && break   # safety cap: 4000 tasks
+done
 ```
 
-Filter to entries where `done == false`. Cap at the user-supplied `--limit` (default 25). If the filtered list is empty, print `Inbox is empty — nothing to triage.` and stop.
+Then filter to entries where `done == false`. Cap at the user-supplied `--limit` (default 10).
+
+When `--simulate` is active, also drop any task that already carries a label whose title starts with `triage-target:`. This keeps the simulation loop idempotent — once you've labeled a task, subsequent runs ignore it until you either remove the labels or perform a real move.
+
+If the filtered list is empty, print `Inbox is empty — nothing to triage.` and stop.
+
+**Issue-candidate bias from origin:** the user's `quicktask-vikunja` Android app captures dev-oriented todos — tasks from that app are strong candidates for `issue` rather than `move`. Detect the origin by any of these signals:
+
+- title matches `^Screenshot_.*_ch\.freaxnx01\.quicktask_vikunja\.(jpg|png)$`
+- any attachment filename contains `ch.freaxnx01.quicktask_vikunja`
+- description is empty **and** title is a bare URL or ends with a bare URL (Android share-sheet capture)
+
+When an origin signal fires, bump the classifier's preference toward `issue <rel>/<repo>` for that row (see Step 6). Never silently drop these — they are real todos.
 
 ### Step 5 — Enrich each task (only when needed)
 
-For each task, decide whether to enrich:
+Enrichment feeds the classifier. Run whichever of the two branches below fits; skip both when the task's own text is already descriptive.
 
-- **Enrich** (use the WebFetch tool on the URL inside the title or description) if **either**:
-  - the title length is < 30 characters, **or**
-  - the title matches `^https?://` (a bare URL).
-- **Otherwise** skip enrichment.
+#### 5a — URL enrichment (WebFetch)
 
-Enrichment prompt for WebFetch: *"Return only: page title, plus a one-sentence summary of what this page is about. No commentary."*
+Use WebFetch on a URL from the title or description when **either**:
+- the title length is < 30 characters, **or**
+- the title matches `^https?://` (a bare URL).
 
-Cache the enrichment result in memory for use during classification — do not refetch.
+Enrichment prompt: *"Return only: page title, plus a one-sentence summary of what this page is about. No commentary."*
+
+#### 5b — Image enrichment (Read tool)
+
+Trigger when the task has at least one attachment with a `file.mime` starting `image/`, **and** the title gives little signal (e.g. `Image`, empty, or < 30 chars). This catches Signal-captured screenshots and photos.
+
+Download each such attachment and Read it (the Read tool accepts JPEG/PNG and returns the visual content to the model):
+
+```bash
+# For each (task_id, attachment_id) pair:
+curl -s -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+  "https://todo.home.freaxnx01.ch/api/v1/tasks/$TASK_ID/attachments/$ATTACHMENT_ID" \
+  -o "/tmp/flowhub-images/task${TASK_ID}_file${ATTACHMENT_ID}.${EXT}"
+```
+
+Then call the **Read** tool on the downloaded path. Use what you see to extract: a short one-line description of the image's subject, any visible text/URLs, and whether it's a screenshot, a photo, or a scanned document. That becomes the synthetic "enriched title" for classification.
+
+Hard limits — skip image enrichment when any of these hold:
+- the file is > 10 MB (skip with reason `image too large`);
+- the mime isn't `image/jpeg`, `image/png`, `image/webp`, or `image/gif`;
+- the task already has a descriptive title (≥ 30 chars and not literally `Image`).
+
+Cache all enrichment results in memory for use during classification — never refetch, never re-download.
 
 ### Step 6 — Classify each task
 
+Load the repo catalogue (local + remote, all forges) for issue candidates — this is the only universe of legal issue targets:
+
+```bash
+source /home/freax/projects/repos/github/freaxnx01/public/config/shell/clrepo.sh
+_clrepo_remote_list 0 > /tmp/flowhub-repos.list
+```
+
+Each line is `<rel>/<repo>` where `<rel>` is `github/<owner>/{public,private}` | `gitlab/<owner>` | `git-forgejo`.
+
 For each task, propose **one** of:
+
+- **`issue <rel>/<repo>`** — the task reads like a bug report, feature request, or dev TODO for a specific repo. Prefer this action when **either** of these holds:
+  - the origin signal fires (see Step 4 — QuickTask-origin bias), **or**
+  - the enriched content mentions a repo name from the catalogue as a substring, **or**
+  - the content has clear dev signals (error messages, stack traces, "fix", "bug", "TODO", "implement", a github.com/gitlab.com URL pointing at one of the user's repos).
+
+  On apply, this dispatches to `/flowhub-issue <task-id>` which reuses the forge-specific issue-creation logic.
 
 - **`move <project_id>`** — an existing project from the catalogue (Step 3) that fits the task. The proposal text should show the project's `title` for human readability.
 - **`create+move <new-project-name>`** — only if no existing project fits. Choose a clean, short German title that matches the user's existing naming style (look at the catalogue for cues — the user mixes German and English). Examples of names already present: `Bücher`, `Movies`, `Zitate/Quotes`, `IT Homelab`, `Reiseliste`.
 - **`skip`** — if the task is genuinely uncategorisable, ambiguous, or appears to be transient noise.
+
+Prefer `issue` only when confidence is medium or higher; on low confidence, fall back to `move` / `skip` and let the edit walk escalate if the user insists.
 
 Self-rate confidence as `high` / `medium` / `low`:
 
@@ -129,6 +195,77 @@ After the walk, re-print the updated proposal table and ask `Apply all? [y / N]`
 
 Process rows sequentially. **For every action, always send `title` in the payload** (Vikunja returns HTTP 412 otherwise — confirmed via the Vikunja memory file).
 
+#### 9-sim — `--simulate` branch (label-only)
+
+When `--simulate` is active, **do not touch `project_id`** for any row. Instead, for each row (including `skip`), attach two labels to the task:
+
+- `triage-target:<project-or-action>` — project title for `move`, `"create:<new-project-name>"` for `create+move`, `"(skip)"` for `skip`. (No `flowhub-issue` case here — issue detection is handled elsewhere in the skill and treated as `move` from the label's perspective.)
+- `triage-conf:<high|medium|low>`
+
+Label resolution is get-or-create — Vikunja rejects attaching a label id that doesn't exist yet:
+
+```bash
+# Try to find existing label by title; create if absent. Returns the id on stdout.
+get_or_create_label() {
+  local title="$1"
+  local id
+  id=$(curl -s -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+         "https://todo.home.freaxnx01.ch/api/v1/labels?s=$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))' "$title")" \
+       | python3 -c 'import json,sys; ls=json.load(sys.stdin); print(next((l["id"] for l in ls if l["title"]==sys.argv[1]), ""))' "$title")
+  if [ -z "$id" ]; then
+    local body
+    body=$(python3 -c 'import json,sys; print(json.dumps({"title": sys.argv[1], "hex_color": sys.argv[2]}))' "$title" "$2")
+    id=$(curl -s -X PUT \
+           -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+           -H "Content-Type: application/json" \
+           -d "$body" \
+           "https://todo.home.freaxnx01.ch/api/v1/labels" \
+         | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+  fi
+  echo "$id"
+}
+```
+
+Suggested palette (second arg to `get_or_create_label`):
+
+| Label prefix | Color |
+|---|---|
+| `triage-target:` | `a0a0ff` (soft blue) |
+| `triage-target:(skip)` | `808080` (grey) |
+| `triage-conf:high` | `22c55e` (green) |
+| `triage-conf:medium` | `eab308` (amber) |
+| `triage-conf:low` | `ef4444` (red) |
+
+Attach both labels to the task:
+
+```bash
+for lid in "$TARGET_LABEL_ID" "$CONF_LABEL_ID"; do
+  curl -s -w "\n__HTTP_%{http_code}__" -X PUT \
+    -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"label_id\":$lid}" \
+    "https://todo.home.freaxnx01.ch/api/v1/tasks/$TASK_ID/labels"
+done
+```
+
+In simulate mode **do not** attach the `flowhub-triaged` label — that label signals a real move has happened, and tasks carrying it would be hidden from a later non-simulate run.
+
+Per-row output line:
+
+```
+~ #3 Sisu: Road to Revenge ↪ label triage-target:Movies + triage-conf:high
+```
+
+Final summary line uses `labeled` and `skipped` instead of `moved`:
+
+```
+Simulated N tasks: M labeled, S skipped, F failed
+```
+
+#### 9-real — normal branch (the rest of this step)
+
+If `--simulate` is **not** active, continue with the move/create+move/skip logic below.
+
 For **`move`**:
 ```bash
 BODY=$(python3 -c 'import json,sys; print(json.dumps({"title": sys.argv[1], "project_id": int(sys.argv[2])}))' "$TASK_TITLE" "$TARGET_ID")
@@ -152,6 +289,14 @@ NEW_ID=$(curl -s -X PUT \
 
 # 2. Move the task into the new project (same as the move case above, with $NEW_ID as target)
 ```
+
+For **`issue`**: dispatch to the `/flowhub-issue` skill with the task id:
+
+```
+/flowhub-issue <task-id>
+```
+
+That skill (see `.ai/skills/flowhub-issue.md`) pulls the task's title/description/attachments from Vikunja, extracts issue title + body, creates the issue on the matched forge, and (on success) marks the Vikunja task done with the issue URL appended to its description. Do not duplicate that logic here; this skill only chooses the repo and hands off the id.
 
 For **`skip`**: do nothing.
 
