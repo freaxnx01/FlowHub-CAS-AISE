@@ -83,10 +83,10 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
 - [x] Scalar docs anschauen: http://localhost:5001/scalar und http://localhost:5002/scalar
 - [x] `make infra-down` zum Aufräumen
 
-### 🔲 Offen — Reflexion / KI-Erfahrungen
+### ✅ Done — Reflexion / KI-Erfahrungen
 
-- [ ] KI-Assistent (Claude Code) Erfahrungen notieren für PVA-Reflexion
-- [ ] Kurze Notiz in `poc/restful-api-playground/REFLECTION.md` oder hier:
+- [x] KI-Assistent (Claude Code) Erfahrungen notieren für PVA-Reflexion
+- [x] Kurze Notiz in `poc/restful-api-playground/REFLECTION.md` oder hier:
   - Wann detaillierte Arbeitsanweisung an KI, wann schrittweise Delegation?
   - Welche Probleme bei generiertem Code beobachtet? (z.B. CentralPackageManagement-Fehler, `AddOpenApi` fehlende Package, Grpc.Tools PrivateAssets)
   - Sync vs. async — wo welche Variante? (REST für Client-Aufruf, gRPC für Service-zu-Service typed, RabbitMQ für entkoppelte Broadcasts)
