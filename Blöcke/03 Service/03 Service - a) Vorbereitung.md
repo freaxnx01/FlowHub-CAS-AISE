@@ -101,7 +101,8 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
 - [x] Entscheiden: Bleibt FlowHub ein Modular Monolith (ADR 0001), oder echte Microservice-Aufteilung für Block 3?
   - Moodle-Auftrag fordert "Microservices", ADR 0001 sagt Modular Monolith. → Entscheid in ADR 0002 dokumentiert.
   - **Entscheid:** `docs/adr/0002-service-architecture-and-async-communication.md` (Status: **Accepted**, 2026-04-17). Modular Monolith bleibt; MassTransit-Async-Pipeline für Capture-Enrichment / Skill-Routing; REST-API für Nicht-UI-Clients in `source/FlowHub.Api/`; gRPC und physischer Service-Split abgelehnt.
-- [ ] Kandidaten für asynchrone Kommunikation in FlowHub identifizieren (z.B. Capture-Enrichment, Skill-Routing als Event-Pipeline)
+- [x] Kandidaten für asynchrone Kommunikation in FlowHub identifizieren (z.B. Capture-Enrichment, Skill-Routing als Event-Pipeline)
+  - **Abgedeckt in:** ADR 0002 (Decision 2, Decision 3) und `poc/restful-api-playground/REFLECTION.md` (Abschnitt "Sync vs async — decision logic"). Kandidaten: `CaptureCreated` → Enrichment-Fan-out (Klassifikation, Link-Preview, Tag-Suggestion), `CaptureClassified` → `Skills.RoutingHandler` → externe Integration-Calls mit MQ-basiertem Retry/DLQ.
 
 ---
 
