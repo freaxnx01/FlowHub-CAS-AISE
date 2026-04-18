@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  },
+  "kestrelEndpoints": {
+    "Grpc": {
+      "url": "http://localhost:5003",
+      "protocols": "Http2"
+    }
+  }
+}
