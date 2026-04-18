@@ -69,6 +69,49 @@ Keep the monolith. Introduce **MQ** for the Capture-enrichment / Skill-routing p
 
 MQ adds an operational dependency (RabbitMQ) and eventual consistency on the enrichment side. Worth it for the decoupling; not worth it if everything in scope is a single synchronous request/response.
 
+## Detaillierte Arbeitsanweisung vs schrittweise Delegation
+
+Two ways to interact with the AI, distinguished by **who decomposes the problem**:
+
+- **Detaillierte Arbeitsanweisung** — *I* decompose. The prompt names file paths, method signatures, exact behaviour, tests. The AI executes my design fast. Fits: small well-defined fix, strong opinion on the design, security- or correctness-sensitive change, unusual constraint the AI would not infer.
+- **Schrittweise Delegation** — *the AI* decomposes. I give the goal; it explores, proposes, asks, implements; I approve each step before the next. Fits: exploring a design space, multi-file feature where decomposition *is* the work, greenfield area without fixed conventions, learning unfamiliar territory.
+
+**Rule of thumb.** If I can write the method's docstring myself, write the instruction myself. If I cannot yet articulate the design, do not pretend to — delegate, and use the AI's first proposal to discover what I actually want. The worst mode is the middle: vague instruction + no checkpoints → the AI invents a direction I did not want, context is burned before I notice.
+
+**Concrete in this POC.**
+
+- Detailed instruction worked well for: adding the `OrderGrpcService` method signatures once the `.proto` was fixed; writing the `OrderPlacedConsumerTests` with an explicit "use MassTransit Test Harness + NSubstitute for the gRPC client" directive.
+- Step-by-step delegation worked well for: the original Option A vs Option B architectural split decision (I described the goal, the AI proposed two layouts, I picked one); the initial scaffolding where I did not yet know the MassTransit registration shape.
+- The 70% Problem (Beyond Vibe Coding Kap. 3+4) showed up concretely: delegation got the scaffold working quickly, but the last 30% — CentralPackageManagement tuning, `Grpc.Tools` `PrivateAssets`, `AddOpenApi` package resolution — needed either me reading the errors carefully or switching to detailed instruction ("add package X at version Y to `Directory.Packages.props` and set `PrivateAssets=all` on the Grpc.Tools reference in `Contracts.csproj`").
+
+## Observed problems with AI-generated code
+
+Concrete issues while scaffolding this POC — useful data points for the Moodle Leitfrage *"Welche Probleme können bei KI-generiertem Code entstehen, und wie vermeidet man sie?"*.
+
+- **CentralPackageManagement collision.** The root repo pins package versions in `Directory.Packages.props`. The AI's initial `dotnet new` scaffold added `<PackageReference Version="…" />` attributes in the playground's `.csproj` files, which triggers `NU1008` under Central Package Management. Fix: the playground got its own `Directory.Packages.props` so it can diverge from the root pinning, and `<PackageVersion>` entries were moved there. Root cause: the AI did not read the surrounding `Directory.Build.props` / `Directory.Packages.props` before generating the new project. Prevention: either share the repo conventions explicitly in the prompt, or review the generated `.csproj` diff before `dotnet build`.
+
+- **Strict analyzer defaults broke the build.** The root `Directory.Build.props` sets `TreatWarningsAsErrors=true` plus the full .NET analyzer ruleset. Generated code tripped on CA1848 (LoggerMessage source-gen), CA1873 (cache culture on date formatting), and CA1050 (missing namespaces in auto-generated Protobuf stubs). Fix: the playground's local `Directory.Build.props` sets `NoWarn` for those specific rules and disables `TreatWarningsAsErrors` for generated `.g.cs` files. Root cause: the AI optimises for "code that compiles on default settings", not "code that compiles under strict project policy". Prevention: include the analyzer policy in the brief, or accept a first failed build and iterate.
+
+- **`AddOpenApi` / `MapOpenApi` without the package.** In .NET 10 the built-in OpenAPI support lives in `Microsoft.AspNetCore.OpenApi` — it is **not** part of the `Microsoft.AspNetCore.App` shared framework. The AI wrote the two calls assuming they would resolve; build failed at `AddOpenApi` cannot be found. Fix: add the package explicitly. Root cause: API surface drift between .NET versions that the AI's training data straddles. Prevention: for any API call on a fresh template, check the NuGet reference before assuming.
+
+- **`Grpc.Tools` leaked into downstream projects.** The AI added `Grpc.Tools` to `Contracts.csproj` without `<PrivateAssets>all</PrivateAssets>`. That propagates the build-time `protoc` tooling into every project that references `Contracts`, bloating them and occasionally causing duplicate `.g.cs` generation. Fix: `PrivateAssets=all` on all `Grpc.Tools` references. Root cause: subtle NuGet metadata the AI skipped over. Prevention: any tooling-only package reference needs a `PrivateAssets` audit.
+
+- **Consumer-owned gRPC channel.** The original consumer created `GrpcChannel.ForAddress(...)` itself. That works at runtime but is untestable — the consumer cannot be unit-tested against a faked client. Refactored to `AddGrpcClient<T>()` + constructor injection, then the test harness uses `NSubstitute` for the gRPC client. Root cause: the AI took the obvious happy-path wiring without thinking about testability. Prevention: testability is a project-level constraint that needs to be stated, not assumed.
+
+**Pattern across these.** The AI is strong at *local* correctness (this file compiles, this test passes) and weak at *contextual* correctness (this file fits the repo's conventions, this wiring survives unit testing). The countermeasure is to surface repo-wide constraints up front (CLAUDE.md, explicit prompt) and to review the diff, not the output, after generation.
+
+## Sync vs async — decision logic
+
+A short decision tree for which transport fits which call.
+
+- **HTTP/REST (synchronous request-response)** — caller needs an answer *now*, response shape is loosely typed, audience includes non-.NET clients or humans with curl. Use when: Web UI → backend read, browser or external automation calls the API, single-shot CRUD against a resource. Example in the POC: `POST /orders` accepts the order request; `GET /notifications` lets the test script verify the flow. In FlowHub: the `/api/captures` surface for Telegram / integrations / CLI.
+- **gRPC (synchronous, typed, binary RPC)** — caller and callee are both services we own, we want a typed contract and low-latency request-response, streaming may be useful later. Use when: one internal service asks another for specific data. Example in the POC: `NotificationService` asks `OrderService` for order details via `OrderGrpc.GetOrder(orderId)`. In FlowHub: **none today** — the monolith has no cross-process RPC calls. gRPC becomes relevant only if a capability is lifted into its own process.
+- **Message broker / events (asynchronous pub-sub)** — producer and consumer must be decoupled in time, one publish should fan out to many consumers, the producer's latency must not depend on the consumer, retry / DLQ behaviour is wanted. Use when: "something happened" events, background enrichment, flaky external integrations. Example in the POC: `OrderPlaced` event on RabbitMQ, with `OrderPlacedConsumer` running independently. In FlowHub: `CaptureCreated` → enrichment fan-out (classification, link preview, tag suggestion), `CaptureClassified` → `Skills.RoutingHandler` → external integration call.
+
+**Heuristic.** If the caller would block waiting for the answer anyway, use sync (REST to the outside, gRPC internally). If the caller only needs to say *"this happened, someone please deal with it"*, use a broker — and accept eventual consistency in exchange for decoupling and resilience.
+
+This answers the Moodle Leitfrage *"Was sind Vor- und Nachteile asynchroner Kommunikation?"* from the concrete perspective of the POC and of FlowHub's planned event pipeline (see ADR 0002).
+
 ## AI-Assistant Notes (Claude Code)
 
 - Used for wire-up of MassTransit + RabbitMQ configuration and gRPC client setup; useful for boilerplate, less useful for choosing the architectural split.
