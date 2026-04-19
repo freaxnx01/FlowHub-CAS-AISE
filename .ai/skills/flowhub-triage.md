@@ -262,6 +262,35 @@ Final summary line uses `labeled` and `skipped` instead of `moved`:
 Simulated N tasks: M labeled, S skipped, F failed
 ```
 
+**Simulate + issue — run the interview, skip the forge call.** The enrichment interview (`/flowhub-issue` Step 5.5) is content-gathering, not a forge side effect, so it **must** run in simulate mode too — otherwise the label captures intent the user never validated, and the next real run re-asks everything from scratch.
+
+Flow for an `issue` row under `--simulate`:
+
+1. Trigger `/flowhub-issue` Step 5.5 interview against the task. Ask the same questions (problem, reproduction, repo, severity) when the content is thin.
+2. **Persist the answers into the Vikunja task's description** under a clearly fenced block so the next real apply can re-use them without re-interviewing:
+   ```
+   <!-- flowhub-triage:enrichment v1 -->
+   ## Pre-filled for issue creation
+   - repo: <rel>/<repo>
+   - severity: <bug|feature|chore|question>
+   - title: <refined title>
+
+   ### Body
+   <refined body>
+   <!-- /flowhub-triage:enrichment -->
+   ```
+   The next `/flowhub-issue <task-id>` run detects this block and skips the interview, going straight to Step 6 (create).
+3. Label the task based on the interview **outcome**, not the initial proposal:
+   | Outcome | `triage-target:` label suffix | Notes |
+   |---|---|---|
+   | accept | `issue:<rel>/<repo>` | fully enriched, ready for real apply |
+   | accept with `skip-image` | `issue:<rel>/<repo>:no-image` | image(s) dropped from the plan |
+   | defer | `(defer)` | context block still written to description; task stays in inbox |
+   | cancel | (no label, row counted as `cancelled`) | nothing written |
+4. `triage-conf` reflects the *post-interview* confidence, which is usually higher than the pre-interview estimate (the user just clarified the content). Bump the conf label accordingly.
+
+Still no forge calls and no `flowhub-triaged` label in simulate mode — the forge activity waits for the real apply run.
+
 #### 9-real — normal branch (the rest of this step)
 
 If `--simulate` is **not** active, continue with the move/create+move/skip logic below.
@@ -297,6 +326,8 @@ For **`issue`**: dispatch to the `/flowhub-issue` skill with the task id:
 ```
 
 That skill (see `.ai/skills/flowhub-issue.md`) pulls the task's title/description/attachments from Vikunja, extracts issue title + body, creates the issue on the matched forge, and (on success) marks the Vikunja task done with the issue URL appended to its description. Do not duplicate that logic here; this skill only chooses the repo and hands off the id.
+
+**Interview gate:** `/flowhub-issue` runs an inline enrichment interview (its Step 5.5) whenever the task content is too thin to make a sensible issue — filename-only titles, QuickTask UI screenshots, notes like "openclaw reduce Token usage to zero", and so on. If the user types `defer` during that interview, `/flowhub-issue` writes the collected context back to the Vikunja task description and leaves the task in the inbox for a future pass. Factor this into the triage apply summary: a deferred row counts as `deferred`, not `failed` (it is intentional).
 
 For **`skip`**: do nothing.
 
