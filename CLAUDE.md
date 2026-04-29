@@ -35,6 +35,20 @@ The CAS coursework, FlowHub concept, and project decisions live in an Obsidian v
 
 ---
 
+## Grading — Bewertungskriterien Are Always In Scope
+
+The CAS project is graded against a fixed Moodle rubric (18 scored items, max 100 pts). The canonical source is **`vault/Organisation/Bewertungskriterien.md`** — every Block-Nachbereitung file mirrors the relevant subset as a checklist with point weights.
+
+**Rule:** When the current date falls in any Block-Nachbereitung phase (see `.ai/cas-instructions.md` → Block Schedule), the rubric is **active context**, not background. Specifically:
+
+- Before claiming a Block-Nachbereitung is "done", run `/grade-self-check` (or manually walk every item in `vault/Organisation/Bewertungskriterien.md`) and verify each one has a deliverable.
+- The KI / Sub-Systeme / Reflexion bucket carries 30 of 100 points — the highest-weighted single item is "Wurden KI-unterstützende Werkzeuge verwendet und deren Nutzung beschrieben" (max 12 pts). Keep `docs/ai-usage.md` (or `docs/insights/block-N.md`) current as work happens — not as a one-shot at submission.
+- The Quarkus / Jakarta-EE programming criterion (max 10 pts) is **N/A for FlowHub's .NET stack** and is consciously skipped — note this in the submission PDF rather than stretching coverage.
+
+This applies to *every* Block, not only the final one — each block's work contributes to the final grade.
+
+---
+
 ## Essential Commands
 
 ### Make targets (preferred)
