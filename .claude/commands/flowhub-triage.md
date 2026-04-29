@@ -1,20 +1,37 @@
-Read open tasks from the user's Vikunja Inbox, propose target projects from the live project list, and (on accept) move them.
+Read open **Captures** (glossary: *Infoschnipsel*) from all wired Channels — Vikunja Inbox plus Telegram `@flowhub_intelliflow_bot` — propose target projects from the live project list, and (on accept) move them.
 
 Args: $ARGUMENTS
 
 **Flags:**
-- `--limit N` (default **10**) — caps how many inbox tasks are processed in one run.
-- `--simulate` — don't move tasks; attach `triage-target:<...>` + `triage-conf:<high|medium|low>` labels instead. Already-simulated tasks (those carrying any `triage-target:*` label) are skipped on subsequent runs.
+- `--limit N` (default **10**) — caps how many Captures are processed in one run.
+- `--simulate` — don't move Captures; attach `triage-target:<...>` + `triage-conf:<high|medium|low>` labels instead. Already-simulated Captures (those carrying any `triage-target:*` label) are skipped on subsequent runs.
+- `--only-issues` — after classification, hide rows whose action ≠ `issue`.
+- `--no-telegram` — skip the Telegram drain (4a); read Vikunja only.
 
 Follow the canonical skill body in `.ai/skills/flowhub-triage.md` exactly. It contains the credential lookup, project + task fetching, classification rules, proposal table format, edit walk, and apply loop.
 
 ## Quick reference
 
+### Channels (inbound Capture sources)
+
+- **Vikunja Inbox** (Integration used as Capture staging for QuickTask / Signal-bridge / manual entries / the Telegram drain).
+- **Telegram** `@flowhub_intelliflow_bot` — drained via Bot API `getUpdates` every triage run.
+  - Token: Passbolt resource `fd9897e7-544c-4109-8ee9-cc8eb1838ee5` ("Telegram flowhub_bot HTTP API Token").
+  - Offset state file: `~/.cache/flowhub/telegram-offset` (plain integer, not secret — cursor only).
+  - `getUpdates`: `https://api.telegram.org/bot<TOKEN>/getUpdates?offset=<N+1>&timeout=0`
+  - `getFile` → file path → download from `https://api.telegram.org/file/bot<TOKEN>/<file_path>`
+  - Source label on each Telegram-drained Capture: `channel:telegram` (`#0088cc`)
+  - Reserved `channel:*` family: `channel:telegram`, `channel:quicktask`, `channel:signal`, `channel:manual` — see skill Step 4a for the taxonomy and who sets each.
+
+### Vikunja API
+
 - Vikunja: `https://todo.home.freaxnx01.ch`
 - Inbox detection: `GET /api/v1/user.settings.default_project_id`
 - Project list: `GET /api/v1/projects?per_page=200`
-- Inbox tasks: `GET /api/v1/projects/{inbox_id}/tasks?per_page=100` (filter `done=false`)
-- Move task: `POST /api/v1/tasks/{id}` body `{"title":..., "project_id":N}` — **`title` is mandatory** (412 otherwise)
+- Paginated Inbox fetch: `GET /api/v1/projects/{inbox_id}/tasks?per_page=200&page=N`
+- Create Capture in inbox: `PUT /api/v1/projects/{inbox_id}/tasks` body `{"title":..., "description":..., "project_id":N}`
+- Attach file: `PUT /api/v1/tasks/{id}/attachments` (multipart `files=@...`)
+- Move Capture: `POST /api/v1/tasks/{id}` body `{"title":..., "project_id":N}` — **`title` is mandatory** (412 otherwise)
 - Create project: `PUT /api/v1/projects` body `{"title":...}`
 - Download attachment (for image enrichment): `GET /api/v1/tasks/{task_id}/attachments/{attachment_id}` → raw bytes
 - Label lookup: `GET /api/v1/labels?s=<title>` (substring match)

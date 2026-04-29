@@ -48,9 +48,101 @@ curl -s -H "Authorization: Bearer $VIKUNJA_TOKEN" \
 
 Read it and remember every `(id, title)` pair *except* the inbox itself. This is the **only** universe of projects the classifier may propose. Never invent project ids or titles outside this list.
 
-### Step 4 — Load open inbox tasks
+### Step 4 — Ingest Captures
 
-The Vikunja inbox can easily exceed one page. **Always paginate** — `per_page` is capped server-side and a single request will silently drop later tasks.
+Captures arrive through multiple **Channels** (glossary: an inbound source). The triage skill unifies them into a single list before classification. Two Channels are wired:
+
+- **4a** — Telegram bot `@flowhub_intelliflow_bot` (drain each run, push to Vikunja Inbox).
+- **4b** — Vikunja Inbox (what QuickTask, Signal-bridge, and the Telegram drain all write to).
+
+Downstream steps (5+) don't distinguish origins — every Capture ends up as a Vikunja Inbox task by the end of Step 4.
+
+Flags:
+- `--no-telegram` — skip 4a (use when Telegram is down or you're triaging offline).
+
+#### 4a — Drain the Telegram bot
+
+Fetch the bot token from Passbolt (resource id `fd9897e7-544c-4109-8ee9-cc8eb1838ee5`, "Telegram flowhub_bot HTTP API Token"). Reuse the same Passbolt pattern as the Vikunja token in Step 1; never write the token to disk.
+
+```bash
+TG_TOKEN=$(passbolt get resource \
+  --id fd9897e7-544c-4109-8ee9-cc8eb1838ee5 \
+  --serverAddress "https://passbolt.home.freaxnx01.ch" \
+  --userPrivateKeyFile ~/.config/passbolt/private.asc \
+  --userPassword "$PASSBOLT_PASSWORD" \
+  --mfaMode none 2>&1 | awk -F': ' '/Password/ {print $2}')
+```
+
+**Offset state (safe to persist):** the `update_id` of the most recent successfully drained update is stored at `~/.cache/flowhub/telegram-offset`. This is *not* a secret — it's the cursor Telegram uses to know which updates you've already acknowledged. Read it; default to `0` on first run.
+
+```bash
+mkdir -p ~/.cache/flowhub
+OFFSET=$(cat ~/.cache/flowhub/telegram-offset 2>/dev/null || echo 0)
+curl -s "https://api.telegram.org/bot${TG_TOKEN}/getUpdates?offset=$((OFFSET+1))&timeout=0" \
+  > /tmp/flowhub-tg-updates.json
+```
+
+For each update in `result[]` (in order — Telegram returns them chronologically):
+
+1. **Extract Capture content** from `message` (or `edited_message`):
+   - **Text**: `message.text`
+   - **URL-carrying**: a `message.text` matching `^https?://` (prefer URL mode in Vikunja-Capture).
+   - **Photo**: pick `message.photo[-1]` (largest size), record `file_id`.
+   - **Document**: `message.document.file_id` + `message.document.file_name`.
+   - **Caption**: `message.caption` — use as Capture description when media is present.
+   - Ignore messages without any of these (stickers, location, service messages) — log `skipped (non-capture message type)`.
+
+2. **Write to Vikunja Inbox** — same shape as QuickTask/Signal captures today:
+   ```bash
+   BODY=$(python3 -c 'import json,sys; print(json.dumps({"title": sys.argv[1], "description": sys.argv[2], "project_id": int(sys.argv[3])}))' "$TITLE" "$DESCRIPTION" "$INBOX_ID")
+   TASK_ID=$(curl -s -X PUT \
+     -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d "$BODY" \
+     "https://todo.home.freaxnx01.ch/api/v1/projects/$INBOX_ID/tasks" \
+     | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+   ```
+
+3. **Download + attach media** (for photo/document updates) — mirror how QuickTask ends up with Vikunja attachments:
+   ```bash
+   # 3a. Resolve file_path from file_id
+   FILE_PATH=$(curl -s "https://api.telegram.org/bot${TG_TOKEN}/getFile?file_id=${FILE_ID}" \
+     | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["file_path"])')
+
+   # 3b. Download the file to a local temp path
+   LOCAL=$(mktemp --suffix=".${FILE_PATH##*.}")
+   curl -s "https://api.telegram.org/file/bot${TG_TOKEN}/${FILE_PATH}" -o "$LOCAL"
+
+   # 3c. Upload as a Vikunja attachment (multipart form)
+   curl -s -w "\n__HTTP_%{http_code}__" -X PUT \
+     -H "Authorization: Bearer $VIKUNJA_TOKEN" \
+     -F "files=@${LOCAL}" \
+     "https://todo.home.freaxnx01.ch/api/v1/tasks/${TASK_ID}/attachments"
+   ```
+   Delete `$LOCAL` after upload.
+
+4. **Source label** — tag the new Vikunja task with `channel:telegram` (get-or-create it using the same helper as `--simulate` — palette `0088cc`, Telegram brand blue). This makes the Channel visible in the Vikunja UI and on the proposal table, and lets downstream classification apply origin bias symmetric to the QuickTask heuristic.
+
+The full `channel:*` label family (reserved prefix — add rows as new Channels come online):
+
+| Label | Color | Set by |
+|---|---|---|
+| `channel:telegram` | `#0088cc` | Step 4a in this skill |
+| `channel:quicktask` | `#7b68ee` | to be added to `/flowhub-capture` when the Android app calls through it (today QuickTask writes Vikunja directly, so untagged — the classifier detects it by filename heuristic instead) |
+| `channel:signal` | `#3a76f0` | to be added to `/flowhub-capture` when invoked by the Signal-to-claude bridge |
+| `channel:manual` | `#9ca3af` | `/flowhub-capture` when run interactively by the user with no other origin hint |
+
+Only `channel:telegram` is applied today — the others are reserved names so the taxonomy stays coherent when the other Channels are retrofitted. The classifier in Step 6 should treat `channel:telegram` as a weak issue-candidate bias for now (same class as QuickTask), because Telegram messages from you are usually either URLs to file or short dev notes.
+
+5. **Advance the offset** — *only* after the Vikunja write + all attachment uploads for that update succeed. Write the update's `update_id` to `~/.cache/flowhub/telegram-offset`. If any step fails, stop draining (do not advance the offset) and surface the error — the next run will retry the same update.
+
+6. **Soft-fail on Telegram unreachable** — if the `getUpdates` call itself errors (network, HTTP 5xx, invalid token), print one warning line (`warn: Telegram getUpdates failed (<reason>) — continuing without Telegram drain`) and fall through to 4b. Never abort the whole triage run because Telegram is down.
+
+When done, print one summary line: `Telegram: drained N Captures (M text, K with media), offset now X` (or `Telegram: no new captures`).
+
+#### 4b — Load open Captures from the Vikunja Inbox
+
+The Vikunja inbox can easily exceed one page. **Always paginate** — `per_page` is capped server-side and a single request will silently drop later Captures.
 
 ```bash
 page=1
