@@ -32,40 +32,45 @@ Wahrscheinlich sind Sie mit einer monolithischen oder einer einfachen Schichtena
 
 ## Bewertungskriterien (Block 3)
 
-Pflichtcheck am Ende jeder Nachbereitung — die fünf Dimensionen aus `.ai/cas-instructions.md` für **diesen** Block durchgehen, bevor "fertig" geclaimed wird.
+Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[Bewertungskriterien]] für **diesen** Block durchgehen, bevor "fertig" geclaimed wird. Punkteangaben in Klammern zeigen Max-Score (volle Erfüllung).
+
+> Quarkus/Jakarta-EE-Item ist für FlowHub (.NET-Stack) **nicht relevant** — bewusst ausgeklammert.
 
 ### Spezifikation
 
-- [ ] Use Cases für die Service-Schicht benannt (Capture submit/list/retry, Skill-Routing, Integration-Health, Enrichment-Pipeline)
-- [ ] SMART NfAs für die API/Async-Pipeline (Latenz, Throughput, Retry-/DLQ-Verhalten, Verfügbarkeit, OpenAPI-Versionierung)
-- [ ] Solution Vision aktualisiert — Modular Monolith + REST + Async Pipeline (Verweis auf ADR 0002)
+- [ ] **Use Cases & fachliche Anforderungen benannt (5)** — Capture submit/list/retry, Skill-Routing, Integration-Health, Enrichment-Pipeline (Server-seitig formalisiert)
+- [ ] **NfA SMART spezifiziert (5)** — API-Latenz, Throughput, Retry-/DLQ-Verhalten, Verfügbarkeit, OpenAPI-Versionierungs-SLA
+- [ ] **Solution Vision beschrieben (5)** — Modular Monolith + REST + MassTransit-Async-Pipeline (Verweis auf ADR 0002, ggf. Update für Block 3)
 
 ### Entwurf
 
-- [ ] Architektur textuell beschrieben (ADR 0002 erweitern oder ergänzendes ADR für Async-Pipeline / API-Modul)
-- [ ] Strukturperspektive: Modul-/Subsystem-Diagramm (FlowHub.Web ↔ FlowHub.Api ↔ FlowHub.Core ↔ FlowHub.Skills/Integrations, Bus)
-- [ ] Verhaltensperspektive: Sequence-/Activity-Diagramme für Capture-Enrichment-Flow und Skill-Routing
-- [ ] Interaktionsperspektive: API-Surface dokumentiert (OpenAPI/Scalar), Event-Kontrakte (`CaptureCreated`, `CaptureClassified`, …)
-- [ ] DB-Modell als Skizze (auch wenn Persistenz erst Block 4 — die Domain-Entitäten dürfen nicht überraschen)
+- [ ] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0003 (Async Pipeline) + ADR 0004 (KI-Integration) inkl. Diagramme
+- [ ] **Struktur / Verhalten / Interaktion (7)**:
+  - Struktur: Modul-Diagramm (FlowHub.Web ↔ FlowHub.Api ↔ FlowHub.Core ↔ Skills/Integrations, Bus)
+  - Verhalten: Sequence-/Activity-Diagramme für Capture-Enrichment + Skill-Routing
+  - Interaktion: API-Surface (OpenAPI/Scalar) + Event-Kontrakte (`CaptureCreated`, `CaptureClassified`, …)
+- [ ] **DB-Modell spezifiziert (3)** — auch wenn Persistenz erst Block 4: Entity-Skizze damit nichts überrascht
 
 ### Programmierung
 
-- [ ] `source/FlowHub.Api/` scaffolded — Minimal API + FluentValidation + ProblemDetails + OpenAPI/Scalar
-- [ ] Async-Pipeline mit MassTransit (In-Memory-Transport für Block 3, RabbitMQ-Profil bereit)
-- [ ] OpenAPI-Spec generiert; typed Client (`Refit` o.ä. als MicroProfile-Äquivalent) generiert und konsumiert
-- [ ] KI-Integration in mindestens einem Service (Capture-Klassifikation via `Microsoft.Extensions.AI`)
-- [ ] Code in Layer/Module/Subsystem strukturiert; Conventional Commits; Implementierungs-Insights im Repo (CHANGELOG / ADR / Reflexion)
+- [ ] **Code lesbar, dokumentiert, nach Layer/Modul/Sub-System strukturiert (7)**
+- [ ] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10), siehe [[Bewertungskriterien]]
+- [ ] **Erkenntnisse aus der Programmierung dokumentiert (3)** — CHANGELOG, ADRs, ggf. `docs/insights/block-3.md`
+- [ ] **Source in Git-Repository (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE`, alle Block-3-Commits gepusht
 
 ### Validierung
 
-- [ ] Akzeptanzkriterien je Use Case dokumentiert
-- [ ] Test-Strategie-Dokument (Unit für Domain & Handlers, Component für API-Endpoints, Contract-Tests gegen OpenAPI, MassTransit Test Harness für Consumers)
-- [ ] Unit-/Integrationstests implementiert, alle grün (`dotnet test` voll grün)
-- [ ] Testresultate dokumentiert (Counts + ggf. Coverage in CHANGELOG / `docs/`)
+- [ ] **Abnahmekriterien definiert (5)** — pro Use Case explizit (z.B. in ADR oder `docs/acceptance-criteria.md`)
+- [ ] **Test-Strategie + Technologien spezifiziert (5)** — `docs/test-strategy.md`: xUnit, FluentAssertions, NSubstitute, bUnit, ASP.NET Mvc.Testing, MassTransit Test Harness
+- [ ] **Unit-Tests programmiert (3)** — Handlers, Validators, Consumers, API-Endpoints
+- [ ] **Test-Ergebnisse dokumentiert (3)** — Counts + ggf. Coverage in CHANGELOG / `[Unreleased]`
 
-### Präsentation
+### KI, Sub-Systeme & Reflexion
 
-- [ ] Block-3-Reflexion / Folien-Skizze für nächste PVA (was wurde gebaut, welche Entscheide, welche Trade-offs, KI-Erfahrungen)
+- [ ] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ höchstgewichtetes Kriterium — welche Tools (Claude Code, Copilot, ChatGPT), welche Aufgaben, Prompt-Strategien, generierter vs. handgeschriebener Anteil. Doku in `docs/ai-usage.md` oder pro Block in `docs/insights/`
+- [ ] **Intelligente / flexible Services mit KI gebaut (6)** — mind. ein Service nutzt KI zur Laufzeit (Capture-Klassifikation via `Microsoft.Extensions.AI`)
+- [ ] **Sub-Systeme als unabhängige Container deploybar (5)** — `FlowHub.Web` und `FlowHub.Api` als getrennte Container; RabbitMQ als Container; Docker-Compose-Profil dokumentiert. ⚠️ **Spannung mit ADR 0002:** Modular Monolith bleibt im Code, aber die Deployment-Topologie kann mehrere Container zeigen — Block 5 ist die finale Stufe, in Block 3 mind. den Plan + Compose-Skizze festhalten
+- [ ] **KI-Erfahrungen als Fazit reflektiert (7)** — Block-3-Reflexion: was hat funktioniert, was nicht, wo war menschliche Korrektur nötig, lessons learned. Auch geeignet als Folien-Material für PVA 2026-05-23
 
 ---
 
