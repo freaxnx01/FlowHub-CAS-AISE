@@ -20,12 +20,14 @@ FlowHub is implemented incrementally, block by block, aligned to this schedule. 
 
 ## Grading (Bewertungskriterien)
 
-The final project submission is graded across five dimensions — Spezifikation, Entwurf, Programmierung, Validierung, and Präsentation. These criteria must be kept in mind throughout every implementation phase, not just at the end, since each block's work contributes to the final grade:
+**Canonical source of truth:** [`vault/Organisation/Bewertungskriterien.md`](../vault/Organisation/Bewertungskriterien.md) — full Moodle rubric with all 18 scored items and their point ladders.
 
-- **Spezifikation:** Key use cases and functional requirements named; non-functional requirements (NfA) specified SMART; solution vision described
+The rubric groups into five buckets. Each block's work contributes to the final grade, so the criteria are checked actively at the end of **every** Block-Nachbereitung — not just at final submission:
+
+- **Spezifikation:** Key use cases & functional requirements named; non-functional requirements (NfA) specified SMART; solution vision described
 - **Entwurf:** Architecture described textually and visually; design covered from structural, behavioral, and interaction perspectives; DB model specified
-- **Programmierung:** Code readable, documented, structured by layer/module/subsystem; modern application concepts applied; implementation insights documented; source code in a Git repository
+- **Programmierung:** Code readable, documented, structured by layer/module/subsystem; implementation insights documented; source code in a Git repository (the Quarkus / Jakarta-EE-specific item is N/A for the FlowHub .NET stack)
 - **Validierung:** Acceptance criteria defined; testing approach and technologies specified; unit tests implemented; test results documented
-- **Präsentation:** Clarity and quality of the final project presentation
+- **KI, Sub-Systeme & Reflexion:** AI-tool usage described (max 12 pts — the highest-weighted single item); intelligent/flexible services built with AI; solution split into independently deployable sub-systems / containers; AI-tool experience reflected as a closing fazit
 
-Scoring uses a 0/1/3/5 (or 0/1/4/7 and 0/3/7/10 for higher-weight items) scale per criterion. The grading rubric should actively guide what gets documented and tested in every block.
+Scoring uses 0/1/3/5, 0/1/4/7, 0/3/7/10, 0/2/6, 0/1/7/12, or 0/2 ladders depending on weight. See the vault page for exact ladders per criterion. The grading rubric should actively guide what gets documented, built, and tested in every block.
