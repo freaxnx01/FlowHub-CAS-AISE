@@ -1,0 +1,5 @@
+# This directory is a Syncthing folder marker.
+# Do not delete.
+
+folderID: 9lmka-regwv
+created: 2026-02-15T18:59:15+01:00
