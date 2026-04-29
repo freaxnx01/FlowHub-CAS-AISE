@@ -1,5 +1,7 @@
 # Vault ↔ Repo Link Implementation Plan
 
+> **Superseded on 2026-04-29.** The vault has since been merged into this repo as a git subtree under `vault/` and the standalone vault repo has been retired. This plan describes the older "two-repo with documentation link" approach and is kept for historical context only.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a discoverable, read-only reference link between this repo and the CAS Obsidian vault — repo points at vault, vault points back at repo.
