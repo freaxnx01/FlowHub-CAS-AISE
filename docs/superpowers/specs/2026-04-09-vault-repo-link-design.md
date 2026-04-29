@@ -1,7 +1,9 @@
 # Vault ↔ Repo Connection — Design
 
+> **Superseded on 2026-04-29.** The vault was merged into this repo as a git subtree under `vault/`, and the standalone `gitlab.freaxnx01.ch/freax/obsidian-cas-aise` repo was retired. This design (a documentation-only link between two separate repos) no longer reflects how things are wired. Kept for historical context.
+
 **Date:** 2026-04-09
-**Status:** Approved
+**Status:** Superseded (2026-04-29)
 **Type:** Reference-only link (no sync, no symlinks)
 
 ## Goal

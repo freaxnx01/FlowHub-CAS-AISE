@@ -1,8 +1,8 @@
 # Obsidian Vault: cas-aise
 
-This directory **is** the project. It is the Obsidian vault for the CAS AI/SE coursework (Certificate of Advanced Studies — AI & Software Engineering), backed by git repo `gitlab.freaxnx01.ch/freax/obsidian-cas-aise`.
+This directory is the Obsidian vault for the CAS AI/SE coursework (Certificate of Advanced Studies — AI & Software Engineering). It used to be a standalone git repo at `gitlab.freaxnx01.ch/freax/obsidian-cas-aise`, but has been merged into the FlowHub project repo (`github.com/freaxnx01/FlowHub-CAS-AISE`) as a git subtree. Vault edits ship through the FlowHub repo's normal commit/push workflow.
 
-When Claude is started with this directory as CWD, the vault is the workspace: read, create, and edit pages as the primary task.
+Within this folder, treat the workspace as the vault: read, create, and edit pages following the conventions below.
 
 ## Structure
 
@@ -53,13 +53,13 @@ Do NOT add frontmatter to pages that are only being read, not modified.
 
 ## Auto-commit
 
-After creating or editing pages, automatically commit and push:
+After creating or editing vault pages, commit and push from the FlowHub repo root:
 
 ```bash
-cd /mnt/c/Users/freax/Documents/Obsidian/cas-aise
-git add -A
-git commit -m "docs(<scope>): <description>"
+cd /home/freax/projects/repos/github/freaxnx01/public/FlowHub-CAS-AISE
+git add vault/
+git commit -m "docs(vault/<scope>): <description>"
 git push
 ```
 
-Conventional commit style with `docs()` prefix. Scope = folder or topic name (e.g. `docs(knowledge): add UML sequence diagram notes`).
+Conventional commit style with `docs()` prefix and a `vault/` scope prefix to keep vault-only edits visible in the log. Inner scope = folder or topic name (e.g. `docs(vault/knowledge): add UML sequence diagram notes`).

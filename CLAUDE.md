@@ -18,20 +18,20 @@ Agent context for Claude Code. Read this before taking any action in this reposi
 
 ## Knowledge Base (Obsidian Vault)
 
-The CAS coursework, FlowHub concept, and project decisions live in a separate Obsidian vault. This vault is the source of truth for everything **except** code.
+The CAS coursework, FlowHub concept, and project decisions live in an Obsidian vault that is now part of this repo (subtree-merged from the former `gitlab.freaxnx01.ch/freax/obsidian-cas-aise` repo, which has been retired). The vault is the source of truth for everything **except** code.
 
-- **Path:** `/mnt/c/Users/freax/Documents/Obsidian/cas-aise/`
-- **Mode:** Read-only from this repo. Writes happen only when CWD is the vault (per the global vault convention in `~/.claude/CLAUDE.md`).
-- **Back-link:** `Projektarbeit/Repository.md` in the vault points back here.
+- **Path:** `vault/` at the repo root.
+- **Mode:** Editable as part of this repo — same commit/push workflow as the rest of FlowHub. The vault keeps its own `CLAUDE.md` describing tagging and per-folder conventions.
+- **Back-link:** `vault/Projektarbeit/Repository.md` (kept as historical context; no longer required since the vault and code share a repo).
 
 **Primary focus paths** — grep/read these first when project background is needed:
 
-- `Projektarbeit/` — thesis & FlowHub concept (`Idee FlowHub.md`, `Dev.md`, `Skills.md`, `External Services.md`)
-- `Blöcke/` — course block notes that drive the incremental build
+- `vault/Projektarbeit/` — thesis & FlowHub concept (`Idee FlowHub.md`, `Dev.md`, `Skills.md`, `External Services.md`)
+- `vault/Blöcke/` — course block notes that drive the incremental build
 
-**Secondary** (search on demand): `Knowledge/`, `Allgemein/`, `Organisation/`, `Notes.md`, `TODO.md`.
+**Secondary** (search on demand): `vault/Knowledge/`, `vault/Allgemein/`, `vault/Organisation/`, `vault/Notes.md`, `vault/TODO.md`.
 
-**Read trigger:** Before answering questions about CAS scope, modules, deadlines, project decisions, or the FlowHub concept, grep the vault first.
+**Read trigger:** Before answering questions about CAS scope, modules, deadlines, project decisions, or the FlowHub concept, grep `vault/` first.
 
 ---
 
