@@ -1,0 +1,52 @@
+name: claude
+
+# Consumer stub for the freaxnx01/claude-pipeline reusable workflow.
+#
+# Two triggers:
+#   - issues:labeled with `ai-implement`     → first run on a fresh task
+#   - workflow_dispatch (issue-number, attempt) → retry-dispatch.sh
+#                                               (or manual replay)
+#
+# Fork-PR protection: this workflow has NO `pull_request` or `pull_request_target`
+# trigger. Public-repo forks cannot label issues on the upstream repo, so they
+# cannot trigger this workflow. The label trigger is only fireable by users
+# with write access. Workflow_dispatch is also restricted to write-access users.
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue-number:
+        description: GitHub issue number to (re-)implement.
+        type: number
+        required: true
+      attempt:
+        description: 1-based retry attempt counter (drives retry-policy caps).
+        type: number
+        default: 1
+
+# Permission ceiling — the called workflow can only escalate up to whatever is
+# granted here. Sized for branch+commit, draft-PR creation, comment+labels on
+# the issue, and `gh workflow run` self-redispatch on retry.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  claude:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'ai-implement' }}
+    uses: freaxnx01/claude-pipeline/.github/workflows/claude-implement.yml@main
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    with:
+      issue-number: ${{ github.event.inputs.issue-number || github.event.issue.number }}
+      attempt: ${{ fromJSON(github.event.inputs.attempt || '1') }}
+      # Force GitHub-hosted runners — never attach a self-hosted runner to a
+      # public repo (fork-PR / pwn-request attack surface).
+      runner-labels: '["ubuntu-latest"]'
+      # .NET builds + tests are slower than the sandbox's trivial markdown
+      # changes. 60 minutes covers most realistic FlowHub tasks.
+      timeout-minutes: 60
