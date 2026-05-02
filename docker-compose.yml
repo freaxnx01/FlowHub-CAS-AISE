@@ -1,0 +1,36 @@
+# Block-5 deployment topology preview. NOT used by `make run` (which stays single-process).
+# Demonstrates the multi-container option: FlowHub.Web + FlowHub.Api (Slice A) + RabbitMQ.
+# Run with: docker compose up --build (once the Slice-A api project lands and Dockerfiles exist).
+
+services:
+  flowhub.web:
+    build:
+      context: .
+      dockerfile: source/FlowHub.Web/Dockerfile
+    image: flowhub-web:dev
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Bus__Transport: RabbitMq
+      Bus__RabbitMq__Host: rabbitmq
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5070:8080"
+
+  # flowhub.api lands in Slice A — entry kept here so the topology is visible.
+  # flowhub.api:
+  #   build:
+  #     context: .
+  #     dockerfile: source/FlowHub.Api/Dockerfile
+  #   image: flowhub-api:dev
+  #   environment:
+  #     Bus__Transport: RabbitMq
+  #     Bus__RabbitMq__Host: rabbitmq
+  #   depends_on: [rabbitmq]
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "15672:15672"   # management UI
+      - "5672:5672"     # AMQP
