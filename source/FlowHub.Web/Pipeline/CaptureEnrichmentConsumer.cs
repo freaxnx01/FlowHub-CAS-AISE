@@ -46,7 +46,7 @@ public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated
     }
 
     [LoggerMessage(
-        EventId = 1,
+        EventId = 1001,
         Level = LogLevel.Information,
         Message = "Capture {CaptureId} classified as Orphan (no matched skill)")]
     private partial void LogOrphan(Guid captureId);

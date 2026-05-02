@@ -1,11 +1,9 @@
 using FlowHub.Core.Captures;
-using FlowHub.Core.Classification;
 using FlowHub.Web.Stubs;
 using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
 
 namespace FlowHub.Web.ComponentTests.Pipeline;
 
@@ -27,7 +25,6 @@ internal static class PipelineTestBase
         // root provider (tests resolve ICaptureService from provider directly).
         services.AddSingleton<ICaptureService>(sp =>
             new CaptureServiceStub(sp.GetRequiredService<IBus>()));
-        services.AddSingleton(Substitute.For<IClassifier>());
         services.AddSingleton(NullLoggerFactory.Instance);
         services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger<>),
             typeof(Microsoft.Extensions.Logging.Abstractions.NullLogger<>));

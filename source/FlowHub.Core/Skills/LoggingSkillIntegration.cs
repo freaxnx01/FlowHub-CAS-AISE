@@ -22,7 +22,7 @@ public sealed partial class LoggingSkillIntegration : ISkillIntegration
     }
 
     [LoggerMessage(
-        EventId = 1,
+        EventId = 2001,
         Level = LogLevel.Information,
         Message = "Stub integration '{Skill}' would write capture {CaptureId} with tags {Tags}")]
     private partial void LogStubWrite(string skill, Guid captureId, IReadOnlyList<string> tags);
