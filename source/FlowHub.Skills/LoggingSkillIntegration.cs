@@ -1,7 +1,8 @@
 using FlowHub.Core.Captures;
+using FlowHub.Core.Skills;
 using Microsoft.Extensions.Logging;
 
-namespace FlowHub.Core.Skills;
+namespace FlowHub.Skills;
 
 public sealed partial class LoggingSkillIntegration : ISkillIntegration
 {

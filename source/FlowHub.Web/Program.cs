@@ -2,6 +2,7 @@ using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Health;
 using FlowHub.Core.Skills;
+using FlowHub.Skills;
 using FlowHub.Web.Auth;
 using FlowHub.Web.Components;
 using FlowHub.Web.Pipeline;
