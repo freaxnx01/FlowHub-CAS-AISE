@@ -1,5 +1,6 @@
 using FlowHub.Web.Components.Pages;
 using FlowHub.Web.Stubs;
+using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
@@ -14,7 +15,7 @@ namespace FlowHub.Web.ComponentTests;
 /// </summary>
 public class SmokeTests : TestContext
 {
-    private readonly CaptureServiceStub _captureService = new();
+    private readonly CaptureServiceStub _captureService = new(Substitute.For<IPublishEndpoint>());
     private readonly SkillRegistryStub _skillRegistry = new();
     private readonly IntegrationHealthServiceStub _integrationHealthService = new();
 

@@ -1,4 +1,5 @@
 using FlowHub.Web.Stubs;
+using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
@@ -7,7 +8,7 @@ namespace FlowHub.Web.ComponentTests.Pages;
 
 public class CapturesTests : TestContext
 {
-    private readonly CaptureServiceStub _captureService = new();
+    private readonly CaptureServiceStub _captureService = new(Substitute.For<IPublishEndpoint>());
 
     public CapturesTests()
     {
