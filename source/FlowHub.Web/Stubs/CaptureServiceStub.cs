@@ -127,6 +127,9 @@ public sealed class CaptureServiceStub : ICaptureService
     public Task MarkUnhandledAsync(Guid id, string reason, CancellationToken cancellationToken = default) =>
         ReplaceCapture(id, c => c with { Stage = LifecycleStage.Unhandled, FailureReason = reason });
 
+    public Task ResetForRetryAsync(Guid id, CancellationToken cancellationToken = default) =>
+        ReplaceCapture(id, c => c with { Stage = LifecycleStage.Raw, FailureReason = null });
+
     public Task<CapturePage> ListAsync(CaptureFilter filter, CancellationToken cancellationToken = default)
     {
         IReadOnlyList<Capture> items;

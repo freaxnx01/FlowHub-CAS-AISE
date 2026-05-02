@@ -26,4 +26,6 @@ public interface ICaptureService
     Task MarkUnhandledAsync(Guid id, string reason, CancellationToken cancellationToken = default);
 
     Task<CapturePage> ListAsync(CaptureFilter filter, CancellationToken cancellationToken = default);
+
+    Task ResetForRetryAsync(Guid id, CancellationToken cancellationToken = default);
 }
