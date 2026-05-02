@@ -15,3 +15,14 @@
 .DS_Store
 # direnv
 .envrc
+
+# Syncthing folder markers
+.stfolder/
+.stfolder.removed-*/
+
+# Personal/PII assets — kept locally, never committed
+_images/2026-01-30_10h45_26.png
+_images/2026-01-30_10h45_57.png
+_images/Pasted image 20260119172107.png
+_files/Moodle/Modul/1-Einführung/html/
+_files/Moodle/Modul/_Allgemein/html/
