@@ -1,3 +1,5 @@
+using FlowHub.Api;
+using FlowHub.Api.Endpoints;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Health;
@@ -10,6 +12,7 @@ using FlowHub.Web.Stubs;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
 using MudBlazor.Services;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +91,9 @@ builder.Services.AddMassTransit(x =>
     }
 });
 
+// Block 3 Slice A — REST API surface for non-UI consumers.
+builder.Services.AddFlowHubApi();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -105,4 +111,11 @@ app.UseAuthorization();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+app.MapFlowHubApi();
+app.MapOpenApi("/openapi/v1.json");
+app.MapScalarApiReference();
+
 app.Run();
+
+// Expose Program for WebApplicationFactory<Program> in integration tests.
+public partial class Program { }
