@@ -16,4 +16,12 @@ public interface ICaptureService
     Task<FailureCounts> GetFailureCountsAsync(CancellationToken cancellationToken = default);
 
     Task<Capture> SubmitAsync(string content, ChannelKind source, CancellationToken cancellationToken = default);
+
+    Task MarkClassifiedAsync(Guid id, string matchedSkill, CancellationToken cancellationToken = default);
+
+    Task MarkRoutedAsync(Guid id, CancellationToken cancellationToken = default);
+
+    Task MarkOrphanAsync(Guid id, string reason, CancellationToken cancellationToken = default);
+
+    Task MarkUnhandledAsync(Guid id, string reason, CancellationToken cancellationToken = default);
 }

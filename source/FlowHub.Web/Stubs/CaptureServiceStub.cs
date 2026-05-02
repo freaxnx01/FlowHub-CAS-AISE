@@ -1,11 +1,15 @@
 using Bogus;
 using FlowHub.Core.Captures;
+using FlowHub.Core.Events;
+using MassTransit;
 
 namespace FlowHub.Web.Stubs;
 
 /// <summary>
 /// Bogus-backed in-memory stub for <see cref="ICaptureService"/>.
-/// Block 2 test data — gets replaced by a real implementation in Block 3.
+/// Block 3 Slice B: publishes <see cref="CaptureCreated"/> on submit and exposes
+/// state-transition methods used by the pipeline consumers.
+/// EF Core-backed implementation lands in Block 4.
 /// </summary>
 public sealed class CaptureServiceStub : ICaptureService
 {
@@ -29,9 +33,13 @@ public sealed class CaptureServiceStub : ICaptureService
     ];
 
     private readonly List<Capture> _captures;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly object _lock = new();
 
-    public CaptureServiceStub()
+    public CaptureServiceStub(IPublishEndpoint publishEndpoint)
     {
+        _publishEndpoint = publishEndpoint;
+
         var rng = new Faker { Random = new Bogus.Randomizer(42) };
         var now = DateTimeOffset.UtcNow;
 
@@ -49,35 +57,41 @@ public sealed class CaptureServiceStub : ICaptureService
 
     public Task<Capture?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var capture = _captures.FirstOrDefault(c => c.Id == id);
-        return Task.FromResult(capture);
+        lock (_lock)
+        {
+            return Task.FromResult(_captures.FirstOrDefault(c => c.Id == id));
+        }
     }
 
     public Task<IReadOnlyList<Capture>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        IReadOnlyList<Capture> all = _captures
-            .OrderByDescending(c => c.CreatedAt)
-            .ToList();
-        return Task.FromResult(all);
+        lock (_lock)
+        {
+            IReadOnlyList<Capture> all = _captures.OrderByDescending(c => c.CreatedAt).ToList();
+            return Task.FromResult(all);
+        }
     }
 
     public Task<IReadOnlyList<Capture>> GetRecentAsync(int count, CancellationToken cancellationToken = default)
     {
-        IReadOnlyList<Capture> recent = _captures
-            .OrderByDescending(c => c.CreatedAt)
-            .Take(count)
-            .ToList();
-        return Task.FromResult(recent);
+        lock (_lock)
+        {
+            IReadOnlyList<Capture> recent = _captures.OrderByDescending(c => c.CreatedAt).Take(count).ToList();
+            return Task.FromResult(recent);
+        }
     }
 
     public Task<FailureCounts> GetFailureCountsAsync(CancellationToken cancellationToken = default)
     {
-        var orphan = _captures.Count(c => c.Stage == LifecycleStage.Orphan);
-        var unhandled = _captures.Count(c => c.Stage == LifecycleStage.Unhandled);
-        return Task.FromResult(new FailureCounts(orphan, unhandled));
+        lock (_lock)
+        {
+            var orphan = _captures.Count(c => c.Stage == LifecycleStage.Orphan);
+            var unhandled = _captures.Count(c => c.Stage == LifecycleStage.Unhandled);
+            return Task.FromResult(new FailureCounts(orphan, unhandled));
+        }
     }
 
-    public Task<Capture> SubmitAsync(string content, ChannelKind source, CancellationToken cancellationToken = default)
+    public async Task<Capture> SubmitAsync(string content, ChannelKind source, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(content);
 
@@ -89,31 +103,58 @@ public sealed class CaptureServiceStub : ICaptureService
             Stage: LifecycleStage.Raw,
             MatchedSkill: null);
 
-        _captures.Add(capture);
-        return Task.FromResult(capture);
+        lock (_lock)
+        {
+            _captures.Add(capture);
+        }
+
+        await _publishEndpoint.Publish(
+            new CaptureCreated(capture.Id, capture.Content, capture.Source, capture.CreatedAt),
+            cancellationToken);
+
+        return capture;
     }
 
-    private static LifecycleStage PickStage(Faker rng, int index)
+    public Task MarkClassifiedAsync(Guid id, string matchedSkill, CancellationToken cancellationToken = default) =>
+        ReplaceCapture(id, c => c with { Stage = LifecycleStage.Classified, MatchedSkill = matchedSkill });
+
+    public Task MarkRoutedAsync(Guid id, CancellationToken cancellationToken = default) =>
+        ReplaceCapture(id, c => c with { Stage = LifecycleStage.Routed });
+
+    public Task MarkOrphanAsync(Guid id, string reason, CancellationToken cancellationToken = default) =>
+        ReplaceCapture(id, c => c with { Stage = LifecycleStage.Orphan, FailureReason = reason });
+
+    public Task MarkUnhandledAsync(Guid id, string reason, CancellationToken cancellationToken = default) =>
+        ReplaceCapture(id, c => c with { Stage = LifecycleStage.Unhandled, FailureReason = reason });
+
+    private Task ReplaceCapture(Guid id, Func<Capture, Capture> transform)
     {
-        // Distribution: mostly Completed, one Routed (in-flight), two Orphan,
-        // one Unhandled — so the dashboard's Needs Attention widget has something
-        // to show and the grid demonstrates all lifecycle states.
-        return index switch
+        lock (_lock)
         {
-            2 or 8 => LifecycleStage.Orphan,
-            4 => LifecycleStage.Unhandled,
-            6 => LifecycleStage.Routed,
-            _ => LifecycleStage.Completed,
-        };
+            var index = _captures.FindIndex(c => c.Id == id);
+            if (index < 0)
+            {
+                throw new KeyNotFoundException($"Capture {id} not found.");
+            }
+            _captures[index] = transform(_captures[index]);
+        }
+        return Task.CompletedTask;
     }
+
+    private static LifecycleStage PickStage(Faker rng, int index) => index switch
+    {
+        2 or 8 => LifecycleStage.Orphan,
+        4 => LifecycleStage.Unhandled,
+        6 => LifecycleStage.Routed,
+        _ => LifecycleStage.Completed,
+    };
 
     private static string? PickSkill(Faker rng, int index)
     {
         if (index == 4)
         {
-            return null; // Unhandled has no matched Skill.
+            return null;
         }
-
         return SkillNames[index % SkillNames.Length];
     }
 
