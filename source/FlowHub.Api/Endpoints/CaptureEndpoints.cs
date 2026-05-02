@@ -21,7 +21,67 @@ public static class CaptureEndpoints
             .Produces<Capture>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
+        captures.MapGet("/", ListAsync)
+            .WithName("ListCaptures")
+            .Produces<ListCapturesResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
+
         return app;
+    }
+
+    public sealed record ListCapturesResponse(IReadOnlyList<Capture> Items, string? NextCursor);
+
+    private static async Task<Results<Ok<ListCapturesResponse>, ProblemHttpResult>> ListAsync(
+        ICaptureService captureService,
+        HttpContext httpContext,
+        string? stage,
+        ChannelKind? source,
+        int? limit,
+        string? cursor,
+        CancellationToken ct)
+    {
+        IReadOnlyList<LifecycleStage>? stages = null;
+        if (!string.IsNullOrEmpty(stage))
+        {
+            try
+            {
+                stages = stage.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => Enum.Parse<LifecycleStage>(s, ignoreCase: true))
+                    .ToArray();
+            }
+            catch (ArgumentException)
+            {
+                return TypedResults.Problem(
+                    type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/validation.md",
+                    title: "Invalid stage filter.",
+                    detail: $"'{stage}' contains an unknown LifecycleStage.",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: httpContext.Request.Path);
+            }
+        }
+
+        CaptureCursor? captureCursor = null;
+        if (!string.IsNullOrEmpty(cursor))
+        {
+            try
+            {
+                captureCursor = CaptureCursor.Decode(cursor);
+            }
+            catch (FormatException)
+            {
+                return TypedResults.Problem(
+                    type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/validation.md",
+                    title: "Invalid pagination cursor.",
+                    detail: "The cursor is not a valid Base64Url-encoded value.",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    instance: httpContext.Request.Path);
+            }
+        }
+
+        var filter = new CaptureFilter(stages, source, limit ?? 50, captureCursor);
+        var page = await captureService.ListAsync(filter, ct);
+
+        return TypedResults.Ok(new ListCapturesResponse(page.Items, page.Next?.Encode()));
     }
 
     private static async Task<Results<Created<Capture>, ValidationProblem>> SubmitAsync(
