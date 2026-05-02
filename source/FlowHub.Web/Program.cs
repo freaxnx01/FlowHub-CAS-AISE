@@ -8,7 +8,6 @@ using FlowHub.Web.Pipeline;
 using FlowHub.Web.Stubs;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +44,8 @@ builder.Services.AddCascadingAuthenticationState();
 // AddSingleton<ICaptureService, CaptureServiceStub>() would fail because
 // IPublishEndpoint is registered Scoped by MassTransit and a Singleton can't
 // capture a Scoped dependency.
+// TODO Block 4: when the EF Core impl lands, ICaptureService becomes Scoped
+// (DbContext is Scoped) and can take IPublishEndpoint directly — drop the factory.
 builder.Services.AddSingleton<ICaptureService>(sp =>
     new CaptureServiceStub(sp.GetRequiredService<IBus>()));
 builder.Services.AddSingleton<ISkillRegistry, SkillRegistryStub>();
@@ -68,6 +69,8 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<SkillRoutingConsumer>(c =>
         c.UseMessageRetry(r => r.Intervals(500, 2000, 5000)));
 
+    // No retry policy — fault observer is best-effort per spec D5
+    // (recursive retry on Fault<T> would loop forever).
     x.AddConsumer<LifecycleFaultObserver>();
 
     if (string.Equals(builder.Configuration["Bus:Transport"], "RabbitMq", StringComparison.OrdinalIgnoreCase))
