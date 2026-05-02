@@ -28,7 +28,9 @@ public sealed partial class LifecycleFaultObserver
         {
             await _captureService.MarkOrphanAsync(captureId, reason, context.CancellationToken);
         }
-        catch (Exception ex)
+        // D5 (best-effort, no recursive retry): swallow any MarkXxx failure so the message
+        // doesn't re-fault into Fault<Fault<T>>. Cancellation must still propagate.
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             LogObserverFailed(ex, captureId, "Orphan");
         }
@@ -43,7 +45,9 @@ public sealed partial class LifecycleFaultObserver
         {
             await _captureService.MarkUnhandledAsync(captureId, reason, context.CancellationToken);
         }
-        catch (Exception ex)
+        // D5 (best-effort, no recursive retry): swallow any MarkXxx failure so the message
+        // doesn't re-fault into Fault<Fault<T>>. Cancellation must still propagate.
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             LogObserverFailed(ex, captureId, "Unhandled");
         }
