@@ -127,6 +127,53 @@ public sealed class CaptureServiceStub : ICaptureService
     public Task MarkUnhandledAsync(Guid id, string reason, CancellationToken cancellationToken = default) =>
         ReplaceCapture(id, c => c with { Stage = LifecycleStage.Unhandled, FailureReason = reason });
 
+    public Task<CapturePage> ListAsync(CaptureFilter filter, CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<Capture> items;
+        CaptureCursor? next;
+
+        lock (_lock)
+        {
+            IEnumerable<Capture> query = _captures
+                .OrderByDescending(c => c.CreatedAt)
+                .ThenByDescending(c => c.Id);
+
+            if (filter.Stages is { Count: > 0 } stages)
+            {
+                query = query.Where(c => stages.Contains(c.Stage));
+            }
+
+            if (filter.Source is ChannelKind src)
+            {
+                query = query.Where(c => c.Source == src);
+            }
+
+            if (filter.Cursor is CaptureCursor cursor)
+            {
+                query = query.SkipWhile(c =>
+                    c.CreatedAt > cursor.CreatedAt
+                    || (c.CreatedAt == cursor.CreatedAt && c.Id.CompareTo(cursor.Id) >= 0));
+            }
+
+            var limit = Math.Clamp(filter.Limit, 1, 200);
+            var page = query.Take(limit + 1).ToList();
+
+            if (page.Count > limit)
+            {
+                var last = page[limit - 1];
+                next = new CaptureCursor(last.CreatedAt, last.Id);
+                items = page.Take(limit).ToList();
+            }
+            else
+            {
+                next = null;
+                items = page;
+            }
+        }
+
+        return Task.FromResult(new CapturePage(items, next));
+    }
+
     private Task ReplaceCapture(Guid id, Func<Capture, Capture> transform)
     {
         lock (_lock)

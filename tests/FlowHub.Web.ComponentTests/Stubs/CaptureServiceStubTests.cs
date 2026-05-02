@@ -189,4 +189,55 @@ public sealed class CaptureServiceStubTests
         updated.Stage.Should().Be(LifecycleStage.Unhandled);
         updated.FailureReason.Should().Be("integration down");
     }
+
+    // ── ListAsync ──
+
+    [Fact]
+    public async Task ListAsync_NoFilter_ReturnsAllOrderedByCreatedAtDesc()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+
+        var page = await sut.ListAsync(new CaptureFilter(null, null, Limit: 50, Cursor: null), default);
+
+        page.Items.Should().HaveCountGreaterThanOrEqualTo(12);
+        page.Items.Should().BeInDescendingOrder(c => c.CreatedAt);
+    }
+
+    [Fact]
+    public async Task ListAsync_LimitTwo_ReturnsTwoItemsAndNextCursor()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+
+        var page = await sut.ListAsync(new CaptureFilter(null, null, Limit: 2, Cursor: null), default);
+
+        page.Items.Should().HaveCount(2);
+        page.Next.Should().NotBeNull();
+        page.Next!.CreatedAt.Should().Be(page.Items[1].CreatedAt);
+        page.Next.Id.Should().Be(page.Items[1].Id);
+    }
+
+    [Fact]
+    public async Task ListAsync_WithCursor_ReturnsItemsStrictlyAfterCursor()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+        var firstPage = await sut.ListAsync(new CaptureFilter(null, null, Limit: 2, Cursor: null), default);
+
+        var secondPage = await sut.ListAsync(
+            new CaptureFilter(null, null, Limit: 2, Cursor: firstPage.Next), default);
+
+        secondPage.Items.Should().NotBeEmpty();
+        secondPage.Items.Select(c => c.Id).Should().NotIntersectWith(firstPage.Items.Select(c => c.Id));
+    }
+
+    [Fact]
+    public async Task ListAsync_StageOrphan_ReturnsOnlyOrphanCaptures()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+
+        var page = await sut.ListAsync(
+            new CaptureFilter(Stages: new[] { LifecycleStage.Orphan }, null, Limit: 50, Cursor: null), default);
+
+        page.Items.Should().NotBeEmpty();
+        page.Items.Should().OnlyContain(c => c.Stage == LifecycleStage.Orphan);
+    }
 }
