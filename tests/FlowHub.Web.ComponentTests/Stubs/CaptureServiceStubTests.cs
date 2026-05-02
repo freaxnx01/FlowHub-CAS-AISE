@@ -240,4 +240,29 @@ public sealed class CaptureServiceStubTests
         page.Items.Should().NotBeEmpty();
         page.Items.Should().OnlyContain(c => c.Stage == LifecycleStage.Orphan);
     }
+
+    // ── ResetForRetryAsync ──
+
+    [Fact]
+    public async Task ResetForRetryAsync_OrphanCapture_ResetsToRawAndClearsFailureReason()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+        var capture = await sut.SubmitAsync("hello", ChannelKind.Web, default);
+        await sut.MarkOrphanAsync(capture.Id, "no skill matched", default);
+
+        await sut.ResetForRetryAsync(capture.Id, default);
+
+        var updated = await sut.GetByIdAsync(capture.Id, default);
+        updated!.Stage.Should().Be(LifecycleStage.Raw);
+        updated.FailureReason.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ResetForRetryAsync_UnknownId_Throws()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+
+        Func<Task> act = () => sut.ResetForRetryAsync(Guid.NewGuid(), default);
+        await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
 }
