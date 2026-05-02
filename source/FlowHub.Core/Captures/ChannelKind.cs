@@ -8,4 +8,5 @@ public enum ChannelKind
 {
     Telegram,
     Web,
+    Api,
 }
