@@ -24,4 +24,6 @@ public interface ICaptureService
     Task MarkOrphanAsync(Guid id, string reason, CancellationToken cancellationToken = default);
 
     Task MarkUnhandledAsync(Guid id, string reason, CancellationToken cancellationToken = default);
+
+    Task<CapturePage> ListAsync(CaptureFilter filter, CancellationToken cancellationToken = default);
 }
