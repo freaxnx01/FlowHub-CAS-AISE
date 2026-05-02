@@ -1,7 +1,8 @@
 ---
 tags:
   - claude-generated
-updated: 2026-04-29
+  - claude-updated
+updated: 2026-05-02
 ---
 
 # Block 3 — Service · Nachbereitung
@@ -40,11 +41,11 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [ ] **Use Cases & fachliche Anforderungen benannt (5)** — Capture submit/list/retry, Skill-Routing, Integration-Health, Enrichment-Pipeline (Server-seitig formalisiert)
 - [ ] **NfA SMART spezifiziert (5)** — API-Latenz, Throughput, Retry-/DLQ-Verhalten, Verfügbarkeit, OpenAPI-Versionierungs-SLA
-- [ ] **Solution Vision beschrieben (5)** — Modular Monolith + REST + MassTransit-Async-Pipeline (Verweis auf ADR 0002, ggf. Update für Block 3)
+- [x] **Solution Vision beschrieben (5)** — Modular Monolith + REST + MassTransit-Async-Pipeline (ADR 0002 + ADR 0003); REST-API-Surface in `docs/design/api/api-surface.md`
 
 ### Entwurf
 
-- [ ] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0003 (Async Pipeline) + ADR 0004 (KI-Integration) inkl. Diagramme
+- [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0003 (Async Pipeline) ✅, ADR 0004 (KI-Integration) noch offen (Slice C)
 - [ ] **Struktur / Verhalten / Interaktion (7)**:
   - Struktur: Modul-Diagramm (FlowHub.Web ↔ FlowHub.Api ↔ FlowHub.Core ↔ Skills/Integrations, Bus)
   - Verhalten: Sequence-/Activity-Diagramme für Capture-Enrichment + Skill-Routing
@@ -53,24 +54,24 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Programmierung
 
-- [ ] **Code lesbar, dokumentiert, nach Layer/Modul/Sub-System strukturiert (7)**
+- [x] **Code lesbar, dokumentiert, nach Layer/Modul/Sub-System strukturiert (7)** — Slice B: hexagonale Ports (`IClassifier`, `ISkillIntegration`), Pipeline-Modul, EventId-Namespacing (1000–1999 / 2000–2999), `LoggerMessage` source-gen
 - [ ] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10), siehe [[Bewertungskriterien]]
-- [ ] **Erkenntnisse aus der Programmierung dokumentiert (3)** — CHANGELOG, ADRs, ggf. `docs/insights/block-3.md`
-- [ ] **Source in Git-Repository (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE`, alle Block-3-Commits gepusht
+- [x] **Erkenntnisse aus der Programmierung dokumentiert (3)** — ADR 0003, `docs/ai-usage.md` (Reflexion-Sektion mit ⚠/❌ Tabelle); CHANGELOG noch offen
+- [x] **Source in Git-Repository (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE`; Slice-B-Branch `feat/block3-async-pipeline` lokal committed, Push folgt nach Final Code Review
 
 ### Validierung
 
 - [ ] **Abnahmekriterien definiert (5)** — pro Use Case explizit (z.B. in ADR oder `docs/acceptance-criteria.md`)
-- [ ] **Test-Strategie + Technologien spezifiziert (5)** — `docs/test-strategy.md`: xUnit, FluentAssertions, NSubstitute, bUnit, ASP.NET Mvc.Testing, MassTransit Test Harness
-- [ ] **Unit-Tests programmiert (3)** — Handlers, Validators, Consumers, API-Endpoints
-- [ ] **Test-Ergebnisse dokumentiert (3)** — Counts + ggf. Coverage in CHANGELOG / `[Unreleased]`
+- [ ] **Test-Strategie + Technologien spezifiziert (5)** — `docs/spec/testing-strategy.md` existiert (Block-2-Stand), Slice-B-Tools (MassTransit Test Harness, `LoggerMessage` source-gen) noch nicht ergänzt
+- [x] **Unit-Tests programmiert (3)** — Slice B: 16 neue Tests (KeywordClassifier 4, CaptureServiceStub 6, Pipeline-Consumers 6) → 47 Tests insgesamt grün
+- [ ] **Test-Ergebnisse dokumentiert (3)** — in ADR 0003 + `docs/ai-usage.md` skizziert; CHANGELOG `[Unreleased]` noch offen
 
 ### KI, Sub-Systeme & Reflexion
 
-- [ ] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ höchstgewichtetes Kriterium — welche Tools (Claude Code, Copilot, ChatGPT), welche Aufgaben, Prompt-Strategien, generierter vs. handgeschriebener Anteil. Doku in `docs/ai-usage.md` oder pro Block in `docs/insights/`
-- [ ] **Intelligente / flexible Services mit KI gebaut (6)** — mind. ein Service nutzt KI zur Laufzeit (Capture-Klassifikation via `Microsoft.Extensions.AI`)
-- [ ] **Sub-Systeme als unabhängige Container deploybar (5)** — `FlowHub.Web` und `FlowHub.Api` als getrennte Container; RabbitMQ als Container; Docker-Compose-Profil dokumentiert. ⚠️ **Spannung mit ADR 0002:** Modular Monolith bleibt im Code, aber die Deployment-Topologie kann mehrere Container zeigen — Block 5 ist die finale Stufe, in Block 3 mind. den Plan + Compose-Skizze festhalten
-- [ ] **KI-Erfahrungen als Fazit reflektiert (7)** — Block-3-Reflexion: was hat funktioniert, was nicht, wo war menschliche Korrektur nötig, lessons learned. Auch geeignet als Folien-Material für PVA 2026-05-23
+- [x] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ höchstgewichtetes Kriterium — `docs/ai-usage.md` (Living Doc): Tool-Stack, Workflow (brainstorming → writing-plans → SDD), generierter vs. handgeschriebener Anteil, notable Adaptationen die Subagents gefunden haben (z.B. Captive-Dependency-Trap)
+- [ ] **Intelligente / flexible Services mit KI gebaut (6)** — Port `IClassifier` + Stub `KeywordClassifier` ✅; AI-Backed-Adapter via `Microsoft.Extensions.AI` ist Slice C
+- [x] **Sub-Systeme als unabhängige Container deploybar (5)** — Sketch-Level: `docker-compose.yml` (web + rabbitmq + future api) im Repo; finale Block-5-Variante folgt
+- [x] **KI-Erfahrungen als Fazit reflektiert (7)** — Reflexion-Sektion in `docs/ai-usage.md` mit ✅ / ⚠ / ❌ Auflistung; PVA-Folien-Material noch zu destillieren
 
 ---
 
@@ -78,9 +79,9 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Architektur & Entscheide
 
-- [ ] ADR 0003 — Async Messaging Pipeline (MassTransit Transport, Topology, Retry/DLQ-Policy, Outbox?)
-- [ ] ADR 0004 — KI-Integration in Services (Provider, Abstraction, Prompt-/Cost-Strategie, Stack-Mapping Spring-AI → .NET)
-- [ ] OpenAPI-Versionierungs- und Konsistenzstrategie festlegen (Scalar als UI, Refit/Kiota als Client-Generator)
+- [x] ADR 0003 — Async Messaging Pipeline (MassTransit Topology, Retry/DLQ, Fault-Observer; Outbox auf Block 4 verschoben)
+- [ ] ADR 0004 — KI-Integration in Services (Provider, Abstraction, Prompt-/Cost-Strategie, Stack-Mapping Spring-AI → .NET) — Slice C
+- [ ] OpenAPI-Versionierungs- und Konsistenzstrategie festlegen (Scalar als UI, Refit/Kiota als Client-Generator) — Slice A
 
 ### REST-API (`source/FlowHub.Api/`)
 
@@ -92,17 +93,17 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Async-Pipeline (MassTransit)
 
-- [ ] MassTransit + In-Memory-Transport in `FlowHub.Web` / `FlowHub.Api` registriert
-- [ ] Event-Kontrakte definiert: `CaptureCreated`, `CaptureClassified`, `SkillRoutingRequested`, `IntegrationCallFailed`
-- [ ] Consumers: `CaptureEnrichmentConsumer` (Classification + Tagging), `SkillRoutingHandler`
-- [ ] Retry-/DLQ-Policy + Test Harness Tests
-- [ ] RabbitMQ-Profil vorbereiten (Docker-Compose-Snippet, lokal aktivierbar)
+- [x] MassTransit + In-Memory-Transport in `FlowHub.Web` registriert — `FlowHub.Api`-Wiring kommt mit Slice A
+- [x] Event-Kontrakte definiert: `CaptureCreated`, `CaptureClassified` — `SkillRoutingRequested` + `IntegrationCallFailed` bewusst gestrichen (ADR 0003 D2: Routing-Consumer schreibt inline; Failures sind `Fault<CaptureClassified>`)
+- [x] Consumers: `CaptureEnrichmentConsumer`, `SkillRoutingConsumer` (statt `…Handler`), `LifecycleFaultObserver`
+- [x] Retry-/DLQ-Policy + Test Harness Tests — per-Consumer-Retry (100/500ms enrichment, 500/2000/5000ms routing); Fault-Observer ohne Retry; 6 Tests
+- [x] RabbitMQ-Profil vorbereiten — Docker-Compose-Sketch im Repo; lokales Aktivieren wird in Block 5 fertiggestellt
 
 ### KI in Services
 
-- [ ] `Microsoft.Extensions.AI` (oder Semantic Kernel) als Abstraktion einbinden
-- [ ] Klassifikator-Stub: Capture → vorgeschlagene Tags / Skill — mit Mock-Provider testbar
-- [ ] Reflexion zu Spring-AI / Koog vs. .NET-Stack (kurz dokumentieren, warum nicht JVM)
+- [ ] `Microsoft.Extensions.AI` (oder Semantic Kernel) als Abstraktion einbinden — Slice C
+- [x] Klassifikator-Stub: Capture → vorgeschlagene Tags / Skill — `KeywordClassifier` (deterministische URL/todo-Heuristik, 4 Tests grün); Mock-Provider via NSubstitute in Pipeline-Tests
+- [ ] Reflexion zu Spring-AI / Koog vs. .NET-Stack — kurz in ADR 0003 angerissen, eigenes Doc folgt mit ADR 0004
 
 ### Typed Clients (Konsistenz Server↔Client)
 
@@ -114,10 +115,10 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [ ] Test-Strategie als Dokument (`docs/test-strategy.md` o.ä.)
 - [ ] Akzeptanzkriterien je Use Case (in den ADRs oder eigenem Doc)
-- [ ] Unit-Tests für Handlers / Validators
-- [ ] Component-Tests für API-Endpoints (`Microsoft.AspNetCore.Mvc.Testing`)
-- [ ] MassTransit Test Harness für Consumers
-- [ ] `dotnet test` voll grün, Resultate in CHANGELOG dokumentieren
+- [x] Unit-Tests für Handlers / Validators — Slice B: KeywordClassifier (4), CaptureServiceStub (6), Pipeline-Consumers (6); Validators kommen mit Slice A
+- [ ] Component-Tests für API-Endpoints (`Microsoft.AspNetCore.Mvc.Testing`) — Slice A
+- [x] MassTransit Test Harness für Consumers — `PipelineTestBase` + 6 Harness-basierte Tests (Enrichment, Routing, Fault-Observer)
+- [x] `dotnet test` voll grün — 47/47, Build mit warnings-as-errors clean; CHANGELOG-Eintrag noch offen
 
 ### Spezifikation & Dokumentation
 
