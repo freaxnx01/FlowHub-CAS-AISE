@@ -215,7 +215,12 @@ The Quarkus / Jakarta EE criterion (max 10 pts) remains N/A — see ADR 0002 and
 MassTransit adds a meaningful learning curve. The three areas where it bites soonest:
 
 1. **Captive dependency** (Decision 8). MassTransit's DI lifetime model has `IBus` as singleton and `IPublishEndpoint` as scoped. Any singleton service that needs to publish must either inject `IBus` or use a factory. This is not obvious from the docs and requires a comment in the code to avoid future confusion.
-2. **EventId namespacing convention.** Serilog event ids for pipeline events follow the convention `1000–1999` for enrichment-consumer events and `2000–2999` for routing-consumer events. The range `3000–3999` is reserved for fault-observer events. This is a project-local convention not enforced by tooling — it must be followed by discipline and noted in `docs/ai-usage.md`.
+2. **EventId namespacing convention.** Serilog event ids follow project-local ranges, scoped by where the LoggerMessage source-gen partial method physically lives:
+   - **`1000–1999` — Pipeline** (consumers + fault observer in `source/FlowHub.Web/Pipeline/`). Slice B uses `1001` (`CaptureEnrichmentConsumer.LogOrphan`), `1002` (`SkillRoutingConsumer.LogUnhandled`), `1003` (`LifecycleFaultObserver.LogObserverFailed`).
+   - **`2000–2999` — Skills** (adapters in `source/FlowHub.Skills/`). Slice B uses `2001` (`LoggingSkillIntegration.LogStubWrite`).
+   - Higher ranges are unallocated; new modules pick a free range when they land.
+
+   Not enforced by tooling — followed by discipline and reflected here + in commit messages.
 3. **Test harness retry intervals.** Tests use `10ms` retry intervals to keep the suite fast. If a test is flaky, the first thing to check is whether the retry budget is being exhausted faster than the assertions can observe the state transition. The `ITestHarness` `await harness.Consumed<T>()` helper handles most of this, but it is worth knowing.
 
 ### In-memory transport caveats
