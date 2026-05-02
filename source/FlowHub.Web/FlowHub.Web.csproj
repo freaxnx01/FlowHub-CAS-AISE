@@ -8,6 +8,8 @@
   <ItemGroup>
     <PackageReference Include="MudBlazor" />
     <PackageReference Include="Bogus" />
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
   </ItemGroup>
 
   <ItemGroup>

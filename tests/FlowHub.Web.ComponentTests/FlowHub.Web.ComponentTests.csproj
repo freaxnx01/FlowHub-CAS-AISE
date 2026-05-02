@@ -17,6 +17,7 @@
     <PackageReference Include="bunit" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="NSubstitute" />
+    <PackageReference Include="MassTransit" />
   </ItemGroup>
 
   <ItemGroup>
