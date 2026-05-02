@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlowHub.Core\FlowHub.Core.csproj" />
+    <ProjectReference Include="..\FlowHub.Skills\FlowHub.Skills.csproj" />
   </ItemGroup>
 
 </Project>
