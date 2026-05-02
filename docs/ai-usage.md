@@ -84,6 +84,60 @@ The 5% human input is high-value: scope correction, package-name correction, fac
 - The .NET SDK pin in `global.json` (10.0.201) didn't match the installed SDK (10.0.104). The agent installed 10.0.201 to `~/.dotnet` and symlinked it into `~/.local/bin/dotnet`. Worked, but added a non-trivial environment change the user has to know about; documented in `~/.bashrc` with a removal note.
 - A mid-stream `git history rewrite on main` (PII scrub) invalidated all in-flight commit SHAs. The user had to coordinate the stop/restart manually. Workflow worked: stop after current todo, document HEAD + remaining tasks, resume on the rewritten branch using commit messages as identity.
 
+## Block 3 Slice A — REST API
+
+### Brainstorming + spec writing
+
+Conversational design via Claude Code's brainstorming skill. The session built on the `docs/design/api/api-surface.md` sketch produced during Block 3 Vorbereitung (D1–D6 already locked). Slice A added 5 new decisions (D7–D11): scope sizing (captures-only vs. full surface), versioning strategy (`/api/v1/` prefix), cursor pagination format, ProblemDetails conformance level, and test project topology.
+
+The user picked option β (Captures-only scope) over the full 7-endpoint surface (α) and the no-skills-endpoint variant (γ), explicitly to free implementation time for Slices C and D. Skills and integrations endpoints deferred to Slice D.
+
+Final spec self-reviewed by Claude before commit: placeholder scan, internal consistency check, ambiguity check, scope check.
+
+### Implementation plan
+
+Authored by Claude Code via the `writing-plans` skill from the approved spec. 15 tasks total, TDD-ordered: new project scaffold → endpoint stubs → validators → cursor pagination → list async → GET by id → retry handler → JSON enum config → test project → integration tests per endpoint → OpenAPI/Scalar wiring → problem details → MassTransit IBus injection → vault/ai-usage docs → final test pass.
+
+### Implementation execution
+
+Subagent-driven. 15 tasks dispatched sequentially; Haiku for mechanical tasks (T1 scaffolding, T4 project registration, T13 vault checklist, T14 problem docs); Sonnet 4.6 for all TDD, judgment-heavy, and integration tasks.
+
+New project `source/FlowHub.Api/` co-hosted via project reference in `FlowHub.Web`; new test project `tests/FlowHub.Api.IntegrationTests/` bootstrapped via `WebApplicationFactory<Program>`. Cursor format: hand-rolled URL-safe base64 of JSON `(CreatedAt, Id)` — no ASP.NET dependency introduced into `FlowHub.Core`.
+
+### Notable adaptations the implementers caught
+
+- **`JsonStringEnumConverter` configuration:** Minimal API uses integer enum serialization by default; the T8 implementer added `ConfigureHttpJsonOptions` with `JsonStringEnumConverter` server-side, plus matching `JsonSerializerOptions` in test deserialization. This wasn't pre-specified in the plan.
+- **`Captures` namespace shadow:** creating `tests/FlowHub.Web.ComponentTests/Captures/` for `CaptureCursorTests` shadowed the `FlowHub.Web.Components.Pages.Captures` Blazor component referenced in `CapturesTests.cs`. T5 implementer fixed via a `using CapturesPage =` alias at the top of the test file.
+- **Consumer race in retry handler:** synthesizing the response capture from the post-reset state (rather than re-querying after `ResetForRetryAsync`) avoids a flaky test where the Slice-B in-memory consumer reclassifies the capture before the response is built (T11).
+- **MassTransit package reference:** T11 implementer added `<PackageReference Include="MassTransit" />` to `FlowHub.Api.csproj` for `IBus` injection — the package version was already centrally pinned in `Directory.Packages.props` from Slice B, so no version conflict arose.
+- **Missing `using Microsoft.AspNetCore.Http;`:** the T2 endpoint snippet in the plan omitted this import; the T2 implementer caught and added it before the build could fail.
+
+### Generated vs. handwritten share (estimate, Slice A only)
+
+| Artifact | AI-drafted | Human-edited |
+|---|---|---|
+| Spec | ~95% | ~5% (scope choice α/β/γ + cursor format choice) |
+| Plan | ~95% | ~5% (verifying paths) |
+| Production code (endpoints, validators, cursor, ListAsync) | ~95% | ~5% (constructor / namespace fixes during review) |
+| Tests (integration via WebApplicationFactory) | ~95% | 0% |
+
+### Reflexion — what worked, what didn't
+
+**What worked**
+
+- The api-surface sketch from Block 3 Vorbereitung removed ~80% of the design work for Slice A — the brainstorming session reduced to scope sizing and gap-filling 5 new decisions rather than designing from scratch.
+- Implementer subagents caught real .NET defaults issues (`JsonStringEnumConverter`, namespace shadow) that the plan didn't anticipate — the two-stage review (spec-compliance then code-quality) continued to justify its overhead.
+- The `WebApplicationFactory`-based test project gave end-to-end confidence that the Minimal API routes, validators, and JSON serialization all compose correctly in the real DI container — no mocking of infrastructure.
+
+**What needed correction**
+
+- Plan defects: the T2 endpoint snippet was missing `using Microsoft.AspNetCore.Http;`, and the JSON enum string-converter plumbing wasn't pre-specified. Both were caught by implementers mid-task. Lesson: plan authoring should compile-check inline snippets mentally against the existing `_Imports` / `using` surface.
+- Cursor format was underspecified in the initial plan draft (no mention of URL-safe base64 vs. plain base64). The T5 implementer picked URL-safe; the plan was updated retroactively.
+
+**What didn't work / blockers**
+
+N/A — no blockers; subagent dispatches went straight through without escalation.
+
 ## Prompts of note
 
 (Captured here when surprising or high-leverage. Empty for now — most prompts followed standard skill conventions.)

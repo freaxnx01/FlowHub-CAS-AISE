@@ -61,8 +61,8 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Validierung
 
-- [ ] **Abnahmekriterien definiert (5)** — pro Use Case explizit (z.B. in ADR oder `docs/acceptance-criteria.md`)
-- [ ] **Test-Strategie + Technologien spezifiziert (5)** — `docs/spec/testing-strategy.md` existiert (Block-2-Stand), Slice-B-Tools (MassTransit Test Harness, `LoggerMessage` source-gen) noch nicht ergänzt
+- [ ] **Abnahmekriterien definiert (5)** — pro Use Case explizit (z.B. in ADR oder `docs/acceptance-criteria.md`) — **partial (Slice A)**: 17 integration-test cases in `tests/FlowHub.Api.IntegrationTests/` serve as executable Abnahmekriterien per captures endpoint; formal UC list still open
+- [ ] **Test-Strategie + Technologien spezifiziert (5)** — `docs/spec/testing-strategy.md` existiert (Block-2-Stand), Slice-B-Tools (MassTransit Test Harness, `LoggerMessage` source-gen) noch nicht ergänzt — **Slice A adds**: `Microsoft.AspNetCore.Mvc.Testing` + `WebApplicationFactory<Program>` now in documented test stack (17 integration tests, 74 total)
 - [x] **Unit-Tests programmiert (3)** — Slice B: 16 neue Tests (KeywordClassifier 4, CaptureServiceStub 6, Pipeline-Consumers 6) → 47 Tests insgesamt grün
 - [ ] **Test-Ergebnisse dokumentiert (3)** — in ADR 0003 + `docs/ai-usage.md` skizziert; CHANGELOG `[Unreleased]` noch offen
 
@@ -81,15 +81,15 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [x] ADR 0003 — Async Messaging Pipeline (MassTransit Topology, Retry/DLQ, Fault-Observer; Outbox auf Block 4 verschoben)
 - [ ] ADR 0004 — KI-Integration in Services (Provider, Abstraction, Prompt-/Cost-Strategie, Stack-Mapping Spring-AI → .NET) — Slice C
-- [ ] OpenAPI-Versionierungs- und Konsistenzstrategie festlegen (Scalar als UI, Refit/Kiota als Client-Generator) — Slice A
+- [x] OpenAPI-Versionierungs- und Konsistenzstrategie festlegen (Scalar als UI, Refit/Kiota als Client-Generator) — **partial**: Scalar wired and serving `/scalar`; Refit/Kiota client generation deferred to Slice D
 
 ### REST-API (`source/FlowHub.Api/`)
 
-- [ ] Projekt scaffolden + in `FlowHub.slnx` registrieren
-- [ ] Endpoints: `GET/POST /api/captures`, `GET /api/captures/{id}`, `POST /api/captures/{id}/retry`, `GET /api/skills`, `GET /api/integrations`
-- [ ] FluentValidation am Boundary, ProblemDetails (RFC 9457) für Fehler
-- [ ] OpenAPI + Scalar UI (`/scalar`)
-- [ ] Stub-Daten-Quelle (Bogus/In-Memory aus Block 2 wiederverwenden) — keine echte Persistenz (Block 4)
+- [x] Projekt scaffolden + in `FlowHub.slnx` registrieren
+- [x] Endpoints: `GET/POST /api/captures`, `GET /api/captures/{id}`, `POST /api/captures/{id}/retry`, `GET /api/skills`, `GET /api/integrations` — **partial**: captures endpoints (GET /api/v1/captures, POST /api/v1/captures, GET /api/v1/captures/{id}, POST /api/v1/captures/{id}/retry) all landed; GET /api/skills and GET /api/integrations **deferred to v2** per Slice A spec D7
+- [x] FluentValidation am Boundary, ProblemDetails (RFC 9457) für Fehler
+- [x] OpenAPI + Scalar UI (`/scalar`)
+- [x] Stub-Daten-Quelle (Bogus/In-Memory aus Block 2 wiederverwenden) — keine echte Persistenz (Block 4)
 
 ### Async-Pipeline (MassTransit)
 
@@ -116,7 +116,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 - [ ] Test-Strategie als Dokument (`docs/test-strategy.md` o.ä.)
 - [ ] Akzeptanzkriterien je Use Case (in den ADRs oder eigenem Doc)
 - [x] Unit-Tests für Handlers / Validators — Slice B: KeywordClassifier (4), CaptureServiceStub (6), Pipeline-Consumers (6); Validators kommen mit Slice A
-- [ ] Component-Tests für API-Endpoints (`Microsoft.AspNetCore.Mvc.Testing`) — Slice A
+- [x] Component-Tests für API-Endpoints (`Microsoft.AspNetCore.Mvc.Testing`) — Slice A: 17 integration tests via `WebApplicationFactory<Program>` in `tests/FlowHub.Api.IntegrationTests/`
 - [x] MassTransit Test Harness für Consumers — `PipelineTestBase` + 6 Harness-basierte Tests (Enrichment, Routing, Fault-Observer)
 - [x] `dotnet test` voll grün — 47/47, Build mit warnings-as-errors clean; CHANGELOG-Eintrag noch offen
 
