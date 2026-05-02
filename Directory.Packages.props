@@ -14,6 +14,7 @@
 
     <!-- Logging / observability (placeholder, not yet wired in Block 2) -->
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup Label="Test">
