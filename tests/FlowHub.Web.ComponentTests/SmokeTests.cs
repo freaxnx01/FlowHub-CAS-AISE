@@ -1,5 +1,6 @@
 using FlowHub.Web.Components.Pages;
 using FlowHub.Web.Stubs;
+using CapturesPage = FlowHub.Web.Components.Pages.Captures;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
@@ -90,7 +91,7 @@ public class SmokeTests : TestContext
     [Fact]
     public void CapturesList_ShowsAllTwelveCaptures()
     {
-        var cut = RenderComponent<Captures>();
+        var cut = RenderComponent<CapturesPage>();
 
         cut.Markup.Should().Contain("Results: 12");
     }
@@ -98,7 +99,7 @@ public class SmokeTests : TestContext
     [Fact]
     public void CapturesList_ContainsOrphanAndUnhandledBadges()
     {
-        var cut = RenderComponent<Captures>();
+        var cut = RenderComponent<CapturesPage>();
 
         cut.Markup.Should().Contain("orphan");
         cut.Markup.Should().Contain("unhandled");
