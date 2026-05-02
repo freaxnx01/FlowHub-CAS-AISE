@@ -26,6 +26,11 @@ public static class CaptureEndpoints
             .Produces<ListCapturesResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
+        captures.MapGet("/{id:guid}", GetByIdAsync)
+            .WithName("GetCapture")
+            .Produces<Capture>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         return app;
     }
 
@@ -82,6 +87,25 @@ public static class CaptureEndpoints
         var page = await captureService.ListAsync(filter, ct);
 
         return TypedResults.Ok(new ListCapturesResponse(page.Items, page.Next?.Encode()));
+    }
+
+    private static async Task<Results<Ok<Capture>, ProblemHttpResult>> GetByIdAsync(
+        Guid id,
+        ICaptureService captureService,
+        HttpContext httpContext,
+        CancellationToken ct)
+    {
+        var capture = await captureService.GetByIdAsync(id, ct);
+        if (capture is null)
+        {
+            return TypedResults.Problem(
+                type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/capture-not-found.md",
+                title: "Capture not found.",
+                detail: $"No capture exists with id {id}.",
+                statusCode: StatusCodes.Status404NotFound,
+                instance: httpContext.Request.Path);
+        }
+        return TypedResults.Ok(capture);
     }
 
     private static async Task<Results<Created<Capture>, ValidationProblem>> SubmitAsync(
