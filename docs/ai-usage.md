@@ -1,0 +1,96 @@
+# AI Tool Usage — FlowHub
+
+> Living document for the rubric criterion "Wurden KI-unterstützende Werkzeuge verwendet und deren Nutzung beschrieben (12)" (highest-weighted single item, see `vault/Organisation/Bewertungskriterien.md`). Updated as work happens — not as a one-shot at submission.
+
+## Tools in use
+
+| Tool | Purpose | Where it shows up |
+|---|---|---|
+| Claude Code (Opus 4.7, 1M context) | Brainstorming, plan writing, ADR drafting, controller for subagent dispatches | `docs/superpowers/specs/`, `docs/superpowers/plans/`, `docs/adr/`, this file |
+| Claude Sonnet 4.6 (subagents) | Implementer + spec reviewer + code-quality reviewer subagents under the superpowers SDD workflow | All `source/` and `tests/` changes from Block 3 Slice B |
+| GitHub Copilot | Inline suggestions during editing | Sparingly — Claude Code drives sessions end-to-end |
+| ChatGPT | Ad-hoc concept clarification, side checks | Only when Claude is mid-task on something else |
+
+## Workflow used in Block 3
+
+The Block 3 Slice-B work (async pipeline) ran end-to-end through the **superpowers** plugin's structured workflow:
+
+1. `superpowers:brainstorming` — locked 13 design decisions via A/B/C trade-off questions; output is `docs/superpowers/specs/2026-04-30-async-pipeline-design.md`.
+2. `superpowers:writing-plans` — produced the 16-task TDD-driven implementation plan at `docs/superpowers/plans/2026-04-30-async-pipeline.md`.
+3. `superpowers:subagent-driven-development` — for each task: dispatch a fresh implementer subagent → spec-compliance review subagent → code-quality review subagent → mark complete in the controller's TaskList.
+4. `superpowers:using-git-worktrees` — isolated all implementation work in `.worktrees/block3-async-pipeline/` on branch `feat/block3-async-pipeline`, leaving `main` untouched until the branch is reviewed.
+
+## Block 3 Slice B — async pipeline
+
+### Brainstorming + spec writing
+
+Conversational design via Claude Code's brainstorming skill. ~13 decisions surfaced as A/B/C questions; reviewer (the human) corrected scope choice from "Slice A first" (REST API) to "Slice B (ADR 0003 first — pin scope before coding)" after a technical discussion of MassTransit's tradeoffs and the genuine value vs. overhead of a queue in a single-user system.
+
+The user explicitly delegated the remaining design decisions during a 1.5-hour break ("pick recommendations and give a short summary on return"); Claude completed the spec, committed it locally, and presented a decision summary for review.
+
+Final spec self-reviewed by Claude before commit (placeholder scan, internal consistency, ambiguity check, scope check).
+
+### Implementation plan
+
+Authored by Claude Code via the `writing-plans` skill from the approved spec. 16 tasks total, bite-sized TDD ordering: packages → events → ports → adapters → service mark-methods → consumers (enrichment, routing, fault) → Program.cs wiring → ADR 0003 → ai-usage.md → docker-compose sketch → vault checklist.
+
+### Implementation execution
+
+Subagent-driven. Pattern per task:
+
+- Dispatch implementer subagent (general-purpose, Sonnet 4.6 for TDD/judgment, Haiku for mechanical) with the full task text + context — never make the subagent read the plan file.
+- Implementer reports DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT.
+- Dispatch spec-compliance reviewer subagent — reads actual code, compares to plan, returns ✅ / ❌ with file:line citations.
+- If ✅ spec, dispatch `superpowers:code-reviewer` agent — returns Strengths / Issues (Critical / Important / Minor) / Assessment.
+- Apply minor fix-ups inline (controller-side) for trivial issues; surface critical/important ones back to the implementer.
+
+### Notable adaptations the implementers caught (real value, not hallucinations)
+
+- **`MassTransit.Testing` is not a separate NuGet package** in MassTransit 8.5.9 — `AddMassTransitTestHarness()` lives in the main `MassTransit` package. The plan was wrong; the implementer corrected the package list and the test-project reference.
+- **Captive-dependency trap on `IPublishEndpoint`** — MassTransit registers `IPublishEndpoint` as Scoped; `CaptureServiceStub` is Singleton. Plain `AddSingleton<ICaptureService, CaptureServiceStub>()` would fail at startup. Implementer surfaced the issue, applied the canonical fix (factory using `IBus`), and propagated the same pattern to `Program.cs`.
+- **`harness.Consumed.Any<T>(predicate, TimeSpan)` overload** doesn't exist in MassTransit 8.5.9 — implementer used `using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5))` and passed `cts.Token` instead.
+- **`appsettings.Development.json` is in `.gitignore`** (12-factor compliance per CLAUDE.md). The first T11 commit force-added it; the implementer flagged the issue in their report, and a follow-up commit removed it. The `Program.cs` `else` branch already defaults to `UsingInMemory`, making the file redundant.
+- **Pre-existing `CaptureServiceStubTests.cs`** had 4 Block-2 regression tests not mentioned in the plan. Implementer merged the 6 new tests with the existing 4 (rather than overwriting) and updated `CapturesTests.cs` + `SmokeTests.cs` to pass an `IPublishEndpoint` substitute to the new constructor.
+
+### Generated vs. handwritten share (estimate, Slice B only)
+
+| Artifact | AI-drafted | Human-edited |
+|---|---|---|
+| Brainstorming spec | ~95% | ~5% (decisions, scope, factual corrections) |
+| Implementation plan | ~95% | ~5% (verifying packages, paths) |
+| ADR 0003 | ~95% | TBC after review |
+| Production code (consumers, classifier, registration) | ~95% | ~5% (constructor scope fixes during review) |
+| Tests | ~95% | 0% (TDD-first; tests were author-once) |
+
+The 5% human input is high-value: scope correction, package-name correction, factory-pattern surfacing, 12-factor compliance enforcement.
+
+### Reflexion — what worked, what didn't
+
+✅ **What worked**
+
+- The brainstorming-skill A/B/C question format forced explicit decision-making instead of hand-waving. 13 decisions written down, each with rationale.
+- Subagent-driven development per task gave clean isolation: each implementer started with a fresh context, the controller curated exactly what they needed, and the two-stage review (spec then quality) caught real issues twice.
+- LoggerMessage source-gen caught CA1848/CA1873 analyzer rules early; the team established an EventId namespacing convention (Pipeline 1000–1999, Skills 2000–2999) before the third consumer landed.
+- The smoke-test gate (`make run` + `curl /` returning 200) revealed the captive-dependency issue immediately when it would have been silent in a unit-test-only run.
+
+⚠ **What needed correction**
+
+- The plan was authored from incomplete repository knowledge (missed reading `CaptureServiceStubTests.cs`, the existing `ChannelKind` values, the `MassTransit.Testing` package layout). Implementers had to adapt mid-task. Lesson: brainstorming + plan authoring should explicitly grep/read every file the plan references.
+- The first T11 commit force-added a gitignored file. The plan didn't catch this; the implementer's self-review did. Lesson: any time the agent runs `git add -f`, that's a red flag worth surfacing in the dispatch prompt.
+- The first T8 implementer used a verbose 50-line `NoopPublishEndpoint` hand-rolled mock when `Substitute.For<IPublishEndpoint>()` was already available. The plan's fallback note was missed. Lesson: spell out the simpler alternative inline, not as a footnote.
+
+❌ **What didn't work / where humans had to intervene**
+
+- The .NET SDK pin in `global.json` (10.0.201) didn't match the installed SDK (10.0.104). The agent installed 10.0.201 to `~/.dotnet` and symlinked it into `~/.local/bin/dotnet`. Worked, but added a non-trivial environment change the user has to know about; documented in `~/.bashrc` with a removal note.
+- A mid-stream `git history rewrite on main` (PII scrub) invalidated all in-flight commit SHAs. The user had to coordinate the stop/restart manually. Workflow worked: stop after current todo, document HEAD + remaining tasks, resume on the rewritten branch using commit messages as identity.
+
+## Prompts of note
+
+(Captured here when surprising or high-leverage. Empty for now — most prompts followed standard skill conventions.)
+
+## References
+
+- ADR 0003: `docs/adr/0003-async-pipeline.md`
+- Spec: `docs/superpowers/specs/2026-04-30-async-pipeline-design.md`
+- Plan: `docs/superpowers/plans/2026-04-30-async-pipeline.md`
+- Bewertungskriterien: `vault/Organisation/Bewertungskriterien.md`
