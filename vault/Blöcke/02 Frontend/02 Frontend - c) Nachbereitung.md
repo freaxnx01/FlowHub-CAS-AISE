@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-04-10
+updated: 2026-05-03
 ---
 
 # Block 2 — Frontend · Nachbereitung
@@ -104,21 +104,6 @@ Sind bereits in ADR 0001 als "out of scope" dokumentiert:
 - Real Persistence → Block 4 (aktuell In-Memory Bogus Stubs)
 - Live SignalR Push neuer Captures (nice-to-have, ggf. Block 3)
 - Charts / Metrics Visualisierungen
-
----
-
-## Reading List (offen aus Vorbereitung)
-
-Falls noch nicht erledigt — eigentlich Vorbereitungsarbeit, aber das `02 Frontend - a) Vorbereitung.md` listet diese 8 Kapitel als noch offen:
-
-- [ ] Beyond Vibe Coding · Kap. 3 — The 70% Problem: AI-Assisted Workflows
-- [ ] Beyond Vibe Coding · Kap. 4 — Beyond the 70%: Maximizing Human Contribution
-- [ ] Coding with AI · Kap. 3 — Design and discovery
-- [ ] Coding with AI · Kap. 4 — Coding the first version of our application
-- [ ] Coding with AI · Kap. 7 — Building user interfaces with ChatGPT
-- [ ] Head First Software Architecture · Kap. 3 — The Two Laws of Software Architecture
-- [ ] Head First Software Architecture · Kap. 4 — Logical Components
-- [ ] Quarkus in Action · Kap. 6 — Exposing and securing web applications
 
 ---
 

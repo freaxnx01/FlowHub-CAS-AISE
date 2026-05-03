@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-04-18
+updated: 2026-05-03
 ---
 
 # Block 3 — Services · Vorbereitung
@@ -95,9 +95,10 @@ Option B gewählt: **OrderService + NotificationService + RabbitMQ**.
 
 > Kein Moodle-Pflichtteil, aber sinnvoll um in die Nachbereitung mit klarem Plan zu starten.
 
-- [ ] FlowHub API-Surface skizzieren — welche Endpoints brauchen die bestehenden Blazor-Pages?
+- [x] FlowHub API-Surface skizzieren — welche Endpoints brauchen die bestehenden Blazor-Pages?
   - `GET /api/captures`, `POST /api/captures`, `GET /api/captures/{id}`, `POST /api/captures/{id}/retry`, …
   - `GET /api/skills`, `GET /api/integrations`
+  - **Status (2026-05-03):** captures endpoints landed in Block 3 Slice A; `GET /api/skills` + `GET /api/integrations` deferred to v2 per Slice A spec D7 — see [[03 Service - c) Nachbereitung]] REST-API section.
 - [x] Entscheiden: Bleibt FlowHub ein Modular Monolith (ADR 0001), oder echte Microservice-Aufteilung für Block 3?
   - Moodle-Auftrag fordert "Microservices", ADR 0001 sagt Modular Monolith. → Entscheid in ADR 0002 dokumentiert.
   - **Entscheid:** `docs/adr/0002-service-architecture-and-async-communication.md` (Status: **Accepted**, 2026-04-17). Modular Monolith bleibt; MassTransit-Async-Pipeline für Capture-Enrichment / Skill-Routing; REST-API für Nicht-UI-Clients in `source/FlowHub.Api/`; gRPC und physischer Service-Split abgelehnt.
