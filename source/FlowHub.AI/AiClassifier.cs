@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text.Json;
 using FlowHub.Core.Classification;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
@@ -9,7 +8,6 @@ namespace FlowHub.AI;
 internal sealed partial class AiClassifier : IClassifier
 {
     private static readonly string[] AllowedSkills = ["Wallabag", "Vikunja", ""];
-    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
     private readonly IChatClient _chat;
     private readonly IClassifier _keyword;
@@ -35,13 +33,15 @@ internal sealed partial class AiClassifier : IClassifier
 
         try
         {
-            var response = await _chat.GetResponseAsync(
+            var response = await _chat.GetResponseAsync<AiClassificationResponse>(
                 AiPrompts.BuildMessages(content),
                 _options,
-                cancellationToken);
+                cancellationToken: cancellationToken);
 
-            var payload = JsonSerializer.Deserialize<AiClassificationResponse>(response.Text ?? "", Json)
-                ?? throw new JsonException("AI response payload was null after deserialization");
+            if (!response.TryGetResult(out var payload))
+            {
+                throw new InvalidOperationException("schema_violation");
+            }
 
             if (Array.IndexOf(AllowedSkills, payload.MatchedSkill) < 0)
             {
