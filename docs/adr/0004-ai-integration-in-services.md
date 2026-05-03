@@ -231,11 +231,15 @@ Extends the ADR 0003 §EventId convention:
 `ChatOptions.MaxOutputTokens=300` (~2× the schema's natural ~150 output tokens),
 `Temperature=0.2` (deterministic-ish), `HttpClient` 10s timeout.
 
-Anthropic prompt cache: system prompt marked `cache_control: ephemeral` via
-`ChatOptions.AdditionalProperties`; ~80% input-token discount on the system-prompt
-segment after the second call. OpenRouter prompt cache is not universally
-supported across upstream models — Slice C does not claim it. Asymmetry documented
-here as a real difference between adapters.
+Anthropic prompt cache: deferred to Slice D — `Anthropic.SDK 5.10.0`'s `IChatClient`
+bridge does not surface the `cache_control: ephemeral` marker (see `BuildChatClient`
+TODO in `AiServiceCollectionExtensions.cs`). The ~80% input-token discount on the
+system-prompt segment is forfeit until either (a) the bridge surfaces a
+`ChatOptions.AdditionalProperties` key for caching, or (b) `AiClassifier` is
+rewritten to use the native `MessageParameters` API. Low priority given the system
+prompt is ~150 tokens; per-call delta is sub-cent at Haiku 4.5 pricing. OpenRouter
+prompt cache is not universally supported across upstream models — Slice C does not
+claim it. Asymmetry documented here as a real difference between adapters.
 
 ### OpenTelemetry
 

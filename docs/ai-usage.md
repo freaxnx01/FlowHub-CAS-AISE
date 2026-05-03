@@ -185,8 +185,9 @@ assistant. The `AiClassifier` calls a real LLM (Anthropic Haiku 4.5 by default,
 swappable to OpenRouter Llama 3.1 70B Instruct via one env var) on every capture
 that flows through the enrichment pipeline.
 
-Cost guards: `MaxOutputTokens=300`, `Temperature=0.2`, 10s HTTP timeout, Anthropic
-prompt-cache marker on the system prompt segment.
+Cost guards: `MaxOutputTokens=300`, `Temperature=0.2`, 10s HTTP timeout. Anthropic
+prompt-cache marker deferred to Slice D — `Anthropic.SDK 5.10.0` exposes it only via
+its native API, not via the MEAI bridge.
 
 Failure handling: any provider exception or schema violation logs `EventId 3010
 AiClassifierFellBackToKeyword` at Warning and routes to the deterministic
