@@ -2,7 +2,7 @@
 tags:
   - claude-generated
   - claude-updated
-updated: 2026-05-02
+updated: 2026-05-03
 ---
 
 # Block 3 — Service · Nachbereitung
@@ -103,7 +103,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [ ] `Microsoft.Extensions.AI` (oder Semantic Kernel) als Abstraktion einbinden — Slice C
 - [x] Klassifikator-Stub: Capture → vorgeschlagene Tags / Skill — `KeywordClassifier` (deterministische URL/todo-Heuristik, 4 Tests grün); Mock-Provider via NSubstitute in Pipeline-Tests
-- [ ] Reflexion zu Spring-AI / Koog vs. .NET-Stack — kurz in ADR 0003 angerissen, eigenes Doc folgt mit ADR 0004
+- [ ] Reflexion zu `Microsoft.Extensions.AI` / Semantic Kernel im .NET-Stack — kurz in ADR 0003 angerissen, eigenes Doc folgt mit ADR 0004
 
 ### Typed Clients (Konsistenz Server↔Client)
 
