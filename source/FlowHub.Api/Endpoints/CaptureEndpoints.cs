@@ -10,6 +10,14 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FlowHub.Api.Endpoints;
 
+internal static class ProblemTypes
+{
+    private const string Base = "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/";
+    public const string Validation = Base + "validation.md";
+    public const string CaptureNotFound = Base + "capture-not-found.md";
+    public const string CaptureNotRetryable = Base + "capture-not-retryable.md";
+}
+
 public static class CaptureEndpoints
 {
     public static IEndpointRouteBuilder MapFlowHubApi(this IEndpointRouteBuilder app)
@@ -65,7 +73,7 @@ public static class CaptureEndpoints
             catch (ArgumentException)
             {
                 return TypedResults.Problem(
-                    type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/validation.md",
+                    type: ProblemTypes.Validation,
                     title: "Invalid stage filter.",
                     detail: $"'{stage}' contains an unknown LifecycleStage.",
                     statusCode: StatusCodes.Status400BadRequest,
@@ -83,7 +91,7 @@ public static class CaptureEndpoints
             catch (FormatException)
             {
                 return TypedResults.Problem(
-                    type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/validation.md",
+                    type: ProblemTypes.Validation,
                     title: "Invalid pagination cursor.",
                     detail: "The cursor is not a valid Base64Url-encoded value.",
                     statusCode: StatusCodes.Status400BadRequest,
@@ -107,7 +115,7 @@ public static class CaptureEndpoints
         if (capture is null)
         {
             return TypedResults.Problem(
-                type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/capture-not-found.md",
+                type: ProblemTypes.CaptureNotFound,
                 title: "Capture not found.",
                 detail: $"No capture exists with id {id}.",
                 statusCode: StatusCodes.Status404NotFound,
@@ -129,7 +137,7 @@ public static class CaptureEndpoints
         if (capture is null)
         {
             return TypedResults.Problem(
-                type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/capture-not-found.md",
+                type: ProblemTypes.CaptureNotFound,
                 title: "Capture not found.",
                 detail: $"No capture exists with id {id}.",
                 statusCode: StatusCodes.Status404NotFound,
@@ -139,7 +147,7 @@ public static class CaptureEndpoints
         if (!RetryableStages.Contains(capture.Stage))
         {
             return TypedResults.Problem(
-                type: "https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/problems/capture-not-retryable.md",
+                type: ProblemTypes.CaptureNotRetryable,
                 title: "Capture stage is not retryable.",
                 detail: $"Captures may only be retried from Orphan or Unhandled. Current stage: {capture.Stage}.",
                 statusCode: StatusCodes.Status409Conflict,
