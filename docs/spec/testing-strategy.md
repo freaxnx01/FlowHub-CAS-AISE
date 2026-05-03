@@ -26,30 +26,97 @@ graph TD
 
 | Layer | Framework | What it tests | When to run | Block |
 |---|---|---|---|---|
-| **Unit** | xUnit + FluentAssertions + NSubstitute | Domain types, service logic, validators, pure functions | Every build (`make test`) | Block 2+ |
-| **Component (bUnit)** | bUnit + MudBlazor.Services | Razor components render correctly, props/events wire up, states (loading/empty/error) display properly | Every build (`make test`) | Block 2 (current) |
-| **Integration** | WebApplicationFactory + Testcontainers (PostgreSQL) | Full HTTP pipeline, DI composition, auth middleware, EF Core queries, API endpoints | Before merge / CI | Block 3 (when API + DB land) |
+| **Unit** | xUnit + FluentAssertions + NSubstitute | Domain types, service logic, validators, pure functions | Every build (`make test`) | Block 2-3 (active) |
+| **Component (bUnit)** | bUnit + MudBlazor.Services | Razor components render correctly, props/events wire up, states (loading/empty/error) display properly | Every build (`make test`) | Block 2-3 (active) |
+| **Integration** | WebApplicationFactory + Testcontainers (PostgreSQL) | Full HTTP pipeline, DI composition, auth middleware, EF Core queries, API endpoints | Before merge / CI | Block 3 (active — API; Block 4 will add DB-backed) |
 | **E2E** | Playwright | Browser-level: page navigation, SignalR circuit, visual layout, cross-page flows | Before release / CI | Block 5 (when deployed) |
 
-## Current State (Block 2)
+## Current State (Block 3 — through Slice C)
 
 ### What's implemented
 
-- **31 bUnit component tests** in `tests/FlowHub.Web.ComponentTests/`
-- **4 stub service behavior tests** (CaptureServiceStub: GetRecent, GetFailureCounts, Submit happy path, Submit empty-content rejection)
-- **5 NeedsAttentionCard tests** (loading skeleton, all-clear, failure counts, orphan click callback, unhandled click callback)
-- **3 SkillHealthCard tests** (loading, empty, populated)
-- **3 NewCapture form tests** (render, skills load, skills-fail graceful degradation)
-- **2 Captures list tests** (render all, results count)
-- **14 smoke tests** using real Bogus stubs (not mocks) covering the full manual walkthrough: Dashboard → Captures list → Capture detail (orphan, unhandled, completed, not-found) → New Capture → Skills → Integrations
+- **99 default-suite tests** passing on `make test` (excluding `Category=AI`):
+  - **82 component tests** in `tests/FlowHub.Web.ComponentTests/` covering Razor components, service stubs, classification, and the MassTransit pipeline
+  - **17 API integration tests** in `tests/FlowHub.Api.IntegrationTests/` covering REST endpoints via `WebApplicationFactory<Program>`
+
+- **Slice A (REST API)**: 17 integration tests via `Microsoft.AspNetCore.Mvc.Testing` covering `/api/v1/captures` endpoints:
+  - `SubmitCaptureTests` — POST with validation (valid, empty content, invalid skill)
+  - `ListCapturesTests` — GET with cursor pagination, stage/source filters
+  - `GetCaptureByIdTests` — GET single capture, 404 not found
+  - `RetryCaptureTests` — POST retry with stage validation
+  - `ProblemDetailsFormatTests` — RFC 9457 wire format validation
+  - `SmokeTests` — end-to-end captures workflow
+
+- **Slice B (Async Pipeline)**: 6 MassTransit Test Harness tests covering event consumers:
+  - `CaptureEnrichmentConsumerTests` — 2 tests (enrich keywords, handle invalid skill)
+  - `SkillRoutingConsumerTests` — 2 tests (route by matched skill, handle orphan)
+  - `LifecycleFaultObserverTests` — 2 tests (catch pipeline exceptions, log with EventId)
+
+- **Slice B (Keywords)**: 5 `KeywordClassifier` tests covering deterministic classification logic
+
+- **Block-2 Regression**: 16 `CaptureServiceStub` tests verifying backward compatibility:
+  - Submit flow (new capture, appends to list, rejects empty)
+  - GetRecent / GetFailureCounts (Block-2 smoke test data)
+  - Lifecycle transitions (Classified, Routed, Orphan, Unhandled)
+  - List with filters and cursor pagination
+  - Reset for retry
+
+- **Slice C (AI Integration)** — design patterns locked, implementation tests planned for next session:
+  - `AiClassifier` tests (mocking `IChatClient`, happy path + 5 fallback scenarios)
+  - `AddFlowHubAi` registration tests (D2 dual-provider matrix: Anthropic Haiku / OpenRouter Llama 3.1)
+  - Trait-gated live integration tests with `[SkippableFact]` for real API calls (Anthropic / OpenRouter keys required)
 
 ### What's deferred
 
 | Test type | Why deferred | Lands in |
 |---|---|---|
-| Integration tests (WebApplicationFactory) | No real services or DB to test against yet — stubs are in-memory | Block 3 |
 | E2E tests (Playwright) | No deployed environment; SignalR testing needs a running browser | Block 5 |
+| Integration tests with real DB (EF Core + Testcontainers) | Database persistence module not yet wired; `CaptureServiceStub` remains in-memory | Block 4 |
 | Load/performance tests | Single-operator system, no scaling pressure | Not planned |
+
+### Slice-C-specific patterns
+
+#### Mocking `IChatClient` with NSubstitute
+
+`Microsoft.Extensions.AI.IChatClient` defines both instance methods and extension methods. Extension methods (e.g. `GetResponseAsync<T>`) cannot be intercepted directly by NSubstitute. Instead, tests mock the underlying instance method that the extension calls internally:
+
+```csharp
+var chatClient = Substitute.For<IChatClient>();
+chatClient
+    .CompleteAsync(
+        Arg.Any<IList<ChatMessage>>(),    // messages
+        Arg.Any<ChatClientCompletionOptions?>(),  // options
+        Arg.Any<CancellationToken>())
+    .Returns(Task.FromResult(new ChatCompletion { ... }));
+```
+
+The typed extension `GetResponseAsync<ClassificationResult>(...)` calls the instance method internally, so the mock seam still works.
+
+#### Trait-gated live AI tests with `[SkippableFact]`
+
+Live integration tests that require real API keys use the `[SkippableFact]` attribute (from `Xunit.SkippableFact` 1.4.13). Tests skip conditionally when environment variables are unset:
+
+```csharp
+[Trait("Category", "AI")]
+[SkippableFact]
+public async Task AiClassifier_WithAnthropicKey_ClassifiesViaRealApi()
+{
+    Skip.IfNot(Environment.GetEnvironmentVariable("Ai__Anthropic__ApiKey") != null,
+        "Ai__Anthropic__ApiKey not configured");
+    
+    // real API call test
+}
+```
+
+- `make test` excludes the `Category=AI` trait and all live tests remain **Skipped** (not silently passed)
+- `make test-ai` runs only that trait — intended for operator-on-demand validation when keys are loaded
+- CI runs `make test` only; live tests are operator-local
+
+#### Trait filtering strategy
+
+Tests use `[Trait("Category", "AI")]` to partition:
+- **Default suite** (`Category!=AI`): 99 tests, runs every build, no external dependencies
+- **Live AI suite** (`Category=AI`): 4+ tests, runs on-demand, requires real API credentials
 
 ## Test Naming Convention
 
@@ -134,7 +201,8 @@ The smoke tests (`SmokeTests.cs`) automate verification of these states against 
 ## Running Tests
 
 ```bash
-make test          # run all tests (31 currently)
+make test          # run all tests (99 default-suite, excl. AI)
+make test-ai       # run AI trait-gated tests only (requires Ai__*__ApiKey env vars)
 make test-watch    # watch mode for component tests
 make build         # build also catches analyzer warnings (TreatWarningsAsErrors)
 ```
