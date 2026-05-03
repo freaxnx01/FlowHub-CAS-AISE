@@ -4,18 +4,22 @@ These diagrams document the behaviour of `CaptureEnrichmentConsumer` and the `IC
 The consumer sits at the head of the MassTransit pipeline: it receives every `CaptureCreated` event
 and turns it into a classified capture (happy path) or a terminal `Orphan` state (failure paths).
 
-**Current implementation (Slice B):** `IClassifier` is `KeywordClassifier` — a deterministic,
-in-process classifier. Slice C swaps in `AiClassifier : IClassifier` without touching any consumer
-code; the port shape (`ClassifyAsync(content, ct) → ClassificationResult`) is unchanged.
-The fallback diagram (B) therefore documents the *designed* Slice-C behaviour; it is not yet live.
+**Implemented (Slice C, 2026-05-03):** `IClassifier` is resolved from DI at startup based on
+configuration. When `Ai:Provider` is not set, `AddFlowHubAi` registers `KeywordClassifier`
+directly — no `AiClassifier` wrapper is in the chain. When `Ai:Provider` and the matching API
+key are set, `AiClassifier` wraps `KeywordClassifier` as its fallback floor. The port shape
+(`ClassifyAsync(content, ct) → ClassificationResult`) is unchanged regardless of which
+implementation is active; the consumer code never changed between Slice B and Slice C.
 
 ---
 
 ## A. Happy path — AI classifier configured, call succeeds
 
-The `AiClassifier` makes one structured-output call to the provider, validates the schema, and
-returns a `ClassificationResult(Tags, MatchedSkill, Title)`. The consumer writes the result back
-to `ICaptureService` and publishes `CaptureClassified` for the routing consumer.
+This path applies when `Ai:Provider` and the matching API key are set. `AiClassifier` makes one
+structured-output call to the provider via `GetResponseAsync<AiClassificationResponse>(...)`,
+validates the schema, and returns a `ClassificationResult(Tags, MatchedSkill, Title)`. The
+consumer writes the result back to `ICaptureService` and publishes `CaptureClassified` for the
+routing consumer.
 
 **Invariants:**
 - `MatchedSkill` is validated against `{"Wallabag", "Vikunja", ""}` even after a successful AI
@@ -42,7 +46,7 @@ sequenceDiagram
 
     Bus->>Consumer: deliver CaptureCreated
     Consumer->>AI: ClassifyAsync(content, ct)
-    AI->>Chat: CompleteAsync<AiClassificationResponse>(messages, options, ct)
+    AI->>Chat: GetResponseAsync<AiClassificationResponse>(messages, options, ct)
     Chat-->>AI: ChatCompletion with TryGetResult=true
     Note right of AI: validate MatchedSkill ∈ {"Wallabag","Vikunja",""}
     AI-->>Consumer: ClassificationResult(Tags, MatchedSkill, Title)
@@ -91,7 +95,7 @@ sequenceDiagram
 
     Bus->>Consumer: deliver CaptureCreated
     Consumer->>AI: ClassifyAsync(content, ct)
-    AI->>Chat: CompleteAsync<AiClassificationResponse>(messages, options, ct)
+    AI->>Chat: GetResponseAsync<AiClassificationResponse>(messages, options, ct)
     Chat-->>AI: throws (HttpRequestException / TaskCanceledException / JsonException / schema guard)
     Note right of AI: log Warning EventId 3010 AiClassifierFellBackToKeyword<br/>(reason, duration_ms)
     AI->>Floor: ClassifyAsync(content, ct)
