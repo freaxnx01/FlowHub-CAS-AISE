@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>FlowHub.Web</RootNamespace>
     <AssemblyName>FlowHub.Web</AssemblyName>
+    <UserSecretsId>flowhub-web-cas-aise</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FlowHub.AI\FlowHub.AI.csproj" />
     <ProjectReference Include="..\FlowHub.Api\FlowHub.Api.csproj" />
     <ProjectReference Include="..\FlowHub.Core\FlowHub.Core.csproj" />
     <ProjectReference Include="..\FlowHub.Skills\FlowHub.Skills.csproj" />

@@ -151,7 +151,7 @@ The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modul
 │   │   │   └── Shared/                ← reusable cross-page components (LifecycleBadge, HealthDot)
 │   │   ├── Stubs/                     ← Bogus-backed stub services for Block 2
 │   │   └── Program.cs
-│   ├── FlowHub.AI/                    ← (placeholder — AI classification, future block)
+│   ├── FlowHub.AI/                    ← MEAI-backed classifier (Block 3 Slice C, ADR 0004)
 │   ├── FlowHub.Integrations/          ← (placeholder — Wallabag, Wekan, Vikunja, …)
 │   ├── FlowHub.Persistence/           ← (placeholder — EF Core, Block 4)
 │   ├── FlowHub.Skills/                ← (placeholder — Skill implementations)
