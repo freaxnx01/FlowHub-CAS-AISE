@@ -7,7 +7,9 @@
     <IsTestProject>true</IsTestProject>
     <!-- CLAUDE.md test naming is MethodName_StateUnderTest_ExpectedBehavior; the
          analyzer rule contradicts the project convention, so suppress it for tests. -->
-    <NoWarn>$(NoWarn);CA1707</NoWarn>
+    <!-- CA1707: test naming uses underscores by convention (MethodName_State_Expected) -->
+    <!-- CA1861: inline array literals in test assertions are single-use; perf warning is N/A -->
+    <NoWarn>$(NoWarn);CA1707;CA1861</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
