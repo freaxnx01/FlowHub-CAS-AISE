@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\source\FlowHub.AI\FlowHub.AI.csproj" />
     <ProjectReference Include="..\..\source\FlowHub.Core\FlowHub.Core.csproj" />
     <ProjectReference Include="..\..\source\FlowHub.Web\FlowHub.Web.csproj" />
   </ItemGroup>

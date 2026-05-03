@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/source/">
+    <Project Path="source/FlowHub.AI/FlowHub.AI.csproj" />
     <Project Path="source/FlowHub.Api/FlowHub.Api.csproj" />
     <Project Path="source/FlowHub.Core/FlowHub.Core.csproj" />
     <Project Path="source/FlowHub.Skills/FlowHub.Skills.csproj" />
