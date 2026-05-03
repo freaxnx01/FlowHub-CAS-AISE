@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>FlowHub.Web</RootNamespace>
     <AssemblyName>FlowHub.Web</AssemblyName>
+    <UserSecretsId>flowhub-web-cas-aise</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
