@@ -91,20 +91,38 @@ public static class AiServiceCollectionExtensions
         string model,
         IConfiguration configuration)
     {
+        var timeoutSeconds = int.TryParse(configuration["Ai:TimeoutSeconds"], out var parsed) ? parsed : 10;
+
         switch (provider)
         {
             case AiProvider.Anthropic:
                 // MessagesEndpoint directly implements IChatClient in Anthropic.SDK 5.x.
                 // The model is conveyed per-request via ChatOptions.ModelId, which we
                 // set as a default via ConfigureOptions so callers need not repeat it.
-                return new AnthropicClient(apiKey).Messages
+                //
+                // The HttpClient is created once (Singleton closure) to avoid socket exhaustion.
+                // Note: we own this HttpClient instance — AnthropicClient does NOT dispose it.
+                //
+                // TODO Slice D: wire Anthropic cache_control: ephemeral on the system-prompt
+                // segment for ~80% input-token discount after the second call.
+                // Anthropic.SDK 5.x exposes PromptCacheType.AutomaticToolsAndSystem only via
+                // the native MessageParameters API, not through the MEAI IChatClient bridge
+                // (ChatOptions has no AdditionalProperties key the adapter currently honours).
+                var anthropicHttp = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
+                return new AnthropicClient(apiKey, anthropicHttp).Messages
                     .AsBuilder()
                     .ConfigureOptions(o => o.ModelId = model)
                     .Build();
 
             case AiProvider.OpenRouter:
                 var endpoint = new Uri(configuration["Ai:OpenRouter:Endpoint"] ?? DefaultOpenRouterEndpoint);
-                var openAiOptions = new OpenAIClientOptions { Endpoint = endpoint };
+                // NetworkTimeout is on ClientPipelineOptions (base of OpenAIClientOptions) and
+                // applies to the underlying HttpClient send — no custom HttpClient needed.
+                var openAiOptions = new OpenAIClientOptions
+                {
+                    Endpoint = endpoint,
+                    NetworkTimeout = TimeSpan.FromSeconds(timeoutSeconds),
+                };
                 return new OpenAIClient(new ApiKeyCredential(apiKey), openAiOptions)
                     .GetChatClient(model)
                     .AsIChatClient();
