@@ -61,10 +61,13 @@ graph TD
   - List with filters and cursor pagination
   - Reset for retry
 
-- **Slice C (AI Integration)** — design patterns locked, implementation tests planned for next session:
-  - `AiClassifier` tests (mocking `IChatClient`, happy path + 5 fallback scenarios)
-  - `AddFlowHubAi` registration tests (D2 dual-provider matrix: Anthropic Haiku / OpenRouter Llama 3.1)
-  - Trait-gated live integration tests with `[SkippableFact]` for real API calls (Anthropic / OpenRouter keys required)
+- **Slice C (AI Integration)**: 25 mocked unit tests + 4 trait-gated live tests shipped in `tests/FlowHub.Web.ComponentTests/Ai/` and `tests/FlowHub.AI.IntegrationTests/`:
+  - **3 `AiPrompts` tests** — `BuildMessages` structure (system-prompt first, user-message second) + system-prompt language guard (no German routing tokens)
+  - **3 `AiClassificationResponse` tests** — `Description` / `AllowedValues` / nullable `Title` attributes for schema generation
+  - **10 `AiClassifier` tests** — success path + 3 argument-forwarding tests (cancellation token, `MaxOutputTokens=300`, `Temperature=0.2`) + 5 fallback paths (`HttpRequestException`, `TaskCanceledException`, `JsonException`, schema-violation guard, `InvalidOperationException`) + `EventId 3010` logging contract
+  - **8 `AddFlowHubAi` registration tests** — D8 matrix: no-provider, Anthropic without key, OpenRouter without key, Anthropic with key, OpenRouter with key, invalid value, case-insensitive parse, model override
+  - **1 `KeywordClassifier` test** — `ClassifyAsync_AnyContent_KeywordClassifierReturnsNullTitle` locks the `Title=null` contract
+  - **4 trait-gated live integration tests** in `tests/FlowHub.AI.IntegrationTests/` — Anthropic Haiku 4.5 (URL→Wallabag, todo→Vikunja) + OpenRouter Llama 3.1 (URL→Wallabag, todo→Vikunja)
 
 ### What's deferred
 
@@ -81,16 +84,16 @@ graph TD
 `Microsoft.Extensions.AI.IChatClient` defines both instance methods and extension methods. Extension methods (e.g. `GetResponseAsync<T>`) cannot be intercepted directly by NSubstitute. Instead, tests mock the underlying instance method that the extension calls internally:
 
 ```csharp
-var chatClient = Substitute.For<IChatClient>();
-chatClient
-    .CompleteAsync(
-        Arg.Any<IList<ChatMessage>>(),    // messages
-        Arg.Any<ChatClientCompletionOptions?>(),  // options
+var chat = Substitute.For<IChatClient>();
+chat.GetResponseAsync(
+        Arg.Any<IEnumerable<ChatMessage>>(),
+        Arg.Any<ChatOptions?>(),
         Arg.Any<CancellationToken>())
-    .Returns(Task.FromResult(new ChatCompletion { ... }));
+    .Returns(new ChatResponse(new ChatMessage(ChatRole.Assistant,
+        JsonSerializer.Serialize(new { tags = new[] { "x" }, matched_skill = "Wallabag", title = "T" }))));
 ```
 
-The typed extension `GetResponseAsync<ClassificationResult>(...)` calls the instance method internally, so the mock seam still works.
+`AiClassifier` calls the typed extension `GetResponseAsync<AiClassificationResponse>(messages, options, ct)`, which internally invokes the instance method `GetResponseAsync(messages, options, ct)`. NSubstitute mocks the instance method; the typed extension's parser then sees the mock-supplied JSON and deserializes it.
 
 #### Trait-gated live AI tests with `[SkippableFact]`
 
@@ -98,13 +101,23 @@ Live integration tests that require real API keys use the `[SkippableFact]` attr
 
 ```csharp
 [Trait("Category", "AI")]
-[SkippableFact]
-public async Task AiClassifier_WithAnthropicKey_ClassifiesViaRealApi()
+public sealed class AnthropicHaikuLiveTests
 {
-    Skip.IfNot(Environment.GetEnvironmentVariable("Ai__Anthropic__ApiKey") != null,
-        "Ai__Anthropic__ApiKey not configured");
-    
-    // real API call test
+    private static IClassifier BuildClassifier()
+    {
+        var apiKey = Environment.GetEnvironmentVariable("Ai__Anthropic__ApiKey");
+        Skip.If(string.IsNullOrWhiteSpace(apiKey), "Ai__Anthropic__ApiKey not configured");
+        // … build IClassifier from real configuration
+    }
+
+    [SkippableFact]
+    public async Task ClassifyAsync_UrlContent_LiveAnthropicReturnsWallabagWithTitle()
+    {
+        var sut = BuildClassifier();
+        var result = await sut.ClassifyAsync("https://en.wikipedia.org/wiki/Hexagonal_architecture", default);
+        result.MatchedSkill.Should().Be("Wallabag");
+        result.Title.Should().NotBeNullOrWhiteSpace();
+    }
 }
 ```
 
@@ -116,7 +129,7 @@ public async Task AiClassifier_WithAnthropicKey_ClassifiesViaRealApi()
 
 Tests use `[Trait("Category", "AI")]` to partition:
 - **Default suite** (`Category!=AI`): 99 tests, runs every build, no external dependencies
-- **Live AI suite** (`Category=AI`): 4+ tests, runs on-demand, requires real API credentials
+- **Live AI suite** (`Category=AI`): 4 tests, runs on-demand, requires real API credentials
 
 ## Test Naming Convention
 
@@ -141,6 +154,7 @@ The `CA1707` analyzer rule (no underscores in method names) is suppressed for te
 | NSubstitute | 5.3.0 | Interface mocking for service dependencies |
 | Bogus | 35.6.1 | Test data generation (used in stub services, not directly in tests) |
 | MudBlazor.Services | (via MudBlazor 8.5.1) | Required in test DI for MudBlazor components to render |
+| Xunit.SkippableFact | 1.4.13 | `[SkippableFact]` + `Skip.If(...)` — conditionally skip live AI tests when API keys are absent |
 
 ## bUnit Test Patterns
 
