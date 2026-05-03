@@ -1,3 +1,4 @@
+using FlowHub.AI;
 using FlowHub.Api;
 using FlowHub.Api.Endpoints;
 using FlowHub.Core.Captures;
@@ -55,8 +56,10 @@ builder.Services.AddSingleton<ICaptureService>(sp =>
 builder.Services.AddSingleton<ISkillRegistry, SkillRegistryStub>();
 builder.Services.AddSingleton<IIntegrationHealthService, IntegrationHealthServiceStub>();
 
-// Block 3 Slice B — classifier + skill integrations.
-builder.Services.AddSingleton<IClassifier, KeywordClassifier>();
+// Block 3 Slice C — AI-backed classifier (per ADR 0004) with keyword fallback.
+// Uses real provider when Ai:Provider + Ai:<P>:ApiKey are set; silently falls back
+// to the deterministic KeywordClassifier otherwise so `make run` works zero-config.
+builder.Services.AddFlowHubAi(builder.Configuration);
 builder.Services.AddSingleton<ISkillIntegration>(sp =>
     new LoggingSkillIntegration("Wallabag", sp.GetRequiredService<ILogger<LoggingSkillIntegration>>()));
 builder.Services.AddSingleton<ISkillIntegration>(sp =>

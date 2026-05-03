@@ -41,4 +41,12 @@ public sealed class KeywordClassifierTests
         result.MatchedSkill.Should().BeEmpty();
         result.Tags.Should().ContainSingle().Which.Should().Be("unsorted");
     }
+
+    [Fact]
+    public async Task ClassifyAsync_AnyContent_KeywordClassifierReturnsNullTitle()
+    {
+        var result = await _sut.ClassifyAsync("https://example.com/article", default);
+
+        result.Title.Should().BeNull();
+    }
 }

@@ -45,7 +45,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Entwurf
 
-- [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0003 (Async Pipeline) ✅, ADR 0004 (KI-Integration) noch offen (Slice C)
+- [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0003 (Async Pipeline) ✅, ADR 0004 (KI-Integration) ✅ (landed at `docs/adr/0004-ai-integration-in-services.md`, Slice C)
 - [ ] **Struktur / Verhalten / Interaktion (7)**:
   - Struktur: Modul-Diagramm (FlowHub.Web ↔ FlowHub.Api ↔ FlowHub.Core ↔ Skills/Integrations, Bus)
   - Verhalten: Sequence-/Activity-Diagramme für Capture-Enrichment + Skill-Routing
@@ -69,7 +69,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### KI, Sub-Systeme & Reflexion
 
 - [x] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ höchstgewichtetes Kriterium — `docs/ai-usage.md` (Living Doc): Tool-Stack, Workflow (brainstorming → writing-plans → SDD), generierter vs. handgeschriebener Anteil, notable Adaptationen die Subagents gefunden haben (z.B. Captive-Dependency-Trap)
-- [ ] **Intelligente / flexible Services mit KI gebaut (6)** — Port `IClassifier` + Stub `KeywordClassifier` ✅; AI-Backed-Adapter via `Microsoft.Extensions.AI` ist Slice C
+- [x] **Intelligente / flexible Services mit KI gebaut (6)** — `KeywordClassifier` (deterministische Heuristik) ✅ + `AiClassifier` (Anthropic Haiku 4.5 / OpenRouter Llama 3.1 70B via MEAI) ✅; graceful fallback bei AI-Fehlern dokumentiert (ADR 0004, EventId 3010)
 - [x] **Sub-Systeme als unabhängige Container deploybar (5)** — Sketch-Level: `docker-compose.yml` (web + rabbitmq + future api) im Repo; finale Block-5-Variante folgt
 - [x] **KI-Erfahrungen als Fazit reflektiert (7)** — Reflexion-Sektion in `docs/ai-usage.md` mit ✅ / ⚠ / ❌ Auflistung; PVA-Folien-Material noch zu destillieren
 
@@ -80,7 +80,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### Architektur & Entscheide
 
 - [x] ADR 0003 — Async Messaging Pipeline (MassTransit Topology, Retry/DLQ, Fault-Observer; Outbox auf Block 4 verschoben)
-- [ ] ADR 0004 — KI-Integration in Services (Provider, Abstraction, Prompt-/Cost-Strategie, Stack-Mapping Spring-AI → .NET) — Slice C
+- [x] ADR 0004 — KI-Integration in Services (Provider, Abstraction, Prompt-/Cost-Strategie, Stack-Mapping Spring-AI → .NET) — landed at `docs/adr/0004-ai-integration-in-services.md`
 - [x] OpenAPI-Versionierungs- und Konsistenzstrategie festlegen (Scalar als UI, Refit/Kiota als Client-Generator) — **partial**: Scalar wired and serving `/scalar`; Refit/Kiota client generation deferred to Slice D
 
 ### REST-API (`source/FlowHub.Api/`)
@@ -101,9 +101,9 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### KI in Services
 
-- [ ] `Microsoft.Extensions.AI` (oder Semantic Kernel) als Abstraktion einbinden — Slice C
+- [x] `Microsoft.Extensions.AI` (oder Semantic Kernel) als Abstraktion einbinden — landed in `source/FlowHub.AI/` via `IChatClient`; Anthropic + OpenRouter adapters (Slice C)
 - [x] Klassifikator-Stub: Capture → vorgeschlagene Tags / Skill — `KeywordClassifier` (deterministische URL/todo-Heuristik, 4 Tests grün); Mock-Provider via NSubstitute in Pipeline-Tests
-- [ ] Reflexion zu `Microsoft.Extensions.AI` / Semantic Kernel im .NET-Stack — kurz in ADR 0003 angerissen, eigenes Doc folgt mit ADR 0004
+- [x] Reflexion zu `Microsoft.Extensions.AI` / Semantic Kernel im .NET-Stack — captured in ADR 0004 §"Reflexion" + `docs/ai-usage.md` Slice-C Reflexion-Sektion
 
 ### Typed Clients (Konsistenz Server↔Client)
 
