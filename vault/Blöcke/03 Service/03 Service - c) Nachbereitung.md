@@ -39,18 +39,18 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Spezifikation
 
-- [ ] **Use Cases & fachliche Anforderungen benannt (5)** — Capture submit/list/retry, Skill-Routing, Integration-Health, Enrichment-Pipeline (Server-seitig formalisiert)
-- [ ] **NfA SMART spezifiziert (5)** — API-Latenz, Throughput, Retry-/DLQ-Verhalten, Verfügbarkeit, OpenAPI-Versionierungs-SLA
+- [x] **Use Cases & fachliche Anforderungen benannt (5)** — UC-01..UC-07 (Web UI / Telegram / Dashboard) + UC-08..UC-11 (REST submit, async pipeline, AI fallback, retry) in `docs/spec/use-cases.md`
+- [x] **NfA SMART spezifiziert (5)** — NF-01..NF-08 (Block 2 UI) + NF-09..NF-13 (API latency, retry budget, AI fallback rate, AI cost, OpenAPI versioning SLA) in `docs/spec/use-cases.md`
 - [x] **Solution Vision beschrieben (5)** — Modular Monolith + REST + MassTransit-Async-Pipeline (ADR 0002 + ADR 0003); REST-API-Surface in `docs/design/api/api-surface.md`
 
 ### Entwurf
 
 - [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0003 (Async Pipeline) ✅, ADR 0004 (KI-Integration) ✅ (landed at `docs/adr/0004-ai-integration-in-services.md`, Slice C)
-- [ ] **Struktur / Verhalten / Interaktion (7)**:
-  - Struktur: Modul-Diagramm (FlowHub.Web ↔ FlowHub.Api ↔ FlowHub.Core ↔ Skills/Integrations, Bus)
-  - Verhalten: Sequence-/Activity-Diagramme für Capture-Enrichment + Skill-Routing
-  - Interaktion: API-Surface (OpenAPI/Scalar) + Event-Kontrakte (`CaptureCreated`, `CaptureClassified`, …)
-- [ ] **DB-Modell spezifiziert (3)** — auch wenn Persistenz erst Block 4: Entity-Skizze damit nichts überrascht
+- [x] **Struktur / Verhalten / Interaktion (7)**:
+  - Struktur: System-Context (`docs/spec/system-context.md`, C4 L1) + ADR 0002 module split
+  - Verhalten: Sequence-Diagramme in `docs/design/sequences/` (Capture-Enrichment happy + AI fallback; Skill-Routing happy + retry exhaustion)
+  - Interaktion: API-Surface (`docs/design/api/api-surface.md`, OpenAPI/Scalar) + Event-Kontrakte (`CaptureCreated`, `CaptureClassified`, `Fault<CaptureClassified>`)
+- [x] **DB-Modell spezifiziert (3)** — Block-4-preview Entity-Skizze in `docs/design/db/entities.md` (Mermaid ER + indexes + deferred-decisions list)
 
 ### Programmierung
 
@@ -61,10 +61,10 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Validierung
 
-- [ ] **Abnahmekriterien definiert (5)** — pro Use Case explizit (z.B. in ADR oder `docs/acceptance-criteria.md`) — **partial (Slice A)**: 17 integration-test cases in `tests/FlowHub.Api.IntegrationTests/` serve as executable Abnahmekriterien per captures endpoint; formal UC list still open
-- [ ] **Test-Strategie + Technologien spezifiziert (5)** — `docs/spec/testing-strategy.md` existiert (Block-2-Stand), Slice-B-Tools (MassTransit Test Harness, `LoggerMessage` source-gen) noch nicht ergänzt — **Slice A adds**: `Microsoft.AspNetCore.Mvc.Testing` + `WebApplicationFactory<Program>` now in documented test stack (17 integration tests, 74 total)
-- [x] **Unit-Tests programmiert (3)** — Slice B: 16 neue Tests (KeywordClassifier 4, CaptureServiceStub 6, Pipeline-Consumers 6) → 47 Tests insgesamt grün
-- [ ] **Test-Ergebnisse dokumentiert (3)** — in ADR 0003 + `docs/ai-usage.md` skizziert; CHANGELOG `[Unreleased]` noch offen
+- [x] **Abnahmekriterien definiert (5)** — UC-08..UC-11 in `docs/spec/use-cases.md` carry their own acceptance criteria; 17 integration tests in `tests/FlowHub.Api.IntegrationTests/` + 25 unit tests in `tests/FlowHub.Web.ComponentTests/Ai/` serve as executable acceptance per endpoint / classifier behaviour
+- [x] **Test-Strategie + Technologien spezifiziert (5)** — `docs/spec/testing-strategy.md` updated to Block-3 reality: 99 default-suite + 4 trait-gated live tests; tools (xunit, bUnit, NSubstitute, FluentAssertions, `WebApplicationFactory<Program>`, MassTransit Test Harness, Xunit.SkippableFact) and Slice-C-specific patterns (NSubstitute on `IChatClient`, `[SkippableFact]`, `Category=AI` trait filter) documented
+- [x] **Unit-Tests programmiert (3)** — 99 default-suite tests passing (82 component + 17 API integration) + 4 trait-gated live tests (Slice C). Build clean under warnings-as-errors
+- [x] **Test-Ergebnisse dokumentiert (3)** — `CHANGELOG.md` `[Unreleased]` populated with Slice A/B/C deliverables; ADR 0003 / 0004 reference test counts + EventId namespacing; `docs/ai-usage.md` per-slice retros include test outcomes
 
 ### KI, Sub-Systeme & Reflexion
 
@@ -122,10 +122,10 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Spezifikation & Dokumentation
 
-- [ ] Use-Case-Liste ergänzen / aktualisieren (`vault/Projektarbeit/`)
-- [ ] SMART NfAs für API + Async-Pipeline festhalten
-- [ ] DB-Modell-Skizze (Vorbereitung für Block 4)
-- [ ] CHANGELOG `[Unreleased]` mit Block-3-Deliverables füllen
+- [x] Use-Case-Liste ergänzen / aktualisieren — UC-08..UC-11 in `docs/spec/use-cases.md`
+- [x] SMART NfAs für API + Async-Pipeline festhalten — NF-09..NF-13 in `docs/spec/use-cases.md`
+- [x] DB-Modell-Skizze (Vorbereitung für Block 4) — `docs/design/db/entities.md`
+- [x] CHANGELOG `[Unreleased]` mit Block-3-Deliverables füllen — Slice A/B/C entries landed
 
 ### 🚫 Out of Scope (Block 3) — geparkt
 
