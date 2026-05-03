@@ -138,6 +138,73 @@ New project `source/FlowHub.Api/` co-hosted via project reference in `FlowHub.We
 
 N/A — no blockers; subagent dispatches went straight through without escalation.
 
+## Block 3 Slice C — AI integration (production-runtime)
+
+Slice C is the first time AI moves from *development tool* to *production-runtime
+component*. The classifier port `IClassifier` (introduced in Slice B as a hexagonal
+seam with a deterministic `KeywordClassifier` adapter) now has a second adapter,
+`AiClassifier`, that calls a real LLM in the request path of the enrichment consumer.
+
+### Brainstorming + spec writing
+
+Conversational design via Claude Code's brainstorming skill. 10 decisions surfaced
+as A/B/C questions covering: scope (classifier-only vs. classifier+title vs. multi-
+feature enrichment), provider mix (which two adapters), abstraction layer
+(`Microsoft.Extensions.AI` vs. Semantic Kernel), port shape (extend
+`ClassificationResult` vs. sibling `IEnricher`), failure semantics (graceful fallback
+vs. hard fail), default models, structured-output strategy, no-key startup behaviour,
+test layering (mocked unit + trait-gated live), and provider selection.
+
+User picked the .NET-native MEAI abstraction over Semantic Kernel (Q3) and the
+graceful fallback over hard-fail (Q5) — both decisions explicitly motivated by the
+rubric phrasing *"intelligente und flexible Services"* (graceful = flexible).
+
+Final spec self-reviewed by Claude before commit (placeholder scan, internal
+consistency, ambiguity check, scope check).
+
+### Implementation plan
+
+Authored by Claude Code via the `writing-plans` skill from the approved spec. 15
+tasks total, TDD-ordered: packages → ClassificationResult extension → FlowHub.AI
+csproj → AiPrompts → AiClassificationResponse DTO → AiClassifier (10 unit tests) →
+AddFlowHubAi (8 unit tests covering D8 matrix) → Program.cs wiring → integration
+test project → 4 trait-gated live tests → Makefile filter → ai-usage.md → ADR 0004
+→ CLAUDE.md placeholder note → vault checklist + CHANGELOG + final pass.
+
+### Implementation execution
+
+Subagent-driven. Sonnet 4.6 for TDD/judgment-heavy tasks (T2, T4–T10); Haiku for
+mechanical tasks (T1 packages, T3 csproj scaffolding, T9 integration test scaffold,
+T11 Makefile, T14 CLAUDE.md tweak, T15 vault checklist).
+
+### Production-runtime AI use
+
+This slice is what the rubric *"KI: Wurden KI-Werkzeuge verwendet"* (max 12 pts)
+actually asks for: AI inside the running application, not just AI as a coding
+assistant. The `AiClassifier` calls a real LLM (Anthropic Haiku 4.5 by default,
+swappable to OpenRouter Llama 3.1 70B Instruct via one env var) on every capture
+that flows through the enrichment pipeline.
+
+Cost guards: `MaxOutputTokens=300`, `Temperature=0.2`, 10s HTTP timeout, Anthropic
+prompt-cache marker on the system prompt segment.
+
+Failure handling: any provider exception or schema violation logs `EventId 3010
+AiClassifierFellBackToKeyword` at Warning and routes to the deterministic
+`KeywordClassifier` floor — capture is always classified.
+
+### Notable adaptations the implementers caught (real value, not hallucinations)
+
+(To be filled in by the implementer after Task 15 final pass — same shape as the
+Slice B / Slice A entries.)
+
+### Generated vs. handwritten share (estimate, Slice C only)
+
+(To be filled in.)
+
+### Reflexion — what worked, what didn't
+
+(To be filled in.)
+
 ## Prompts of note
 
 (Captured here when surprising or high-leverage. Empty for now — most prompts followed standard skill conventions.)
