@@ -1,3 +1,9 @@
+---
+tags:
+  - claude-updated
+updated: 2026-05-03
+---
+
 # Cheat Sheet: Context Engineering
 
 > **Kern-Takeaway:** Kontext ist wichtiger als Prompts.
@@ -76,6 +82,36 @@ async def list_vehicles(
 ```
 
 Async, Service-Layer, Pydantic-Schemas, korrekte Imports, Router statt App-Instanz -- der Agent kennt die Architektur.
+
+## Kontexthygiene mit Superpowers
+
+Drei-Phasen-Workflow, der den Kontext zwischen den Phasen bewusst leert (`/clear`), damit jede Phase mit frischem, fokussiertem Kontext startet:
+
+### 1. Specs / Design
+
+Anforderungen und Design erarbeiten (z. B. via `superpowers:brainstorming`).
+
+```text
+/clear
+```
+
+### 2. Plan
+
+```text
+> Read docs/superpowers/specs/xyz.md and run superpowers:writing-plans to produce the implementation plan.
+```
+
+```text
+/clear
+```
+
+### 3. Implement
+
+```text
+> Execute the xyz plan via subagent-driven-development
+```
+
+**Warum `/clear` zwischen den Phasen?** Jede Phase produziert ein Artefakt (Spec → Plan → Code), das in der nächsten Phase als reiner Input dient. Den vorherigen Hin-und-her-Dialog im Kontext zu behalten verwässert den Fokus und kostet Tokens, ohne Mehrwert zu liefern.
 
 ---
 

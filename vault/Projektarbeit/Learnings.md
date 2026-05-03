@@ -1,7 +1,8 @@
 ---
 tags:
   - claude-generated
-updated: 2026-05-02
+  - claude-updated
+updated: 2026-05-03
 ---
 
 # Learnings CAS AISE
@@ -39,3 +40,17 @@ Die deutlich tragfähigere Variante: den Console-Output (oder `dotnet watch`-Log
 Es gibt nicht *das eine* richtige Werkzeug, um sich im Code zu orientieren — die Wahl hängt von Projektgrösse und Frage-Typ ab, und das macht der Agent erst gut, wenn man ihm das explizit beibringt. Bei kleinen Repos (FlowHub ist mit wenigen tausend LOC noch handlich) reicht oft ein direktes `Read` oder ein gezielter `rg`-Aufruf; das ist schnell, deterministisch und kostet praktisch keinen Overhead. Sobald aber strukturelle Fragen ins Spiel kommen ("wo wird `IClassificationPort` implementiert?", "welche Aufrufer hat diese Methode?"), wird ein **LSP**-basierter Zugriff überlegen, weil er Symbole statt Strings auflöst und Renames, Inheritance oder Partial Classes korrekt versteht — etwas, das `grep` prinzipiell nicht leisten kann.
 
 Bei grösseren Codebases oder unscharfen Suchen lohnt sich dann der nächste Sprung: **grepai** (oder vergleichbare semantische Such-Tools), die nicht nach exakten Tokens, sondern nach Bedeutung suchen ("wo behandeln wir Validierungsfehler an der API-Boundary?"). Die praktische Heuristik, die sich bewährt hat: erst `rg` versuchen — wenn drei Suchanläufe nichts Brauchbares liefern, ist die Frage vermutlich nicht lexikalisch, sondern semantisch, und es ist Zeit für LSP oder grepai. Diese Hierarchie bewusst zu wählen — statt reflexartig das mächtigste Tool zu nehmen — spart Tokens, hält Antworten schnell und vermeidet das typische "Agent versinkt in Suchergebnissen"-Pattern.
+
+---
+
+## Context Hygiene: Superpowers-Workflow mit `/clear`-Schnitten
+
+Eng verwandt mit der Logs-via-File-Disziplin ist die Frage, wie man **mehrphasige Aufgaben** sauber durch Spec → Plan → Implementierung führt, ohne dass sich der Kontext bis zur Unkenntlichkeit aufbläht. Das `superpowers`-Plugin hat dafür einen Drei-Phasen-Workflow etabliert, der zwischen den Phasen jeweils ein hartes `/clear` setzt — also den Conversation-Kontext bewusst auf null zurücksetzt:
+
+1. **Specs / Design** — Anforderungen und Entwurf erarbeiten (z. B. via `superpowers:brainstorming`), Ergebnis als `docs/superpowers/specs/xyz.md` ablegen.
+   `/clear`
+2. **Plan** — neue Session: `> Read docs/superpowers/specs/xyz.md and run superpowers:writing-plans to produce the implementation plan.`
+   `/clear`
+3. **Implement** — wieder neue Session: `> Execute the xyz plan via subagent-driven-development`
+
+Der Trick liegt im `/clear`: jede Phase produziert ein **Artefakt auf Disk** (Spec-MD, Plan-MD, Code-Diff), das in der nächsten Phase als reiner Input zurückgelesen wird. Den vorherigen Hin-und-her-Dialog mitzuschleppen liefert keinen Mehrwert — die Entscheidungen sind im Artefakt festgehalten — kostet aber konstant Tokens und lenkt das Modell mit veralteten Zwischenstands-Diskussionen ab. Diese Disziplin ist die strukturelle Variante des Logs-via-File-Patterns: was zwischen Phasen weiterleben muss, gehört in eine Datei; was nur Gesprächs-Begleitmaterial war, darf gelöscht werden. Praktisch macht das bei nicht-trivialen Features den Unterschied zwischen einer fokussierten Implementierung und einem zähen, immer langsamer werdenden Mega-Thread.
