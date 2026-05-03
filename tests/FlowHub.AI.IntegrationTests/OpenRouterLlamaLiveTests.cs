@@ -10,10 +10,10 @@ namespace FlowHub.AI.IntegrationTests;
 [Trait("Category", "AI")]
 public sealed class OpenRouterLlamaLiveTests
 {
-    private static IClassifier? BuildClassifier()
+    private static IClassifier BuildClassifier()
     {
         var apiKey = Environment.GetEnvironmentVariable("Ai__OpenRouter__ApiKey");
-        if (string.IsNullOrWhiteSpace(apiKey)) return null;
+        Skip.If(string.IsNullOrWhiteSpace(apiKey), "Ai__OpenRouter__ApiKey not configured");
 
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -28,11 +28,10 @@ public sealed class OpenRouterLlamaLiveTests
         return services.BuildServiceProvider().GetRequiredService<IClassifier>();
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ClassifyAsync_UrlContent_LiveOpenRouterReturnsWallabagWithTitle()
     {
         var sut = BuildClassifier();
-        if (sut is null) return;
 
         var result = await sut.ClassifyAsync(
             "https://en.wikipedia.org/wiki/Modular_monolith",
@@ -42,11 +41,10 @@ public sealed class OpenRouterLlamaLiveTests
         result.Title.Should().NotBeNullOrWhiteSpace();
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ClassifyAsync_TodoContent_LiveOpenRouterReturnsVikunjaWithTitle()
     {
         var sut = BuildClassifier();
-        if (sut is null) return;
 
         var result = await sut.ClassifyAsync(
             "todo: review the Block 3 PVA submission tomorrow",

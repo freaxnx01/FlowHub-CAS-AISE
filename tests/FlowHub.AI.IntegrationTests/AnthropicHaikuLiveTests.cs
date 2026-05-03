@@ -10,10 +10,10 @@ namespace FlowHub.AI.IntegrationTests;
 [Trait("Category", "AI")]
 public sealed class AnthropicHaikuLiveTests
 {
-    private static IClassifier? BuildClassifier()
+    private static IClassifier BuildClassifier()
     {
         var apiKey = Environment.GetEnvironmentVariable("Ai__Anthropic__ApiKey");
-        if (string.IsNullOrWhiteSpace(apiKey)) return null;
+        Skip.If(string.IsNullOrWhiteSpace(apiKey), "Ai__Anthropic__ApiKey not configured");
 
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -28,11 +28,10 @@ public sealed class AnthropicHaikuLiveTests
         return services.BuildServiceProvider().GetRequiredService<IClassifier>();
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ClassifyAsync_UrlContent_LiveAnthropicReturnsWallabagWithTitle()
     {
         var sut = BuildClassifier();
-        if (sut is null) return; // skip when no key configured
 
         var result = await sut.ClassifyAsync(
             "https://en.wikipedia.org/wiki/Hexagonal_architecture",
@@ -42,11 +41,10 @@ public sealed class AnthropicHaikuLiveTests
         result.Title.Should().NotBeNullOrWhiteSpace();
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ClassifyAsync_TodoContent_LiveAnthropicReturnsVikunjaWithTitle()
     {
         var sut = BuildClassifier();
-        if (sut is null) return;
 
         var result = await sut.ClassifyAsync(
             "todo: buy milk on Saturday",
