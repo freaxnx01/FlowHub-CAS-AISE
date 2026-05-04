@@ -16,15 +16,15 @@ public sealed partial class LoggingSkillIntegration : ISkillIntegration
 
     public string Name { get; }
 
-    public Task WriteAsync(Capture capture, IReadOnlyList<string> tags, CancellationToken cancellationToken)
+    public Task<SkillResult> HandleAsync(Capture capture, CancellationToken cancellationToken)
     {
-        LogStubWrite(Name, capture.Id, tags);
-        return Task.CompletedTask;
+        LogStubWrite(Name, capture.Id);
+        return Task.FromResult(new SkillResult(Success: true, ExternalRef: $"stub-{capture.Id:N}"));
     }
 
     [LoggerMessage(
         EventId = 2001,
         Level = LogLevel.Information,
-        Message = "Stub integration '{Skill}' would write capture {CaptureId} with tags {Tags}")]
-    private partial void LogStubWrite(string skill, Guid captureId, IReadOnlyList<string> tags);
+        Message = "Stub integration '{Skill}' would write capture {CaptureId}")]
+    private partial void LogStubWrite(string skill, Guid captureId);
 }

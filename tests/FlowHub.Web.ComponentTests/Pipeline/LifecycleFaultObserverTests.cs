@@ -49,8 +49,8 @@ public sealed class LifecycleFaultObserverTests
     {
         var integration = Substitute.For<ISkillIntegration>();
         integration.Name.Returns("Wallabag");
-        integration.WriteAsync(Arg.Any<Capture>(), Arg.Any<IReadOnlyList<string>>(), Arg.Any<CancellationToken>())
-            .Returns<Task>(_ => throw new InvalidOperationException("integration down"));
+        integration.HandleAsync(Arg.Any<Capture>(), Arg.Any<CancellationToken>())
+            .Returns<Task<SkillResult>>(_ => throw new InvalidOperationException("integration down"));
 
         await using var provider = PipelineTestBase.Build(
             configure: s => s.AddSingleton(integration),
