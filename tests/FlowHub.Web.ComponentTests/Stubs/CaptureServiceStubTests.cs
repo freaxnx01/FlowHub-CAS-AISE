@@ -266,6 +266,49 @@ public sealed class CaptureServiceStubTests
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
+    // ── MarkClassifiedAsync — Title forwarding (Beta MVP) ────────────────────
+
+    [Fact]
+    public async Task MarkClassifiedAsync_WithTitle_PersistsTitleOnCapture()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+        var capture = await sut.SubmitAsync("https://example.com", ChannelKind.Web);
+
+        await sut.MarkClassifiedAsync(capture.Id, "Wallabag", "Hexagonal architecture", default);
+
+        var updated = await sut.GetByIdAsync(capture.Id);
+        updated!.Stage.Should().Be(LifecycleStage.Classified);
+        updated.MatchedSkill.Should().Be("Wallabag");
+        updated.Title.Should().Be("Hexagonal architecture");
+    }
+
+    // ── MarkCompletedAsync (Beta MVP) ────────────────────────────────────────
+
+    [Fact]
+    public async Task MarkCompletedAsync_WithExternalRef_TransitionsToCompletedAndPersistsRef()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+        var capture = await sut.SubmitAsync("https://example.com", ChannelKind.Web);
+        await sut.MarkClassifiedAsync(capture.Id, "Wallabag", "Title", default);
+        await sut.MarkRoutedAsync(capture.Id, default);
+
+        await sut.MarkCompletedAsync(capture.Id, externalRef: "wal-42", default);
+
+        var updated = await sut.GetByIdAsync(capture.Id);
+        updated!.Stage.Should().Be(LifecycleStage.Completed);
+        updated.ExternalRef.Should().Be("wal-42");
+    }
+
+    [Fact]
+    public async Task MarkCompletedAsync_UnknownId_Throws()
+    {
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+
+        var act = () => sut.MarkCompletedAsync(Guid.NewGuid(), externalRef: null, default);
+
+        await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
+
     // ── Capture record shape (Beta MVP) ──────────────────────────────────────
 
     [Fact]

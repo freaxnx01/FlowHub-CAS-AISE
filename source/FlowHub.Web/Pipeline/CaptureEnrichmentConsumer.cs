@@ -36,7 +36,7 @@ public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated
             return;
         }
 
-        await _captureService.MarkClassifiedAsync(msg.CaptureId, result.MatchedSkill, ct);
+        await _captureService.MarkClassifiedAsync(msg.CaptureId, result.MatchedSkill, cancellationToken: ct);
 
         await context.Publish(new CaptureClassified(
             msg.CaptureId,
