@@ -11,6 +11,7 @@
     <Project Path="tests/FlowHub.AI.IntegrationTests/FlowHub.AI.IntegrationTests.csproj" />
     <Project Path="tests/FlowHub.Api.IntegrationTests/FlowHub.Api.IntegrationTests.csproj" />
     <Project Path="tests/FlowHub.Persistence.Tests/FlowHub.Persistence.Tests.csproj" />
+    <Project Path="tests/FlowHub.Skills.Tests/FlowHub.Skills.Tests.csproj" />
     <Project Path="tests/FlowHub.Web.ComponentTests/FlowHub.Web.ComponentTests.csproj" />
   </Folder>
 </Solution>
