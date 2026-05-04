@@ -148,3 +148,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 - ADR 0002: `docs/adr/0002-service-architecture-and-async-communication.md`
 - POC: `poc/restful-api-playground/` (REST + gRPC + RabbitMQ Sandbox)
 - Bewertungskriterien: `.ai/cas-instructions.md` (Section "Grading")
+
+---
+
+> **Beta MVP follow-up (2026-05-04):** Persistence + real Skill integrations landed early via the Beta-MVP slice (see `docs/superpowers/specs/2026-05-04-beta-mvp-design.md` for design and `docs/superpowers/plans/2026-05-04-beta-mvp.md` for the plan). The Block-3 rubric closure already covered the Block-3 criteria; this is just an FYI cross-reference.

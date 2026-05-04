@@ -37,3 +37,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Makefile`: `make test` filters `Category!=AI`; new `make test-ai` runs the live tests
 - **ADR 0004**: AI integration in services (provider, abstraction, prompt + cost strategy)
 - **EventId range 3000–3999** reserved for AI (extends ADR 0003 namespacing)
+- **Beta MVP — Web → AI → Wallabag/Vikunja** (`docs/superpowers/specs/2026-05-04-beta-mvp-design.md`)
+  - **Persistence** — `FlowHub.Persistence` becomes an active project: `FlowHubDbContext` (Sqlite) + `CaptureEntity` + `EfCaptureService` (`ICaptureService` adapter) + `AddFlowHubPersistence` extension + `MigrationRunner` IHostedService applying migrations at startup
+  - **Capture record** extended with optional `Title` (set by classifier) and `ExternalRef` (set on `MarkCompletedAsync`)
+  - **`Completed` terminal state** wired: `SkillRoutingConsumer` calls `ISkillIntegration.HandleAsync` after `MarkRoutedAsync`, then `MarkCompletedAsync(externalRef)` on success; throws on `!Success` to engage MassTransit retry → eventual `LifecycleFaultObserver` → `Unhandled`
+  - **`ISkillIntegration` shape** simplified to one method: `Task<SkillResult> HandleAsync(Capture, CancellationToken)` (was `WriteAsync(Capture, IReadOnlyList<string>, …)`)
+  - **`WallabagSkillIntegration`** — POST `/api/entries.json` with bearer auth; returns Wallabag entry id as `ExternalRef`
+  - **`VikunjaSkillIntegration`** — PUT `/api/v1/projects/{id}/tasks` with bearer auth; uses classifier `Title` as task title, falls back to truncated content
+  - **`AddFlowHubSkills`** — silent fallback semantics matching `AddFlowHubAi`: skill registers as no-op when `Skills:<X>:BaseUrl`/`:ApiToken`/`:DefaultProjectId` missing
+  - **`SkillsBootLogger`** — `EventId 4020 SkillRegistered` / `4021 SkillNotConfigured`
+  - **EventId range 4000–4999** reserved for skill startup; 2000–2999 for skill runtime; 5000–5999 for persistence
+  - **UI** — `Title` column in Recent Captures grid + Capture Detail; `ExternalRef` shown in Capture Detail Metadata
+  - **Tests** — 13 EF Core unit tests, 7 Wallabag + 6 Vikunja unit tests, 7 `AddFlowHubSkills` extension tests, 1 new `SkillRoutingConsumer` test for `MarkCompleted`, 2 trait-gated `[Category=BetaSmoke]` live tests
+  - **Makefile** — `make test` excludes `AI` and `BetaSmoke`; new `make test-beta` runs the live Beta tests against real Wallabag + Vikunja
+- **`docs/ai-usage.md`** appended with Block-4-prep / Beta-MVP retrospective section

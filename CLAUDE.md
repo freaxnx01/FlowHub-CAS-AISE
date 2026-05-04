@@ -101,7 +101,7 @@ Test naming convention: `MethodName_StateUnderTest_ExpectedBehavior` (CA1707 is 
 
 ### Database Migrations
 
-> ⏳ **Block 4** — EF Core persistence isn't wired yet. The commands below describe the eventual workflow once `FlowHub.Persistence` lands in Block 4. Currently all data is in-memory Bogus stubs.
+> Persistence is wired as of the Beta MVP (2026-05-04). The commands below describe the standard EF Core workflow against `source/FlowHub.Persistence`.
 
 ```bash
 # Add migration
@@ -152,9 +152,9 @@ The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modul
 │   │   ├── Stubs/                     ← Bogus-backed stub services for Block 2
 │   │   └── Program.cs
 │   ├── FlowHub.AI/                    ← MEAI-backed classifier (Block 3 Slice C, ADR 0004)
-│   ├── FlowHub.Integrations/          ← (placeholder — Wallabag, Wekan, Vikunja, …)
-│   ├── FlowHub.Persistence/           ← (placeholder — EF Core, Block 4)
-│   ├── FlowHub.Skills/                ← (placeholder — Skill implementations)
+│   ├── FlowHub.Integrations/          ← (placeholder — kept for legacy split, see ADR pending)
+│   ├── FlowHub.Persistence/           ← EF Core SQLite + EfCaptureService (Beta MVP, 2026-05-04)
+│   ├── FlowHub.Skills/                ← Wallabag + Vikunja ISkillIntegration impls (Beta MVP, 2026-05-04)
 │   └── FlowHub.Telegram/              ← (placeholder — Telegram channel)
 ├── tests/
 │   ├── FlowHub.Web.ComponentTests/    ← bUnit + xunit + FluentAssertions + NSubstitute
