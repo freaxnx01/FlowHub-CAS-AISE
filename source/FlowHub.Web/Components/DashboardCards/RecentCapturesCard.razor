@@ -50,6 +50,13 @@
                             <LifecycleBadge Stage="@context.Item.Stage" />
                         </CellTemplate>
                     </PropertyColumn>
+                    <PropertyColumn Property="x => x.Title" Title="Title">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2" Style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px;">
+                                @(context.Item.Title ?? "—")
+                            </MudText>
+                        </CellTemplate>
+                    </PropertyColumn>
                     <PropertyColumn Property="x => x.Content" Title="Content">
                         <CellTemplate>
                             <MudText Typo="Typo.body2" Style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;">
