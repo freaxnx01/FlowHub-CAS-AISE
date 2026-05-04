@@ -7,7 +7,7 @@ public sealed class FlowHubDbContext : DbContext
 {
     public FlowHubDbContext(DbContextOptions<FlowHubDbContext> options) : base(options) { }
 
-    internal DbSet<CaptureEntity> Captures => Set<CaptureEntity>();
+    public DbSet<CaptureEntity> Captures => Set<CaptureEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
