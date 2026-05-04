@@ -115,11 +115,23 @@ public sealed class CaptureServiceStub : ICaptureService
         return capture;
     }
 
-    public Task MarkClassifiedAsync(Guid id, string matchedSkill, CancellationToken cancellationToken = default) =>
-        ReplaceCapture(id, c => c with { Stage = LifecycleStage.Classified, MatchedSkill = matchedSkill });
+    public Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, CancellationToken cancellationToken = default) =>
+        ReplaceCapture(id, c => c with
+        {
+            Stage = LifecycleStage.Classified,
+            MatchedSkill = matchedSkill,
+            Title = title ?? c.Title,
+        });
 
     public Task MarkRoutedAsync(Guid id, CancellationToken cancellationToken = default) =>
         ReplaceCapture(id, c => c with { Stage = LifecycleStage.Routed });
+
+    public Task MarkCompletedAsync(Guid id, string? externalRef, CancellationToken cancellationToken = default) =>
+        ReplaceCapture(id, c => c with
+        {
+            Stage = LifecycleStage.Completed,
+            ExternalRef = externalRef ?? c.ExternalRef,
+        });
 
     public Task MarkOrphanAsync(Guid id, string reason, CancellationToken cancellationToken = default) =>
         ReplaceCapture(id, c => c with { Stage = LifecycleStage.Orphan, FailureReason = reason });
