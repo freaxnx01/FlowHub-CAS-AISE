@@ -4,7 +4,7 @@
 # `make` with no target prints help.
 
 .DEFAULT_GOAL := help
-.PHONY: help run watch build test test-ai test-watch restore clean format
+.PHONY: help run watch build test test-ai test-beta test-watch restore clean format
 
 SOLUTION    := FlowHub.slnx
 WEB_PROJECT := source/FlowHub.Web
@@ -30,11 +30,14 @@ watch: ## Run FlowHub.Web with hot reload (dotnet watch)
 build: ## Build the full solution
 	dotnet build $(SOLUTION)
 
-test: ## Run all tests except [Category=AI]
-	dotnet test $(SOLUTION) --no-build --filter "Category!=AI"
+test: ## Run all tests except [Category=AI] and [Category=BetaSmoke]
+	dotnet test $(SOLUTION) --no-build --filter "Category!=AI&Category!=BetaSmoke"
 
 test-ai: ## Run live integration tests against real AI providers (requires Ai__*__ApiKey env)
 	dotnet test tests/FlowHub.AI.IntegrationTests --filter "Category=AI"
+
+test-beta: ## Run live Beta-smoke tests against real Wallabag + Vikunja (requires Skills__*__ApiToken env)
+	dotnet test tests/FlowHub.Skills.IntegrationTests --filter "Category=BetaSmoke"
 
 test-watch: ## Run component tests in watch mode
 	dotnet watch test --project tests/FlowHub.Web.ComponentTests
