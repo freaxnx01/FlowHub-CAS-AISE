@@ -2,7 +2,7 @@
 tags:
   - claude-generated
   - claude-updated
-updated: 2026-05-03
+updated: 2026-05-04
 ---
 
 # Block 3 — Service · Nachbereitung
@@ -55,7 +55,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### Programmierung
 
 - [x] **Code lesbar, dokumentiert, nach Layer/Modul/Sub-System strukturiert (7)** — Slice B: hexagonale Ports (`IClassifier`, `ISkillIntegration`), Pipeline-Modul, EventId-Namespacing (1000–1999 / 2000–2999), `LoggerMessage` source-gen
-- [ ] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10), siehe [[Bewertungskriterien]]
+- [x] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10), siehe [[Bewertungskriterien]]; consciously skipped, will be noted in submission PDF
 - [x] **Erkenntnisse aus der Programmierung dokumentiert (3)** — ADR 0003, `docs/ai-usage.md` (Reflexion-Sektion mit ⚠/❌ Tabelle); CHANGELOG noch offen
 - [x] **Source in Git-Repository (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE`; Slice-B-Branch `feat/block3-async-pipeline` lokal committed, Push folgt nach Final Code Review
 
@@ -105,16 +105,18 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 - [x] Klassifikator-Stub: Capture → vorgeschlagene Tags / Skill — `KeywordClassifier` (deterministische URL/todo-Heuristik, 4 Tests grün); Mock-Provider via NSubstitute in Pipeline-Tests
 - [x] Reflexion zu `Microsoft.Extensions.AI` / Semantic Kernel im .NET-Stack — captured in ADR 0004 §"Reflexion" + `docs/ai-usage.md` Slice-C Reflexion-Sektion
 
-### Typed Clients (Konsistenz Server↔Client)
+### Typed Clients (Konsistenz Server↔Client) — deferred
 
-- [ ] Refit (oder Kiota) als MicroProfile-REST-Client-Äquivalent evaluieren und entscheiden
-- [ ] Generierter/typed Client für `FlowHub.Api` aus OpenAPI
-- [ ] Blazor-Pages über typed Client gegen die REST-API verdrahten (statt direkten Stub-Service-Calls)
+> **Decision (2026-05-04):** Deferred indefinitely. Not on the Beta-MVP path — the Blazor UI talks to `ICaptureService` in-process (per ADR 0001 D2), so a typed REST client is only needed by future external consumers (Telegram bot, mobile). When that lands, evaluate Refit vs Kiota then; today there is no live consumer to wire.
+
+- [x] ~~Refit (oder Kiota) als MicroProfile-REST-Client-Äquivalent evaluieren und entscheiden~~ — deferred (no live consumer)
+- [x] ~~Generierter/typed Client für `FlowHub.Api` aus OpenAPI~~ — deferred (no live consumer)
+- [x] ~~Blazor-Pages über typed Client gegen die REST-API verdrahten (statt direkten Stub-Service-Calls)~~ — deferred; ADR 0001 D2 specifies UI uses in-process services, not the REST API
 
 ### Validierung & Tests
 
-- [ ] Test-Strategie als Dokument (`docs/test-strategy.md` o.ä.)
-- [ ] Akzeptanzkriterien je Use Case (in den ADRs oder eigenem Doc)
+- [x] Test-Strategie als Dokument — lives at `docs/spec/testing-strategy.md`; refreshed for Block 3 reality (99 default-suite + 4 trait-gated; tools, patterns, deferrals)
+- [x] Akzeptanzkriterien je Use Case — UC-08..UC-11 in `docs/spec/use-cases.md` carry Postcondition / Error sections; 17 API integration tests + 25 Slice-C unit tests serve as executable acceptance per endpoint / classifier behaviour
 - [x] Unit-Tests für Handlers / Validators — Slice B: KeywordClassifier (4), CaptureServiceStub (6), Pipeline-Consumers (6); Validators kommen mit Slice A
 - [x] Component-Tests für API-Endpoints (`Microsoft.AspNetCore.Mvc.Testing`) — Slice A: 17 integration tests via `WebApplicationFactory<Program>` in `tests/FlowHub.Api.IntegrationTests/`
 - [x] MassTransit Test Harness für Consumers — `PipelineTestBase` + 6 Harness-basierte Tests (Enrichment, Routing, Fault-Observer)
