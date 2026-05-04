@@ -62,6 +62,31 @@ public sealed class CaptureEnrichmentConsumerTests
         stored!.Stage.Should().Be(LifecycleStage.Orphan);
     }
 
+    [Fact]
+    public async Task Consume_KnownSkillWithTitle_PassesTitleToCaptureService()
+    {
+        var classifier = Substitute.For<IClassifier>();
+        classifier.ClassifyAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ClassificationResult(["link"], "Wallabag", Title: "Hexagonal architecture"));
+
+        await using var provider = PipelineTestBase.Build(
+            configure: s => s.AddSingleton(classifier),
+            configureBus: x => x.AddConsumer<CaptureEnrichmentConsumer>());
+
+        var harness = provider.GetRequiredService<ITestHarness>();
+        await harness.Start();
+
+        var captureService = provider.GetRequiredService<ICaptureService>();
+        var capture = await captureService.SubmitAsync("https://example.com", ChannelKind.Web, default);
+
+        (await harness.Consumed.Any<CaptureCreated>(
+            x => x.Context.Message.CaptureId == capture.Id))
+            .Should().BeTrue();
+
+        var updated = await captureService.GetByIdAsync(capture.Id, default);
+        updated!.Title.Should().Be("Hexagonal architecture");
+    }
+
     private static IClassifier StubClassifier(ClassificationResult result)
     {
         var sub = Substitute.For<IClassifier>();
