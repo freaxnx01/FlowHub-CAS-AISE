@@ -3,6 +3,7 @@
     <Project Path="source/FlowHub.AI/FlowHub.AI.csproj" />
     <Project Path="source/FlowHub.Api/FlowHub.Api.csproj" />
     <Project Path="source/FlowHub.Core/FlowHub.Core.csproj" />
+    <Project Path="source/FlowHub.Persistence/FlowHub.Persistence.csproj" />
     <Project Path="source/FlowHub.Skills/FlowHub.Skills.csproj" />
     <Project Path="source/FlowHub.Web/FlowHub.Web.csproj" />
   </Folder>

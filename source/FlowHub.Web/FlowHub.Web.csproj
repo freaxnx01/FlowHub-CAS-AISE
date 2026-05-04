@@ -18,6 +18,7 @@
     <ProjectReference Include="..\FlowHub.AI\FlowHub.AI.csproj" />
     <ProjectReference Include="..\FlowHub.Api\FlowHub.Api.csproj" />
     <ProjectReference Include="..\FlowHub.Core\FlowHub.Core.csproj" />
+    <ProjectReference Include="..\FlowHub.Persistence\FlowHub.Persistence.csproj" />
     <ProjectReference Include="..\FlowHub.Skills\FlowHub.Skills.csproj" />
   </ItemGroup>
 
