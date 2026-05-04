@@ -12,4 +12,6 @@ public sealed record Capture(
     DateTimeOffset CreatedAt,
     LifecycleStage Stage,
     string? MatchedSkill,
-    string? FailureReason = null);
+    string? FailureReason = null,
+    string? Title = null,
+    string? ExternalRef = null);

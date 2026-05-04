@@ -265,4 +265,24 @@ public sealed class CaptureServiceStubTests
         Func<Task> act = () => sut.ResetForRetryAsync(Guid.NewGuid(), default);
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
+
+    // ── Capture record shape (Beta MVP) ──────────────────────────────────────
+
+    [Fact]
+    public void Capture_RecordShape_HasOptionalTitleAndExternalRef()
+    {
+        var capture = new Capture(
+            Id: Guid.NewGuid(),
+            Source: ChannelKind.Web,
+            Content: "https://example.com",
+            CreatedAt: DateTimeOffset.UtcNow,
+            Stage: LifecycleStage.Completed,
+            MatchedSkill: "Wallabag",
+            FailureReason: null,
+            Title: "Example",
+            ExternalRef: "wal-42");
+
+        capture.Title.Should().Be("Example");
+        capture.ExternalRef.Should().Be("wal-42");
+    }
 }
