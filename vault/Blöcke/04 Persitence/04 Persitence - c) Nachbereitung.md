@@ -60,7 +60,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Entwurf
 
-- [ ] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0005 für Persistenz: Provider-Wahl (PostgreSQL), ORM-Wahl (EF Core), Repository-vs-DbContext-direkt, Migrations-Workflow
+- [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0005 (`docs/adr/0005-persistence.md`, Accepted, 2026-05-04): Provider-Wahl (SQLite Beta → PostgreSQL Block 4), ORM EF Core 10, kein Repository-Layer (`EfCaptureService` = `ICaptureService`-Adapter direkt), Migrations-Workflow (`dotnet-ef` Tool-Manifest + `MigrationRunner` IHostedService Beta → separate init-container Block 5), `internal sealed` + `InternalsVisibleTo`, Cursor-Pagination keyset, Index-Strategie
 - [ ] **Struktur / Verhalten / Interaktion (7)**:
   - Struktur: `FlowHub.Persistence`-Layer, `DbContext`, Entities, Migrations, Repositories
   - Verhalten: CRUD-Flows, Migrations-Run, Query-Plans für Hot-Path-Queries
@@ -71,7 +71,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [ ] **Code lesbar/dokumentiert/strukturiert (7)** — `FlowHub.Persistence` als eigenes Projekt, sauber getrennt von Domain (`FlowHub.Core`)
 - [ ] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10)
-- [ ] **Erkenntnisse dokumentiert (3)** — Migrations-Strategie, Performance-Beobachtungen, EF-Core-Pitfalls (Tracking, Includes, N+1) in `docs/insights/block-4.md`
+- [x] **Erkenntnisse dokumentiert (3)** — `docs/ai-usage.md` Block-4-prep / Beta-MVP-Sektion: dual-provider EF-Core-8+ trap, `InternalsVisibleTo`-Pattern für Test-Seeding, surgical `MigrationRunner`-Removal in `IntegrationTestFactory`, `IDesignTimeDbContextFactory` für Tooling-Discovery, captive-`HttpClient`-Anti-Pattern (gemerkt für Block 4 Cleanup); ADR 0005 §"Alternatives considered" deckt Dapper/NHibernate/Repository-Pattern Trade-offs ab
 - [ ] **Source in Git (2)** — alle Block-4-Commits gepusht
 
 ### Validierung
@@ -102,7 +102,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Architektur & Entscheide
 
-- [ ] ADR 0005 — Persistence (Provider, ORM, Repository-Pattern-Entscheid, Migrations-Workflow)
+- [x] ADR 0005 — Persistence (Provider, ORM, Repository-Pattern-Entscheid, Migrations-Workflow) — `docs/adr/0005-persistence.md` (Accepted, 2026-05-04)
 - [x] Stack-Mapping-Notiz: Hibernate/Panache/Jakarta Data → EF Core (kurze Doku, warum, was äquivalent) — landed im Auftrag-Intro oben (FlowHub-Stack-Mapping)
 
 ### Implementierung (`source/FlowHub.Persistence/`)
@@ -164,4 +164,5 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 - Block 5 Nachbereitung: [[05 Deployment - c) Nachbereitung]]
 - ADR 0001: `docs/adr/0001-frontend-render-mode-and-architecture.md`
 - ADR 0002: `docs/adr/0002-service-architecture-and-async-communication.md`
+- ADR 0005: `docs/adr/0005-persistence.md` — Persistence (Beta MVP)
 - Bewertungskriterien: [[Bewertungskriterien]]
