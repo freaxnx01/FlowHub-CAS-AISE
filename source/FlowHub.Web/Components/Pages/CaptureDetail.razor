@@ -54,6 +54,10 @@ else
                     @if (_capture.Stage == LifecycleStage.Orphan) { <text> (failed)</text> }
                 </MudText>
             </MudStack>
+            @if (!string.IsNullOrWhiteSpace(_capture.Title))
+            {
+                <MudText Typo="Typo.h6" Class="mt-2">@_capture.Title</MudText>
+            }
         </MudCardHeader>
 
         <MudCardContent>
@@ -83,6 +87,14 @@ else
                 <MudText Typo="Typo.body2"><strong>Source:</strong> @_capture.Source</MudText>
                 <MudText Typo="Typo.body2"><strong>Stage:</strong> @_capture.Stage</MudText>
                 <MudText Typo="Typo.body2"><strong>Skill:</strong> @(_capture.MatchedSkill ?? "—")</MudText>
+                @if (!string.IsNullOrWhiteSpace(_capture.Title))
+                {
+                    <MudText Typo="Typo.body2"><strong>Title:</strong> @_capture.Title</MudText>
+                }
+                @if (!string.IsNullOrWhiteSpace(_capture.ExternalRef))
+                {
+                    <MudText Typo="Typo.body2"><strong>External ref:</strong> @_capture.ExternalRef</MudText>
+                }
             </MudStack>
 
             @* Actions — only for Orphan / Unhandled *@
