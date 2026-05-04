@@ -293,6 +293,30 @@ exist as a fast sanity gate for whoever runs `make test-ai` with keys configured
 
 (Captured here when surprising or high-leverage. Empty for now — most prompts followed standard skill conventions.)
 
+---
+
+## Block 4 prep — Beta MVP (Web → AI → Wallabag/Vikunja)
+
+### Workflow
+
+End-to-end vertical slice that landed Block-4 (persistence) and Block-5 (real Skills + Integrations) work early to validate the architecture on a real homelab demo before continuing rubric-aligned work. Same superpowers SDD loop as Slice C.
+
+- `superpowers:brainstorming` produced `docs/superpowers/specs/2026-05-04-beta-mvp-design.md` (D1–D8).
+- `superpowers:writing-plans` produced this plan (`docs/superpowers/plans/2026-05-04-beta-mvp.md`).
+- `superpowers:subagent-driven-development` (or `executing-plans` for inline) drove the 21 tasks.
+
+### Notable adaptations the implementers caught
+
+(To be filled in during/after execution.)
+
+### Generated vs. handwritten share
+
+(To be filled in during/after execution; mirror the Slice A/B/C tables.)
+
+### Reflexion — what worked / what didn't
+
+(To be filled in during/after execution. Sized for the submission PDF.)
+
 ## References
 
 - ADR 0003: `docs/adr/0003-async-pipeline.md`
