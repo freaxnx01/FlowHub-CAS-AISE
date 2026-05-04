@@ -425,5 +425,10 @@ appsettings.Development.json
 appsettings.Local.json
 appsettings.Production.json
 
+# SQLite database written by MigrationRunner at runtime
+flowhub.db
+flowhub.db-shm
+flowhub.db-wal
+
 # Git worktrees
 .worktrees/

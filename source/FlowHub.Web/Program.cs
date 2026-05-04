@@ -1,10 +1,10 @@
 using FlowHub.AI;
 using FlowHub.Api;
 using FlowHub.Api.Endpoints;
-using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Health;
 using FlowHub.Core.Skills;
+using FlowHub.Persistence;
 using FlowHub.Skills;
 using FlowHub.Web.Auth;
 using FlowHub.Web.Components;
@@ -43,16 +43,13 @@ else
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-// Block 2 stub services — replaced incrementally as later blocks land.
-// CaptureServiceStub now publishes CaptureCreated on submit, so it must be
-// constructed via factory using IBus (singleton publish endpoint) — plain
-// AddSingleton<ICaptureService, CaptureServiceStub>() would fail because
-// IPublishEndpoint is registered Scoped by MassTransit and a Singleton can't
-// capture a Scoped dependency.
-// TODO Block 4: when the EF Core impl lands, ICaptureService becomes Scoped
-// (DbContext is Scoped) and can take IPublishEndpoint directly — drop the factory.
-builder.Services.AddSingleton<ICaptureService>(sp =>
-    new CaptureServiceStub(sp.GetRequiredService<IBus>()));
+// Block 4 prep (Beta MVP) — EF Core SQLite persistence.
+// `AddFlowHubPersistence` registers FlowHubDbContext (scoped) + EfCaptureService as ICaptureService.
+// Migrations apply at startup via the MigrationRunner IHostedService.
+builder.Services.AddFlowHubPersistence(builder.Configuration);
+
+// SkillRegistry / IntegrationHealth keep their Bogus stubs for the Beta — orthogonal to
+// architecture validation; live probes are post-Beta polish.
 builder.Services.AddSingleton<ISkillRegistry, SkillRegistryStub>();
 builder.Services.AddSingleton<IIntegrationHealthService, IntegrationHealthServiceStub>();
 
