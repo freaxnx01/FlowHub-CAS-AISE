@@ -136,20 +136,25 @@ public class SmokeTests : TestContext
     // ──────────────────────────────────────────────────────────
 
     [Fact]
-    public async Task CaptureDetail_Unhandled_ShowsNoSkillMessageAndAssignAction()
+    public async Task CaptureDetail_Unhandled_ShowsIntegrationFailureAndAssignAction()
     {
         var all = await _captureService.GetAllAsync();
         var unhandled = all.First(c => c.Stage == LifecycleStage.Unhandled);
 
         var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, unhandled.Id));
 
-        // Info alert
-        cut.Markup.Should().Contain("No Skill matched this Capture");
+        // Failure alert surfaces FailureReason (Beta MVP — Unhandled means a skill matched but
+        // its integration failed; the operator drills in here to read the reason).
+        cut.Markup.Should().Contain("Skill integration failed");
+        if (!string.IsNullOrWhiteSpace(unhandled.FailureReason))
+        {
+            cut.Markup.Should().Contain(unhandled.FailureReason);
+        }
 
         // Full content
         cut.Markup.Should().Contain(unhandled.Content);
 
-        // Assign action (not Retry — unhandled has no Skill to retry)
+        // Assign action (Retry is reserved for Orphan; Unhandled offers reassign or ignore)
         cut.Markup.Should().Contain("Assign skill");
         cut.Markup.Should().Contain("Ignore");
         cut.Markup.Should().NotContain("Retry routing");
