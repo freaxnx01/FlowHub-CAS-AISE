@@ -4,12 +4,12 @@ namespace FlowHub.Core.Skills;
 
 /// <summary>
 /// Driven port: writes a Capture to a downstream skill-specific service.
-/// Slice B ships <see cref="LoggingSkillIntegration"/> stubs; real adapters
-/// (Wallabag, Wekan, Vikunja) land in Block 4/5.
+/// One method per integration; the implementation is responsible for HTTP,
+/// auth, retries within a single attempt, and any skill-specific tagging.
 /// </summary>
 public interface ISkillIntegration
 {
     string Name { get; }
 
-    Task WriteAsync(Capture capture, IReadOnlyList<string> tags, CancellationToken cancellationToken);
+    Task<SkillResult> HandleAsync(Capture capture, CancellationToken cancellationToken);
 }
