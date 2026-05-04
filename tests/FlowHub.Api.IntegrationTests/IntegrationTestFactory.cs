@@ -52,7 +52,7 @@ public sealed class IntegrationTestFactory : WebApplicationFactory<Program>
             // Wholesale RemoveAll<IHostedService>() would also drop MassTransit's bus-control
             // hosted service, causing consumer pipeline tests to fail.
             var runners = services
-                .Where(d => d.ImplementationType?.Name == "MigrationRunner")
+                .Where(d => d.ImplementationType == typeof(MigrationRunner))
                 .ToList();
             foreach (var d in runners)
             {

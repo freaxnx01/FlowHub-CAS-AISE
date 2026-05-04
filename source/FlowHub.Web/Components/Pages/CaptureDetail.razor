@@ -70,8 +70,8 @@ else
             }
             else if (_capture.Stage == LifecycleStage.Unhandled)
             {
-                <MudAlert Severity="Severity.Info" Class="mb-4">
-                    No Skill matched this Capture. The AI classifier could not determine a category.
+                <MudAlert Severity="Severity.Error" Class="mb-4">
+                    Skill integration failed: @(_capture.FailureReason ?? "Unknown error")
                 </MudAlert>
             }
 
