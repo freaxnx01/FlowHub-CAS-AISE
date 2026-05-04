@@ -57,10 +57,10 @@ builder.Services.AddSingleton<IIntegrationHealthService, IntegrationHealthServic
 // Uses real provider when Ai:Provider + Ai:<P>:ApiKey are set; silently falls back
 // to the deterministic KeywordClassifier otherwise so `make run` works zero-config.
 builder.Services.AddFlowHubAi(builder.Configuration);
-builder.Services.AddSingleton<ISkillIntegration>(sp =>
-    new LoggingSkillIntegration("Wallabag", sp.GetRequiredService<ILogger<LoggingSkillIntegration>>()));
-builder.Services.AddSingleton<ISkillIntegration>(sp =>
-    new LoggingSkillIntegration("Vikunja", sp.GetRequiredService<ILogger<LoggingSkillIntegration>>()));
+
+// Beta MVP — real skill integrations behind ISkillIntegration. AddFlowHubSkills mirrors
+// AddFlowHubAi: silent fallback if Skills:<X>:BaseUrl or :ApiToken is missing.
+builder.Services.AddFlowHubSkills(builder.Configuration);
 
 // Block 3 Slice B — MassTransit pipeline.
 builder.Services.AddMassTransit(x =>
