@@ -1,7 +1,8 @@
 ---
 tags:
   - claude-generated
-updated: 2026-04-29
+  - claude-updated
+updated: 2026-05-04
 ---
 
 # Block 4 — Persistence · Nachbereitung
@@ -33,6 +34,15 @@ Wir wenden uns nun der dritten und letzten Schicht einer klassischen Enterprise 
 > - Migrations → `dotnet ef migrations add` / `dotnet ef database update` (Workflow steht in `CLAUDE.md`)
 >
 > Datenbank: PostgreSQL (Docker), Connection-String über `ConnectionStrings__Default` ENV-Variable.
+
+---
+
+> **Beta-MVP follow-up (2026-05-04):** Ein vertikaler Beta-Slice (`docs/superpowers/specs/2026-05-04-beta-mvp-design.md` + `docs/superpowers/plans/2026-05-04-beta-mvp.md`) hat einen Teil des Block-4-Scopes vorgezogen, um die Architektur an einer realen Homelab-Demo zu validieren:
+>
+> - **Geliefert:** `FlowHub.Persistence` aktiv, `FlowHubDbContext` (Captures-DbSet), `EfCaptureService`, `Initial`-Migration, `AddFlowHubPersistence`-Extension, `MigrationRunner` (`IHostedService`), Cursor-Pagination in `ListAsync`.
+> - **Bewusst aufgeschoben für Block 4:** **PostgreSQL** (Beta nutzt SQLite), separate `EntityTypeConfiguration<T>`-Klassen, Repository-Pattern-Layer, vollständiges Domänenmodell (Skill/SkillRun/Channel/Integration/Tag), `make db-up`/`db-migrate`, Testcontainers-Tests, ADR 0005, `docs/insights/block-4.md`, Migrations als separater Init-Container (12-Factor XII).
+>
+> Die unten getickten Items sind vom Beta-Slice abgedeckt; alle anderen bleiben offen und werden in der regulären Block-4-Phase (ab 2026-05-09) bearbeitet.
 
 ---
 
@@ -93,22 +103,22 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### Architektur & Entscheide
 
 - [ ] ADR 0005 — Persistence (Provider, ORM, Repository-Pattern-Entscheid, Migrations-Workflow)
-- [ ] Stack-Mapping-Notiz: Hibernate/Panache/Jakarta Data → EF Core (kurze Doku, warum, was äquivalent)
+- [x] Stack-Mapping-Notiz: Hibernate/Panache/Jakarta Data → EF Core (kurze Doku, warum, was äquivalent) — landed im Auftrag-Intro oben (FlowHub-Stack-Mapping)
 
 ### Implementierung (`source/FlowHub.Persistence/`)
 
-- [ ] Projekt scaffolden, in `FlowHub.slnx` registrieren
-- [ ] `FlowHubDbContext` mit `DbSet<T>` für alle Entities
-- [ ] `EntityTypeConfiguration<T>` pro Entity (Fluent API statt Annotations)
-- [ ] PostgreSQL-Connection via `ConnectionStrings__Default` ENV
-- [ ] Initial-Migration `0001_Initial` generieren (`dotnet ef migrations add`)
-- [ ] Repository-Interfaces in `FlowHub.Core`, Implementierungen in `FlowHub.Persistence`
-- [ ] DI-Registration als `IServiceCollection`-Extension (`AddFlowHubPersistence(connectionString)`)
+- [x] Projekt scaffolden, in `FlowHub.slnx` registrieren — Beta MVP (`source/FlowHub.Persistence/FlowHub.Persistence.csproj`)
+- [x] `FlowHubDbContext` mit `DbSet<T>` für alle Entities — **partial**: Beta MVP nur `Captures`-DbSet; weitere Entities (Skill, SkillRun, Channel, Integration, Tag) in Block 4
+- [ ] `EntityTypeConfiguration<T>` pro Entity (Fluent API statt Annotations) — Beta nutzt inline `OnModelCreating`; Refactor zu separaten Config-Klassen in Block 4
+- [ ] PostgreSQL-Connection via `ConnectionStrings__Default` ENV — Beta nutzt SQLite; PostgreSQL-Switch in Block 4
+- [x] Initial-Migration `0001_Initial` generieren (`dotnet ef migrations add`) — Beta MVP (`Migrations/20260504120638_Initial.cs`)
+- [ ] Repository-Interfaces in `FlowHub.Core`, Implementierungen in `FlowHub.Persistence` — Beta MVP nutzt `ICaptureService` direkt gegen `DbContext`; Repository-Layer-Entscheid in ADR 0005
+- [x] DI-Registration als `IServiceCollection`-Extension (`AddFlowHubPersistence(connectionString)`) — Beta MVP (`AddFlowHubPersistence(IConfiguration)` mit `ConnectionStrings:Default`-Lookup)
 
 ### Dynamische Abfragen
 
-- [ ] LINQ + Expression Trees als "Criteria-API"-Äquivalent — Beispiel: dynamischer Capture-Filter (Lifecycle, Channel, Tags, Search)
-- [ ] Pagination-Helper (Skip/Take + Cursor-basiert für lange Listen)
+- [ ] LINQ + Expression Trees als "Criteria-API"-Äquivalent — Beispiel: dynamischer Capture-Filter (Lifecycle, Channel, Tags, Search) — Beta MVP nur statische Filter; voller dynamischer Filter inkl. Tag/Search in Block 4
+- [x] Pagination-Helper (Skip/Take + Cursor-basiert für lange Listen) — Beta MVP (`EfCaptureService.ListAsync` mit `CaptureCursor` keyset-pagination, `limit+1`-Probe)
 - [ ] N+1-Problem aktiv vermeiden (`Include` / Projektion / Read-Models)
 
 ### Migrations & Deployment-Vorbereitung
@@ -120,8 +130,8 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Stub-Replacement
 
-- [ ] Bogus-basierte Stubs aus Block 2 durch DB-gestützte Implementierungen ersetzen — *aber* Bogus-Seed für Dev-Mode behalten (`appsettings.Development.json`-Flag)
-- [ ] `ICaptureService`, `ISkillRegistry`, `IIntegrationHealthService` jetzt gegen Repository statt In-Memory
+- [ ] Bogus-basierte Stubs aus Block 2 durch DB-gestützte Implementierungen ersetzen — *aber* Bogus-Seed für Dev-Mode behalten (`appsettings.Development.json`-Flag) — Beta MVP hat Bogus-Stubs entfernt; deterministisches Seeding nur im `IntegrationTestFactory` für API-Tests; Dev-Mode-Seed offen
+- [x] `ICaptureService`, `ISkillRegistry`, `IIntegrationHealthService` jetzt gegen Repository statt In-Memory — **partial**: nur `ICaptureService` swap (Beta MVP); `ISkillRegistry` + `IIntegrationHealthService` bleiben Stubs (per Beta-Spec D3 — orthogonal zu Architektur-Validierung)
 
 ### Tests
 
@@ -132,7 +142,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Spezifikation & Doku
 
-- [ ] CHANGELOG `[Unreleased]` mit Block-4-Deliverables
+- [x] CHANGELOG `[Unreleased]` mit Block-4-Deliverables — **partial**: Beta-MVP-Persistence-Eintrag landed (commits `d7b7af0..c5340e9`); reine Block-4-Erweiterungen (PostgreSQL, Repository-Pattern, ADR 0005) kommen nach
 - [ ] Use-Case-Liste um datenseitige Use Cases erweitern
 - [ ] Performance-NfAs SMART formulieren (mit Mess-Methodik)
 - [ ] `docs/insights/block-4.md` — Erkenntnisse Datenmodellierung mit KI
