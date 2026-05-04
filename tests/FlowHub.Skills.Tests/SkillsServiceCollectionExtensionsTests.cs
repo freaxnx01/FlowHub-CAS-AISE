@@ -71,4 +71,51 @@ public sealed class SkillsServiceCollectionExtensionsTests
             .Single(o => o.Skill == "Wallabag")
             .Reason.Should().Be("missing-base-url");
     }
+
+    [Fact]
+    public void AddFlowHubSkills_VikunjaFullyConfigured_RegistersIntegration()
+    {
+        var sp = Build(new Dictionary<string, string?>
+        {
+            ["Skills:Vikunja:BaseUrl"] = "https://vikunja.example.com",
+            ["Skills:Vikunja:ApiToken"] = "tok",
+            ["Skills:Vikunja:DefaultProjectId"] = "42",
+        });
+
+        sp.GetServices<ISkillIntegration>().Should().ContainSingle(i => i.Name == "Vikunja");
+        sp.GetServices<SkillsRegistrationOutcome>()
+            .Single(o => o.Skill == "Vikunja")
+            .Registered.Should().BeTrue();
+    }
+
+    [Fact]
+    public void AddFlowHubSkills_VikunjaWithoutProjectId_NotRegistered()
+    {
+        var sp = Build(new Dictionary<string, string?>
+        {
+            ["Skills:Vikunja:BaseUrl"] = "https://vikunja.example.com",
+            ["Skills:Vikunja:ApiToken"] = "tok",
+        });
+
+        sp.GetServices<ISkillIntegration>().Should().NotContain(i => i.Name == "Vikunja");
+        sp.GetServices<SkillsRegistrationOutcome>()
+            .Single(o => o.Skill == "Vikunja")
+            .Reason.Should().Be("missing-project-id");
+    }
+
+    [Fact]
+    public void AddFlowHubSkills_BothConfigured_RegistersTwoIntegrations()
+    {
+        var sp = Build(new Dictionary<string, string?>
+        {
+            ["Skills:Wallabag:BaseUrl"] = "https://wallabag.example.com",
+            ["Skills:Wallabag:ApiToken"] = "wal-tok",
+            ["Skills:Vikunja:BaseUrl"] = "https://vikunja.example.com",
+            ["Skills:Vikunja:ApiToken"] = "vik-tok",
+            ["Skills:Vikunja:DefaultProjectId"] = "42",
+        });
+
+        var integrations = sp.GetServices<ISkillIntegration>().Select(i => i.Name).ToList();
+        integrations.Should().BeEquivalentTo(new[] { "Wallabag", "Vikunja" });
+    }
 }
