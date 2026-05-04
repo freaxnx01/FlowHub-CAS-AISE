@@ -5,7 +5,7 @@ namespace FlowHub.Persistence.Entities;
 /// Strings (not enums) are stored for <see cref="Source"/> and <see cref="Stage"/>
 /// to keep SQLite columns human-inspectable.
 /// </summary>
-public sealed class CaptureEntity
+internal sealed class CaptureEntity
 {
     public Guid Id { get; set; }
     public string Content { get; set; } = "";
