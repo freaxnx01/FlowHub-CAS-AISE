@@ -4,4 +4,6 @@ public sealed record CaptureFilter(
     IReadOnlyList<LifecycleStage>? Stages,
     ChannelKind? Source,
     int Limit,
-    CaptureCursor? Cursor);
+    CaptureCursor? Cursor,
+    string? Tag = null,
+    string? SearchTerm = null);

@@ -27,6 +27,10 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IChannelRepository, EfChannelRepository>();
         services.AddScoped<ISkillRepository, EfSkillRepository>();
         services.AddScoped<ISkillRegistry, EfSkillRegistry>();
+        services.AddScoped<IIntegrationRepository, EfIntegrationRepository>();
+        services.AddScoped<IIntegrationHealthService, EfIntegrationHealthService>();
+        services.AddScoped<ITagRepository, EfTagRepository>();
+        services.AddScoped<ISkillRunRepository, EfSkillRunRepository>();
         services.AddHostedService<MigrationRunner>();
 
         return services;

@@ -64,28 +64,13 @@ internal sealed class EfCaptureRepository : ICaptureRepository
 
     public async Task<CapturePage> ListAsync(CaptureFilter filter, CancellationToken cancellationToken = default)
     {
-        IQueryable<CaptureEntity> query = _db.Captures.AsNoTracking()
+        IQueryable<CaptureEntity> query = _db.Captures
+            .Include(c => c.Tags)
+            .AsNoTracking()
             .OrderByDescending(c => c.CreatedAt)
             .ThenByDescending(c => c.Id);
 
-        if (filter.Stages is { Count: > 0 } stages)
-        {
-            var stageStrings = stages.Select(s => s.ToString()).ToHashSet();
-            query = query.Where(c => stageStrings.Contains(c.Stage));
-        }
-
-        if (filter.Source is ChannelKind src)
-        {
-            var sourceString = src.ToString();
-            query = query.Where(c => c.Source == sourceString);
-        }
-
-        if (filter.Cursor is CaptureCursor cursor)
-        {
-            query = query.Where(c =>
-                c.CreatedAt < cursor.CreatedAt
-                || (c.CreatedAt == cursor.CreatedAt && c.Id.CompareTo(cursor.Id) < 0));
-        }
+        query = CaptureQueryBuilder.Apply(query, filter);
 
         var limit = Math.Clamp(filter.Limit, 1, 200);
         var fetched = await query.Take(limit + 1).ToListAsync(cancellationToken);

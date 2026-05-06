@@ -10,6 +10,10 @@ public sealed class FlowHubDbContext : DbContext
     internal DbSet<CaptureEntity> Captures => Set<CaptureEntity>();
     internal DbSet<ChannelEntity> Channels => Set<ChannelEntity>();
     internal DbSet<SkillEntity> Skills => Set<SkillEntity>();
+    internal DbSet<IntegrationEntity> Integrations => Set<IntegrationEntity>();
+    internal DbSet<IntegrationHealthSampleEntity> IntegrationHealthSamples => Set<IntegrationHealthSampleEntity>();
+    internal DbSet<TagEntity> Tags => Set<TagEntity>();
+    internal DbSet<SkillRunEntity> SkillRuns => Set<SkillRunEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

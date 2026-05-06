@@ -377,6 +377,14 @@ The 21-task plan reserved Task 21 for the operator: set user-secrets (Anthropic 
 
 AI generated the entity class boilerplate (`ChannelEntity`, `SkillEntity`) and the corresponding `IEntityTypeConfiguration<T>` implementations. Human reviewed field lengths against the spec (varchar(64) for Name, varchar(32) for Kind — AI initially used varchar(128) before correction). AI generated `EfSkillRepository` and `EfChannelRepository`; human added the `UpsertAsync` pattern (AI defaulted to separate `AddAsync` / `UpdateAsync` methods before the upsert requirement was clarified). `EfSkillRegistry` wrapping `ISkillRepository` was a human design decision to keep the driving port (`ISkillRegistry`) decoupled from the driven port (`ISkillRepository`); AI implemented the two-line class.
 
+### Slice 3: Full Domain Model + Dynamic Filter (May 2026)
+
+AI generated entity classes and `IEntityTypeConfiguration<T>` implementations for `Integration`, `IntegrationHealthSample`, `Tag`, and `SkillRun`. Human decisions:
+- Hard vs. soft FK strategy for each relationship (AI defaulted to hard FKs everywhere; human reviewed and softened Capture→Channel and Capture→Skill based on operational reasoning)
+- `DeleteBehavior.Restrict` vs `Cascade` on SkillRun→Skill FK (AI initially suggested Cascade, human changed to Restrict to preserve audit trail if a skill is renamed)
+
+`CaptureQueryBuilder` using expression-tree composition was AI-generated. Human added `.Include(c => c.Tags)` after noticing the N+1 anti-pattern in code review (AI's initial `ListAsync` loaded tags lazily). The ILike call for case-insensitive search was AI-suggested; human confirmed it's the right approach for block-4 scope vs. pg_trgm full-text search (deferred to Block 5).
+
 ## References
 
 - ADR 0003: `docs/adr/0003-async-pipeline.md`

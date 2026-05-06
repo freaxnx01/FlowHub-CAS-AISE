@@ -9,7 +9,6 @@ using FlowHub.Skills;
 using FlowHub.Web.Auth;
 using FlowHub.Web.Components;
 using FlowHub.Web.Pipeline;
-using FlowHub.Web.Stubs;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
 using MudBlazor.Services;
@@ -47,9 +46,6 @@ builder.Services.AddCascadingAuthenticationState();
 // `AddFlowHubPersistence` registers FlowHubDbContext (scoped) + EfCaptureService as ICaptureService.
 // Migrations apply at startup via the MigrationRunner IHostedService.
 builder.Services.AddFlowHubPersistence(builder.Configuration);
-
-// IntegrationHealth keeps its Bogus stub — live probes are post-Beta polish.
-builder.Services.AddSingleton<IIntegrationHealthService, IntegrationHealthServiceStub>();
 
 // Block 3 Slice C — AI-backed classifier (per ADR 0004) with keyword fallback.
 // Uses real provider when Ai:Provider + Ai:<P>:ApiKey are set; silently falls back
