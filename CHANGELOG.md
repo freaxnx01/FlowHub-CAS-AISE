@@ -83,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IntegrationHealthServiceStub` removed from DI (class retained for component tests)
 - SQLite migration `20260504120638_Initial` (replaced by PostgreSQL-compatible migrations)
 
-### Test Results (Block 4 baseline)
+### Test Results (Block 4 final)
 
-- Total: 154 tests passing, 0 failing
-- New integration tests via Testcontainers: 16
+- Total: 154 tests passing, 0 failing (verified 2026-05-06, filter: `Category!=AI&Category!=BetaSmoke`)
+- Breakdown: FlowHub.Persistence.Tests 29, FlowHub.Web.ComponentTests 88, FlowHub.Api.IntegrationTests 17, FlowHub.Skills.Tests 20
+- New integration tests via Testcontainers: 16 (Persistence layer)

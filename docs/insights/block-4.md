@@ -60,3 +60,33 @@ Docker Compose `flowhub.migrations` service (12-Factor XII) was a human design d
 | **Total** | **~1010** | **~902** | **~108** | **~89%** |
 
 Human contributions were concentrated in: FK strategy decisions, N+1 detection, field length corrections, index additions, and Docker Compose service dependency pattern.
+
+## KI-Reflexion / Fazit
+
+### Stärken der KI-Unterstützung (Strengths)
+
+**Boilerplate-Generierung:** Die sieben `IEntityTypeConfiguration<T>`-Klassen (insgesamt ~130 Zeilen) wurden vollständig von der KI generiert. Ohne KI wäre dieser Schritt zeitintensiv und fehleranfällig gewesen — die Klassen sind strukturell identisch, unterscheiden sich nur in Tabellennamen und Feldlängen.
+
+**Migrationsgenerierung:** Das Scaffolding der drei EF Core Migrations (0001–0003) war vollständig automatisiert. Die KI hat den Design-Time-Factory-Ansatz korrekt angewendet.
+
+**Expression-Tree-Filter:** `CaptureQueryBuilder` mit kombinierter Prädikatenkomposition (Stage, Source, Tag, ILike) war ohne KI-Unterstützung deutlich aufwendiger. Die KI hat das korrekte Muster für EF Core LINQ-Komposition auf Anhieb angewendet.
+
+**Test-Scaffolding:** 16 Integrationstests wurden von der KI generiert und bestehen alle beim ersten Durchlauf. Die Teststruktur (Arrange/Act/Assert, FluentAssertions-Syntax) ist konsistent und entspricht den Projektvorgaben.
+
+### Schwächen und Grenzen (Weaknesses)
+
+**N+1-Blindheit:** Die KI hat `EfCaptureRepository.ListAsync` initial ohne `.Include(c => c.Tags)` generiert. Das N+1-Problem wäre in einer Codeüberprüfung aufgefallen — KI hat keine implizite Performance-Awareness für Navigation Properties.
+
+**FK-Strategie:** Die KI hat durchgängig Hard-FKs mit CASCADE DELETE vorgeschlagen, ohne die Unterscheidung zwischen "owned" Entitäten (Tags, IntegrationHealthSamples) und "referenced" Entitäten (Channel, Skill) zu erkennen. Die Soft-FK-Entscheidung für Capture→Channel und Capture→Skill war eine Domain-Entscheidung, die domänenspezifisches Verständnis erforderte.
+
+**Feldlängen:** Erste Generierung verwendete varchar(128) für Name-Felder. Die spec schreibt varchar(64) vor. KI liest Spezifikationen korrekt, wenn sie explizit zitiert werden — aber ohne direkten Verweis wird auf "sichere" Standardwerte ausgewichen.
+
+**Paket-Versionen:** Der Plan hatte Npgsql 9.0.4 spezifiziert (EF Core 9 Ära). Der implementierende Subagent musste die Version auf 10.0.1 anpassen. Plan-Templates mit versionsgepinnten Paketen degradieren mit der Zeit.
+
+### Fazit
+
+KI-Unterstützung hat in Block 4 die Implementierungszeit für Persistence-Infrastruktur auf ~89% des Codes reduziert. Der menschliche Beitrag war konzentriert auf: Architekturentscheidungen (FK-Strategie, Repository-Interface-Design), Performance-Korrekturen (N+1), Spezifikationsabgleich (Feldlängen, Indexe) und Code Review.
+
+Die Kombination aus Brainstorming-Skill → Spec-Dokument → Plan-Dokument → Subagent-getriebene Implementierung hat sich bewährt: Jede Phase hat die nächste informiert, ohne dass die KI unkontrolliert in die falsche Richtung implementiert hat.
+
+**Einschätzung:** KI ist ein starker Accelerator für Infrastruktur-Code (Boilerplate, Migrations, Tests), erfordert aber menschliche Führung bei Architektur- und Domain-Entscheidungen.
