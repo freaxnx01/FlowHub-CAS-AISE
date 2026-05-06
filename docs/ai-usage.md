@@ -371,6 +371,12 @@ The spec error table contained one runtime-incorrect claim that survived through
 
 The 21-task plan reserved Task 21 for the operator: set user-secrets (Anthropic key, Wallabag PAT, Vikunja PAT + project id), boot the app, verify EventIds 3020/4020/5010/5011 in the boot log, browser-test URL → Wallabag / `todo:` → Vikunja / nonsense → Orphan, restart-survival check, optional `make test-beta` against the live homelab, then push. That step is not part of this writeup — it was deliberately gated for human-driven validation against the real homelab services. The 138/138 unit-and-integration-test count above is the upper bound of what the automated pipeline can guarantee; the Task-21 evidence (screenshots, log lines, live Wallabag/Vikunja entries) will land in this section when the operator runs it.
 
+## Block 4 — Slice 2 (rolling note)
+
+### Slice 2: Channel + Skill Entities (May 2026)
+
+AI generated the entity class boilerplate (`ChannelEntity`, `SkillEntity`) and the corresponding `IEntityTypeConfiguration<T>` implementations. Human reviewed field lengths against the spec (varchar(64) for Name, varchar(32) for Kind). AI generated `EfSkillRepository` and `EfChannelRepository`; human added the `UpsertAsync` pattern. `EfSkillRegistry` wrapping `ISkillRepository` was a human design decision; AI implemented the two-line class.
+
 ## References
 
 - ADR 0003: `docs/adr/0003-async-pipeline.md`

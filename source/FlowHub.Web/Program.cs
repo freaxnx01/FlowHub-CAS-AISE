@@ -48,9 +48,7 @@ builder.Services.AddCascadingAuthenticationState();
 // Migrations apply at startup via the MigrationRunner IHostedService.
 builder.Services.AddFlowHubPersistence(builder.Configuration);
 
-// SkillRegistry / IntegrationHealth keep their Bogus stubs for the Beta — orthogonal to
-// architecture validation; live probes are post-Beta polish.
-builder.Services.AddSingleton<ISkillRegistry, SkillRegistryStub>();
+// IntegrationHealth keeps its Bogus stub — live probes are post-Beta polish.
 builder.Services.AddSingleton<IIntegrationHealthService, IntegrationHealthServiceStub>();
 
 // Block 3 Slice C — AI-backed classifier (per ADR 0004) with keyword fallback.

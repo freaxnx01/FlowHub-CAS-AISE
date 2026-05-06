@@ -1,4 +1,6 @@
 using FlowHub.Core.Captures;
+using FlowHub.Core.Channels;
+using FlowHub.Core.Health;
 using FlowHub.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +24,9 @@ public static class PersistenceServiceCollectionExtensions
         services.AddDbContext<FlowHubDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<ICaptureRepository, EfCaptureRepository>();
         services.AddScoped<ICaptureService, EfCaptureService>();
+        services.AddScoped<IChannelRepository, EfChannelRepository>();
+        services.AddScoped<ISkillRepository, EfSkillRepository>();
+        services.AddScoped<ISkillRegistry, EfSkillRegistry>();
         services.AddHostedService<MigrationRunner>();
 
         return services;
