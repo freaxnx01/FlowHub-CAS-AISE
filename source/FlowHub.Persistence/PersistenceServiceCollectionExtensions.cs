@@ -9,13 +9,16 @@ namespace FlowHub.Persistence;
 
 public static class PersistenceServiceCollectionExtensions
 {
-    private const string DefaultConnectionString = "Data Source=flowhub.db";
+    private const string DefaultConnectionString =
+        "Host=localhost;Port=5432;Database=flowhub;Username=flowhub;Password=dev-secret";
 
-    public static IServiceCollection AddFlowHubPersistence(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddFlowHubPersistence(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Default") ?? DefaultConnectionString;
 
-        services.AddDbContext<FlowHubDbContext>(options => options.UseSqlite(connectionString));
+        services.AddDbContext<FlowHubDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<ICaptureService, EfCaptureService>();
         services.AddHostedService<MigrationRunner>();
 

@@ -1,5 +1,5 @@
 # Block-5 deployment topology preview. NOT used by `make run` (which stays single-process).
-# Demonstrates the multi-container option: FlowHub.Web + FlowHub.Api (Slice A) + RabbitMQ.
+# Demonstrates the multi-container option: FlowHub.Web + FlowHub.Api (Slice A) + RabbitMQ + PostgreSQL.
 # Run with: docker compose up --build (once the Slice-A api project lands and Dockerfiles exist).
 
 services:
@@ -13,8 +13,12 @@ services:
       ASPNETCORE_URLS: http://+:8080
       Bus__Transport: RabbitMq
       Bus__RabbitMq__Host: rabbitmq
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=flowhub;Username=flowhub;Password=dev-secret"
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     ports:
       - "5070:8080"
 
@@ -34,3 +38,22 @@ services:
     ports:
       - "15672:15672"   # management UI
       - "5672:5672"     # AMQP
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: flowhub
+      POSTGRES_USER: flowhub
+      POSTGRES_PASSWORD: dev-secret
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowhub -d flowhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
