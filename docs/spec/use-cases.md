@@ -178,6 +178,41 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Error:** Capture is not in a retryable stage (`Raw`, `Classified`, `Routed`) → `409 Conflict` ProblemDetails.
 **Note:** UC-06 documents the UI entry point and the Block-2 stub state. UC-11 defines the Block-3 implementation that fulfils the "Retry routing" action stubbed in UC-06 Flow (Orphan) step 3 and Flow (Unhandled) step 2.
 
+### UC-12: Filter Captures by Lifecycle Stage
+
+**Actor:** Operator  
+**Trigger:** Operator selects one or more stages in the Captures list filter.  
+**Flow:** System queries `ICaptureService.ListAsync` with the selected stages. List refreshes to show only matching captures.  
+**Acceptance:** Selecting "Orphan" returns only orphaned captures. Selecting multiple stages returns the union.
+
+### UC-13: Filter Captures by Tag
+
+**Actor:** Operator  
+**Trigger:** Operator enters a tag value in the tag filter field.  
+**Flow:** System queries `ICaptureService.ListAsync` with `CaptureFilter.Tag` set. Returns only captures that have the tag attached.  
+**Acceptance:** A capture tagged "dotnet" appears when filter is "dotnet". Captures without the tag are excluded.
+
+### UC-14: Search Captures by Content or Title
+
+**Actor:** Operator  
+**Trigger:** Operator types a search term in the search box.  
+**Flow:** System queries with `CaptureFilter.SearchTerm`. PostgreSQL ILIKE match against Content and Title (case-insensitive). Not full-text search — deferred to Block 5.  
+**Acceptance:** Searching "hexagonal" returns captures whose Content or Title contains that substring (any casing).
+
+### UC-15: View Skill-Run History for a Capture
+
+**Actor:** Operator  
+**Trigger:** Operator opens a Capture detail and views the routing history tab.  
+**Flow:** System queries `ISkillRunRepository.GetByCaptureIdAsync`. Returns all routing attempts for that capture ordered by StartedAt DESC.  
+**Acceptance:** A capture that was routed twice shows two SkillRun entries.
+
+### UC-16: View Integration Health History
+
+**Actor:** Operator  
+**Trigger:** Operator opens the Integrations page and expands an integration's history.  
+**Flow:** System queries `IIntegrationRepository.GetRecentSamplesAsync`. Returns the last N health samples.  
+**Acceptance:** Shows SampledAt, Status, and DurationMs for each sample.
+
 ---
 
 ## Non-Functional Requirements (SMART)
