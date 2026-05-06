@@ -1,4 +1,5 @@
 using FlowHub.Core.Captures;
+using FlowHub.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ public static class PersistenceServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Default") ?? DefaultConnectionString;
 
         services.AddDbContext<FlowHubDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddScoped<ICaptureRepository, EfCaptureRepository>();
         services.AddScoped<ICaptureService, EfCaptureService>();
         services.AddHostedService<MigrationRunner>();
 
