@@ -37,6 +37,11 @@ namespace FlowHub.Persistence.Migrations
                 descending: new bool[0]);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Captures_MatchedSkill",
+                table: "Captures",
+                column: "MatchedSkill");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Captures_Stage",
                 table: "Captures",
                 column: "Stage");

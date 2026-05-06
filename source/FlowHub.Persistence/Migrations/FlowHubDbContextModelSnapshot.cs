@@ -66,6 +66,9 @@ namespace FlowHub.Persistence.Migrations
                         .IsDescending()
                         .HasDatabaseName("IX_Captures_CreatedAt_DESC");
 
+                    b.HasIndex("MatchedSkill")
+                        .HasDatabaseName("IX_Captures_MatchedSkill");
+
                     b.HasIndex("Stage")
                         .HasDatabaseName("IX_Captures_Stage");
 

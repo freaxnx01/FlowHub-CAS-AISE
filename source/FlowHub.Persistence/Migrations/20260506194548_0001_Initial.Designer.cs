@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FlowHub.Persistence.Migrations
 {
     [DbContext(typeof(FlowHubDbContext))]
-    [Migration("20260506193326_0001_Initial")]
+    [Migration("20260506194548_0001_Initial")]
     partial class _0001_Initial
     {
         /// <inheritdoc />
@@ -68,6 +68,9 @@ namespace FlowHub.Persistence.Migrations
                     b.HasIndex("CreatedAt")
                         .IsDescending()
                         .HasDatabaseName("IX_Captures_CreatedAt_DESC");
+
+                    b.HasIndex("MatchedSkill")
+                        .HasDatabaseName("IX_Captures_MatchedSkill");
 
                     b.HasIndex("Stage")
                         .HasDatabaseName("IX_Captures_Stage");
