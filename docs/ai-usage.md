@@ -375,7 +375,7 @@ The 21-task plan reserved Task 21 for the operator: set user-secrets (Anthropic 
 
 ### Slice 2: Channel + Skill Entities (May 2026)
 
-AI generated the entity class boilerplate (`ChannelEntity`, `SkillEntity`) and the corresponding `IEntityTypeConfiguration<T>` implementations. Human reviewed field lengths against the spec (varchar(64) for Name, varchar(32) for Kind). AI generated `EfSkillRepository` and `EfChannelRepository`; human added the `UpsertAsync` pattern. `EfSkillRegistry` wrapping `ISkillRepository` was a human design decision; AI implemented the two-line class.
+AI generated the entity class boilerplate (`ChannelEntity`, `SkillEntity`) and the corresponding `IEntityTypeConfiguration<T>` implementations. Human reviewed field lengths against the spec (varchar(64) for Name, varchar(32) for Kind — AI initially used varchar(128) before correction). AI generated `EfSkillRepository` and `EfChannelRepository`; human added the `UpsertAsync` pattern (AI defaulted to separate `AddAsync` / `UpdateAsync` methods before the upsert requirement was clarified). `EfSkillRegistry` wrapping `ISkillRepository` was a human design decision to keep the driving port (`ISkillRegistry`) decoupled from the driven port (`ISkillRepository`); AI implemented the two-line class.
 
 ## References
 
