@@ -3,24 +3,53 @@
 # Run with: docker compose up --build (once the Slice-A api project lands and Dockerfiles exist).
 
 services:
-  flowhub.web:
-    build:
-      context: .
-      dockerfile: source/FlowHub.Web/Dockerfile
-    image: flowhub-web:dev
+  postgres:
+    image: postgres:17-alpine
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://+:8080
-      Bus__Transport: RabbitMq
-      Bus__RabbitMq__Host: rabbitmq
+      POSTGRES_DB: flowhub
+      POSTGRES_USER: flowhub
+      POSTGRES_PASSWORD: dev-secret
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowhub -d flowhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  flowhub.migrations:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: >
+      sh -c "dotnet tool restore &&
+             dotnet ef database update
+             --project source/FlowHub.Persistence
+             --startup-project source/FlowHub.Web"
+    environment:
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=flowhub;Username=flowhub;Password=dev-secret"
     depends_on:
-      rabbitmq:
-        condition: service_started
       postgres:
         condition: service_healthy
-    ports:
-      - "5070:8080"
+
+  # Block 5: uncomment when Dockerfile lands
+  # flowhub.web:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "5070:5070"
+  #   environment:
+  #     ASPNETCORE_URLS: "http://+:5070"
+  #     ASPNETCORE_ENVIRONMENT: Production
+  #     ConnectionStrings__Default: "Host=postgres;Port=5432;Database=flowhub;Username=flowhub;Password=dev-secret"
+  #     Bus__Transport: RabbitMq
+  #   depends_on:
+  #     flowhub.migrations:
+  #       condition: service_completed_successfully
 
   # flowhub.api lands in Slice A — entry kept here so the topology is visible.
   # flowhub.api:
@@ -38,22 +67,11 @@ services:
     ports:
       - "15672:15672"   # management UI
       - "5672:5672"     # AMQP
-
-  postgres:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: flowhub
-      POSTGRES_USER: flowhub
-      POSTGRES_PASSWORD: dev-secret
-    ports:
-      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U flowhub -d flowhub"]
-      interval: 5s
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
