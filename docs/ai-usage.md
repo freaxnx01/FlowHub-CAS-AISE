@@ -371,19 +371,42 @@ The spec error table contained one runtime-incorrect claim that survived through
 
 The 21-task plan reserved Task 21 for the operator: set user-secrets (Anthropic key, Wallabag PAT, Vikunja PAT + project id), boot the app, verify EventIds 3020/4020/5010/5011 in the boot log, browser-test URL → Wallabag / `todo:` → Vikunja / nonsense → Orphan, restart-survival check, optional `make test-beta` against the live homelab, then push. That step is not part of this writeup — it was deliberately gated for human-driven validation against the real homelab services. The 138/138 unit-and-integration-test count above is the upper bound of what the automated pipeline can guarantee; the Task-21 evidence (screenshots, log lines, live Wallabag/Vikunja entries) will land in this section when the operator runs it.
 
-## Block 4 — Slice 2 (rolling note)
+## Block 4 — Persistence (May 2026)
 
-### Slice 2: Channel + Skill Entities (May 2026)
+### Tools
 
-AI generated the entity class boilerplate (`ChannelEntity`, `SkillEntity`) and the corresponding `IEntityTypeConfiguration<T>` implementations. Human reviewed field lengths against the spec (varchar(64) for Name, varchar(32) for Kind — AI initially used varchar(128) before correction). AI generated `EfSkillRepository` and `EfChannelRepository`; human added the `UpsertAsync` pattern (AI defaulted to separate `AddAsync` / `UpdateAsync` methods before the upsert requirement was clarified). `EfSkillRegistry` wrapping `ISkillRepository` was a human design decision to keep the driving port (`ISkillRegistry`) decoupled from the driven port (`ISkillRepository`); AI implemented the two-line class.
+| Tool | Role |
+|---|---|
+| Claude Code (Sonnet 4.6, controller) | Spec/plan authoring, subagent dispatch controller, spec+quality review |
+| Claude Sonnet 4.6 (implementer subagents) | Implementation, TDD, entity scaffolding, test writing |
+| Claude Haiku 4.5 (mechanical subagents) | Mechanical tasks: doc writing, YAML edits, spec docs |
+| GitHub Copilot | Inline completions during session review |
 
-### Slice 3: Full Domain Model + Dynamic Filter (May 2026)
+### Workflow
 
-AI generated entity classes and `IEntityTypeConfiguration<T>` implementations for `Integration`, `IntegrationHealthSample`, `Tag`, and `SkillRun`. Human decisions:
-- Hard vs. soft FK strategy for each relationship (AI defaulted to hard FKs everywhere; human reviewed and softened Capture→Channel and Capture→Skill based on operational reasoning)
-- `DeleteBehavior.Restrict` vs `Cascade` on SkillRun→Skill FK (AI initially suggested Cascade, human changed to Restrict to preserve audit trail if a skill is renamed)
+Same `superpowers:subagent-driven-development` loop as Block 3:
+1. `superpowers:brainstorming` — `docs/superpowers/specs/2026-05-05-block4-nachbereitung-design.md` (Block 4 scope spec)
+2. `superpowers:writing-plans` — 5-slice plan at `docs/superpowers/plans/2026-05-05-block4-nachbereitung.md`
+3. `superpowers:subagent-driven-development` — fresh implementer + spec-compliance reviewer + code-quality reviewer subagent per task. Dispatch model: Sonnet for TDD/judgment, Haiku for docs/YAML.
 
-`CaptureQueryBuilder` using expression-tree composition was AI-generated. Human added `.Include(c => c.Tags)` after noticing the N+1 anti-pattern in code review (AI's initial `ListAsync` loaded tags lazily). The ILike call for case-insensitive search was AI-suggested; human confirmed it's the right approach for block-4 scope vs. pg_trgm full-text search (deferred to Block 5).
+### Per-Slice AI Usage
+
+**Slice 1 (PostgreSQL + Repository Foundation):** AI generated `EfCaptureRepository` from the interface contract; initial `FindAsync` (tracking) corrected to `.AsNoTracking().FirstOrDefaultAsync()` by reviewer. `ICaptureRepository` interface design was a human decision. AI share: ~90%.
+
+**Slice 2 (Channel + Skill Entities):** AI produced entities, configurations, and repositories in one pass. varchar(128) Name field corrected to varchar(64) in review. `EfSkillRegistry` two-line class was human-designed; AI implemented. AI share: ~88%.
+
+**Slice 3 (Full Domain Model):** AI generated 4 entities + configs + repos. FK strategy corrected by human (AI defaulted to CASCADE everywhere; SkillRun→Skill changed to RESTRICT, Capture→Channel/Skill soft FK). N+1 on Tags nav property caught by human in code review. AI share: ~85%.
+
+**Slice 4 (Tests + Docker):** `PostgresFixture` per-test isolation pattern scaffolded by AI; human validated `NpgsqlConnectionStringBuilder` admin connection. All 16 test methods AI-generated. Docker Compose `flowhub.migrations` service was human-designed (12-Factor XII pattern). AI share: ~90%.
+
+See `docs/insights/block-4.md` for full AI metrics table and KI-Reflexion.
+
+### Notable Corrections (Block 4)
+
+- **Npgsql version:** Plan specified 9.0.4 (EF Core 9 era); actual project uses EF Core 10. Implementer resolved to 10.0.1. Plan version pins should be verified against installed SDK before execution.
+- **N+1 on Tags:** `EfCaptureRepository.ListAsync` initially generated without `.Include(c => c.Tags)`. Caught in code-quality review. Fix: add `Include` before `AsNoTracking` in query chain.
+- **FK cascade defaults:** AI defaults to CASCADE DELETE on all FKs. Requires explicit human review of each FK against domain semantics (owned entity vs. referenced entity).
+- **CA1707/CA1825 in generated migrations:** Added `.editorconfig` to suppress these for `Migrations/` folder — numeric migration name prefix (`0001_`) causes a leading underscore in the generated class name, triggering CA1707.
 
 ## References
 
