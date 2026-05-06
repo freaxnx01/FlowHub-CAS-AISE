@@ -6,6 +6,8 @@ namespace FlowHub.Persistence;
 
 internal static class CaptureQueryBuilder
 {
+    // Caller must order by (CreatedAt DESC, Id DESC) before calling Apply — the cursor clause is semantically
+    // dependent on that ordering to produce correct keyset pagination results.
     internal static IQueryable<CaptureEntity> Apply(IQueryable<CaptureEntity> query, CaptureFilter filter)
     {
         if (filter.Stages is { Count: > 0 } stages)
