@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace FlowHub.Persistence;
 
-public sealed class FlowHubDbContextFactory : IDesignTimeDbContextFactory<FlowHubDbContext>
+internal sealed class FlowHubDbContextFactory : IDesignTimeDbContextFactory<FlowHubDbContext>
 {
     public FlowHubDbContext CreateDbContext(string[] args)
     {
