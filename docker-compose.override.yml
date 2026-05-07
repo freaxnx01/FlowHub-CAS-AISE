@@ -1,0 +1,26 @@
+# Dev/demo overrides — DemoAuthHandler activates (no Auth__OIDC__* env vars set).
+# Exposes all ports for local access.
+
+services:
+  flowhub.web:
+    ports:
+      - "5070:5070"
+    environment:
+      Serilog__MinimumLevel: Debug
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  rabbitmq:
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  prometheus:
+    ports:
+      - "9090:9090"
+
+  grafana:
+    ports:
+      - "3000:3000"

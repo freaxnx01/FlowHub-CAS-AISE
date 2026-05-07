@@ -1,10 +1,12 @@
 using FlowHub.Core.Captures;
+using Pgvector.EntityFrameworkCore;
 using FlowHub.Core.Channels;
 using FlowHub.Core.Health;
 using FlowHub.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +23,8 @@ public static class PersistenceServiceCollectionExtensions
     {
         var connectionString = configuration.GetConnectionString("Default") ?? DefaultConnectionString;
 
-        services.AddDbContext<FlowHubDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddDbContext<FlowHubDbContext>(options =>
+            options.UseNpgsql(connectionString, npgsql => npgsql.UseVector()));
         services.AddScoped<ICaptureRepository, EfCaptureRepository>();
         services.AddScoped<ICaptureService, EfCaptureService>();
         services.AddScoped<IChannelRepository, EfChannelRepository>();
@@ -31,12 +34,24 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IIntegrationHealthService, EfIntegrationHealthService>();
         services.AddScoped<ITagRepository, EfTagRepository>();
         services.AddScoped<ISkillRunRepository, EfSkillRunRepository>();
-        services.AddHostedService<MigrationRunner>();
+        services.TryAddSingleton<IEmbeddingService>(NullEmbeddingService.Instance);
 
         return services;
     }
 }
 
+/// <summary>Returned when no embedding provider is configured.</summary>
+internal sealed class NullEmbeddingService : IEmbeddingService
+{
+    public static readonly NullEmbeddingService Instance = new();
+    public Task<float[]?> GenerateAsync(string text, CancellationToken cancellationToken = default)
+        => Task.FromResult<float[]?>(null);
+}
+
+/// <remarks>
+/// Not registered as IHostedService in production (12-Factor XII).
+/// Use the <c>flowhub.migrations</c> Docker Compose service or <c>make migrate</c>.
+/// </remarks>
 internal sealed partial class MigrationRunner : IHostedService
 {
     private readonly IServiceProvider _services;

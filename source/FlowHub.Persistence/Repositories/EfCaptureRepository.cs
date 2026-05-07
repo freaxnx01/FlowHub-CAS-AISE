@@ -1,6 +1,8 @@
 using FlowHub.Core.Captures;
 using FlowHub.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
+using Pgvector;
+using System.Globalization;
 
 namespace FlowHub.Persistence.Repositories;
 
@@ -84,6 +86,53 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         }
 
         return new CapturePage(fetched.Select(ToDomain).ToList(), null);
+    }
+
+    public async Task StoreEmbeddingAsync(
+        Guid captureId, float[] embedding, CancellationToken cancellationToken = default)
+    {
+        // ExecuteUpdateAsync issues a single UPDATE without loading or tracking the entity —
+        // keeps admin rebuild loops O(N) instead of O(N²) at NfA-04 scale (100k captures).
+        var vector = new Vector(embedding);
+        var rows = await _db.Captures
+            .Where(c => c.Id == captureId)
+            .ExecuteUpdateAsync(s => s.SetProperty(c => c.Embedding, vector), cancellationToken);
+        if (rows == 0)
+            throw new KeyNotFoundException($"Capture {captureId} not found.");
+    }
+
+    public async Task<IReadOnlyList<Capture>> SearchByEmbeddingAsync(
+        float[] queryEmbedding, int limit, CancellationToken cancellationToken = default)
+    {
+        // Mirror the ListAsync 1..200 contract; without this, ?limit=-1 yields 500
+        // and ?limit=2000000000 forces an unbounded ANN scan (DoS vector).
+        var safeLimit = Math.Clamp(limit, 1, 200);
+
+        // float[] values are IEEE 754 floats — no SQL injection risk in the literal.
+        var vectorLiteral = "[" + string.Join(",",
+            queryEmbedding.Select(f => f.ToString("G", CultureInfo.InvariantCulture))) + "]";
+
+        var entities = await _db.Captures
+            .FromSqlInterpolated($"""
+                SELECT * FROM "Captures"
+                WHERE "Embedding" IS NOT NULL
+                ORDER BY "Embedding" <=> {vectorLiteral}::vector
+                LIMIT {safeLimit}
+                """)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(ToDomain).ToList();
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetIdsWithoutEmbeddingAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _db.Captures
+            .AsNoTracking()
+            .Where(c => c.Embedding == null)
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
     }
 
     private static Capture ToDomain(CaptureEntity e) => new(

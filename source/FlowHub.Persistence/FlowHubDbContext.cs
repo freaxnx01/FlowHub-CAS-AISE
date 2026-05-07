@@ -17,6 +17,17 @@ public sealed class FlowHubDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        if (Database.IsNpgsql())
+        {
+            modelBuilder.HasPostgresExtension("vector");
+        }
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FlowHubDbContext).Assembly);
+
+        if (!Database.IsNpgsql())
+        {
+            // InMemory and other non-Npgsql providers cannot map Pgvector.Vector — ignore the column.
+            modelBuilder.Entity<CaptureEntity>().Ignore(c => c.Embedding);
+        }
     }
 }

@@ -20,5 +20,9 @@ internal sealed class CaptureEntityTypeConfiguration : IEntityTypeConfiguration<
         builder.HasIndex(c => c.Stage).HasDatabaseName("IX_Captures_Stage");
         builder.HasIndex(c => c.CreatedAt).IsDescending().HasDatabaseName("IX_Captures_CreatedAt_DESC");
         builder.HasIndex(c => c.MatchedSkill).HasDatabaseName("IX_Captures_MatchedSkill");
+
+        builder.Property(c => c.Embedding)
+            .HasColumnType("vector(1024)")
+            .IsRequired(false);
     }
 }
