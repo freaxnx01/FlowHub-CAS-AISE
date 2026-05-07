@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- PostgreSQL provider (Npgsql 10.0.1) replaces SQLite throughout `FlowHub.Persistence`
+- `ICaptureRepository` + `EfCaptureRepository` — repository interface in Core, EF Core impl in Persistence
+- `IChannelRepository` + `EfChannelRepository`, `ISkillRepository` + `EfSkillRepository`
+- `IIntegrationRepository` + `EfIntegrationRepository`, `ITagRepository` + `EfTagRepository`
+- `ISkillRunRepository` + `EfSkillRunRepository`
+- `EfSkillRegistry` (replaces `SkillRegistryStub` in DI), `EfIntegrationHealthService` (replaces `IntegrationHealthServiceStub` in DI)
+- `CaptureQueryBuilder` — expression-tree filter supporting Stage, Source, Tag, SearchTerm (ILike), cursor
+- EF Core migrations: `0001_Initial` (PostgreSQL), `0002_AddChannelAndSkill`, `0003_Block4FullDomain`
+- Testcontainers PostgreSQL test infrastructure (`PostgresFixture`, per-test isolated databases)
+- `EfCaptureRepositoryTests` (9 tests), `EfSkillRegistryTests` (2 tests), `EfIntegrationHealthServiceTests` (3 tests), `MigrationSmokeTest` (2 tests) — 16 new integration tests via Testcontainers
+- Docker Compose: `flowhub.migrations` init service (12-Factor XII pattern)
+- `make db-up` and `make db-migrate` Makefile targets
+- `docs/spec/nfa.md` — SMART NfA criteria (NfA-01 through NfA-05)
+- `docs/design/db/er.md` — full ER diagram (7 tables, FK strategy documented)
+- `docs/spec/use-cases.md` — UC-09 through UC-16 (persistence + filter use cases)
 - **Project scaffolding**: `global.json` (.NET 10), `Directory.Build.props`, `Directory.Packages.props` (central package management), `FlowHub.slnx` root solution, `Makefile` with dev task targets
 - **FlowHub.Core**: domain types (`Capture`, `ChannelKind`, `LifecycleStage` with `Completed` terminal state, `FailureCounts`, `SkillHealth`, `IntegrationHealth`, `HealthStatus`) and driving-port interfaces (`ICaptureService`, `ISkillRegistry`, `IIntegrationHealthService`)
 - **FlowHub.Web**: Blazor Web App with Interactive Server rendering (per ADR 0001)
@@ -54,3 +69,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`docs/ai-usage.md`** Block-4-prep / Beta-MVP retrospective section filled in: notable adaptations (EF Core 8+ dual-provider trap, `InternalsVisibleTo` for test seeding, surgical `MigrationRunner` removal, design-time `IDesignTimeDbContextFactory`, captive-`HttpClient` flag, rate-limit recovery), generated-vs-handwritten share table (~85% AI / ~15% human in production code), reflexion sized for the submission PDF
 - **ADR 0005** — Persistence (`docs/adr/0005-persistence.md`): EF Core 10 ORM, SQLite-for-Beta vs PostgreSQL-for-Block-4 provider choice, no Repository-pattern layer (`EfCaptureService` is the `ICaptureService` adapter directly), `dotnet-ef` tool manifest + in-process `MigrationRunner` Beta migrations workflow (separate init container deferred to Block 5 per 12-Factor XII), `internal sealed` entity + `InternalsVisibleTo` test visibility, keyset cursor pagination on `(CreatedAt DESC, Id DESC)` with `limit+1` probe, `IX_Captures_Stage` + `IX_Captures_CreatedAt_DESC` indexes, EventId range 5000–5999, Block-4 evolution table
 - **EventId range 5000–5999** reserved for persistence runtime / startup events (5010 `LogApplyingMigrations`, 5011 `LogMigrationsApplied`)
+
+### Changed
+
+- `EfCaptureService` now delegates all data access to `ICaptureRepository` (no direct DbContext access)
+- `EfCaptureServiceTests` updated to use NSubstitute mocks for `ICaptureRepository`
+- `CaptureFilter` extended with `Tag` and `SearchTerm` optional fields
+- `FlowHubDbContext.OnModelCreating` uses `ApplyConfigurationsFromAssembly` (was inline configuration)
+
+### Removed
+
+- `SkillRegistryStub` removed from DI (class retained for component tests)
+- `IntegrationHealthServiceStub` removed from DI (class retained for component tests)
+- SQLite migration `20260504120638_Initial` (replaced by PostgreSQL-compatible migrations)
+
+### Test Results (Block 4 final)
+
+- Total: 154 tests passing, 0 failing (verified 2026-05-06, filter: `Category!=AI&Category!=BetaSmoke`)
+- Breakdown: FlowHub.Persistence.Tests 29, FlowHub.Web.ComponentTests 88, FlowHub.Api.IntegrationTests 17, FlowHub.Skills.Tests 20
+- New integration tests via Testcontainers: 16 (Persistence layer)

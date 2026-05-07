@@ -82,3 +82,11 @@ graph TD
     FH -- "HTTP" --> OL
     FH -- "OIDC" --> Auth
 ```
+
+## Persistence Layer
+
+FlowHub uses PostgreSQL 17 as its primary database, accessed via EF Core 10 with the Npgsql provider. The schema follows a migrations-first workflow: all schema changes are expressed as EF Core migration files committed to Git and applied as an idempotent SQL script at deploy time.
+
+The Repository pattern separates domain logic from database access. Repository interfaces are defined in `FlowHub.Core` (returning domain types), with EF Core implementations in `FlowHub.Persistence`. Application-layer services (`ICaptureService`, `ISkillRegistry`, `IIntegrationHealthService`) compose repositories; they never reference `FlowHubDbContext` directly.
+
+Local development uses `docker compose up postgres` to start a PostgreSQL container. `make db-migrate` applies pending migrations. `make run` starts the application, which auto-migrates via `MigrationRunner` for convenience.

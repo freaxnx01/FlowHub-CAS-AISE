@@ -178,6 +178,41 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Error:** Capture is not in a retryable stage (`Raw`, `Classified`, `Routed`) → `409 Conflict` ProblemDetails.
 **Note:** UC-06 documents the UI entry point and the Block-2 stub state. UC-11 defines the Block-3 implementation that fulfils the "Retry routing" action stubbed in UC-06 Flow (Orphan) step 3 and Flow (Unhandled) step 2.
 
+### UC-12: Filter Captures by Lifecycle Stage
+
+**Actor:** Operator  
+**Trigger:** Operator selects one or more stages in the Captures list filter.  
+**Flow:** System queries `ICaptureService.ListAsync` with the selected stages. List refreshes to show only matching captures.  
+**Acceptance:** Selecting "Orphan" returns only orphaned captures. Selecting multiple stages returns the union.
+
+### UC-13: Filter Captures by Tag
+
+**Actor:** Operator  
+**Trigger:** Operator enters a tag value in the tag filter field.  
+**Flow:** System queries `ICaptureService.ListAsync` with `CaptureFilter.Tag` set. Returns only captures that have the tag attached.  
+**Acceptance:** A capture tagged "dotnet" appears when filter is "dotnet". Captures without the tag are excluded.
+
+### UC-14: Search Captures by Content or Title
+
+**Actor:** Operator  
+**Trigger:** Operator types a search term in the search box.  
+**Flow:** System queries with `CaptureFilter.SearchTerm`. PostgreSQL ILIKE match against Content and Title (case-insensitive). Not full-text search — deferred to Block 5.  
+**Acceptance:** Searching "hexagonal" returns captures whose Content or Title contains that substring (any casing).
+
+### UC-15: View Skill-Run History for a Capture
+
+**Actor:** Operator  
+**Trigger:** Operator opens a Capture detail and views the routing history tab.  
+**Flow:** System queries `ISkillRunRepository.GetByCaptureIdAsync`. Returns all routing attempts for that capture ordered by StartedAt DESC.  
+**Acceptance:** A capture that was routed twice shows two SkillRun entries.
+
+### UC-16: View Integration Health History
+
+**Actor:** Operator  
+**Trigger:** Operator opens the Integrations page and expands an integration's history.  
+**Flow:** System queries `IIntegrationRepository.GetRecentSamplesAsync`. Returns the last N health samples.  
+**Acceptance:** Shows SampledAt, Status, and DurationMs for each sample.
+
 ---
 
 ## Non-Functional Requirements (SMART)
@@ -193,7 +228,36 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 | NF-07 | **Portability** — runs on Linux (homelab Docker) and WSL2 (dev) | `make run` works on both environments | Manual verification |
 | NF-08 | **Data privacy** — no Capture content leaves the operator's infrastructure | 0 external API calls for data processing (AI classification runs locally via Ollama in future blocks) | Architecture review |
 | NF-09 | **API latency** — REST endpoints respond within tight bounds for an interactive integration hub | `POST /api/v1/captures` p95 < 200 ms (server-side, excluding async bus-publish); `GET /api/v1/captures` p95 < 100 ms with cursor pagination | Block 5 load test (k6/nbomber); Block 3 evidence: integration-test wall-clock < 1 s end-to-end against in-memory stubs |
-| NF-10 | **Async pipeline retry budget** — transient failures in the enrichment or routing consumers are retried before a Capture is marked `Unhandled` | `CaptureEnrichmentConsumer`: 2 retries at 100 ms / 500 ms intervals; `SkillRoutingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms intervals; after exhaustion `LifecycleFaultObserver` marks `Unhandled` | MassTransit `TestHarness` tests in `tests/FlowHub.Web.ComponentTests/Pipeline/` (6 harness tests) |
+| NF-10 | **Async pipeline retry budget** — transient failures in the enrichment, embedding, or routing consumers are retried before a Capture is marked `Unhandled` | `CaptureEnrichmentConsumer`: 2 retries at 100 ms / 500 ms; `CaptureEmbeddingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms (failure leaves the Capture without an embedding — backfill via admin rebuild); `SkillRoutingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms; after exhaustion `LifecycleFaultObserver` marks `Unhandled` | MassTransit `TestHarness` tests in `tests/FlowHub.Web.ComponentTests/Pipeline/` (6 harness tests) |
 | NF-11 | **AI classifier fallback rate** — an AI provider outage must not propagate to availability loss | < 5% of classifications fall back to keyword during normal provider availability (Anthropic Haiku 4.5 SLA ~99.5%); fallback always succeeds — `AiClassifier` never throws to the caller | EventId 3010 log volume in production; `make test-ai` live integration runs demonstrate the success path; ADR 0004 D5 |
 | NF-12 | **AI classification cost** — per-capture cost is sub-cent to keep the homelab budget bounded | `MaxOutputTokens=300`, `Temperature=0.2`; estimated ~200 tokens input + ~150 tokens output → < $0.001 per classification on Haiku 4.5 pricing | Anthropic dashboard usage report from operator runs; cost guard configured in `AddFlowHubAi(IConfiguration)`; ADR 0004 §"Cost guards" |
 | NF-13 | **OpenAPI versioning SLA** — the REST API is URL-versioned from day one so clients are not broken by future changes | Breaking changes land only in a new major version (`/api/v2/...`); v1 is retained for at least one major-version overlap period | ADR 0002 D6; endpoint catalogue in `docs/design/api/api-surface.md`; version prefix verified in route registration |
+
+## UC-10: Deploy via Docker Compose
+
+**Actor:** Operator  
+**Precondition:** Docker and Docker Compose v2 are installed.  
+**Steps:**
+1. Operator creates `.env` file with required env vars (DB credentials, optional OIDC config, optional embedding key).
+2. Operator runs `docker compose up -d`.
+3. `flowhub.migrations` service applies EF Core migrations and exits successfully.
+4. `flowhub.web` starts, connects to PostgreSQL and RabbitMQ, exposes port 5070.
+5. Operator opens `http://localhost:5070`.  
+**Postcondition:** FlowHub is running; all dependencies healthy.  
+**Exception:** If migrations fail, `flowhub.web` does not start (depends_on condition).
+
+## UC-11: Semantic Search for Captures
+
+**Actor:** Operator  
+**Precondition:** `Embeddings__ApiKey` is configured; at least one Capture exists with a stored embedding.  
+**Note on embedding generation:** Embeddings for new Captures are generated asynchronously by `CaptureEmbeddingConsumer` (subscribed to `CaptureCreated`), so a Capture submitted via UC-09 becomes searchable a moment after submission, not synchronously with the `POST /api/v1/captures` response. This keeps capture submission inside the NF-09 p95 < 200 ms budget regardless of embedding-provider latency. Backfill of captures stored before the provider was configured is via `POST /api/v1/admin/embeddings/rebuild`.
+
+**Steps:**
+1. Operator sends `GET /api/v1/captures/search?q=database+performance&limit=5`.
+2. FlowHub embeds the query via the configured embedding provider.
+3. FlowHub returns up to 5 Captures ranked by cosine similarity.  
+**Postcondition:** Response contains Captures semantically related to the query, even if query words don't appear in titles or content.  
+**Exceptions:**
+- Empty/whitespace `q` → `400 Bad Request` (ValidationProblem).
+- Embedding service not configured → `503 Service Unavailable` with ProblemDetails body.
+- `limit` is clamped to 1..200 (mirrors the list-endpoint contract).

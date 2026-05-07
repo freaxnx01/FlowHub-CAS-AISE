@@ -9,10 +9,10 @@ using Microsoft.Extensions.Hosting;
 namespace FlowHub.Api.IntegrationTests;
 
 /// <summary>
-/// Boots FlowHub.Web in-process with the Development environment so the
-/// DevAuthHandler bypass is active (no real OIDC token required).
-/// Replaces the SQLite DbContext registration with EF Core InMemory so each
-/// test factory instance gets an isolated, file-free database.
+/// Boots FlowHub.Web in-process without <c>Auth:OIDC:Authority</c> configured so the
+/// DemoAuthHandler auto-sign-in path is active (no real OIDC token required).
+/// Replaces the PostgreSQL (Npgsql) DbContext registration with EF Core InMemory so each
+/// test factory instance gets an isolated, database-free environment.
 /// Seeds a fixed set of captures so tests that expect pre-existing data
 /// (Orphan, Completed, and enough rows for cursor pagination) work without stubs.
 /// </summary>
@@ -31,7 +31,7 @@ public sealed class IntegrationTestFactory : WebApplicationFactory<Program>
             //   • IDbContextOptionsConfiguration<TContext>  — the builder action (carries the provider)
             //   • DbContextOptions                          — the non-generic fallback
             // We must remove the IDbContextOptionsConfiguration<FlowHubDbContext> entry too;
-            // leaving it causes EF to see two providers (Sqlite + InMemory) and throw.
+            // leaving it causes EF to see two providers (Npgsql + InMemory) and throw.
             services.RemoveAll<DbContextOptions<FlowHubDbContext>>();
 
             // IDbContextOptionsConfiguration<T> is internal to EF — access it by interface name.

@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: flowhub
+    static_configs:
+      - targets: ['flowhub.web:5070']
+    metrics_path: /metrics
