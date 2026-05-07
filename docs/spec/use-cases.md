@@ -232,3 +232,27 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 | NF-11 | **AI classifier fallback rate** — an AI provider outage must not propagate to availability loss | < 5% of classifications fall back to keyword during normal provider availability (Anthropic Haiku 4.5 SLA ~99.5%); fallback always succeeds — `AiClassifier` never throws to the caller | EventId 3010 log volume in production; `make test-ai` live integration runs demonstrate the success path; ADR 0004 D5 |
 | NF-12 | **AI classification cost** — per-capture cost is sub-cent to keep the homelab budget bounded | `MaxOutputTokens=300`, `Temperature=0.2`; estimated ~200 tokens input + ~150 tokens output → < $0.001 per classification on Haiku 4.5 pricing | Anthropic dashboard usage report from operator runs; cost guard configured in `AddFlowHubAi(IConfiguration)`; ADR 0004 §"Cost guards" |
 | NF-13 | **OpenAPI versioning SLA** — the REST API is URL-versioned from day one so clients are not broken by future changes | Breaking changes land only in a new major version (`/api/v2/...`); v1 is retained for at least one major-version overlap period | ADR 0002 D6; endpoint catalogue in `docs/design/api/api-surface.md`; version prefix verified in route registration |
+
+## UC-10: Deploy via Docker Compose
+
+**Actor:** Operator  
+**Precondition:** Docker and Docker Compose v2 are installed.  
+**Steps:**
+1. Operator creates `.env` file with required env vars (DB credentials, optional OIDC config, optional embedding key).
+2. Operator runs `docker compose up -d`.
+3. `flowhub.migrations` service applies EF Core migrations and exits successfully.
+4. `flowhub.web` starts, connects to PostgreSQL and RabbitMQ, exposes port 5070.
+5. Operator opens `http://localhost:5070`.  
+**Postcondition:** FlowHub is running; all dependencies healthy.  
+**Exception:** If migrations fail, `flowhub.web` does not start (depends_on condition).
+
+## UC-11: Semantic Search for Captures
+
+**Actor:** Operator  
+**Precondition:** `Embeddings__ApiKey` is configured; at least one Capture exists with a stored embedding.  
+**Steps:**
+1. Operator sends `GET /api/v1/captures/search?q=database+performance&limit=5`.
+2. FlowHub embeds the query via the configured embedding provider.
+3. FlowHub returns up to 5 Captures ranked by cosine similarity.  
+**Postcondition:** Response contains Captures semantically related to the query, even if query words don't appear in titles or content.  
+**Exception:** If embedding service not configured, returns `503 Service Unavailable` with ProblemDetails body.
