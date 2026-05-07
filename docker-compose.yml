@@ -12,6 +12,15 @@ services:
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=flowhub;Username=flowhub;Password=${POSTGRES_PASSWORD:-dev-secret}"
       Bus__Transport: RabbitMq
       Bus__RabbitMq__Host: rabbitmq
+      Bus__RabbitMq__Username: ${RABBITMQ_USER:-flowhub}
+      Bus__RabbitMq__Password: ${RABBITMQ_PASSWORD:-dev-secret}
+      Embeddings__BaseUrl: ${EMBEDDINGS__BASEURL:-}
+      Embeddings__ApiKey: ${EMBEDDINGS__APIKEY:-}
+      Embeddings__Model: ${EMBEDDINGS__MODEL:-}
+      Embeddings__Dimensions: ${EMBEDDINGS__DIMENSIONS:-}
+      Auth__OIDC__Authority: ${AUTH__OIDC__AUTHORITY:-}
+      Auth__OIDC__ClientId: ${AUTH__OIDC__CLIENTID:-}
+      Auth__OIDC__ClientSecret: ${AUTH__OIDC__CLIENTSECRET:-}
     depends_on:
       flowhub.migrations:
         condition: service_completed_successfully
@@ -38,7 +47,7 @@ services:
     restart: on-failure
 
   postgres:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:pg17
     environment:
       POSTGRES_DB: flowhub
       POSTGRES_USER: flowhub
@@ -54,6 +63,9 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-flowhub}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-dev-secret}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:

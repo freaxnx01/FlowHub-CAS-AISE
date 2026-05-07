@@ -60,6 +60,8 @@ public static class AiServiceCollectionExtensions
         var baseUrl = configuration["Embeddings:BaseUrl"];
         var apiKey = configuration["Embeddings:ApiKey"];
         var model = configuration["Embeddings:Model"] ?? "mistral-embed";
+        var timeoutSeconds = int.TryParse(configuration["Embeddings:TimeoutSeconds"], out var t) ? t : 10;
+        int? dimensions = int.TryParse(configuration["Embeddings:Dimensions"], out var d) ? d : null;
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
@@ -70,7 +72,11 @@ public static class AiServiceCollectionExtensions
             ? "https://api.mistral.ai/v1"
             : baseUrl);
 
-        var openAiOptions = new OpenAIClientOptions { Endpoint = endpoint };
+        var openAiOptions = new OpenAIClientOptions
+        {
+            Endpoint = endpoint,
+            NetworkTimeout = TimeSpan.FromSeconds(timeoutSeconds),
+        };
         var embeddingClient = new OpenAIClient(
                 new ApiKeyCredential(apiKey),
                 openAiOptions)
@@ -78,7 +84,10 @@ public static class AiServiceCollectionExtensions
             .AsIEmbeddingGenerator();
 
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(embeddingClient);
-        services.AddSingleton<IEmbeddingService, AiEmbeddingService>();
+        services.AddSingleton<IEmbeddingService>(sp => new AiEmbeddingService(
+            sp.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(),
+            sp.GetRequiredService<ILogger<AiEmbeddingService>>(),
+            dimensions));
 
         return services;
     }

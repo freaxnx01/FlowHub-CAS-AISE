@@ -228,7 +228,7 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 | NF-07 | **Portability** — runs on Linux (homelab Docker) and WSL2 (dev) | `make run` works on both environments | Manual verification |
 | NF-08 | **Data privacy** — no Capture content leaves the operator's infrastructure | 0 external API calls for data processing (AI classification runs locally via Ollama in future blocks) | Architecture review |
 | NF-09 | **API latency** — REST endpoints respond within tight bounds for an interactive integration hub | `POST /api/v1/captures` p95 < 200 ms (server-side, excluding async bus-publish); `GET /api/v1/captures` p95 < 100 ms with cursor pagination | Block 5 load test (k6/nbomber); Block 3 evidence: integration-test wall-clock < 1 s end-to-end against in-memory stubs |
-| NF-10 | **Async pipeline retry budget** — transient failures in the enrichment or routing consumers are retried before a Capture is marked `Unhandled` | `CaptureEnrichmentConsumer`: 2 retries at 100 ms / 500 ms intervals; `SkillRoutingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms intervals; after exhaustion `LifecycleFaultObserver` marks `Unhandled` | MassTransit `TestHarness` tests in `tests/FlowHub.Web.ComponentTests/Pipeline/` (6 harness tests) |
+| NF-10 | **Async pipeline retry budget** — transient failures in the enrichment, embedding, or routing consumers are retried before a Capture is marked `Unhandled` | `CaptureEnrichmentConsumer`: 2 retries at 100 ms / 500 ms; `CaptureEmbeddingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms (failure leaves the Capture without an embedding — backfill via admin rebuild); `SkillRoutingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms; after exhaustion `LifecycleFaultObserver` marks `Unhandled` | MassTransit `TestHarness` tests in `tests/FlowHub.Web.ComponentTests/Pipeline/` (6 harness tests) |
 | NF-11 | **AI classifier fallback rate** — an AI provider outage must not propagate to availability loss | < 5% of classifications fall back to keyword during normal provider availability (Anthropic Haiku 4.5 SLA ~99.5%); fallback always succeeds — `AiClassifier` never throws to the caller | EventId 3010 log volume in production; `make test-ai` live integration runs demonstrate the success path; ADR 0004 D5 |
 | NF-12 | **AI classification cost** — per-capture cost is sub-cent to keep the homelab budget bounded | `MaxOutputTokens=300`, `Temperature=0.2`; estimated ~200 tokens input + ~150 tokens output → < $0.001 per classification on Haiku 4.5 pricing | Anthropic dashboard usage report from operator runs; cost guard configured in `AddFlowHubAi(IConfiguration)`; ADR 0004 §"Cost guards" |
 | NF-13 | **OpenAPI versioning SLA** — the REST API is URL-versioned from day one so clients are not broken by future changes | Breaking changes land only in a new major version (`/api/v2/...`); v1 is retained for at least one major-version overlap period | ADR 0002 D6; endpoint catalogue in `docs/design/api/api-surface.md`; version prefix verified in route registration |
@@ -250,9 +250,14 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 
 **Actor:** Operator  
 **Precondition:** `Embeddings__ApiKey` is configured; at least one Capture exists with a stored embedding.  
+**Note on embedding generation:** Embeddings for new Captures are generated asynchronously by `CaptureEmbeddingConsumer` (subscribed to `CaptureCreated`), so a Capture submitted via UC-09 becomes searchable a moment after submission, not synchronously with the `POST /api/v1/captures` response. This keeps capture submission inside the NF-09 p95 < 200 ms budget regardless of embedding-provider latency. Backfill of captures stored before the provider was configured is via `POST /api/v1/admin/embeddings/rebuild`.
+
 **Steps:**
 1. Operator sends `GET /api/v1/captures/search?q=database+performance&limit=5`.
 2. FlowHub embeds the query via the configured embedding provider.
 3. FlowHub returns up to 5 Captures ranked by cosine similarity.  
 **Postcondition:** Response contains Captures semantically related to the query, even if query words don't appear in titles or content.  
-**Exception:** If embedding service not configured, returns `503 Service Unavailable` with ProblemDetails body.
+**Exceptions:**
+- Empty/whitespace `q` → `400 Bad Request` (ValidationProblem).
+- Embedding service not configured → `503 Service Unavailable` with ProblemDetails body.
+- `limit` is clamped to 1..200 (mirrors the list-endpoint contract).

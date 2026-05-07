@@ -91,28 +91,34 @@ internal sealed class EfCaptureRepository : ICaptureRepository
     public async Task StoreEmbeddingAsync(
         Guid captureId, float[] embedding, CancellationToken cancellationToken = default)
     {
-        var entity = await _db.Captures.FirstOrDefaultAsync(c => c.Id == captureId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Capture {captureId} not found.");
-        entity.Embedding = new Vector(embedding);
-        await _db.SaveChangesAsync(cancellationToken);
+        // ExecuteUpdateAsync issues a single UPDATE without loading or tracking the entity —
+        // keeps admin rebuild loops O(N) instead of O(N²) at NfA-04 scale (100k captures).
+        var vector = new Vector(embedding);
+        var rows = await _db.Captures
+            .Where(c => c.Id == captureId)
+            .ExecuteUpdateAsync(s => s.SetProperty(c => c.Embedding, vector), cancellationToken);
+        if (rows == 0)
+            throw new KeyNotFoundException($"Capture {captureId} not found.");
     }
 
     public async Task<IReadOnlyList<Capture>> SearchByEmbeddingAsync(
         float[] queryEmbedding, int limit, CancellationToken cancellationToken = default)
     {
-        // float[] values are IEEE 754 floats — no SQL injection risk.
+        // Mirror the ListAsync 1..200 contract; without this, ?limit=-1 yields 500
+        // and ?limit=2000000000 forces an unbounded ANN scan (DoS vector).
+        var safeLimit = Math.Clamp(limit, 1, 200);
+
+        // float[] values are IEEE 754 floats — no SQL injection risk in the literal.
         var vectorLiteral = "[" + string.Join(",",
             queryEmbedding.Select(f => f.ToString("G", CultureInfo.InvariantCulture))) + "]";
 
-        var sql = $"""
-            SELECT * FROM "Captures"
-            WHERE "Embedding" IS NOT NULL
-            ORDER BY "Embedding" <=> '{vectorLiteral}'::vector
-            LIMIT {limit}
-            """;
-
         var entities = await _db.Captures
-            .FromSqlRaw(sql)
+            .FromSqlInterpolated($"""
+                SELECT * FROM "Captures"
+                WHERE "Embedding" IS NOT NULL
+                ORDER BY "Embedding" <=> {vectorLiteral}::vector
+                LIMIT {safeLimit}
+                """)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 

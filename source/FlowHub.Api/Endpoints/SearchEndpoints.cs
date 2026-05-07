@@ -17,12 +17,13 @@ public static class SearchEndpoints
         group.MapGet("/search", SearchAsync)
             .WithName("SearchCaptures")
             .Produces<IReadOnlyList<Capture>>(StatusCodes.Status200OK)
+            .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 
         return app;
     }
 
-    private static async Task<Results<Ok<IReadOnlyList<Capture>>, ProblemHttpResult>> SearchAsync(
+    private static async Task<Results<Ok<IReadOnlyList<Capture>>, ValidationProblem, ProblemHttpResult>> SearchAsync(
         string q,
         IEmbeddingService embeddingService,
         ICaptureRepository captureRepository,
@@ -30,6 +31,14 @@ public static class SearchEndpoints
         int? limit,
         CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(q))
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["q"] = ["Query parameter 'q' must not be empty or whitespace."],
+            });
+        }
+
         var queryEmbedding = await embeddingService.GenerateAsync(q, ct);
         if (queryEmbedding is null)
         {

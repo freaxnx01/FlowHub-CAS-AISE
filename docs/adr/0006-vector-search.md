@@ -14,7 +14,8 @@ FlowHub accumulates Captures over time. Keyword search fails when the query does
 - **Index:** HNSW (`hnsw (Embedding vector_cosine_ops)`) — approximate nearest-neighbour, sub-millisecond at <1 M rows.
 - **Embedding provider:** Mistral `mistral-embed` via MEAI `IEmbeddingGenerator<string, Embedding<float>>`.
 - **Provider abstraction:** OpenAI-compatible base URL + model name in env vars. Switching to OpenAI = change 3 env vars + new migration for column if dimensions differ.
-- **Graceful degradation:** If `Embeddings__ApiKey` is absent, `IEmbeddingService` is a no-op and Captures are stored without embeddings. Search returns `503` when not configured.
+- **Generation pipeline:** Embedding is generated **off the request path** by `CaptureEmbeddingConsumer`, which subscribes to `CaptureCreated` (same shape as `CaptureEnrichmentConsumer`). `POST /api/v1/captures` returns as soon as the row is persisted and the message is published — embedding latency does not count against NF-09 (p95 < 200 ms). Retries: 3 intervals at 500 ms / 2 s / 5 s; on exhaustion the Capture remains without an embedding and can be backfilled via `POST /api/v1/admin/embeddings/rebuild`.
+- **Graceful degradation:** If `Embeddings__ApiKey` is absent, `IEmbeddingService` is a no-op and the consumer skips storage; Captures are persisted without embeddings. Search returns `503` when not configured.
 
 ## Provider Configuration
 
@@ -23,7 +24,10 @@ Embeddings__BaseUrl=https://api.mistral.ai/v1
 Embeddings__ApiKey=<key>
 Embeddings__Model=mistral-embed
 Embeddings__Dimensions=1024
+Embeddings__TimeoutSeconds=10
 ```
+
+`Embeddings__Dimensions` is forwarded to the provider via `EmbeddingGenerationOptions.Dimensions` — required when using OpenAI `text-embedding-3-*` to truncate to a non-native size. `Embeddings__TimeoutSeconds` is bounded on the underlying `OpenAIClient` (`NetworkTimeout`); on timeout the consumer retries per its policy.
 
 ## Switching Providers
 

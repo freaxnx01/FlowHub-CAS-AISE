@@ -4,6 +4,7 @@ WORKDIR /src
 
 COPY FlowHub.slnx Directory.Build.props Directory.Packages.props global.json ./
 COPY source/ ./source/
+COPY tests/ ./tests/
 
 RUN dotnet restore FlowHub.slnx
 

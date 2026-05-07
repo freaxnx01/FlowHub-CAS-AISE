@@ -8,20 +8,23 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
 {
     private readonly IEmbeddingGenerator<string, Embedding<float>> _generator;
     private readonly ILogger<AiEmbeddingService> _log;
+    private readonly EmbeddingGenerationOptions? _options;
 
     public AiEmbeddingService(
         IEmbeddingGenerator<string, Embedding<float>> generator,
-        ILogger<AiEmbeddingService> log)
+        ILogger<AiEmbeddingService> log,
+        int? dimensions = null)
     {
         _generator = generator;
         _log = log;
+        _options = dimensions is { } dim ? new EmbeddingGenerationOptions { Dimensions = dim } : null;
     }
 
     public async Task<float[]?> GenerateAsync(string text, CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await _generator.GenerateAsync([text], cancellationToken: cancellationToken);
+            var result = await _generator.GenerateAsync([text], _options, cancellationToken);
             return result[0].Vector.ToArray();
         }
         catch (Exception ex)
