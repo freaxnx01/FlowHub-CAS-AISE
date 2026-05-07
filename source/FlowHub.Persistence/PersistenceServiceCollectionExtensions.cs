@@ -1,4 +1,5 @@
 using FlowHub.Core.Captures;
+using Pgvector.EntityFrameworkCore;
 using FlowHub.Core.Channels;
 using FlowHub.Core.Health;
 using FlowHub.Persistence.Repositories;
@@ -21,7 +22,8 @@ public static class PersistenceServiceCollectionExtensions
     {
         var connectionString = configuration.GetConnectionString("Default") ?? DefaultConnectionString;
 
-        services.AddDbContext<FlowHubDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddDbContext<FlowHubDbContext>(options =>
+            options.UseNpgsql(connectionString, npgsql => npgsql.UseVector()));
         services.AddScoped<ICaptureRepository, EfCaptureRepository>();
         services.AddScoped<ICaptureService, EfCaptureService>();
         services.AddScoped<IChannelRepository, EfChannelRepository>();

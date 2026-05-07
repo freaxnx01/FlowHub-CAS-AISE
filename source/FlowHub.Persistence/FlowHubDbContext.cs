@@ -17,6 +17,7 @@ public sealed class FlowHubDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("vector");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FlowHubDbContext).Assembly);
     }
 }
