@@ -24,19 +24,34 @@ builder.Services
 // MudBlazor — only component library per CLAUDE.md.
 builder.Services.AddMudServices();
 
-// Authentication.
-// Dev: DevAuthHandler auto-signs-in 'Dev Operator' so the real auth pipeline runs.
-// Prod: OIDC against Authentik — wired in Block 5 (Deployment).
-if (builder.Environment.IsDevelopment())
+// Auth mode is driven by configuration, not environment name (12-Factor III).
+// Set Auth__OIDC__Authority + Auth__OIDC__ClientId + Auth__OIDC__ClientSecret for real OIDC.
+// Omit all Auth__OIDC__* vars to activate DemoAuthHandler (any environment).
+if (builder.Configuration["Auth:OIDC:Authority"] is { Length: > 0 } oidcAuthority)
 {
     builder.Services
-        .AddAuthentication(DevAuthHandler.SchemeName)
-        .AddScheme<AuthenticationSchemeOptions, DevAuthHandler>(DevAuthHandler.SchemeName, _ => { });
+        .AddAuthentication(options =>
+        {
+            options.DefaultScheme = Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectDefaults.AuthenticationScheme;
+        })
+        .AddCookie()
+        .AddOpenIdConnect(options =>
+        {
+            options.Authority = oidcAuthority;
+            options.ClientId = builder.Configuration["Auth:OIDC:ClientId"]
+                ?? throw new InvalidOperationException("Auth:OIDC:ClientId is required when Auth:OIDC:Authority is set.");
+            options.ClientSecret = builder.Configuration["Auth:OIDC:ClientSecret"]
+                ?? throw new InvalidOperationException("Auth:OIDC:ClientSecret is required when Auth:OIDC:Authority is set.");
+            options.ResponseType = "code";
+            options.SaveTokens = true;
+        });
 }
 else
 {
-    // TODO Block 5 — wire OpenIdConnect against Authentik via env vars (Auth__OIDC__*).
-    builder.Services.AddAuthentication();
+    builder.Services
+        .AddAuthentication(DemoAuthHandler.SchemeName)
+        .AddScheme<AuthenticationSchemeOptions, DemoAuthHandler>(DemoAuthHandler.SchemeName, _ => { });
 }
 
 builder.Services.AddAuthorization();
