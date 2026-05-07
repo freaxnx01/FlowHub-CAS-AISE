@@ -253,3 +253,25 @@ The `FlowHub.Persistence.Tests` project previously used `Microsoft.EntityFramewo
 | UC-11 Search by Content | `ListAsync_FiltersBySearchTerm` (add in Block 5) | — |
 | UC-12 SkillRun history | `GetByCaptureIdAsync` | `EfSkillRunRepository` (add test in Block 5) |
 | UC-13 Integration health history | `GetRecentSamplesAsync` | `EfIntegrationRepository` (add test in Block 5) |
+
+## E2E Testing Plan (Playwright)
+
+End-to-end tests cover the happy path for each major UI flow. Not yet automated in CI (deferred to post-submission); manual test plan is documented here.
+
+### Test Cases
+
+| Scenario | Steps | Expected |
+|---|---|---|
+| Submit Capture via UI | Navigate to `/`, type content in Quick Capture field, click Submit | Capture appears in recent captures list on Dashboard |
+| View Captures List | Navigate to `/captures` | Table shows paginated Capture list; stage filter works |
+| Retry Orphan Capture | Navigate to `/captures/{id}`, click Retry | Capture moves to Raw stage; toast confirms |
+| Semantic Search (API) | `GET /api/v1/captures/search?q=EF+Core+query` | Returns Captures with semantically related content |
+
+### CI Test Results Reference
+
+Test results from the `ci.yml` GitHub Actions workflow are uploaded as `.trx` artifacts on every run. Screenshot the latest passing run for inclusion in the submission PDF:
+
+1. Go to `github.com/freaxnx01/FlowHub-CAS-AISE/actions`.
+2. Open the latest `CI` run on `main`.
+3. Expand `Test` step to see test count and pass/fail breakdown.
+4. Download `test-results` artifact for `.trx` file with full details.

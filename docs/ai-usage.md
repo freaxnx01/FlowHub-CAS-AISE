@@ -408,6 +408,37 @@ See `docs/insights/block-4.md` for full AI metrics table and KI-Reflexion.
 - **FK cascade defaults:** AI defaults to CASCADE DELETE on all FKs. Requires explicit human review of each FK against domain semantics (owned entity vs. referenced entity).
 - **CA1707/CA1825 in generated migrations:** Added `.editorconfig` to suppress these for `Migrations/` folder — numeric migration name prefix (`0001_`) causes a leading underscore in the generated class name, triggering CA1707.
 
+## Block 5 — Deployment & Abgabe
+
+### Tools Used
+
+- **Claude Code (claude-sonnet-4-6):** Primary tool throughout Block 5. Used via the CLI in the project repository.
+- **Skill: `superpowers:writing-plans`:** Generated the full implementation plan from the design spec.
+- **Skill: `superpowers:test-driven-development`:** Enforced write-tests-first for all new services and endpoints.
+- **Skill: `cas-aise-grade-self-check`:** Verified rubric coverage before declaring completion.
+- **Skill: `superpowers:subagent-driven-development`:** Executed the plan via fresh subagents per task with spec and quality review gates.
+
+### What AI Generated
+
+| Artifact | AI Contribution | Human Review |
+|---|---|---|
+| GitHub Actions workflows | Full YAML scaffold | Corrected permissions, trigger conditions, artifact paths |
+| `AiEmbeddingService` | Class scaffold + `GenerateAsync` implementation | Verified MEAI API call signature |
+| `SearchEndpoints` | Full implementation | Verified 503 path and ProblemDetails shape |
+| `AdminEndpoints` | Full implementation | Added probe call to verify embedding service before rebuild |
+| `DemoAuthHandler` | Refactored from `DevAuthHandler` | Verified config-presence logic |
+| Docker Compose stack | Full YAML | Adjusted healthcheck commands, volume mounts |
+| `docs/insights/block-*.md` | Full content | Verified factual accuracy against git log and vault notes |
+| pgvector migration | Code scaffold | Corrected `Pgvector.EntityFrameworkCore` requirement vs built-in |
+
+### Reflection
+
+The subagent-driven development workflow (plan → subagent per task → spec review → quality review) significantly reduced implementation errors. Having exact file paths and complete code in the plan meant each subagent had no ambiguity about what to implement.
+
+The biggest AI assist in Block 5: generating the GitHub Actions workflows. YAML verbosity makes it easy to get details wrong (action versions, permission scopes). AI-generated YAML was 90% correct and required only minor corrections.
+
+The biggest AI limitation: pgvector EF Core integration. AI initially planned `UseVector()` as a built-in Npgsql 10 feature without an extra package, but `Pgvector.EntityFrameworkCore` was actually required. The lesson: AI training data may not reflect very recent library releases; verify package changelogs.
+
 ## References
 
 - ADR 0003: `docs/adr/0003-async-pipeline.md`
