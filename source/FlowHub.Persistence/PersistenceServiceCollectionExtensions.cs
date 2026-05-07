@@ -31,12 +31,15 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IIntegrationHealthService, EfIntegrationHealthService>();
         services.AddScoped<ITagRepository, EfTagRepository>();
         services.AddScoped<ISkillRunRepository, EfSkillRunRepository>();
-        services.AddHostedService<MigrationRunner>();
 
         return services;
     }
 }
 
+/// <remarks>
+/// Not registered as IHostedService in production (12-Factor XII).
+/// Use the <c>flowhub.migrations</c> Docker Compose service or <c>make migrate</c>.
+/// </remarks>
 internal sealed partial class MigrationRunner : IHostedService
 {
     private readonly IServiceProvider _services;
