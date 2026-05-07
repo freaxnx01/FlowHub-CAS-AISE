@@ -9,4 +9,7 @@ public interface ICaptureRepository
     Task<Capture> AddAsync(Capture capture, CancellationToken cancellationToken = default);
     Task UpdateAsync(Capture capture, CancellationToken cancellationToken = default);
     Task<CapturePage> ListAsync(CaptureFilter filter, CancellationToken cancellationToken = default);
+    Task StoreEmbeddingAsync(Guid captureId, float[] embedding, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Capture>> SearchByEmbeddingAsync(float[] queryEmbedding, int limit, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Guid>> GetIdsWithoutEmbeddingAsync(CancellationToken cancellationToken = default);
 }

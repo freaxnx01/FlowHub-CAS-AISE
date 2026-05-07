@@ -1,4 +1,5 @@
 using Anthropic.SDK;
+using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +49,36 @@ public static class AiServiceCollectionExtensions
             sp.GetRequiredService<ILogger<AiClassifier>>(),
             new ChatOptions { MaxOutputTokens = maxTokens, Temperature = 0.2f }));
         services.AddSingleton<IClassifier>(sp => sp.GetRequiredService<AiClassifier>());
+
+        return services;
+    }
+
+    public static IServiceCollection AddFlowHubEmbeddings(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var baseUrl = configuration["Embeddings:BaseUrl"];
+        var apiKey = configuration["Embeddings:ApiKey"];
+        var model = configuration["Embeddings:Model"] ?? "mistral-embed";
+
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            return services;
+        }
+
+        var endpoint = new Uri(string.IsNullOrWhiteSpace(baseUrl)
+            ? "https://api.mistral.ai/v1"
+            : baseUrl);
+
+        var openAiOptions = new OpenAIClientOptions { Endpoint = endpoint };
+        var embeddingClient = new OpenAIClient(
+                new ApiKeyCredential(apiKey),
+                openAiOptions)
+            .GetEmbeddingClient(model)
+            .AsIEmbeddingGenerator();
+
+        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(embeddingClient);
+        services.AddSingleton<IEmbeddingService, AiEmbeddingService>();
 
         return services;
     }

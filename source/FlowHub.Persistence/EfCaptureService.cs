@@ -8,11 +8,16 @@ public sealed class EfCaptureService : ICaptureService
 {
     private readonly ICaptureRepository _repository;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IEmbeddingService _embeddingService;
 
-    public EfCaptureService(ICaptureRepository repository, IPublishEndpoint publishEndpoint)
+    public EfCaptureService(
+        ICaptureRepository repository,
+        IPublishEndpoint publishEndpoint,
+        IEmbeddingService embeddingService)
     {
         _repository = repository;
         _publishEndpoint = publishEndpoint;
+        _embeddingService = embeddingService;
     }
 
     public Task<Capture?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
@@ -36,6 +41,11 @@ public sealed class EfCaptureService : ICaptureService
         await _publishEndpoint.Publish(
             new CaptureCreated(saved.Id, saved.Content, saved.Source, saved.CreatedAt),
             cancellationToken);
+
+        var embedding = await _embeddingService.GenerateAsync(saved.Content, cancellationToken);
+        if (embedding is not null)
+            await _repository.StoreEmbeddingAsync(saved.Id, embedding, cancellationToken);
+
         return saved;
     }
 

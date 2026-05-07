@@ -66,6 +66,7 @@ builder.Services.AddFlowHubPersistence(builder.Configuration);
 // Uses real provider when Ai:Provider + Ai:<P>:ApiKey are set; silently falls back
 // to the deterministic KeywordClassifier otherwise so `make run` works zero-config.
 builder.Services.AddFlowHubAi(builder.Configuration);
+builder.Services.AddFlowHubEmbeddings(builder.Configuration);
 
 // Beta MVP — real skill integrations behind ISkillIntegration. AddFlowHubSkills mirrors
 // AddFlowHubAi: silent fallback if Skills:<X>:BaseUrl or :ApiToken is missing.

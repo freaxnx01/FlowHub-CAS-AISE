@@ -13,7 +13,8 @@ public sealed class EfCaptureServiceTests
     {
         var ep = Substitute.For<IPublishEndpoint>();
         var repo = Substitute.For<ICaptureRepository>();
-        return (repo, new EfCaptureService(repo, ep), ep);
+        var embedding = Substitute.For<IEmbeddingService>();
+        return (repo, new EfCaptureService(repo, ep, embedding), ep);
     }
 
     private static Capture MakeCapture(Guid? id = null, LifecycleStage stage = LifecycleStage.Raw,

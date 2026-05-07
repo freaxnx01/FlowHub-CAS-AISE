@@ -6,6 +6,7 @@ using FlowHub.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -33,9 +34,18 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IIntegrationHealthService, EfIntegrationHealthService>();
         services.AddScoped<ITagRepository, EfTagRepository>();
         services.AddScoped<ISkillRunRepository, EfSkillRunRepository>();
+        services.TryAddSingleton<IEmbeddingService>(NullEmbeddingService.Instance);
 
         return services;
     }
+}
+
+/// <summary>Returned when no embedding provider is configured.</summary>
+internal sealed class NullEmbeddingService : IEmbeddingService
+{
+    public static readonly NullEmbeddingService Instance = new();
+    public Task<float[]?> GenerateAsync(string text, CancellationToken cancellationToken = default)
+        => Task.FromResult<float[]?>(null);
 }
 
 /// <remarks>

@@ -1,6 +1,8 @@
 using FlowHub.Core.Captures;
 using FlowHub.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
+using Pgvector;
+using System.Globalization;
 
 namespace FlowHub.Persistence.Repositories;
 
@@ -84,6 +86,47 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         }
 
         return new CapturePage(fetched.Select(ToDomain).ToList(), null);
+    }
+
+    public async Task StoreEmbeddingAsync(
+        Guid captureId, float[] embedding, CancellationToken cancellationToken = default)
+    {
+        var entity = await _db.Captures.FirstOrDefaultAsync(c => c.Id == captureId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Capture {captureId} not found.");
+        entity.Embedding = new Vector(embedding);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Capture>> SearchByEmbeddingAsync(
+        float[] queryEmbedding, int limit, CancellationToken cancellationToken = default)
+    {
+        // float[] values are IEEE 754 floats — no SQL injection risk.
+        var vectorLiteral = "[" + string.Join(",",
+            queryEmbedding.Select(f => f.ToString("G", CultureInfo.InvariantCulture))) + "]";
+
+        var sql = $"""
+            SELECT * FROM "Captures"
+            WHERE "Embedding" IS NOT NULL
+            ORDER BY "Embedding" <=> '{vectorLiteral}'::vector
+            LIMIT {limit}
+            """;
+
+        var entities = await _db.Captures
+            .FromSqlRaw(sql)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(ToDomain).ToList();
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetIdsWithoutEmbeddingAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _db.Captures
+            .AsNoTracking()
+            .Where(c => c.Embedding == null)
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
     }
 
     private static Capture ToDomain(CaptureEntity e) => new(
