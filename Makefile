@@ -4,7 +4,7 @@
 # `make` with no target prints help.
 
 .DEFAULT_GOAL := help
-.PHONY: help run watch build test test-ai test-beta test-watch restore clean format
+.PHONY: help run watch build test test-ai test-beta test-watch restore clean format db-up db-migrate migrate
 
 SOLUTION    := FlowHub.slnx
 WEB_PROJECT := source/FlowHub.Web
@@ -50,3 +50,17 @@ clean: ## Remove build artifacts
 
 format: ## Apply dotnet format
 	dotnet format $(SOLUTION)
+
+db-up: ## Start PostgreSQL in Docker (detached, waits until healthy)
+	docker compose up postgres -d --wait
+
+db-migrate: ## Apply EF Core migrations against the Docker PostgreSQL
+	ConnectionStrings__Default="Host=localhost;Port=5432;Database=flowhub;Username=flowhub;Password=dev-secret" \
+		dotnet ef database update \
+		--project source/FlowHub.Persistence \
+		--startup-project source/FlowHub.Web
+
+migrate: ## Apply EF Core migrations to the local database (requires running PostgreSQL)
+	dotnet ef database update \
+		--project source/FlowHub.Persistence \
+		--startup-project source/FlowHub.Web

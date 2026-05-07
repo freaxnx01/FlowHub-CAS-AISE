@@ -1,0 +1,40 @@
+name: Migrations Bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "source/FlowHub.Persistence/Migrations/**"
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore
+        run: dotnet restore FlowHub.slnx
+
+      - name: Build migrations bundle
+        run: |
+          dotnet ef migrations bundle \
+            --project source/FlowHub.Persistence \
+            --startup-project source/FlowHub.Web \
+            --output ./efbundle \
+            --self-contained \
+            --configuration Release
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: efbundle-${{ github.sha }}
+          path: efbundle
+          retention-days: 30

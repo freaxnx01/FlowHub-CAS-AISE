@@ -1,36 +1,100 @@
-# Block-5 deployment topology preview. NOT used by `make run` (which stays single-process).
-# Demonstrates the multi-container option: FlowHub.Web + FlowHub.Api (Slice A) + RabbitMQ.
-# Run with: docker compose up --build (once the Slice-A api project lands and Dockerfiles exist).
+# Production-oriented Docker Compose stack for FlowHub.
+# Override file (docker-compose.override.yml) configures demo/dev mode (DemoAuthHandler, exposed ports).
 
 services:
   flowhub.web:
     build:
       context: .
       dockerfile: source/FlowHub.Web/Dockerfile
-    image: flowhub-web:dev
+    image: flowhub-web:local
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_URLS: "http://+:5070"
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=flowhub;Username=flowhub;Password=${POSTGRES_PASSWORD:-dev-secret}"
       Bus__Transport: RabbitMq
       Bus__RabbitMq__Host: rabbitmq
+      Bus__RabbitMq__Username: ${RABBITMQ_USER:-flowhub}
+      Bus__RabbitMq__Password: ${RABBITMQ_PASSWORD:-dev-secret}
+      Embeddings__BaseUrl: ${EMBEDDINGS__BASEURL:-}
+      Embeddings__ApiKey: ${EMBEDDINGS__APIKEY:-}
+      Embeddings__Model: ${EMBEDDINGS__MODEL:-}
+      Embeddings__Dimensions: ${EMBEDDINGS__DIMENSIONS:-}
+      Auth__OIDC__Authority: ${AUTH__OIDC__AUTHORITY:-}
+      Auth__OIDC__ClientId: ${AUTH__OIDC__CLIENTID:-}
+      Auth__OIDC__ClientSecret: ${AUTH__OIDC__CLIENTSECRET:-}
     depends_on:
-      - rabbitmq
-    ports:
-      - "5070:8080"
+      flowhub.migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5070/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
-  # flowhub.api lands in Slice A — entry kept here so the topology is visible.
-  # flowhub.api:
-  #   build:
-  #     context: .
-  #     dockerfile: source/FlowHub.Api/Dockerfile
-  #   image: flowhub-api:dev
-  #   environment:
-  #     Bus__Transport: RabbitMq
-  #     Bus__RabbitMq__Host: rabbitmq
-  #   depends_on: [rabbitmq]
+  flowhub.migrations:
+    build:
+      context: .
+      dockerfile: docker/migrations/Dockerfile
+    image: flowhub-migrations:local
+    environment:
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=flowhub;Username=flowhub;Password=${POSTGRES_PASSWORD:-dev-secret}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: flowhub
+      POSTGRES_USER: flowhub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowhub -d flowhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    ports:
-      - "15672:15672"   # management UI
-      - "5672:5672"     # AMQP
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-flowhub}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-dev-secret}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docs/monitoring/grafana:/var/lib/grafana/dashboards:ro
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:

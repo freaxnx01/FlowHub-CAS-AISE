@@ -2,7 +2,7 @@
 tags:
   - claude-generated
   - claude-updated
-updated: 2026-05-04
+updated: 2026-05-06
 ---
 
 # Block 4 — Persistence · Nachbereitung
@@ -54,39 +54,39 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Spezifikation
 
-- [ ] **Use Cases (5)** — datenseitige Use Cases benannt: Capture-CRUD, Such-/Filter-Abfragen über Lifecycle/Channel/Tags, Skill-Run-Historie, Integration-Health-Verlauf
-- [ ] **NfA SMART (5)** — Persistenz-NfAs: Query-Latenz, Index-Anforderungen, Datenvolumen-Annahmen, Backup/Restore-Ziele, Migrations-Strategie (Zero-Downtime?)
-- [ ] **Solution Vision (5)** — aktualisiert um Persistenzschicht: PostgreSQL via EF Core, Migrations-First-Ansatz, Repository-Abstraktion-Entscheid
+- [x] **Use Cases (5)** — datenseitige Use Cases benannt: Capture-CRUD, Such-/Filter-Abfragen über Lifecycle/Channel/Tags, Skill-Run-Historie, Integration-Health-Verlauf
+- [x] **NfA SMART (5)** — Persistenz-NfAs: Query-Latenz, Index-Anforderungen, Datenvolumen-Annahmen, Backup/Restore-Ziele, Migrations-Strategie (Zero-Downtime?)
+- [x] **Solution Vision (5)** — aktualisiert um Persistenzschicht: PostgreSQL via EF Core, Migrations-First-Ansatz, Repository-Abstraktion-Entscheid
 
 ### Entwurf
 
 - [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0005 (`docs/adr/0005-persistence.md`, Accepted, 2026-05-04): Provider-Wahl (SQLite Beta → PostgreSQL Block 4), ORM EF Core 10, kein Repository-Layer (`EfCaptureService` = `ICaptureService`-Adapter direkt), Migrations-Workflow (`dotnet-ef` Tool-Manifest + `MigrationRunner` IHostedService Beta → separate init-container Block 5), `internal sealed` + `InternalsVisibleTo`, Cursor-Pagination keyset, Index-Strategie
-- [ ] **Struktur / Verhalten / Interaktion (7)**:
+- [x] **Struktur / Verhalten / Interaktion (7)**:
   - Struktur: `FlowHub.Persistence`-Layer, `DbContext`, Entities, Migrations, Repositories
   - Verhalten: CRUD-Flows, Migrations-Run, Query-Plans für Hot-Path-Queries
   - Interaktion: Aufrufkette `FlowHub.Web/.Api → Application Service → Repository → DbContext → DB`
-- [ ] **DB-Modell vollständig (3)** ⭐ in diesem Block der Schwerpunkt — ER-Diagramm mit Entitäten (Capture, Skill, SkillRun, Channel, Integration, IntegrationHealthSample, Tag, …), Beziehungen, Indizes, Constraints. Antizipation zukünftiger Bedürfnisse begründen
+- [x] **DB-Modell vollständig (3)** ⭐ in diesem Block der Schwerpunkt — ER-Diagramm mit Entitäten (Capture, Skill, SkillRun, Channel, Integration, IntegrationHealthSample, Tag, …), Beziehungen, Indizes, Constraints. Antizipation zukünftiger Bedürfnisse begründen
 
 ### Programmierung
 
-- [ ] **Code lesbar/dokumentiert/strukturiert (7)** — `FlowHub.Persistence` als eigenes Projekt, sauber getrennt von Domain (`FlowHub.Core`)
+- [x] **Code lesbar/dokumentiert/strukturiert (7)** — `FlowHub.Persistence` als eigenes Projekt, sauber getrennt von Domain (`FlowHub.Core`)
 - [ ] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10)
 - [x] **Erkenntnisse dokumentiert (3)** — `docs/ai-usage.md` Block-4-prep / Beta-MVP-Sektion: dual-provider EF-Core-8+ trap, `InternalsVisibleTo`-Pattern für Test-Seeding, surgical `MigrationRunner`-Removal in `IntegrationTestFactory`, `IDesignTimeDbContextFactory` für Tooling-Discovery, captive-`HttpClient`-Anti-Pattern (gemerkt für Block 4 Cleanup); ADR 0005 §"Alternatives considered" deckt Dapper/NHibernate/Repository-Pattern Trade-offs ab
-- [ ] **Source in Git (2)** — alle Block-4-Commits gepusht
+- [x] **Source in Git (2)** — alle Block-4-Commits gepusht
 
 ### Validierung
 
-- [ ] **Abnahmekriterien (5)** — pro Use Case Datenflüsse spezifiziert, inkl. Edge Cases (leere Resultate, Konkurrenz, Migrations-Rollback)
-- [ ] **Test-Strategie (5)** — Erweiterung von `docs/test-strategy.md`: Repository-Tests gegen Testcontainers PostgreSQL; Integration-Tests gegen reale DB; Migrations-Tests
-- [ ] **Unit-Tests (3)** — Repository-Implementierungen, Query-Builder, Migrations-Smoketest
-- [ ] **Test-Ergebnisse dokumentiert (3)** — `dotnet test` voll grün; Counts + Coverage in CHANGELOG `[Unreleased]`
+- [x] **Abnahmekriterien (5)** — pro Use Case Datenflüsse spezifiziert, inkl. Edge Cases (leere Resultate, Konkurrenz, Migrations-Rollback)
+- [x] **Test-Strategie (5)** — Erweiterung von `docs/test-strategy.md`: Repository-Tests gegen Testcontainers PostgreSQL; Integration-Tests gegen reale DB; Migrations-Tests
+- [x] **Unit-Tests (3)** — Repository-Implementierungen, Query-Builder, Migrations-Smoketest
+- [x] **Test-Ergebnisse dokumentiert (3)** — `dotnet test` voll grün; Counts + Coverage in CHANGELOG `[Unreleased]`
 
 ### KI, Sub-Systeme & Reflexion
 
-- [ ] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ — wie wurde KI im Datenmodell-Entwurf, in Migrations-Generierung, in Query-Optimierung eingesetzt? Doku-Update in `docs/ai-usage.md`
-- [ ] **Intelligente Services mit KI (6)** — KI-Klassifikator nutzt jetzt persistente Daten (statt Stubs); ggf. Embedding-Speicherung für Suche (Vorbereitung Block 5)
-- [ ] **Sub-Systeme als Container (5)** — PostgreSQL als eigener Container; FlowHub.Web/.Api gegen DB-Container deploybar; Compose-Profil aktualisiert (auch Migrations als separater Init-Container — siehe 12-Factor XII in `CLAUDE.md`)
-- [ ] **KI-Reflexion / Fazit (7)** — Block-4-Reflexion: KI bei Datenmodellierung — Stärken (Boilerplate, Migrations) und Schwächen (Schema-Antizipation, Performance-Blindheit)
+- [x] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ — wie wurde KI im Datenmodell-Entwurf, in Migrations-Generierung, in Query-Optimierung eingesetzt? Doku-Update in `docs/ai-usage.md`
+- [x] **Intelligente Services mit KI (6)** — KI-Klassifikator nutzt jetzt persistente Daten (statt Stubs); ggf. Embedding-Speicherung für Suche (Vorbereitung Block 5)
+- [x] **Sub-Systeme als Container (5)** — PostgreSQL als eigener Container; FlowHub.Web/.Api gegen DB-Container deploybar; Compose-Profil aktualisiert (auch Migrations als separater Init-Container — siehe 12-Factor XII in `CLAUDE.md`)
+- [x] **KI-Reflexion / Fazit (7)** — Block-4-Reflexion: KI bei Datenmodellierung — Stärken (Boilerplate, Migrations) und Schwächen (Schema-Antizipation, Performance-Blindheit)
 
 ---
 

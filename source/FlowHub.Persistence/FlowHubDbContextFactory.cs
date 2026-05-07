@@ -1,19 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Pgvector.EntityFrameworkCore;
 
 namespace FlowHub.Persistence;
 
-/// <summary>
-/// Design-time factory so that <c>dotnet ef migrations add</c> can instantiate
-/// <see cref="FlowHubDbContext"/> without a running application host.
-/// Used only by the EF Core CLI tooling — never registered in DI.
-/// </summary>
 internal sealed class FlowHubDbContextFactory : IDesignTimeDbContextFactory<FlowHubDbContext>
 {
     public FlowHubDbContext CreateDbContext(string[] args)
     {
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
+            ?? "Host=localhost;Port=5432;Database=flowhub;Username=flowhub;Password=dev-secret";
+
         var options = new DbContextOptionsBuilder<FlowHubDbContext>()
-            .UseSqlite("Data Source=flowhub.db")
+            .UseNpgsql(connectionString, npgsql => npgsql.UseVector())
             .Options;
 
         return new FlowHubDbContext(options);

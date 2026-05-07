@@ -371,6 +371,74 @@ The spec error table contained one runtime-incorrect claim that survived through
 
 The 21-task plan reserved Task 21 for the operator: set user-secrets (Anthropic key, Wallabag PAT, Vikunja PAT + project id), boot the app, verify EventIds 3020/4020/5010/5011 in the boot log, browser-test URL → Wallabag / `todo:` → Vikunja / nonsense → Orphan, restart-survival check, optional `make test-beta` against the live homelab, then push. That step is not part of this writeup — it was deliberately gated for human-driven validation against the real homelab services. The 138/138 unit-and-integration-test count above is the upper bound of what the automated pipeline can guarantee; the Task-21 evidence (screenshots, log lines, live Wallabag/Vikunja entries) will land in this section when the operator runs it.
 
+## Block 4 — Persistence (May 2026)
+
+### Tools
+
+| Tool | Role |
+|---|---|
+| Claude Code (Sonnet 4.6, controller) | Spec/plan authoring, subagent dispatch controller, spec+quality review |
+| Claude Sonnet 4.6 (implementer subagents) | Implementation, TDD, entity scaffolding, test writing |
+| Claude Haiku 4.5 (mechanical subagents) | Mechanical tasks: doc writing, YAML edits, spec docs |
+| GitHub Copilot | Inline completions during session review |
+
+### Workflow
+
+Same `superpowers:subagent-driven-development` loop as Block 3:
+1. `superpowers:brainstorming` — `docs/superpowers/specs/2026-05-05-block4-nachbereitung-design.md` (Block 4 scope spec)
+2. `superpowers:writing-plans` — 5-slice plan at `docs/superpowers/plans/2026-05-05-block4-nachbereitung.md`
+3. `superpowers:subagent-driven-development` — fresh implementer + spec-compliance reviewer + code-quality reviewer subagent per task. Dispatch model: Sonnet for TDD/judgment, Haiku for docs/YAML.
+
+### Per-Slice AI Usage
+
+**Slice 1 (PostgreSQL + Repository Foundation):** AI generated `EfCaptureRepository` from the interface contract; initial `FindAsync` (tracking) corrected to `.AsNoTracking().FirstOrDefaultAsync()` by reviewer. `ICaptureRepository` interface design was a human decision. AI share: ~90%.
+
+**Slice 2 (Channel + Skill Entities):** AI produced entities, configurations, and repositories in one pass. varchar(128) Name field corrected to varchar(64) in review. `EfSkillRegistry` two-line class was human-designed; AI implemented. AI share: ~88%.
+
+**Slice 3 (Full Domain Model):** AI generated 4 entities + configs + repos. FK strategy corrected by human (AI defaulted to CASCADE everywhere; SkillRun→Skill changed to RESTRICT, Capture→Channel/Skill soft FK). N+1 on Tags nav property caught by human in code review. AI share: ~85%.
+
+**Slice 4 (Tests + Docker):** `PostgresFixture` per-test isolation pattern scaffolded by AI; human validated `NpgsqlConnectionStringBuilder` admin connection. All 16 test methods AI-generated. Docker Compose `flowhub.migrations` service was human-designed (12-Factor XII pattern). AI share: ~90%.
+
+See `docs/insights/block-4.md` for full AI metrics table and KI-Reflexion.
+
+### Notable Corrections (Block 4)
+
+- **Npgsql version:** Plan specified 9.0.4 (EF Core 9 era); actual project uses EF Core 10. Implementer resolved to 10.0.1. Plan version pins should be verified against installed SDK before execution.
+- **N+1 on Tags:** `EfCaptureRepository.ListAsync` initially generated without `.Include(c => c.Tags)`. Caught in code-quality review. Fix: add `Include` before `AsNoTracking` in query chain.
+- **FK cascade defaults:** AI defaults to CASCADE DELETE on all FKs. Requires explicit human review of each FK against domain semantics (owned entity vs. referenced entity).
+- **CA1707/CA1825 in generated migrations:** Added `.editorconfig` to suppress these for `Migrations/` folder — numeric migration name prefix (`0001_`) causes a leading underscore in the generated class name, triggering CA1707.
+
+## Block 5 — Deployment & Abgabe
+
+### Tools Used
+
+- **Claude Code (claude-sonnet-4-6):** Primary tool throughout Block 5. Used via the CLI in the project repository.
+- **Skill: `superpowers:writing-plans`:** Generated the full implementation plan from the design spec.
+- **Skill: `superpowers:test-driven-development`:** Enforced write-tests-first for all new services and endpoints.
+- **Skill: `cas-aise-grade-self-check`:** Verified rubric coverage before declaring completion.
+- **Skill: `superpowers:subagent-driven-development`:** Executed the plan via fresh subagents per task with spec and quality review gates.
+
+### What AI Generated
+
+| Artifact | AI Contribution | Human Review |
+|---|---|---|
+| GitHub Actions workflows | Full YAML scaffold | Corrected permissions, trigger conditions, artifact paths |
+| `AiEmbeddingService` | Class scaffold + `GenerateAsync` implementation | Verified MEAI API call signature |
+| `SearchEndpoints` | Full implementation | Verified 503 path and ProblemDetails shape |
+| `AdminEndpoints` | Full implementation | Added probe call to verify embedding service before rebuild |
+| `DemoAuthHandler` | Refactored from `DevAuthHandler` | Verified config-presence logic |
+| Docker Compose stack | Full YAML | Adjusted healthcheck commands, volume mounts |
+| `docs/insights/block-*.md` | Full content | Verified factual accuracy against git log and vault notes |
+| pgvector migration | Code scaffold | Corrected `Pgvector.EntityFrameworkCore` requirement vs built-in |
+
+### Reflection
+
+The subagent-driven development workflow (plan → subagent per task → spec review → quality review) significantly reduced implementation errors. Having exact file paths and complete code in the plan meant each subagent had no ambiguity about what to implement.
+
+The biggest AI assist in Block 5: generating the GitHub Actions workflows. YAML verbosity makes it easy to get details wrong (action versions, permission scopes). AI-generated YAML was 90% correct and required only minor corrections.
+
+The biggest AI limitation: pgvector EF Core integration. AI initially planned `UseVector()` as a built-in Npgsql 10 feature without an extra package, but `Pgvector.EntityFrameworkCore` was actually required. The lesson: AI training data may not reflect very recent library releases; verify package changelogs.
+
 ## References
 
 - ADR 0003: `docs/adr/0003-async-pipeline.md`

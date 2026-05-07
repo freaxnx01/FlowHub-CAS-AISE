@@ -47,6 +47,9 @@ public static class CaptureEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);
 
+        app.MapSearchEndpoints();
+        app.MapAdminEndpoints();
+
         return app;
     }
 

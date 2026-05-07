@@ -6,20 +6,16 @@ using Microsoft.Extensions.Options;
 namespace FlowHub.Web.Auth;
 
 /// <summary>
-/// Dev-only authentication handler that auto-signs-in a fixed "Dev Operator"
-/// principal so the real auth pipeline (<c>[Authorize]</c>, <c>User.IsInRole</c>,
-/// <see cref="Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider"/>)
-/// runs identically in dev and prod.
-///
-/// Per ADR 0001: registered ONLY when <c>builder.Environment.IsDevelopment()</c>.
-/// Production goes through OIDC against Authentik (wired in Block 5).
-/// Never use <c>[AllowAnonymous]</c> sprinkles to bypass auth in dev.
+/// Authentication handler that auto-signs-in a fixed "Demo Operator" principal.
+/// Activates automatically when <c>Auth:OIDC:Authority</c> is absent from configuration.
+/// Works in any environment (dev, CI, demo), not just Development.
+/// Never use <c>[AllowAnonymous]</c> to bypass auth instead of this handler.
 /// </summary>
-public sealed class DevAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public sealed class DemoAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public const string SchemeName = "Dev";
+    public const string SchemeName = "Demo";
 
-    public DevAuthHandler(
+    public DemoAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder)
@@ -31,12 +27,12 @@ public sealed class DevAuthHandler : AuthenticationHandler<AuthenticationSchemeO
     {
         var rolesCsv = Context.RequestServices
             .GetRequiredService<IConfiguration>()
-            .GetValue<string>("Dev:Auth:Roles") ?? "Operator";
+            .GetValue<string>("Demo:Auth:Roles") ?? "Operator";
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, "Dev Operator"),
-            new(ClaimTypes.NameIdentifier, "dev-operator"),
+            new(ClaimTypes.Name, "Demo Operator"),
+            new(ClaimTypes.NameIdentifier, "demo-operator"),
         };
 
         foreach (var role in rolesCsv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))

@@ -220,3 +220,58 @@ make test-ai       # run AI trait-gated tests only (requires Ai__*__ApiKey env v
 make test-watch    # watch mode for component tests
 make build         # build also catches analyzer warnings (TreatWarningsAsErrors)
 ```
+
+## Persistence Layer Testing
+
+### Why Testcontainers Instead of InMemory
+
+The `FlowHub.Persistence.Tests` project previously used `Microsoft.EntityFrameworkCore.InMemory`. Starting in Block 4, all persistence integration tests use Testcontainers PostgreSQL for these reasons:
+
+1. **Provider parity:** InMemory does not enforce FK constraints, does not support `EF.Functions.ILike`, and differs in edge cases for cursor pagination. A test that passes against InMemory can fail against PostgreSQL.
+2. **Realistic query plans:** Index-backed queries behave differently under InMemory (no query optimizer). Tests against real PostgreSQL catch missing indexes early.
+3. **Migration coverage:** InMemory doesn't apply migrations. `MigrationSmokeTest` verifies all migrations apply cleanly against a real engine.
+
+### Test Infrastructure
+
+`PostgresFixture` (`tests/FlowHub.Persistence.Tests/Fixtures/PostgresFixture.cs`) starts one PostgreSQL container per test session (shared via `[Collection("Postgres")]`). Each test gets its own database (`testdb_<guid>`) via `CreateFreshDbAsync()`, which creates the database and applies all migrations before returning the context.
+
+### Test Pyramid for Persistence
+
+| Level | Location | Provider | Count (Block 4) |
+|---|---|---|---|
+| Unit (service orchestration) | `FlowHub.Web.ComponentTests` + `FlowHub.Persistence.Tests` | NSubstitute mocks | ~20 |
+| Integration (repository) | `FlowHub.Persistence.Tests` | Testcontainers PostgreSQL | 15 |
+| Integration (API endpoints) | `FlowHub.Api.IntegrationTests` | WebApplicationFactory | 17 |
+| E2E (browser) | Playwright (planned) | Full stack | planned Block 5 |
+
+### Acceptance Criteria (UC-09 to UC-13)
+
+| Use Case | Test | Location |
+|---|---|---|
+| UC-09 Filter by Stage | `ListAsync_FiltersByStage` | `EfCaptureRepositoryTests` |
+| UC-10 Filter by Tag | `ListAsync_FiltersByTag` (add in Block 5) | — |
+| UC-11 Search by Content | `ListAsync_FiltersBySearchTerm` (add in Block 5) | — |
+| UC-12 SkillRun history | `GetByCaptureIdAsync` | `EfSkillRunRepository` (add test in Block 5) |
+| UC-13 Integration health history | `GetRecentSamplesAsync` | `EfIntegrationRepository` (add test in Block 5) |
+
+## E2E Testing Plan (Playwright)
+
+End-to-end tests cover the happy path for each major UI flow. Not yet automated in CI (deferred to post-submission); manual test plan is documented here.
+
+### Test Cases
+
+| Scenario | Steps | Expected |
+|---|---|---|
+| Submit Capture via UI | Navigate to `/`, type content in Quick Capture field, click Submit | Capture appears in recent captures list on Dashboard |
+| View Captures List | Navigate to `/captures` | Table shows paginated Capture list; stage filter works |
+| Retry Orphan Capture | Navigate to `/captures/{id}`, click Retry | Capture moves to Raw stage; toast confirms |
+| Semantic Search (API) | `GET /api/v1/captures/search?q=EF+Core+query` | Returns Captures with semantically related content |
+
+### CI Test Results Reference
+
+Test results from the `ci.yml` GitHub Actions workflow are uploaded as `.trx` artifacts on every run. Screenshot the latest passing run for inclusion in the submission PDF:
+
+1. Go to `github.com/freaxnx01/FlowHub-CAS-AISE/actions`.
+2. Open the latest `CI` run on `main`.
+3. Expand `Test` step to see test count and pass/fail breakdown.
+4. Download `test-results` artifact for `.trx` file with full details.
