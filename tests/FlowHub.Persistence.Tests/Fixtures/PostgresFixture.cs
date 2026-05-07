@@ -12,6 +12,7 @@ public sealed class PostgresFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         _container = new PostgreSqlBuilder()
+            .WithImage("pgvector/pgvector:pg17")
             .WithDatabase("flowhub_test")
             .WithUsername("test")
             .WithPassword("test")
@@ -32,9 +33,9 @@ public sealed class PostgresFixture : IAsyncLifetime
         cmd.CommandText = $"CREATE DATABASE \"{dbName}\"";
         await cmd.ExecuteNonQueryAsync();
 
-        var csb = new NpgsqlConnectionStringBuilder(ConnectionString) { Database = dbName };
+        var csb = new NpgsqlConnectionStringBuilder(ConnectionString) { Database = dbName, PersistSecurityInfo = true };
         var options = new DbContextOptionsBuilder<FlowHubDbContext>()
-            .UseNpgsql(csb.ConnectionString)
+            .UseNpgsql(csb.ConnectionString, npgsql => npgsql.UseVector())
             .Options;
         var db = new FlowHubDbContext(options);
         await db.Database.MigrateAsync();
