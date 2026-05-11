@@ -41,9 +41,10 @@ build: ## Build the full solution
 test: ## Run all tests except [Category=AI], [Category=BetaSmoke], [Category=E2E]
 	dotnet test $(SOLUTION) --no-build --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E"
 
-test-backend: ## Run backend unit tests only (Persistence + Skills), no live integration, no E2E
+test-backend: ## Run backend unit + skill contract tests (Persistence + Skills + Skills.ContractTests), no live integration, no E2E
 	dotnet test tests/FlowHub.Persistence.Tests
 	dotnet test tests/FlowHub.Skills.Tests
+	dotnet test tests/FlowHub.Skills.ContractTests --filter "Category=SkillContract"
 
 test-frontend: ## Run frontend (bUnit) component tests
 	dotnet test tests/FlowHub.Web.ComponentTests
