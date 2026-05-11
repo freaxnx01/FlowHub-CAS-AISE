@@ -71,6 +71,52 @@ Default to **option 1** for the same reason ADR 0004 picked MEAI over Semantic K
 
 ---
 
+## Additional AI Providers (Gemma, Apertus, Hugging Face)
+
+**Status:** Idea — extension of ADR 0004.
+**Motivation:** Today FlowHub ships two adapters (Anthropic native, OpenRouter aggregator). Adding more provider classes — particularly a **Swiss sovereign open-weights** model — strengthens the *"intelligente und flexible Services"* and *"KI-Werkzeuge verwendet"* rubric narrative beyond what two commercial providers can show.
+
+### Candidates
+
+#### Google Gemma — easy, env-var change
+
+Three reachable paths via the **existing OpenAI-compatible adapter**:
+
+1. **OpenRouter passthrough** — pure env change: `Ai__OpenRouter__Model=google/gemma-3-27b-it`. Zero code.
+2. **Google AI Studio / Vertex AI directly** — both expose OpenAI-compatible endpoints. Needs the configurable `BaseUrl` refactor below.
+3. **Self-host (Ollama / vLLM / llama.cpp)** — `BaseUrl=http://ollama:11434/v1`, `Model=gemma3:27b`. Air-gapped, zero cloud cost.
+
+**Caveat:** structured-output adherence varies by size. 27B variants honour `response_format: json_schema` well; 4B/9B variants flake — same warning ADR 0004 §6 records for smaller Llamas. `KeywordClassifier` fallback is the safety net.
+
+#### Apertus (Swiss ETH/EPFL/CSCS open-weights model) — possible, more wiring
+
+1. **Public AI Inference Utility / Swisscom** — OpenAI-compatible endpoint. Smallest code change.
+2. **Hugging Face Inference Providers / Router** — `https://router.huggingface.co/v1` is OpenAI-compatible; same adapter shape as OpenRouter, just a different aggregator. Availability of Apertus on serverless depends on which HF providers carry it; dedicated Inference Endpoints always work but cost a reserved GPU.
+3. **Self-host on a GPU box** — weights on Hugging Face under an open licence. Serve via vLLM / Ollama → OpenAI-compatible endpoint. Realistic for a homelab demo.
+
+**Verify before committing:** Apertus's structured-output / function-calling maturity. Newer open-weights models often lag here. If strict JSON emission is unreliable, the options are grammar-constrained decoding (vLLM `guided_json`) or accepting higher fallback rates.
+
+#### Hugging Face Router as a generic option
+
+Worth treating as a third aggregator alongside OpenRouter in its own right — reaches many open-weights models (Llama, Mistral, Qwen, Gemma, Apertus when available, …) via one OpenAI-compatible base URL. Same `Ai__OpenAi__BaseUrl` refactor unlocks it.
+
+### Required refactor
+
+Small, contained in `source/FlowHub.AI/AiServiceCollectionExtensions.cs`:
+
+1. **Configurable `BaseUrl`** on the OpenAI-compatible path (currently hardcoded to OpenRouter). Add `Ai__OpenAi__BaseUrl` / `Ai__OpenAi__ApiKey` / `Ai__OpenAi__Model`, and an `AiProvider.OpenAiCompatible` enum value.
+2. **Document per-model asymmetries** as an extension of ADR 0004 §6 — Gemma 27B "fine for schema"; Gemma 4B "expect fallbacks"; Apertus "verify schema support per release".
+
+### Embeddings unchanged
+
+Neither Gemma nor Apertus ships a mature dedicated embedding model. Embeddings stay on Mistral per ADR 0006 — chat and embeddings remain provider-asymmetric (already documented there).
+
+### Rubric angle
+
+Three vendor classes — commercial native (Anthropic), commercial aggregator (OpenRouter), Swiss sovereign open-weights (Apertus) — demonstrate *"flexible"* far more convincingly than two commercial endpoints. A small follow-up ADR can record this as an extension point even if the runtime default stays Anthropic + OpenRouter for the CAS submission.
+
+---
+
 ## References
 
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)
