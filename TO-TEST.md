@@ -24,9 +24,22 @@ Microsoft Edge installed (or `xdg-open` configured) for `make test-all`.
       `PGHOST=127.0.0.1 PGPORT=5432 PGUSER=flowhub PGPASSWORD=dev-secret make db-ping`.
 
 ### `make test-backend`
-- [ ] Runs `FlowHub.Persistence.Tests` and `FlowHub.Skills.Tests`.
+- [ ] Runs `FlowHub.Persistence.Tests`, `FlowHub.Skills.Tests`, and
+      `FlowHub.Skills.ContractTests` (Category=SkillContract).
 - [ ] Does **not** run `FlowHub.Web.ComponentTests` or any `*IntegrationTests`.
 - [ ] Does not require AI / Beta env vars.
+
+### `make test-backend` — Skill contract tests (WireMock.Net)
+- [ ] Vikunja contract suite (6 tests) green: happy path, title fallback to
+      content, 401 / 500 error mapping, missing-id response, bearer header
+      on exact path `/api/v1/projects/{id}/tasks`.
+- [ ] Wallabag contract suite (7 tests) green: happy path, non-URL content
+      short-circuit (no HTTP call), non-http scheme rejection, 401 / 500
+      error mapping, missing-id response, bearer header on exact path
+      `/api/entries.json`.
+- [ ] Each test class boots its own WireMock server on a random loopback
+      port (no fixed port collisions if tests run in parallel).
+- [ ] No `Skills__*` env vars required — contract tests run offline.
 
 ### `make test-frontend`
 - [ ] Runs `FlowHub.Web.ComponentTests` only. Green on a clean checkout.
