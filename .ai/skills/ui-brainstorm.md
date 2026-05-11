@@ -1,6 +1,6 @@
 # UI Brainstorm — Phase 1 of 4
 
-You are helping design a new UI screen or component for a Blazor WebAssembly application using MudBlazor.
+You are helping design a new UI screen or component. Use the active stack overlay (`.ai/stacks/<stack>.md`) for component-library-specific vocabulary and conventions — this skill itself is stack-neutral.
 
 **Target:** $ARGUMENTS
 
@@ -13,24 +13,25 @@ Ask only what you need to understand scope. Cover:
 - What is the primary user goal on this screen?
 - Which user roles interact with it?
 - What data is displayed or captured?
-- Are there any existing components in `/src/Shared/` that could be reused?
-- Any known constraints (auth, offline, performance)?
+- Are there any existing components that could be reused (check the project's shared/common folder)?
+- Any known constraints (auth, offline, performance, a11y)?
 
 Wait for answers before continuing.
 
 ### Step 2 — Propose ASCII wireframe
 After the user answers, draw a clear ASCII wireframe showing:
-- Overall layout (AppBar, Drawer, main content area)
-- Key MudBlazor regions (DataGrid, Form, Dialog, etc.)
-- Primary actions (buttons, FABs)
+- Overall layout (top bar / side nav / main content area, or the stack's equivalent)
+- Key regions (tables, forms, dialogs, etc.)
+- Primary actions (buttons, FABs, links)
 - Empty state and loading state placeholders
+- Error state placement
 
 Use box-drawing characters for clarity:
 ```
 ┌─────────────────────────────────────┐
-│ AppBar                              │
+│ Top Bar                             │
 ├──────────┬──────────────────────────┤
-│ Drawer   │ Main Content             │
+│ Nav      │ Main Content             │
 │          │                          │
 └──────────┴──────────────────────────┘
 ```

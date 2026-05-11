@@ -1,6 +1,6 @@
 # UI Review — Phase 4 of 4
 
-Review the implemented component against the approved wireframe, flow diagrams, and project conventions.
+Review the implemented component against the approved wireframe, flow diagrams, and project conventions. This skill is stack-neutral — cross-reference component-library preferences and file-layout rules against the active stack overlay (`.ai/stacks/<stack>.md`).
 
 **Target:** $ARGUMENTS
 
@@ -10,36 +10,36 @@ Review the implemented component against the approved wireframe, flow diagrams, 
 
 ### Layout & Wireframe fidelity
 - [ ] Does the layout match the approved ASCII wireframe?
-- [ ] Are all sections present (AppBar, Drawer, main content, actions)?
+- [ ] Are all sections present (top bar, nav, main content, actions)?
 - [ ] Are empty states implemented and visible when there is no data?
-- [ ] Are loading states implemented (MudSkeleton or progress indicator)?
-- [ ] Are error states handled visibly (MudSnackbar or MudAlert)?
+- [ ] Are loading states implemented (skeleton / progress / spinner)?
+- [ ] Are error states handled visibly (toast / banner / alert)?
 
 ### Flow fidelity
 - [ ] Does every user action from the Mermaid flow have an implementation?
 - [ ] Are all error branches handled (API failure, 403, 404, validation)?
-- [ ] Are destructive actions gated by a MudDialog confirmation?
+- [ ] Are destructive actions gated by a confirmation dialog?
 - [ ] Are all exit points (navigation, success redirect) wired correctly?
 
-### MudBlazor conventions
-- [ ] No raw HTML where a MudBlazor component could be used
-- [ ] MudDataGrid used for tables (not MudTable unless legacy)
-- [ ] MudSnackbar used for feedback (not custom toast)
-- [ ] Icons use `Icons.Material.Filled.*`
-- [ ] Spacing uses MudBlazor utilities (`ma-*`, `pa-*`, `MudStack`, `MudGrid`)
+### Component-library conventions (per stack overlay)
+- [ ] No raw HTML / primitive widgets where a first-party library component exists
+- [ ] Tabular data uses the stack's preferred data-grid component
+- [ ] Toasts / snackbars use the stack's feedback component (no custom toast)
+- [ ] Icons come from a single icon set, used consistently
+- [ ] Spacing uses the stack's spacing utilities
 
 ### Code conventions
-- [ ] No C# logic in the `.razor` file (only binding and UI events)
-- [ ] Code-behind `.razor.cs` is a `partial class`
-- [ ] No direct API calls from the component (always via a service)
-- [ ] No duplicate components — anything reusable moved to `/src/Shared/`
+- [ ] No business logic in view/markup files (only binding and UI events)
+- [ ] Code-behind / controller / ViewModel separation respected (per stack)
+- [ ] No direct API calls from the component — always via a service
+- [ ] No duplicate components — anything reusable moved to the shared folder
 
 ### Testing
-- [ ] bUnit test file exists for this component
+- [ ] Component-level test file exists for this component
 - [ ] Happy path test passes
 - [ ] Empty state test passes
 - [ ] Error state test passes
-- [ ] Playwright E2E test added or updated
+- [ ] E2E test added or updated if the feature is user-facing
 
 ---
 

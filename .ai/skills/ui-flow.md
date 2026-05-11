@@ -1,6 +1,6 @@
 # UI Flow — Phase 2 of 4
 
-The ASCII wireframe from Phase 1 has been approved. Now map the logic before any code is written.
+The ASCII wireframe from Phase 1 has been approved. Now map the logic before any code is written. This skill is stack-neutral — use the active stack overlay (`.ai/stacks/<stack>.md`) for component-library naming in the component map.
 
 **Target:** $ARGUMENTS
 
@@ -21,9 +21,11 @@ Generate a Mermaid `flowchart TD` covering:
 Generate a Mermaid diagram showing:
 - Component hierarchy (parent → children)
 - Which component owns which state
-- Data flow direction (props down, EventCallback up)
+- Data flow direction (props/parameters down, events up)
 - Which services are injected and where
 - API calls: which component triggers them
+
+Use the component-library names from the active stack overlay (e.g. `MudDataGrid` for .NET/Blazor) in the component map.
 
 ### Step 3 — Screen inventory check
 List any additional screens or dialogs implied by this flow that were not in the wireframe (e.g. detail views, wizard steps, modals). Flag them explicitly.
@@ -38,5 +40,4 @@ End with: "Do these diagrams capture the intended logic? Approve to continue to 
 - No component code in this phase
 - If the flow reveals a missing screen, surface it — do not silently skip it
 - Keep Mermaid diagrams readable: max ~15 nodes per diagram, split if needed
-- Use MudBlazor component names in the component map (e.g. MudDataGrid, MudDialog)
 - On approval, save the diagrams to `docs/design/<feature-name>/flow.md`
