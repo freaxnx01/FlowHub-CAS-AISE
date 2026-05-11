@@ -4,6 +4,11 @@
 # `make` with no target prints help.
 
 .DEFAULT_GOAL := help
+
+# Auto-load .env (gitignored) so ai-* targets and dev runs pick up secrets.
+-include .env
+export
+
 .PHONY: help run watch build test test-ai test-beta test-watch restore clean format db-up db-migrate migrate ai-ping ai-classify ai-embed
 
 SOLUTION       := FlowHub.slnx
