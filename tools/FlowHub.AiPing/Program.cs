@@ -102,28 +102,61 @@ internal static class Program
 
     private static async Task<int> RunPingAsync(IConfiguration config)
     {
-        await using var sp = BuildClassifierProvider(config);
-        var outcome = sp.GetRequiredService<AiRegistrationOutcome>();
-
-        if (!outcome.UsesAi)
+        await using (var sp = BuildClassifierProvider(config))
         {
-            Console.Error.WriteLine($"FAIL: AI provider not configured (reason={outcome.Reason}).");
-            Console.Error.WriteLine("      Set Ai__Provider and the matching Ai__<Provider>__ApiKey.");
-            return 2;
+            var outcome = sp.GetRequiredService<AiRegistrationOutcome>();
+
+            if (!outcome.UsesAi)
+            {
+                Console.Error.WriteLine($"FAIL: AI provider not configured (reason={outcome.Reason}).");
+                Console.Error.WriteLine("      Set Ai__Provider and the matching Ai__<Provider>__ApiKey.");
+                return 2;
+            }
+
+            var chat = sp.GetRequiredService<IChatClient>();
+            Console.WriteLine($"Pinging chat: {outcome.Provider} ({outcome.Model})…");
+
+            var sw = Stopwatch.StartNew();
+            var response = await chat.GetResponseAsync(
+                "Reply with the single word: OK",
+                new ChatOptions { MaxOutputTokens = 16, Temperature = 0f });
+            sw.Stop();
+
+            var reply = response.Text?.Trim() ?? string.Empty;
+            Console.WriteLine($"  reply    = {Truncate(reply, 200)}");
+            Console.WriteLine($"  latency  = {sw.ElapsedMilliseconds} ms");
         }
 
-        var chat = sp.GetRequiredService<IChatClient>();
-        Console.WriteLine($"Pinging {outcome.Provider} ({outcome.Model})…");
+        Console.WriteLine();
 
-        var sw = Stopwatch.StartNew();
-        var response = await chat.GetResponseAsync(
-            "Reply with the single word: OK",
-            new ChatOptions { MaxOutputTokens = 16, Temperature = 0f });
-        sw.Stop();
+        await using (var sp = BuildEmbeddingProvider(config))
+        {
+            var embedding = sp.GetService<IEmbeddingService>();
+            if (embedding is null)
+            {
+                Console.WriteLine("Pinging embeddings: skipped (Embeddings__ApiKey not set)");
+            }
+            else
+            {
+                var model = config["Embeddings:Model"] ?? "mistral-embed";
+                Console.WriteLine($"Pinging embeddings: {model}…");
 
-        var reply = response.Text?.Trim() ?? string.Empty;
-        Console.WriteLine($"  reply    = {Truncate(reply, 200)}");
-        Console.WriteLine($"  latency  = {sw.ElapsedMilliseconds} ms");
+                var sw = Stopwatch.StartNew();
+                var vector = await embedding.GenerateAsync("ping", CancellationToken.None);
+                sw.Stop();
+
+                if (vector is null)
+                {
+                    Console.Error.WriteLine("  FAIL: embedding generation returned null (provider error — see logs).");
+                    return 1;
+                }
+
+                Console.WriteLine($"  dimensions = {vector.Length}");
+                Console.WriteLine($"  latency    = {sw.ElapsedMilliseconds} ms");
+            }
+        }
+
+        Console.WriteLine();
         Console.WriteLine("OK");
         return 0;
     }
