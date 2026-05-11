@@ -1,0 +1,17 @@
+meta {
+  name: Rebuild Embeddings
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/embeddings/rebuild
+  body: none
+  auth: none
+}
+
+docs {
+  POST /api/v1/admin/embeddings/rebuild — backfills missing embeddings for stored Captures.
+  Walks every Capture that has no embedding row, generates one via IEmbeddingService, and writes it.
+  Returns 200 { processed, skipped, failed } or 503 if Embeddings__ApiKey is not configured.
+}

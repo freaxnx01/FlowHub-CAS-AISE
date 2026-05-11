@@ -1,0 +1,23 @@
+meta {
+  name: Search Captures (semantic)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/captures/search?q={{searchQuery}}&limit=10
+  body: none
+  auth: none
+}
+
+params:query {
+  q: {{searchQuery}}
+  limit: 10
+}
+
+docs {
+  GET /api/v1/captures/search?q=…&limit=… — semantic (vector) search over Captures.
+  Embeds the query via IEmbeddingService and runs a cosine-similarity search via pgvector.
+  Returns 200 Capture[] (most-similar first), 400 when q is empty/whitespace,
+  503 when the embedding service is not configured (set Embeddings__ApiKey).
+}

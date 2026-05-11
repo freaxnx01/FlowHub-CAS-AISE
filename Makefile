@@ -4,12 +4,13 @@
 # `make` with no target prints help.
 
 .DEFAULT_GOAL := help
+SHELL := /bin/bash
 
 # Auto-load .env (gitignored) so ai-* targets and dev runs pick up secrets.
 -include .env
 export
 
-.PHONY: help run watch build test test-ai test-beta test-watch restore clean format db-up db-migrate migrate ai-ping ai-classify ai-embed
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
@@ -18,7 +19,7 @@ AIPING_PROJECT := tools/FlowHub.AiPing
 TEXT           ?=
 
 help: ## Show this help
-	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| sort \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
@@ -37,8 +38,65 @@ watch: ## Run FlowHub.Web with hot reload (dotnet watch)
 build: ## Build the full solution
 	dotnet build $(SOLUTION)
 
-test: ## Run all tests except [Category=AI] and [Category=BetaSmoke]
-	dotnet test $(SOLUTION) --no-build --filter "Category!=AI&Category!=BetaSmoke"
+test: ## Run all tests except [Category=AI], [Category=BetaSmoke], [Category=E2E]
+	dotnet test $(SOLUTION) --no-build --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E"
+
+test-backend: ## Run backend unit tests only (Persistence + Skills), no live integration, no E2E
+	dotnet test tests/FlowHub.Persistence.Tests
+	dotnet test tests/FlowHub.Skills.Tests
+
+test-frontend: ## Run frontend (bUnit) component tests
+	dotnet test tests/FlowHub.Web.ComponentTests
+
+test-e2e: ## Start Postgres + FlowHub.Web, wait until ready, run Playwright happy-flow E2E, then stop the server
+	@$(MAKE) db-up
+	@$(MAKE) db-migrate
+	@$(MAKE) playwright-install
+	@echo "==> starting FlowHub.Web at $(WEB_URL)…"
+	@mkdir -p .make
+	@cd $(WEB_PROJECT) && \
+		ASPNETCORE_URLS=$(WEB_URL) ASPNETCORE_ENVIRONMENT=Development \
+		setsid nohup dotnet run --no-launch-profile > ../../.make/web.log 2>&1 & echo $$! > ../../.make/web.pid
+	@echo "==> waiting for /health/live…"
+	@for i in $$(seq 1 60); do \
+		if curl -fsS $(WEB_URL)/health/live >/dev/null 2>&1; then echo "ready"; break; fi; \
+		sleep 1; \
+		if [ $$i = 60 ]; then echo "web never became ready"; tail -50 .make/web.log; kill $$(cat .make/web.pid) 2>/dev/null || true; exit 1; fi; \
+	done
+	@echo "==> running E2E tests"
+	-FLOWHUB_E2E_BASE_URL=$(WEB_URL) dotnet test tests/FlowHub.Web.E2ETests --filter "Category=E2E"; \
+		status=$$?; \
+		echo "==> stopping FlowHub.Web (pid=$$(cat .make/web.pid))"; \
+		kill $$(cat .make/web.pid) 2>/dev/null || true; \
+		rm -f .make/web.pid; \
+		exit $$status
+
+test-all: ## Run backend + frontend tests, then start Postgres + FlowHub.Web and open it in Microsoft Edge
+	@$(MAKE) test-backend
+	@$(MAKE) test-frontend
+	@$(MAKE) db-up
+	@$(MAKE) db-migrate
+	@mkdir -p .make
+	@echo "==> starting FlowHub.Web at $(WEB_URL)…"
+	@cd $(WEB_PROJECT) && \
+		ASPNETCORE_URLS=$(WEB_URL) ASPNETCORE_ENVIRONMENT=Development \
+		setsid nohup dotnet run --no-launch-profile > ../../.make/web.log 2>&1 & echo $$! > ../../.make/web.pid
+	@for i in $$(seq 1 60); do \
+		if curl -fsS $(WEB_URL)/health/live >/dev/null 2>&1; then echo "ready (pid=$$(cat .make/web.pid))"; break; fi; \
+		sleep 1; \
+		if [ $$i = 60 ]; then echo "web never became ready"; tail -50 .make/web.log; exit 1; fi; \
+	done
+	@echo "==> opening $(WEB_URL) in Microsoft Edge"
+	@( command -v microsoft-edge >/dev/null 2>&1 && microsoft-edge $(WEB_URL) >/dev/null 2>&1 & ) || \
+	 ( command -v microsoft-edge-stable >/dev/null 2>&1 && microsoft-edge-stable $(WEB_URL) >/dev/null 2>&1 & ) || \
+	 ( command -v xdg-open >/dev/null 2>&1 && xdg-open $(WEB_URL) >/dev/null 2>&1 & ) || \
+	 echo "  (no Edge / xdg-open found — open $(WEB_URL) manually)"
+	@echo "==> server kept running. Stop with: kill \$$(cat .make/web.pid)"
+
+playwright-install: ## Install Playwright browser binaries (one-time setup)
+	dotnet build tests/FlowHub.Web.E2ETests -c Debug
+	pwsh tests/FlowHub.Web.E2ETests/bin/Debug/net10.0/playwright.ps1 install chromium 2>/dev/null || \
+		tests/FlowHub.Web.E2ETests/bin/Debug/net10.0/playwright.ps1 install chromium
 
 test-ai: ## Run live integration tests against real AI providers (requires Ai__*__ApiKey env)
 	dotnet test tests/FlowHub.AI.IntegrationTests --filter "Category=AI"
@@ -60,6 +118,24 @@ format: ## Apply dotnet format
 
 db-up: ## Start PostgreSQL in Docker (detached, waits until healthy)
 	docker compose up postgres -d --wait
+
+db-ping: ## Verify the PostgreSQL connection (host:port reachable + SELECT 1)
+	@HOST=$${PGHOST:-localhost}; PORT=$${PGPORT:-5432}; DB=$${PGDATABASE:-flowhub}; USER=$${PGUSER:-flowhub}; PASS=$${PGPASSWORD:-dev-secret}; \
+		echo "==> ping postgres at $$HOST:$$PORT (db=$$DB user=$$USER)"; \
+		if command -v pg_isready >/dev/null 2>&1; then \
+			pg_isready -h $$HOST -p $$PORT -d $$DB -U $$USER || exit $$?; \
+		else \
+			( exec 3<>/dev/tcp/$$HOST/$$PORT ) 2>/dev/null && echo "tcp: ok" || { echo "tcp: FAIL ($$HOST:$$PORT unreachable)"; exit 1; }; \
+		fi; \
+		if docker compose ps --status running postgres >/dev/null 2>&1 && [ -n "$$(docker compose ps -q postgres)" ]; then \
+			docker compose exec -T -e PGPASSWORD=$$PASS postgres psql -h localhost -U $$USER -d $$DB -tAc "select 'ok'" \
+				| grep -q '^ok$$' && echo "psql: SELECT 1 ok" || { echo "psql: FAIL"; exit 1; }; \
+		elif command -v psql >/dev/null 2>&1; then \
+			PGPASSWORD=$$PASS psql -h $$HOST -p $$PORT -U $$USER -d $$DB -tAc "select 'ok'" \
+				| grep -q '^ok$$' && echo "psql: SELECT 1 ok" || { echo "psql: FAIL"; exit 1; }; \
+		else \
+			echo "psql: skipped (no docker compose container, no host psql)"; \
+		fi
 
 db-migrate: ## Apply EF Core migrations against the Docker PostgreSQL
 	ConnectionStrings__Default="Host=localhost;Port=5432;Database=flowhub;Username=flowhub;Password=dev-secret" \

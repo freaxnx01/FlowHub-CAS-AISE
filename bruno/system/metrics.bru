@@ -1,0 +1,16 @@
+meta {
+  name: Prometheus Metrics
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/metrics
+  body: none
+  auth: none
+}
+
+docs {
+  GET /metrics — Prometheus scrape endpoint exposed via OpenTelemetry's Prometheus exporter.
+  Anonymous. Wired in Program.cs via MapPrometheusScrapingEndpoint().AllowAnonymous().
+}
