@@ -1,4 +1,4 @@
-[//]: # (Source of truth: .ai/base-instructions.md — update conventions there first, then reflect changes here)
+[//]: # (Source of truth: .ai/base-instructions.md + .ai/stacks/dotnet.md — update those, then regenerate this file by re-running /sync-ai-instructions)
 
 # CLAUDE.md
 

@@ -21,7 +21,7 @@ Create a commit following project conventions.
 ### Step 3 — Draft commit message
 - Follow Conventional Commits: `<type>(<scope>): <summary>`
 - Types: `feat` `fix` `test` `refactor` `chore` `docs` `ci` `perf`
-- Scope: module or layer name (e.g. `orders`, `auth`, `blazor`)
+- Scope: module or layer name (e.g. `orders`, `auth`, `ui`)
 - Summary: imperative mood, ≤72 chars, no period
 - Body (if needed): explain *why*, not *what*
 - If arguments were provided, use them as context for the message
