@@ -1,0 +1,17 @@
+meta {
+  name: Get Capture by Id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/captures/{{captureId}}
+  body: none
+  auth: none
+}
+
+docs {
+  GET /api/v1/captures/{id} — fetch a single Capture by Guid id.
+  Returns 200 with Capture, or 404 ProblemDetails (type=capture-not-found) when missing.
+  Pre-req: Run "Submit Capture" first — it stores the new id into the {{captureId}} env var.
+}

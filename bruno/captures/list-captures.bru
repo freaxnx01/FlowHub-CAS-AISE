@@ -1,0 +1,28 @@
+meta {
+  name: List Captures
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/captures?limit=50
+  body: none
+  auth: none
+}
+
+params:query {
+  limit: 50
+  ~stage: Raw,Classified
+  ~source: Api
+  ~cursor:
+}
+
+docs {
+  GET /api/v1/captures — paginated list of Captures.
+  Query params (all optional):
+    - stage: comma-separated LifecycleStage values [Raw, Classified, Routed, Completed, Orphan, Unhandled]
+    - source: ChannelKind [Telegram, Web, Api]
+    - limit: int, default 50
+    - cursor: opaque pagination cursor returned in the previous page's NextCursor
+  Returns 200 { items: Capture[], nextCursor: string? }, 400 on invalid stage/cursor.
+}

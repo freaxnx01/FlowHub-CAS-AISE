@@ -14,5 +14,6 @@
     <Project Path="tests/FlowHub.Skills.IntegrationTests/FlowHub.Skills.IntegrationTests.csproj" />
     <Project Path="tests/FlowHub.Skills.Tests/FlowHub.Skills.Tests.csproj" />
     <Project Path="tests/FlowHub.Web.ComponentTests/FlowHub.Web.ComponentTests.csproj" />
+    <Project Path="tests/FlowHub.Web.E2ETests/FlowHub.Web.E2ETests.csproj" />
   </Folder>
 </Solution>

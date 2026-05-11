@@ -1,0 +1,16 @@
+meta {
+  name: Health Live
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health/live
+  body: none
+  auth: none
+}
+
+docs {
+  GET /health/live — liveness probe. Returns 200 "Healthy" while the process is running.
+  Anonymous (does not require auth) — used by the Docker healthcheck and `make test-e2e`.
+}

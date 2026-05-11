@@ -1,0 +1,17 @@
+meta {
+  name: Retry Capture
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/captures/{{captureId}}/retry
+  body: none
+  auth: none
+}
+
+docs {
+  POST /api/v1/captures/{id}/retry — requeue a failed Capture.
+  Allowed only when Capture.Stage is Orphan or Unhandled.
+  Returns 202 Accepted with the reset Capture, 404 (capture-not-found), or 409 (capture-not-retryable).
+}
