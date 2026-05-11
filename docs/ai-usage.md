@@ -439,6 +439,30 @@ The biggest AI assist in Block 5: generating the GitHub Actions workflows. YAML 
 
 The biggest AI limitation: pgvector EF Core integration. AI initially planned `UseVector()` as a built-in Npgsql 10 feature without an extra package, but `Pgvector.EntityFrameworkCore` was actually required. The lesson: AI training data may not reflect very recent library releases; verify package changelogs.
 
+## Custom Skills (self-authored)
+
+In addition to the upstream `superpowers:*` and `frontend-design:*` skills (bundled with Claude Code / Anthropic skill marketplaces), the following project-specific skills were authored by the student and used throughout the CAS project. They live in a dedicated plugin repo and are loaded via the Claude Code plugin marketplace.
+
+**Source / plugin repo:** <https://github.com/freaxnx01/agent-skills>
+
+| Skill | Purpose | Where it was used |
+|---|---|---|
+| `cas-aise-todo-list:cas-aise-todo-list` | Computes today's Block (1–5) and Phase (Vorbereitung / PVA / Nachbereitung) from the current date, reads the matching page from the cas-aise Obsidian vault, and renders a 5×3 Block×Phase progress matrix plus open `- [ ]` items grouped by section. | Daily orientation at session start: "what's left for this block/phase". Drove the day-by-day work order across all five blocks. |
+| `cas-aise-grade-self-check:cas-aise-grade-self-check` | Walks the canonical CAS AISE Moodle Bewertungskriterien rubric (18 scored items, 5 buckets, max 100 pts), classifies each item against evidence in the FlowHub repo + vault, and surfaces the highest-leverage gaps. Read-only — produces a gap report only. | Before declaring each Block-Nachbereitung "done" (Blocks 3, 4, 5). Highest-leverage use was on the KI / Sub-Systeme / Reflexion bucket (30/100 pts) — caught missing evidence in `docs/ai-usage.md` (this file) before submission. |
+| `sync-ai-instructions:sync-ai-instructions` | Assembles or refreshes the AI agent instruction files (`CLAUDE.md`, `.github/copilot-instructions.md`, `SKILL.md`, `.ai/base-instructions.md`, `.ai/stacks/<stack>.md`, shared files under `.ai/skills/` and `.claude/commands/`) by pulling a base + chosen stack overlay from a separate `ai-instructions` repo. Idempotent. | One-shot project bootstrap (Block 1) and periodic refresh whenever the base instructions evolved. Most recent sync: commit `5a59074` (chore: sync base + dotnet-blazor overlay from ai-instructions@1071724). |
+
+**Companion repo (instruction source for `sync-ai-instructions`):** <https://github.com/freaxnx01/ai-instructions>
+
+### Why custom skills (and not just upstream)
+
+The three skills above cover concerns that the upstream `superpowers` plugin doesn't address:
+
+- **Course-specific rubric grounding.** `cas-aise-grade-self-check` encodes the Moodle Bewertungskriterien as a programmable checklist. Without it, rubric coverage was easy to drift away from during long implementation sessions.
+- **Schedule-driven prioritisation.** `cas-aise-todo-list` ties the agent to the real Block/Phase calendar in the Obsidian vault rather than letting the agent pick the next task on vibes.
+- **Cross-project instruction reuse.** `sync-ai-instructions` keeps `CLAUDE.md` and friends in sync with a single upstream source — the same overlay drives the FlowHub repo, the `poc/FlowHub.AI.Classification` POC, and any future projects.
+
+All three skills are open-source and reusable by other CAS AISE students who fork the rubric/vault structure.
+
 ## References
 
 - ADR 0003: `docs/adr/0003-async-pipeline.md`
