@@ -4,11 +4,13 @@
 # `make` with no target prints help.
 
 .DEFAULT_GOAL := help
-.PHONY: help run watch build test test-ai test-beta test-watch restore clean format db-up db-migrate migrate
+.PHONY: help run watch build test test-ai test-beta test-watch restore clean format db-up db-migrate migrate ai-ping ai-classify ai-embed
 
-SOLUTION    := FlowHub.slnx
-WEB_PROJECT := source/FlowHub.Web
-WEB_URL     := http://localhost:5070
+SOLUTION       := FlowHub.slnx
+WEB_PROJECT    := source/FlowHub.Web
+WEB_URL        := http://localhost:5070
+AIPING_PROJECT := tools/FlowHub.AiPing
+TEXT           ?=
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -64,3 +66,12 @@ migrate: ## Apply EF Core migrations to the local database (requires running Pos
 	dotnet ef database update \
 		--project source/FlowHub.Persistence \
 		--startup-project source/FlowHub.Web
+
+ai-ping: ## Smoke-test the configured AI provider with a tiny chat call (env: Ai__Provider, Ai__<Provider>__ApiKey)
+	dotnet run --project $(AIPING_PROJECT) -- ping
+
+ai-classify: ## Run IClassifier against TEXT (default: URL + todo samples). Usage: make ai-classify TEXT="todo: buy milk"
+	dotnet run --project $(AIPING_PROJECT) -- classify $(TEXT)
+
+ai-embed: ## Run IEmbeddingService against TEXT (env: Embeddings__ApiKey, Embeddings__Model). Usage: make ai-embed TEXT="hello"
+	dotnet run --project $(AIPING_PROJECT) -- embed $(TEXT)
