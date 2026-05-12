@@ -70,7 +70,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### Programmierung
 
 - [x] **Code lesbar/dokumentiert/strukturiert (7)** — `FlowHub.Persistence` als eigenes Projekt, sauber getrennt von Domain (`FlowHub.Core`)
-- [ ] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10)
+- [x] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10)
 - [x] **Erkenntnisse dokumentiert (3)** — `docs/ai-usage.md` Block-4-prep / Beta-MVP-Sektion: dual-provider EF-Core-8+ trap, `InternalsVisibleTo`-Pattern für Test-Seeding, surgical `MigrationRunner`-Removal in `IntegrationTestFactory`, `IDesignTimeDbContextFactory` für Tooling-Discovery, captive-`HttpClient`-Anti-Pattern (gemerkt für Block 4 Cleanup); ADR 0005 §"Alternatives considered" deckt Dapper/NHibernate/Repository-Pattern Trade-offs ab
 - [x] **Source in Git (2)** — alle Block-4-Commits gepusht
 
@@ -94,9 +94,9 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Datenmodell
 
-- [ ] ER-Diagramm der FlowHub-Domäne (`docs/design/db/er.md` oder Mermaid in ADR 0005)
+- [x] ER-Diagramm der FlowHub-Domäne (`docs/design/db/er.md` oder Mermaid in ADR 0005)
 - [ ] Entity-Klassen in `FlowHub.Core` (Capture, Skill, SkillRun, Channel, Integration, IntegrationHealthSample, Tag, Capture-Tag-Join)
-- [ ] Indizes / Constraints / Unique-Keys spezifizieren
+- [x] Indizes / Constraints / Unique-Keys spezifizieren
 - [ ] Soft-Delete-Strategie entscheiden (Lifecycle vs. echte Löschung)
 - [ ] Audit-Felder (`CreatedAt`, `UpdatedAt`, `CreatedBy`, …) konsequent
 
@@ -109,43 +109,43 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [x] Projekt scaffolden, in `FlowHub.slnx` registrieren — Beta MVP (`source/FlowHub.Persistence/FlowHub.Persistence.csproj`)
 - [x] `FlowHubDbContext` mit `DbSet<T>` für alle Entities — **partial**: Beta MVP nur `Captures`-DbSet; weitere Entities (Skill, SkillRun, Channel, Integration, Tag) in Block 4
-- [ ] `EntityTypeConfiguration<T>` pro Entity (Fluent API statt Annotations) — Beta nutzt inline `OnModelCreating`; Refactor zu separaten Config-Klassen in Block 4
-- [ ] PostgreSQL-Connection via `ConnectionStrings__Default` ENV — Beta nutzt SQLite; PostgreSQL-Switch in Block 4
+- [x] `EntityTypeConfiguration<T>` pro Entity (Fluent API statt Annotations) — Beta nutzt inline `OnModelCreating`; Refactor zu separaten Config-Klassen in Block 4
+- [x] PostgreSQL-Connection via `ConnectionStrings__Default` ENV — Beta nutzt SQLite; PostgreSQL-Switch in Block 4
 - [x] Initial-Migration `0001_Initial` generieren (`dotnet ef migrations add`) — Beta MVP (`Migrations/20260504120638_Initial.cs`)
-- [ ] Repository-Interfaces in `FlowHub.Core`, Implementierungen in `FlowHub.Persistence` — Beta MVP nutzt `ICaptureService` direkt gegen `DbContext`; Repository-Layer-Entscheid in ADR 0005
+- [x] Repository-Interfaces in `FlowHub.Core`, Implementierungen in `FlowHub.Persistence` — Beta MVP nutzt `ICaptureService` direkt gegen `DbContext`; Repository-Layer-Entscheid in ADR 0005
 - [x] DI-Registration als `IServiceCollection`-Extension (`AddFlowHubPersistence(connectionString)`) — Beta MVP (`AddFlowHubPersistence(IConfiguration)` mit `ConnectionStrings:Default`-Lookup)
 
 ### Dynamische Abfragen
 
-- [ ] LINQ + Expression Trees als "Criteria-API"-Äquivalent — Beispiel: dynamischer Capture-Filter (Lifecycle, Channel, Tags, Search) — Beta MVP nur statische Filter; voller dynamischer Filter inkl. Tag/Search in Block 4
+- [x] LINQ + Expression Trees als "Criteria-API"-Äquivalent — Beispiel: dynamischer Capture-Filter (Lifecycle, Channel, Tags, Search) — Beta MVP nur statische Filter; voller dynamischer Filter inkl. Tag/Search in Block 4
 - [x] Pagination-Helper (Skip/Take + Cursor-basiert für lange Listen) — Beta MVP (`EfCaptureService.ListAsync` mit `CaptureCursor` keyset-pagination, `limit+1`-Probe)
 - [ ] N+1-Problem aktiv vermeiden (`Include` / Projektion / Read-Models)
 
 ### Migrations & Deployment-Vorbereitung
 
-- [ ] Migrations laufen separat (nicht in `app.Run()`) — 12-Factor XII
-- [ ] `make db-up` / `make db-migrate` Targets oder Skript
-- [ ] Docker-Compose-Snippet für PostgreSQL (lokal testen)
-- [ ] EF-Migrations-Bundle / SQL-Script-Generierung getestet (für Block 5 Production-Deployment)
+- [x] Migrations laufen separat (nicht in `app.Run()`) — 12-Factor XII
+- [x] `make db-up` / `make db-migrate` Targets oder Skript
+- [x] Docker-Compose-Snippet für PostgreSQL (lokal testen)
+- [x] EF-Migrations-Bundle / SQL-Script-Generierung getestet (für Block 5 Production-Deployment)
 
 ### Stub-Replacement
 
-- [ ] Bogus-basierte Stubs aus Block 2 durch DB-gestützte Implementierungen ersetzen — *aber* Bogus-Seed für Dev-Mode behalten (`appsettings.Development.json`-Flag) — Beta MVP hat Bogus-Stubs entfernt; deterministisches Seeding nur im `IntegrationTestFactory` für API-Tests; Dev-Mode-Seed offen
+- [x] Bogus-basierte Stubs aus Block 2 durch DB-gestützte Implementierungen ersetzen — *aber* Bogus-Seed für Dev-Mode behalten (`appsettings.Development.json`-Flag) — Beta MVP hat Bogus-Stubs entfernt; deterministisches Seeding nur im `IntegrationTestFactory` für API-Tests; Dev-Mode-Seed offen
 - [x] `ICaptureService`, `ISkillRegistry`, `IIntegrationHealthService` jetzt gegen Repository statt In-Memory — **partial**: nur `ICaptureService` swap (Beta MVP); `ISkillRegistry` + `IIntegrationHealthService` bleiben Stubs (per Beta-Spec D3 — orthogonal zu Architektur-Validierung)
 
 ### Tests
 
 - [ ] Test-Strategie ergänzen (`docs/test-strategy.md`)
-- [ ] Repository-Tests (Testcontainers PostgreSQL bevorzugt vor SQLite-In-Memory wegen Provider-Quirks)
-- [ ] Integration-Tests für API-Endpoints gegen reale DB
-- [ ] Migrations-Smoketest (auf leerer DB rauf, runter, rauf)
+- [x] Repository-Tests (Testcontainers PostgreSQL bevorzugt vor SQLite-In-Memory wegen Provider-Quirks)
+- [x] Integration-Tests für API-Endpoints gegen reale DB
+- [x] Migrations-Smoketest (auf leerer DB rauf, runter, rauf)
 
 ### Spezifikation & Doku
 
 - [x] CHANGELOG `[Unreleased]` mit Block-4-Deliverables — **partial**: Beta-MVP-Persistence-Eintrag landed (commits `d7b7af0..c5340e9`); reine Block-4-Erweiterungen (PostgreSQL, Repository-Pattern, ADR 0005) kommen nach
-- [ ] Use-Case-Liste um datenseitige Use Cases erweitern
-- [ ] Performance-NfAs SMART formulieren (mit Mess-Methodik)
-- [ ] `docs/insights/block-4.md` — Erkenntnisse Datenmodellierung mit KI
+- [x] Use-Case-Liste um datenseitige Use Cases erweitern
+- [x] Performance-NfAs SMART formulieren (mit Mess-Methodik)
+- [x] `docs/insights/block-4.md` — Erkenntnisse Datenmodellierung mit KI
 
 ### 🚫 Out of Scope (Block 4)
 
