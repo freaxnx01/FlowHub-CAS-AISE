@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] — 2026-05-12
+
+CAS AISE Abgabe-Version. Consolidates all five course blocks (Einführung, Frontend, Service, Persistence, Deployment) plus the post-Block-5 production-smoke + rubric-gap pass. Repository version is `0.1.0` per `Directory.Build.props`.
+
+
 
 ### Added
 
