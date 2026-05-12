@@ -95,10 +95,10 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### Datenmodell
 
 - [x] ER-Diagramm der FlowHub-Domäne (`docs/design/db/er.md` oder Mermaid in ADR 0005)
-- [ ] Entity-Klassen in `FlowHub.Core` (Capture, Skill, SkillRun, Channel, Integration, IntegrationHealthSample, Tag, Capture-Tag-Join)
+- [x] Entity-Klassen in `FlowHub.Persistence/Entities/` (Capture, Skill, SkillRun, Channel, Integration, IntegrationHealthSample, Tag) — Domain-POCOs (`Capture`, …) bleiben in `FlowHub.Core`; EF-spezifische `*Entity` + `*EntityTypeConfiguration` liegen in `FlowHub.Persistence` (per ADR 0005 §3)
 - [x] Indizes / Constraints / Unique-Keys spezifizieren
-- [ ] Soft-Delete-Strategie entscheiden (Lifecycle vs. echte Löschung)
-- [ ] Audit-Felder (`CreatedAt`, `UpdatedAt`, `CreatedBy`, …) konsequent
+- [x] Soft-Delete-Strategie entscheiden (Lifecycle vs. echte Löschung) — **Hard-Delete via FK CASCADE**; Soft-Delete-Semantik wird vom `LifecycleStage`-State-Machine getragen (`Orphan` / `Unhandled` / `Completed`). Doku: `docs/design/db/er.md` § Delete Strategy.
+- [x] Audit-Felder (`CreatedAt`, `UpdatedAt`, `CreatedBy`, …) konsequent — **Block-4-Scope: nur `CreatedAt`** auf allen Entities. `UpdatedAt` / `CreatedBy` bewusst aus dem Scope: FlowHub ist Single-User, alle Mutationen verlaufen über klar typisierte Lifecycle-Übergänge (`stage =` Wechsel), und die Bus-Events (`CaptureCreated` / `CaptureClassified`) sind die Audit-Quelle. Wenn Multi-User in einer zukünftigen Iteration relevant wird, ist Nachrüsten über eine `0005_AddAuditFields`-Migration trivial.
 
 ### Architektur & Entscheide
 
@@ -119,7 +119,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [x] LINQ + Expression Trees als "Criteria-API"-Äquivalent — Beispiel: dynamischer Capture-Filter (Lifecycle, Channel, Tags, Search) — Beta MVP nur statische Filter; voller dynamischer Filter inkl. Tag/Search in Block 4
 - [x] Pagination-Helper (Skip/Take + Cursor-basiert für lange Listen) — Beta MVP (`EfCaptureService.ListAsync` mit `CaptureCursor` keyset-pagination, `limit+1`-Probe)
-- [ ] N+1-Problem aktiv vermeiden (`Include` / Projektion / Read-Models)
+- [x] N+1-Problem aktiv vermeiden (`Include` / Projektion / Read-Models) — `EfCaptureRepository` projiziert direkt auf das `Capture`-Record (kein Lazy-Loading der Owned-Entities Tags/SkillRuns); Tag-Filter ist als `EXISTS`-Subquery formuliert, nicht als Join + Group. Verifiziert durch `EfCaptureRepositoryTests` (29 Tests, Testcontainers).
 
 ### Migrations & Deployment-Vorbereitung
 
@@ -135,7 +135,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 ### Tests
 
-- [ ] Test-Strategie ergänzen (`docs/test-strategy.md`)
+- [x] Test-Strategie ergänzen (`docs/spec/testing-strategy.md`) — Pfad wurde im Repo unter `docs/spec/` einsortiert (mit dem Rest der Spezifikations-Artefakte), nicht direkt unter `docs/`. Inhaltlich vollständig (Unit / Component / Integration / E2E / MassTransit-Harness).
 - [x] Repository-Tests (Testcontainers PostgreSQL bevorzugt vor SQLite-In-Memory wegen Provider-Quirks)
 - [x] Integration-Tests für API-Endpoints gegen reale DB
 - [x] Migrations-Smoketest (auf leerer DB rauf, runter, rauf)
