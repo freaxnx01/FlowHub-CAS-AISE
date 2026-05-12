@@ -14,13 +14,18 @@ services:
       Bus__RabbitMq__Host: rabbitmq
       Bus__RabbitMq__Username: ${RABBITMQ_USER:-flowhub}
       Bus__RabbitMq__Password: ${RABBITMQ_PASSWORD:-dev-secret}
-      Embeddings__BaseUrl: ${EMBEDDINGS__BASEURL:-}
-      Embeddings__ApiKey: ${EMBEDDINGS__APIKEY:-}
-      Embeddings__Model: ${EMBEDDINGS__MODEL:-}
-      Embeddings__Dimensions: ${EMBEDDINGS__DIMENSIONS:-}
-      Auth__OIDC__Authority: ${AUTH__OIDC__AUTHORITY:-}
-      Auth__OIDC__ClientId: ${AUTH__OIDC__CLIENTID:-}
-      Auth__OIDC__ClientSecret: ${AUTH__OIDC__CLIENTSECRET:-}
+      Embeddings__BaseUrl: ${Embeddings__BaseUrl:-}
+      Embeddings__ApiKey: ${Embeddings__ApiKey:-}
+      Embeddings__Model: ${Embeddings__Model:-}
+      Embeddings__Dimensions: ${Embeddings__Dimensions:-}
+      Ai__Provider: ${Ai__Provider:-}
+      Ai__Anthropic__ApiKey: ${Ai__Anthropic__ApiKey:-}
+      Ai__Anthropic__Model: ${Ai__Anthropic__Model:-}
+      Ai__OpenRouter__ApiKey: ${Ai__OpenRouter__ApiKey:-}
+      Ai__OpenRouter__Model: ${Ai__OpenRouter__Model:-}
+      Auth__OIDC__Authority: ${Auth__OIDC__Authority:-}
+      Auth__OIDC__ClientId: ${Auth__OIDC__ClientId:-}
+      Auth__OIDC__ClientSecret: ${Auth__OIDC__ClientSecret:-}
     depends_on:
       flowhub.migrations:
         condition: service_completed_successfully
