@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
-COPY FlowHub.slnx Directory.Build.props Directory.Packages.props global.json ./
+COPY FlowHub.slnx Directory.Build.props Directory.Packages.props global.json .editorconfig ./
 COPY source/ ./source/
 COPY tests/ ./tests/
 
