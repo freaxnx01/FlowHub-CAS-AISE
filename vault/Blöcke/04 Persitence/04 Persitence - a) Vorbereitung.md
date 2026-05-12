@@ -19,5 +19,5 @@
 
 ### [4] Quarkus in Action
 
-- [ ] Kapitel 7: Database access
-- [ ] Kapitel 8: Reactive programming
+- [x] ~~Kapitel 7: Database access~~ — N/A (Stack-Mismatch: FlowHub nutzt EF Core + PostgreSQL statt Quarkus/Jakarta Data; Pattern via ADR 0005 abgedeckt)
+- [x] ~~Kapitel 8: Reactive programming~~ — N/A (Stack-Mismatch: FlowHub nutzt MassTransit + Channels in .NET statt Quarkus Reactive; Pattern via ADR 0003 abgedeckt)
