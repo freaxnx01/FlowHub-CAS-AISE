@@ -20,5 +20,5 @@
 
 ### [4] Quarkus in Action
 
-- [ ] Kapitel 10: Cloud-native application patterns
-- [ ] Kapitel 11: Quarkus application in the cloud
+- [x] ~~Kapitel 10: Cloud-native application patterns~~ — N/A (Stack-Mismatch: 12-Factor-Compliance + Docker Compose Topology in CLAUDE.md / `docs/projektbeschreibung/` dokumentiert)
+- [x] ~~Kapitel 11: Quarkus application in the cloud~~ — N/A (Stack-Mismatch: .NET Container-Deployment via `docker-compose.yml` + `release.yml` GHCR-Push abgedeckt)
