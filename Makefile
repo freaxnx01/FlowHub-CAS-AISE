@@ -120,7 +120,21 @@ test-contract: ## Run WireMock-based wire-contract tests for Vikunja + Wallabag 
 	dotnet test tests/FlowHub.Skills.ContractTests --filter "Category=SkillContract"
 
 test-services: ## Run live skill-integration tests against flowhub-test-services (Vikunja + Wallabag on CT 128 — see docs/runbooks/test-services.md)
-	$(SECRET_EXEC) dotnet test tests/FlowHub.Skills.IntegrationTests --filter "Category=BetaSmoke"
+	@if WB_EXPORT=$$(tools/wallabag-token.sh --export 2>/tmp/wallabag-token.err); then \
+		echo "==> Wallabag OAuth2 access_token fetched (expires in 3600s)"; \
+	else \
+		echo "==> Wallabag OAuth2 token fetch failed — live Wallabag test will skip"; \
+		cat /tmp/wallabag-token.err >&2 || true; \
+		WB_EXPORT=""; \
+	fi; \
+	bash -c '\
+		eval "$$1"; \
+		set -a; [ -f .env ] && . ./.env; set +a; \
+		if command -v passbolt >/dev/null 2>&1; then \
+			exec passbolt exec -- dotnet test tests/FlowHub.Skills.IntegrationTests --filter "Category=BetaSmoke"; \
+		else \
+			exec dotnet test tests/FlowHub.Skills.IntegrationTests --filter "Category=BetaSmoke"; \
+		fi' bash "$$WB_EXPORT"
 
 test-beta: test-services ## Alias for test-services (legacy name)
 
