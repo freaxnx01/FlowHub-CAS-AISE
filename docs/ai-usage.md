@@ -439,6 +439,14 @@ The biggest AI assist in Block 5: generating the GitHub Actions workflows. YAML 
 
 The biggest AI limitation: pgvector EF Core integration. AI initially planned `UseVector()` as a built-in Npgsql 10 feature without an extra package, but `Pgvector.EntityFrameworkCore` was actually required. The lesson: AI training data may not reflect very recent library releases; verify package changelogs.
 
+### Ultrareview-driven correction: sync-on-submit → async consumer
+
+The first AI-drafted design wired embedding generation directly into `EfCaptureService.SubmitAsync` — generate the embedding, then persist the Capture with the vector in one transaction. A subsequent multi-agent review run (`/ultrareview`, branch-wide) flagged the failure mode: a slow or unavailable embedding provider would either tank the NF-09 p95 < 200 ms submit budget or block capture submission entirely. The accepted design moved embedding generation into `CaptureEmbeddingConsumer` (`IConsumer<CaptureCreated>`) — Captures persist immediately, the embedding lands a moment later, and a provider outage degrades search quality without affecting the write path. The same review prompted adding `POST /api/v1/admin/embeddings/rebuild` for backfilling captures that landed before the provider was configured. This is exactly the class of architectural mistake a single-pass AI generation tends to make — the local code looks fine, but the system-wide latency / availability invariants are wrong.
+
+### Smoke-driven correction: empty-string env defaults
+
+The first run of `make smoke-prod` against the compose stack (2026-05-12) crashed `flowhub.web` at startup with `System.ArgumentException: Value cannot be an empty string. (Parameter 'model')`. Root cause: AI-generated configuration code used `configuration["Embeddings:Model"] ?? "mistral-embed"`, which fails for compose's `${X:-}` interpolation (substitutes empty string, not null). Same trap on `Ai__<Provider>__Model`. The fix (`is { Length: > 0 } m ? m : default`) is a one-character change in semantics but invisible to an AI focused on the in-memory case. Lesson: deployment-shape failure modes are systematically under-tested in AI-generated code; the smoke target is what closed this gap.
+
 ## Custom Skills (self-authored)
 
 In addition to the upstream `superpowers:*` and `frontend-design:*` skills (bundled with Claude Code / Anthropic skill marketplaces), the following project-specific skills were authored by the student and used throughout the CAS project. They live in a dedicated plugin repo and are loaded via the Claude Code plugin marketplace.

@@ -88,3 +88,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Total: 154 tests passing, 0 failing (verified 2026-05-06, filter: `Category!=AI&Category!=BetaSmoke`)
 - Breakdown: FlowHub.Persistence.Tests 29, FlowHub.Web.ComponentTests 88, FlowHub.Api.IntegrationTests 17, FlowHub.Skills.Tests 20
 - New integration tests via Testcontainers: 16 (Persistence layer)
+
+---
+
+## Block 5 — Deployment, Semantic Search, Production Stack (2026-05-07 → 2026-05-12)
+
+### Added
+
+- **Containerisation:** Multi-stage `source/FlowHub.Web/Dockerfile` and `docker/migrations/Dockerfile` (Alpine SDK → Alpine runtime, non-root `appuser`).
+- **Production compose stack** (`docker-compose.yml`): six services — `flowhub.web`, `flowhub.migrations` (init container, 12-Factor XII), `postgres` (pgvector image), `rabbitmq`, `prometheus`, `grafana`. All `depends_on: service_healthy` + `service_completed_successfully` gates.
+- **GitHub Actions:** `ci.yml` (build + test on every push), `release.yml` (Docker image to GHCR on `v*` tag), `migrations.yml` (efbundle artifact on migration changes).
+- **ADR 0006** — Vector Search (`docs/adr/0006-vector-search.md`): pgvector `vector(1024)` column on `Captures`, HNSW index with `vector_cosine_ops`, Mistral `mistral-embed` as default embedding provider.
+- **Semantic search pipeline:** `IEmbeddingService` port in Core, `AiEmbeddingService` in FlowHub.AI over `Microsoft.Extensions.AI` `IEmbeddingGenerator`. `CaptureEmbeddingConsumer` subscribes to `CaptureCreated` and populates the column asynchronously (best-effort — Capture is stored either way). `SearchEndpoints.SearchAsync` exposes `GET /api/v1/captures/search?q=…&limit=…`. `AdminEndpoints.RebuildEmbeddingsAsync` backfills captures stored before the provider was configured.
+- **DemoAuthHandler** replaces `DevAuthHandler` — env-presence-driven (`Auth:OIDC:Authority`), works in any environment.
+- **WireMock.Net contract test tier** (`tests/FlowHub.Skills.ContractTests/`): 13 wire-level tests against a real loopback socket for Vikunja (6) and Wallabag (7) — exercises path, bearer, JSON shape, 401 / 500 error mapping. Trait `Category=SkillContract`, wired into `make test-backend`.
+- **Playwright happy-flow E2E** (`tests/FlowHub.Web.E2ETests/`): `HappyFlowTests.QuickCapture_TodoEntry_AppearsInCapturesListAndDetail` — types into AppBar QuickCapture, asserts list + detail. Trait `Category=E2E`, wrapped by `make test-e2e`.
+- **`make smoke-prod`** end-to-end probe (commit `f0424ec`, 2026-05-12): boots the full stack, asserts migrations exit 0, `/health/live` 200, `/metrics` has `dotnet_*`/`http_*` series, `POST /api/v1/captures` returns 201, and `Captures.Embedding` populates within 30 s. Uses a `curlimages/curl` sidecar joined to the `flowhub.web` network namespace — no host port published. Companion `make smoke-down`.
+- **`tools/FlowHub.AiPing`** console runner + `make ai-ping` / `ai-classify` / `ai-embed` targets — isolated AI smoke that reuses the production DI wiring; provider/model swappable via env.
+- **`make db-ping`**: TCP probe + `SELECT 1` against the configured PostgreSQL (compose-exec → host-psql → bash `/dev/tcp` fallback chain).
+- **Bruno API collection** (`bruno/`): one `.bru` per endpoint covering captures, search, retry, admin, health, metrics, openapi. `submit-capture.bru` pipes the new id into `{{captureId}}` for chained requests.
+- **`make test-backend` / `test-frontend` / `test-e2e` / `test-all`** split + `playwright-install` helper.
+- **`make ai-*` Passbolt integration**: `.env` can hold `passbolt://<resource-id>` refs; `SECRET_EXEC` wrapper re-sources `.env` *inside* the recipe shell and reroutes through `passbolt exec --` (when installed), so secrets never sit in plaintext on disk.
+- **`docs/design/perspectives.md`** — explicit Struktur / Verhalten / Interaktion mapping (rubric "Entwurf aus verschiedenen Perspektiven").
+- **`docs/insights/block-5.md`** — Block 5 reflection, test result matrix (171 tests pass across 5 projects), `make smoke-prod` transcript, and the five real defects-found-by-smoke.
+
+### Changed
+
+- `docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md` §7 — disambiguated *strategic platform decisions* (renamed `ADR-001..ADR-007` → `PE-1..PE-7`) from *implementation ADRs* (`docs/adr/0001..0006`); added cross-reference index.
+- `docs/design/db/er.md` — added Block-5 `Embedding vector(1024)` column + `captures_embedding_hnsw_idx` to the Captures box and a dedicated "Vector Search (Block 5)" subsection.
+- `docs/spec/use-cases.md` — renumbered the colliding Block-5 use cases from UC-10 / UC-11 to UC-17 / UC-18; added explicit `Akzeptanzkriterien` blocks to UC-01..UC-11 (UC-12..UC-16 already carried inline acceptance).
+- **Embedding generation is asynchronous, not sync-on-submit**: `CaptureEmbeddingConsumer` (not `EfCaptureService.SubmitAsync`) owns the Mistral call. Capture submission stays inside the NF-09 p95 < 200 ms budget regardless of embedding-provider latency; captures land in the DB even when the embedding service is down.
+- `AiClassifier` and `AiEmbeddingService` configuration now treats empty-string env values as null (compose interpolation `${X:-}` substitutes empty strings, which previously bypassed the default-model fallback and crashed `flowhub.web` at startup with `OpenAI.AssertNotNullOrEmpty`).
+- `docker-compose.yml` env interpolation switched from uppercase (`${EMBEDDINGS__APIKEY:-}`) to mixed-case (`${Embeddings__ApiKey:-}`) matching `.env.example` and .NET configuration keys.
+- Both `Dockerfile`s now COPY `.editorconfig` into the build context so EF Core migration analyzer suppressions take effect under `TreatWarningsAsErrors`.
+
+### Test Results (Block 5)
+
+- Total: **171 tests passing, 0 failing** (verified 2026-05-12, filter: `Category!=AI&Category!=BetaSmoke&Category!=E2E`).
+- Breakdown: FlowHub.Persistence.Tests 29, FlowHub.Web.ComponentTests 92, FlowHub.Api.IntegrationTests 17, FlowHub.Skills.Tests 20, **FlowHub.Skills.ContractTests 13 (new)**.
+- New tiers introduced in Block 5: WireMock contract tests (13) and Playwright E2E (1, gated by Category=E2E).
+- `make smoke-prod` green end-to-end including the embedding round-trip (~2 s p99 against Mistral).
