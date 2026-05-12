@@ -26,6 +26,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Error:** Empty content → inline validation hint "Type something first".
 **Error:** Service failure → snackbar "Capture failed: {reason}", field content preserved.
 
+**Akzeptanzkriterien:**
+- After typing content and pressing Enter, a `Captured ✓` snackbar appears within 2 s (Playwright happy-flow `HappyFlowTests.QuickCapture_TodoEntry_AppearsInCapturesListAndDetail`).
+- The captured row appears on `/captures` and the detail page renders the same content (same Playwright test).
+- Empty content → no row created; inline hint visible.
+
 ### UC-02: Submit a Capture via Web UI (Long Form)
 
 **Actor:** Operator
@@ -42,6 +47,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Postcondition:** A new Capture exists. If Skill override was selected, the Capture may skip AI classification.
 **Error:** Skill registry fails to load → dropdown disabled, "Let AI decide" forced, Submit still works.
 
+**Akzeptanzkriterien:**
+- `/captures/new` renders a multi-line text area and a Skill dropdown.
+- Submitting non-empty content yields a 201-equivalent service call and a success snackbar; the form clears for the next entry.
+- If `ISkillRegistry.ListAsync` throws, the dropdown is disabled and a `"Let AI decide"` placeholder is forced.
+
 ### UC-03: Submit a Capture via Telegram
 
 **Actor:** Operator (via Telegram bot)
@@ -54,6 +64,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 
 **Postcondition:** Capture exists, visible in the Web UI Dashboard and Captures list.
 **Note:** Not implemented in Block 2 — placeholder `source/FlowHub.Telegram/`. Once the Telegram module lands in Block 3+, the bot calls `POST /api/v1/captures` (UC-08) to submit the capture, inheriting the same validation and pipeline flow.
+
+**Akzeptanzkriterien:**
+- Bot reply confirms receipt within 5 s of the user message.
+- Capture appears in `/captures` with `source = Telegram` and the bot user's identifier in metadata.
+- *(Deferred — implementation lands post-Block-3; covered by UC-08 acceptance for the API path the bot uses.)*
 
 ### UC-04: Monitor Capture health via Dashboard
 
@@ -69,6 +84,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Empty state:** No captures → "No captures yet" with a call-to-action.
 **All-clear state:** Zero failures → calm "All captures routed successfully" message.
 
+**Akzeptanzkriterien:**
+- The Dashboard renders within NF-08 budget (`p95 < 1.5 s` first paint on a 100-capture DB).
+- Empty DB shows the empty-state message (verified by bUnit `DashboardTests`).
+- Mixed-state DB shows non-zero Orphan / Unhandled counts in the "Needs Attention" widget.
+
 ### UC-05: Browse and filter Captures
 
 **Actor:** Operator
@@ -81,6 +101,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 5. Operator clicks a row to drill into the Capture detail.
 
 **Postcondition:** Operator can find any Capture by stage, channel, or content.
+
+**Akzeptanzkriterien:**
+- Deep link `/captures?lc=Orphan` pre-selects the Orphan chip and shows only Orphan rows.
+- Combining a lifecycle chip + a channel chip applies an AND filter.
+- The grid pages at 10/25/50 rows (configurable, default 10).
 
 ### UC-06: Inspect and act on a failed Capture
 
@@ -99,6 +124,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Postcondition (Block 3+):** Capture is retried, reassigned, or marked as ignored. Dashboard counts update.
 **Block 2:** Actions show intent but do not mutate state.
 
+**Akzeptanzkriterien:**
+- Detail page shows the `FailureReason` of an Orphan and "No Skill matched" for an Unhandled.
+- "Retry" button is enabled only for Orphan / Unhandled stages (UC-11 implements the action).
+- Block 2 stubs trigger a "Coming in Block 3" snackbar instead of mutating state.
+
 ### UC-07: View Skill and Integration health
 
 **Actor:** Operator
@@ -108,6 +138,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 2. Grid shows each Skill/Integration with status (healthy/degraded/down) and activity metrics.
 
 **Postcondition:** Operator knows which Skills/Integrations are operational.
+
+**Akzeptanzkriterien:**
+- `/skills` renders one row per registered Skill with status badge (healthy/degraded/down).
+- `/integrations` renders one row per `ISkillIntegration` adapter with `LastWriteAt` + `LastWriteDurationMs`.
+- Each row exposes a "history" expansion showing recent samples (UC-16).
 
 ### UC-08: Submit a Capture via REST API
 
@@ -126,6 +161,12 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Error:** Unknown `source` value → `400` ProblemDetails.
 **Error:** Auth missing or invalid → `401 Unauthorized`.
 **Note:** API surface documented in `docs/design/api/api-surface.md`; OpenAPI schema browsable at `/scalar` (ADR 0002).
+
+**Akzeptanzkriterien:**
+- `POST /api/v1/captures` with a valid body returns 201 within NF-09 (p95 < 200 ms server-side). Verified by `make smoke-prod` step [5/6] and `tests/FlowHub.Api.IntegrationTests/`.
+- Response body matches the `Capture` schema and `Location: /api/v1/captures/{id}` header is present.
+- Missing `content` / unknown `source` → 400 ValidationProblem (`type` = `validation.md`).
+- Bruno collection `bruno/captures/submit-capture.bru` round-trips against a live stack.
 
 ### UC-09: AI-classify and route a Capture (async pipeline)
 
@@ -147,6 +188,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Postcondition:** Capture reaches a terminal stage (`Routed`, `Orphan`, or `Unhandled`). Dashboard counts update on next load.
 **Reference:** ADR 0003 (async pipeline), ADR 0004 (AI classifier).
 
+**Akzeptanzkriterien:**
+- A URL-content Capture reaches `Completed` with `MatchedSkill = "Wallabag"` and a non-empty `ExternalRef` (Skills.ContractTests + `make test-beta`).
+- A todo-content Capture reaches `Completed` with `MatchedSkill = "Vikunja"` and a non-empty `ExternalRef`.
+- MassTransit harness tests (`tests/FlowHub.Web.ComponentTests/Pipeline/*`) prove the three consumer hops fire in order.
+
 ### UC-10: Graceful AI-classifier fallback to keyword floor
 
 **Actor:** System (no human interaction)
@@ -160,6 +206,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 
 **Postcondition:** The Capture is always classified and the pipeline continues. An AI provider outage degrades classification quality but does not cause availability loss. The Warning log at EventId 3010 provides operational visibility.
 **Note:** Fallback rate target and monitoring defined in NF-11. Reference: ADR 0004, decision D5.
+
+**Akzeptanzkriterien:**
+- With `Ai__OpenRouter__ApiKey` deliberately invalid, a Capture submitted via UC-08 still reaches `Classified` stage — via `KeywordClassifier`. Verified by `tests/FlowHub.Web.ComponentTests/Ai/AiClassifierTests.cs`.
+- EventId `3010 AiClassifierFellBackToKeyword` is logged at Warning level with the exception type and Capture ID.
+- `AiClassifier` never throws to its caller (`ClassifyAsync` always returns a `ClassificationResult`).
 
 ### UC-11: Retry a failed Capture from the dashboard
 
@@ -177,6 +228,11 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Error:** Capture not found → `404` ProblemDetails.
 **Error:** Capture is not in a retryable stage (`Raw`, `Classified`, `Routed`) → `409 Conflict` ProblemDetails.
 **Note:** UC-06 documents the UI entry point and the Block-2 stub state. UC-11 defines the Block-3 implementation that fulfils the "Retry routing" action stubbed in UC-06 Flow (Orphan) step 3 and Flow (Unhandled) step 2.
+
+**Akzeptanzkriterien:**
+- `POST /api/v1/captures/{id}/retry` on an Orphan Capture returns 202 Accepted and the body shows `stage = Raw`, `failureReason = null`. Covered by `tests/FlowHub.Api.IntegrationTests/CaptureRetryEndpointTests.cs`.
+- Same call on a `Completed` Capture returns 409 (`type` = `capture-not-retryable.md`).
+- Same call with an unknown id returns 404 (`type` = `capture-not-found.md`).
 
 ### UC-12: Filter Captures by Lifecycle Stage
 
@@ -233,31 +289,47 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 | NF-12 | **AI classification cost** — per-capture cost is sub-cent to keep the homelab budget bounded | `MaxOutputTokens=300`, `Temperature=0.2`; estimated ~200 tokens input + ~150 tokens output → < $0.001 per classification on Haiku 4.5 pricing | Anthropic dashboard usage report from operator runs; cost guard configured in `AddFlowHubAi(IConfiguration)`; ADR 0004 §"Cost guards" |
 | NF-13 | **OpenAPI versioning SLA** — the REST API is URL-versioned from day one so clients are not broken by future changes | Breaking changes land only in a new major version (`/api/v2/...`); v1 is retained for at least one major-version overlap period | ADR 0002 D6; endpoint catalogue in `docs/design/api/api-surface.md`; version prefix verified in route registration |
 
-## UC-10: Deploy via Docker Compose
+## UC-17: Deploy via Docker Compose
 
-**Actor:** Operator  
-**Precondition:** Docker and Docker Compose v2 are installed.  
+**Actor:** Operator
+**Precondition:** Docker and Docker Compose v2 are installed.
 **Steps:**
 1. Operator creates `.env` file with required env vars (DB credentials, optional OIDC config, optional embedding key).
 2. Operator runs `docker compose up -d`.
 3. `flowhub.migrations` service applies EF Core migrations and exits successfully.
 4. `flowhub.web` starts, connects to PostgreSQL and RabbitMQ, exposes port 5070.
-5. Operator opens `http://localhost:5070`.  
-**Postcondition:** FlowHub is running; all dependencies healthy.  
+5. Operator opens `http://localhost:5070`.
+**Postcondition:** FlowHub is running; all dependencies healthy.
 **Exception:** If migrations fail, `flowhub.web` does not start (depends_on condition).
 
-## UC-11: Semantic Search for Captures
+**Akzeptanzkriterien:**
+- `docker compose up --build -d --wait` returns exit 0 with all `service_healthy` dependencies satisfied (verified by `make smoke-prod` step [1/6]).
+- `flowhub.migrations` container reaches `service_completed_successfully` with exit code 0.
+- `GET /health/live` from inside the compose network returns 200 within NF-D3 (30 s) of container start.
+- `GET /metrics` returns a Prometheus exposition that contains at least one `^dotnet_` and one `^http_` series.
 
-**Actor:** Operator  
-**Precondition:** `Embeddings__ApiKey` is configured; at least one Capture exists with a stored embedding.  
+> Note: this UC was previously numbered UC-10 (collision with the AI-fallback UC at line 150). Renumbered 2026-05-12.
+
+## UC-18: Semantic Search for Captures
+
+**Actor:** Operator
+**Precondition:** `Embeddings__ApiKey` is configured; at least one Capture exists with a stored embedding.
 **Note on embedding generation:** Embeddings for new Captures are generated asynchronously by `CaptureEmbeddingConsumer` (subscribed to `CaptureCreated`), so a Capture submitted via UC-09 becomes searchable a moment after submission, not synchronously with the `POST /api/v1/captures` response. This keeps capture submission inside the NF-09 p95 < 200 ms budget regardless of embedding-provider latency. Backfill of captures stored before the provider was configured is via `POST /api/v1/admin/embeddings/rebuild`.
 
 **Steps:**
 1. Operator sends `GET /api/v1/captures/search?q=database+performance&limit=5`.
 2. FlowHub embeds the query via the configured embedding provider.
-3. FlowHub returns up to 5 Captures ranked by cosine similarity.  
-**Postcondition:** Response contains Captures semantically related to the query, even if query words don't appear in titles or content.  
+3. FlowHub returns up to 5 Captures ranked by cosine similarity.
+**Postcondition:** Response contains Captures semantically related to the query, even if query words don't appear in titles or content.
 **Exceptions:**
 - Empty/whitespace `q` → `400 Bad Request` (ValidationProblem).
 - Embedding service not configured → `503 Service Unavailable` with ProblemDetails body.
 - `limit` is clamped to 1..200 (mirrors the list-endpoint contract).
+
+**Akzeptanzkriterien:**
+- `POST /api/v1/captures` followed by polling `Captures.Embedding` populates the column within 30 s when `Embeddings__ApiKey` is set (verified by `make smoke-prod` step [6/6] — actual measurement ~2 s).
+- `GET /api/v1/captures/search?q=...` with a non-empty `q` returns 200 with an array body when at least one embedded Capture exists.
+- Same endpoint with empty `q` returns 400 ValidationProblem; with `Embeddings__ApiKey` unset, returns 503 ProblemDetails (`type` ends with `/validation.md`).
+- `POST /api/v1/admin/embeddings/rebuild` returns 200 `{ processed, skipped, failed }` when keys are present, 503 otherwise.
+
+> Note: this UC was previously numbered UC-11 (collision with the Retry-Capture UC at line 164). Renumbered 2026-05-12.

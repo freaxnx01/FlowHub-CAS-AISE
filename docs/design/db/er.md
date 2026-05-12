@@ -1,4 +1,6 @@
-# FlowHub Entity-Relationship Diagram — Block 4 Schema
+# FlowHub Entity-Relationship Diagram
+
+> **Schema lineage:** Block 4 introduced the base relational model (Captures, Channels, Skills, SkillRuns, Integrations, IntegrationHealthSamples, Tags). Block 5 added the pgvector `Embedding` column on Captures and the HNSW index for semantic search (migration `0004_AddEmbedding`).
 
 ```mermaid
 erDiagram
@@ -12,6 +14,7 @@ erDiagram
         text FailureReason
         varchar(512) Title
         varchar(256) ExternalRef
+        vector_1024 Embedding "Block 5 — Mistral mistral-embed, HNSW idx (cosine)"
     }
 
     Channels {
@@ -75,3 +78,9 @@ erDiagram
 | SkillRun.CaptureId → Capture.Id | **Hard** (CASCADE) | Run is meaningless without its Capture |
 | IntegrationHealthSample.IntegrationName → Integration.Name | **Hard** (CASCADE) | Sample is meaningless without its Integration |
 | Tag.CaptureId → Capture.Id | **Hard** (CASCADE) | Tag is owned by Capture |
+
+## Vector Search (Block 5)
+
+| Column | Type | Index | Notes |
+|---|---|---|---|
+| `Captures.Embedding` | `vector(1024)` (pgvector) | `captures_embedding_hnsw_idx` (HNSW, `vector_cosine_ops`) | Populated asynchronously by `CaptureEmbeddingConsumer` via Mistral `mistral-embed`. Nullable — captures without an embedding fall back to keyword search. |

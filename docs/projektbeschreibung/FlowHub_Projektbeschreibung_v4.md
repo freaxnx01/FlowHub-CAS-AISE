@@ -636,7 +636,20 @@ Cloud:
 
 ## 7. Architekturentscheidungen (ADR)
 
-### ADR-001: C# / .NET 10 als primäre Sprache und Plattform
+Dieses Kapitel listet die **frühen Plattform- und Strategie-Entscheidungen** aus der Konzeptphase (vor Block 1). Sie definieren den Rahmen für die spätere Implementierung. Während der Umsetzung sind sechs **lightweight Implementation-ADRs** (Context → Decision → Consequences) im Repository unter [`docs/adr/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/docs/adr) entstanden, die dort einzeln einsehbar sind:
+
+| ADR | Titel | Status |
+|---|---|---|
+| [0001](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0001-frontend-render-mode-and-architecture.md) | Frontend Render Mode and Architecture | Accepted |
+| [0002](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0002-service-architecture-and-async-communication.md) | Service Architecture and Async Communication | Accepted |
+| [0003](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0003-async-pipeline.md) | Async Pipeline (MassTransit) | Accepted |
+| [0004](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0004-ai-integration-in-services.md) | AI Integration — Provider Abstraction (MEAI) | Accepted |
+| [0005](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0005-persistence.md) | Persistence — EF Core + PostgreSQL | Accepted |
+| [0006](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0006-vector-search.md) | Vector Search — pgvector + Mistral Embeddings | Accepted |
+
+Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind bewusst von den Implementation-ADRs entkoppelt — sie sind Strategie, nicht Lösungsstruktur.
+
+### PE-1: C# / .NET 10 als primäre Sprache und Plattform
 
 **Entscheidung:** C# mit .NET 10 als primäre Sprache.
 
@@ -649,7 +662,7 @@ Cloud:
 
 **Konsequenz:** Kein Wechsel zu Quarkus/Kotlin nötig; vorhandenes C#-Wissen direkt produktiv einsetzbar.
 
-### ADR-002: Blazor SSR für das Web-Dashboard
+### PE-2: Blazor SSR für das Web-Dashboard
 
 **Entscheidung:** Blazor Server-Side Rendering (SSR) für die Admin-Ansicht.
 
@@ -661,7 +674,7 @@ Cloud:
 
 **Konsequenz:** Blazor SSR eignet sich optimal für das Admin-Dashboard; für komplexe interaktive Elemente kann Blazor Interactive Server Mode ergänzt werden.
 
-### ADR-003: Hybrid Skill-System (SKILL.md + C# Handler)
+### PE-3: Hybrid Skill-System (SKILL.md + C# Handler)
 
 **Entscheidung:** Kombination aus deklarativer Konfiguration (`SKILL.md`) und typsicherer Business-Logic (C#).
 
@@ -672,7 +685,7 @@ Cloud:
 
 **Konsequenz:** Zwei Artefakte pro Skill (`SKILL.md` + Handler), aber maximale Flexibilität.
 
-### ADR-004: Docker Compose jetzt, k3s als Future Option
+### PE-4: Docker Compose jetzt, k3s als Future Option
 
 **Entscheidung:** Docker Compose für MVP-Deployment.
 
@@ -684,7 +697,7 @@ Cloud:
 
 **Konsequenz:** Migration zu k3s als Block 5 Projekt möglich, ohne Code-Änderungen.
 
-### ADR-005: Ollama (lokal) als primäres LLM
+### PE-5: Ollama (lokal) als primäres LLM
 
 **Entscheidung:** Llama 3.x via Ollama lokal, Anthropic API als Fallback.
 
@@ -695,7 +708,7 @@ Cloud:
 
 **Konsequenz:** 4.7 GB Model-Download, 4 GB RAM Bedarf für Ollama.
 
-### ADR-006: paperless-ngx für Dokumenten-MVP als reines Upload-Ziel
+### PE-6: paperless-ngx für Dokumenten-MVP als reines Upload-Ziel
 
 **Entscheidung:** Im MVP fungiert paperless-ngx als Dokumenten-Archiv ohne KI-Analyse.
 
@@ -707,7 +720,7 @@ Cloud:
 **Konsequenz:** DocumentSkill macht nur: Erkennen → Upload. Keine Tags, keine Metadaten-Extraktion im MVP.
 **Future:** KI-gestützte Analyse des OCR-Texts (Betrag, Datum, Händler) via `Microsoft.Extensions.AI`.
 
-### ADR-007: Kein Cloud-SaaS – ausschliesslich Self-Hosted Services
+### PE-7: Kein Cloud-SaaS – ausschliesslich Self-Hosted Services
 
 **Entscheidung:** Alle Ziel-Services laufen Self-Hosted im Homelab. Todoist (Cloud SaaS) wird nicht integriert.
 
