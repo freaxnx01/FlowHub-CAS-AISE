@@ -146,7 +146,31 @@ Open the `bruno/` folder in [Bruno](https://www.usebruno.com/), select the
 
 ---
 
-## 5. Regression checks
+## 5. Production compose stack (`make smoke-prod`)
+
+End-to-end smoke against the real docker-compose stack — the deployment
+claim that was never exercised before submission.
+
+- [ ] `make smoke-prod` step [1/6] — `docker compose up --build -d --wait`
+      returns 0 (all `depends_on: service_healthy` satisfied,
+      `flowhub.migrations` reaches `service_completed_successfully`).
+- [ ] Step [2/6] — migrations exit code printed as `0`.
+- [ ] Step [3/6] — `/health/live` returns 200 via the curl sidecar on the
+      same network namespace as `flowhub.web`.
+- [ ] Step [4/6] — `/metrics` body contains both `^dotnet_` and `^http_`
+      Prometheus series.
+- [ ] Step [5/6] — `POST /api/v1/captures` returns 201 with a Guid `id`.
+- [ ] Step [6/6] — with `EMBEDDINGS__APIKEY` set in `.env` (or env):
+      `Captures.Embedding` column populates within 30 s (i.e.
+      `CaptureEmbeddingConsumer` actually runs against RabbitMQ).
+- [ ] Without `EMBEDDINGS__APIKEY`: step [6/6] prints "skipped — …"
+      and the smoke still exits 0 (consumer no-ops by design).
+- [ ] On any failure the stack is left running for diagnosis (no
+      auto-teardown). `make smoke-down` cleanly stops it (volumes preserved).
+
+---
+
+## 6. Regression checks
 
 - [ ] `dotnet build FlowHub.slnx` is green with 0 warnings.
 - [ ] `make test` skips E2E (no Playwright browser launch).
