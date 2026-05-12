@@ -18,13 +18,19 @@ SECRET_EXEC = bash -c 'set -a; [ -f .env ] && . ./.env; set +a; \
 	if command -v passbolt >/dev/null 2>&1; then exec passbolt exec -- "$$@"; \
 	else exec "$$@"; fi' --
 
-.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-install
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
 WEB_URL        := http://localhost:5070
 AIPING_PROJECT := tools/FlowHub.AiPing
+PDF_TOOL_DIR   := tools/md-to-pdf
+PDF_RENDERER   := $(PDF_TOOL_DIR)/render.mjs
+PROJBESCHR_MD  := docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md
+PROJBESCHR_PDF := docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf
 TEXT           ?=
+FILE           ?=
+OUT            ?=
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -205,3 +211,17 @@ smoke-prod: ## Boot full prod compose stack and smoke-test health, /metrics, cap
 
 smoke-down: ## Stop the prod compose stack started by smoke-prod (preserves volumes)
 	docker compose down
+
+pdf-install: ## Install Node deps for the puppeteer-based Markdown→PDF renderer (one-time)
+	cd $(PDF_TOOL_DIR) && npm install --no-fund --no-audit
+
+pdf: ## Render an arbitrary Markdown file to PDF. Usage: make pdf FILE=docs/foo.md [OUT=docs/foo.pdf]
+	@if [ -z "$(FILE)" ]; then echo "usage: make pdf FILE=docs/foo.md [OUT=docs/foo.pdf]"; exit 64; fi
+	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
+	@OUT_FILE="$(OUT)"; if [ -z "$$OUT_FILE" ]; then OUT_FILE="$${FILE%.md}.pdf"; fi; \
+		echo "==> rendering $(FILE) -> $$OUT_FILE"; \
+		node $(PDF_RENDERER) "$(FILE)" "$$OUT_FILE" --title "$$(head -n 1 $(FILE) | sed 's/^# *//')"
+
+pdf-projektbeschreibung: ## Regenerate docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf from the matching .md
+	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
+	node $(PDF_RENDERER) $(PROJBESCHR_MD) $(PROJBESCHR_PDF) --title "FlowHub – Projektbeschreibung"

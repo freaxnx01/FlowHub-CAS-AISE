@@ -1,0 +1,19 @@
+{
+  "name": "flowhub-md-to-pdf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless Markdown → PDF using the same toolchain as the VS Code 'Markdown PDF' (yzane.markdown-pdf) extension: puppeteer + markdown-it + github-markdown-css. Used by `make pdf`.",
+  "bin": {
+    "flowhub-md-to-pdf": "render.mjs"
+  },
+  "dependencies": {
+    "github-markdown-css": "^5.6.1",
+    "highlight.js": "^11.10.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
+    "markdown-it-emoji": "^3.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "puppeteer": "^23.10.4"
+  }
+}
