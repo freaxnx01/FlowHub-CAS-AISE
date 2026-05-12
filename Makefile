@@ -10,7 +10,7 @@ SHELL := /bin/bash
 -include .env
 export
 
-.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
@@ -157,3 +157,43 @@ ai-classify: ## Run IClassifier against TEXT (default: URL + todo samples). Usag
 
 ai-embed: ## Run IEmbeddingService against TEXT (env: Embeddings__ApiKey, Embeddings__Model). Usage: make ai-embed TEXT="hello"
 	dotnet run --project $(AIPING_PROJECT) -- embed $(TEXT)
+
+smoke-prod: ## Boot full prod compose stack and smoke-test health, /metrics, capture submit + embedding round-trip
+	@echo "==> [1/6] docker compose up --build (detached, --wait until healthy)"
+	docker compose up --build -d --wait
+	@echo "==> [2/6] verifying flowhub.migrations exited 0"
+	@MIG_STATUS=$$(docker compose ps -a --format '{{.Service}} {{.ExitCode}}' | awk '$$1=="flowhub.migrations"{print $$2; exit}'); \
+		if [ "$$MIG_STATUS" = "0" ]; then echo "    migrations: exit 0"; else echo "    FAIL: migrations exit=$$MIG_STATUS"; exit 1; fi
+	@WEB_CID=$$(docker compose ps -q flowhub.web); \
+		if [ -z "$$WEB_CID" ]; then echo "FAIL: flowhub.web container not running"; exit 1; fi; \
+		CURL="docker run --rm --network container:$$WEB_CID curlimages/curl:8.10.1 -fsS --max-time 10"; \
+		echo "==> [3/6] GET /health/live"; \
+		$$CURL http://localhost:5070/health/live > /dev/null && echo "    /health/live: 200" || { echo "    FAIL: /health/live"; exit 1; }; \
+		echo "==> [4/6] GET /metrics — expect dotnet_* and http_* series"; \
+		METRICS=$$(mktemp); $$CURL http://localhost:5070/metrics > $$METRICS || { echo "    FAIL: /metrics"; rm -f $$METRICS; exit 1; }; \
+		grep -q "^dotnet_" $$METRICS && echo "    dotnet_* series: ok" || { echo "    FAIL: no dotnet_* metrics"; rm -f $$METRICS; exit 1; }; \
+		grep -q "^http_" $$METRICS && echo "    http_* series:   ok" || { echo "    FAIL: no http_* metrics"; rm -f $$METRICS; exit 1; }; \
+		rm -f $$METRICS; \
+		echo "==> [5/6] POST /api/v1/captures (URL capture for embedding round-trip)"; \
+		BODY=$$($$CURL -X POST -H "Content-Type: application/json" \
+			-d '{"content":"https://en.wikipedia.org/wiki/Hexagonal_architecture","source":"Api"}' \
+			http://localhost:5070/api/v1/captures); \
+		CAPTURE_ID=$$(echo "$$BODY" | sed -n 's/.*"id":"\([0-9a-fA-F-]\{36\}\)".*/\1/p'); \
+		if [ -z "$$CAPTURE_ID" ]; then echo "    FAIL: no id in response: $$BODY"; exit 1; fi; \
+		echo "    captured id: $$CAPTURE_ID"; \
+		echo "==> [6/6] polling Captures.Embedding (up to 30s)"; \
+		if [ -z "$$EMBEDDINGS__APIKEY" ] && [ -z "$$Embeddings__ApiKey" ]; then \
+			echo "    skipped — EMBEDDINGS__APIKEY not set in env / .env (embedding consumer no-ops)"; \
+		else \
+			for i in $$(seq 1 30); do \
+				HAS=$$(docker compose exec -T postgres psql -U flowhub -d flowhub -tAc \
+					"SELECT \"Embedding\" IS NOT NULL FROM \"Captures\" WHERE \"Id\"='$$CAPTURE_ID'" 2>/dev/null | tr -d ' '); \
+				if [ "$$HAS" = "t" ]; then echo "    embedding column populated after ~$${i}s"; break; fi; \
+				sleep 1; \
+				if [ $$i -eq 30 ]; then echo "    FAIL: embedding still NULL after 30s — check CaptureEmbeddingConsumer logs"; exit 1; fi; \
+			done; \
+		fi
+	@echo "==> smoke OK — stack left running. Tear down with: make smoke-down"
+
+smoke-down: ## Stop the prod compose stack started by smoke-prod (preserves volumes)
+	docker compose down
