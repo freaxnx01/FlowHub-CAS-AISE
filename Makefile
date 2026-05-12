@@ -18,7 +18,7 @@ SECRET_EXEC = bash -c 'set -a; [ -f .env ] && . ./.env; set +a; \
 	if command -v passbolt >/dev/null 2>&1; then exec passbolt exec -- "$$@"; \
 	else exec "$$@"; fi' --
 
-.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-install
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-contract test-services test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-install
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
@@ -114,10 +114,15 @@ playwright-install: ## Install Playwright browser binaries (one-time setup)
 		tests/FlowHub.Web.E2ETests/bin/Debug/net10.0/playwright.ps1 install chromium
 
 test-ai: ## Run live integration tests against real AI providers (requires Ai__*__ApiKey env)
-	dotnet test tests/FlowHub.AI.IntegrationTests --filter "Category=AI"
+	$(SECRET_EXEC) dotnet test tests/FlowHub.AI.IntegrationTests --filter "Category=AI"
 
-test-beta: ## Run live Beta-smoke tests against real Wallabag + Vikunja (requires Skills__*__ApiToken env)
-	dotnet test tests/FlowHub.Skills.IntegrationTests --filter "Category=BetaSmoke"
+test-contract: ## Run WireMock-based wire-contract tests for Vikunja + Wallabag (offline, no secrets)
+	dotnet test tests/FlowHub.Skills.ContractTests --filter "Category=SkillContract"
+
+test-services: ## Run live skill-integration tests against flowhub-test-services (Vikunja + Wallabag on CT 128 — see docs/runbooks/test-services.md)
+	$(SECRET_EXEC) dotnet test tests/FlowHub.Skills.IntegrationTests --filter "Category=BetaSmoke"
+
+test-beta: test-services ## Alias for test-services (legacy name)
 
 test-watch: ## Run component tests in watch mode
 	dotnet watch test --project tests/FlowHub.Web.ComponentTests
