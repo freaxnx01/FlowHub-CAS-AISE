@@ -59,7 +59,9 @@ public static class AiServiceCollectionExtensions
     {
         var baseUrl = configuration["Embeddings:BaseUrl"];
         var apiKey = configuration["Embeddings:ApiKey"];
-        var model = configuration["Embeddings:Model"] ?? "mistral-embed";
+        // Compose interpolation substitutes empty strings for unset vars, so an empty
+        // value here means "not configured" — treat it the same as null.
+        var model = configuration["Embeddings:Model"] is { Length: > 0 } m ? m : "mistral-embed";
         var timeoutSeconds = int.TryParse(configuration["Embeddings:TimeoutSeconds"], out var t) ? t : 10;
         int? dimensions = int.TryParse(configuration["Embeddings:Dimensions"], out var d) ? d : null;
 
@@ -113,8 +115,9 @@ public static class AiServiceCollectionExtensions
             return new AiRegistrationOutcome(UsesAi: false, Provider: provider, Model: null, Reason: "missing-key");
         }
 
-        var model = configuration[$"Ai:{provider}:Model"]
-            ?? DefaultModelFor(provider);
+        var model = configuration[$"Ai:{provider}:Model"] is { Length: > 0 } m
+            ? m
+            : DefaultModelFor(provider);
         return new AiRegistrationOutcome(UsesAi: true, Provider: provider, Model: model, Reason: "configured");
     }
 

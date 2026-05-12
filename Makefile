@@ -6,9 +6,17 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-# Auto-load .env (gitignored) so ai-* targets and dev runs pick up secrets.
+# Auto-load .env (gitignored). For targets that need secrets, wrap with
+# $(SECRET_EXEC) — that re-sources .env into the recipe shell *before* the
+# command runs, so Passbolt refs like `KEY=passbolt://<uuid>` get resolved
+# by `passbolt exec` (if present). Falls through unchanged when passbolt is
+# not installed, so plain real-value .env files keep working.
 -include .env
 export
+
+SECRET_EXEC = bash -c 'set -a; [ -f .env ] && . ./.env; set +a; \
+	if command -v passbolt >/dev/null 2>&1; then exec passbolt exec -- "$$@"; \
+	else exec "$$@"; fi' --
 
 .PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down
 
@@ -150,17 +158,17 @@ migrate: ## Apply EF Core migrations to the local database (requires running Pos
 		--startup-project source/FlowHub.Web
 
 ai-ping: ## Smoke-test the configured AI provider with a tiny chat call (env: Ai__Provider, Ai__<Provider>__ApiKey)
-	dotnet run --project $(AIPING_PROJECT) -- ping
+	$(SECRET_EXEC) dotnet run --project $(AIPING_PROJECT) -- ping
 
 ai-classify: ## Run IClassifier against TEXT (default: URL + todo samples). Usage: make ai-classify TEXT="todo: buy milk"
-	dotnet run --project $(AIPING_PROJECT) -- classify $(TEXT)
+	$(SECRET_EXEC) dotnet run --project $(AIPING_PROJECT) -- classify $(TEXT)
 
 ai-embed: ## Run IEmbeddingService against TEXT (env: Embeddings__ApiKey, Embeddings__Model). Usage: make ai-embed TEXT="hello"
-	dotnet run --project $(AIPING_PROJECT) -- embed $(TEXT)
+	$(SECRET_EXEC) dotnet run --project $(AIPING_PROJECT) -- embed $(TEXT)
 
 smoke-prod: ## Boot full prod compose stack and smoke-test health, /metrics, capture submit + embedding round-trip
 	@echo "==> [1/6] docker compose up --build (detached, --wait until healthy)"
-	docker compose up --build -d --wait
+	$(SECRET_EXEC) docker compose up --build -d --wait
 	@echo "==> [2/6] verifying flowhub.migrations exited 0"
 	@MIG_STATUS=$$(docker compose ps -a --format '{{.Service}} {{.ExitCode}}' | awk '$$1=="flowhub.migrations"{print $$2; exit}'); \
 		if [ "$$MIG_STATUS" = "0" ]; then echo "    migrations: exit 0"; else echo "    FAIL: migrations exit=$$MIG_STATUS"; exit 1; fi
