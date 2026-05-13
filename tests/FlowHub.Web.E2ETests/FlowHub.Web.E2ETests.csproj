@@ -5,8 +5,13 @@
     <AssemblyName>FlowHub.Web.E2ETests</AssemblyName>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <NoWarn>$(NoWarn);CA1707;CA1711;CA1822;CA1861</NoWarn>
+    <!-- CA1716: test class names follow the Jxx_Description convention to mirror docs/design/journeys.md; cross-language consumption is N/A -->
+    <NoWarn>$(NoWarn);CA1707;CA1711;CA1716;CA1822;CA1861</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="Journeys\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

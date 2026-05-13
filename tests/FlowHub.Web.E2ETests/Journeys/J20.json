@@ -1,0 +1,14 @@
+{
+  "id": "J20",
+  "category": "edge",
+  "description": "Visiting /captures/{unknown-guid} shows a not-found warning",
+  "entryUrl": "/captures/00000000-0000-0000-0000-000000000000",
+  "preconditions": [],
+  "steps": [
+    "Navigate to /captures/00000000-0000-0000-0000-000000000000"
+  ],
+  "expected": [
+    "Warning alert 'Capture not found' is visible"
+  ],
+  "passes": false
+}
