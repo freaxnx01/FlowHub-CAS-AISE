@@ -190,7 +190,10 @@ The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modul
 └── SKILL.md                            ← OpenClaw skill definition
 ```
 
-**Note:** The `## Docker` section further down describes a `docker-compose.yml`-based workflow that lands in **Block 5 (Deployment)** — those files don't exist yet. Current dev workflow is `make run` / `make watch` directly against the host machine.
+**Note:** The `## Docker` section further down describes the `docker-compose.yml`-based workflow that runs the full stack (Web + Postgres + RabbitMQ + Prometheus + Grafana). Both workflows are valid:
+
+- `make run` / `make watch` — runs only `FlowHub.Web` against backing services that are still up (typically Postgres + RabbitMQ left running in Docker). Fast inner-dev loop with hot reload.
+- `docker compose up -d --build flowhub.web` — rebuilds the Web container against the full stack. Use after merging code that needs to be picked up by the container, or to verify against the production-shaped image.
 
 ---
 
