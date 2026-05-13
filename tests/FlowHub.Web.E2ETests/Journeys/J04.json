@@ -1,0 +1,12 @@
+{
+  "id": "J04",
+  "category": "functional",
+  "description": "Dashboard loads and shows Needs Attention, Recent Captures, Skill Health, and Integration Health cards",
+  "entryUrl": "/",
+  "preconditions": [],
+  "steps": ["Navigate to /"],
+  "expected": [
+    "All four card titles render: 'Needs attention', 'Recent captures', 'Skill health', 'Integration health'"
+  ],
+  "passes": true
+}

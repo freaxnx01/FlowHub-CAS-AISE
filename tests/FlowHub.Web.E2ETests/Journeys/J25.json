@@ -1,0 +1,12 @@
+{
+  "id": "J25",
+  "category": "functional",
+  "description": "/skills shows a row per skill with name, status, and routed-today count",
+  "entryUrl": "/skills",
+  "preconditions": ["Skill registry returns the seeded skills"],
+  "steps": ["Navigate to /skills"],
+  "expected": [
+    "Grid contains at least Books and Movies"
+  ],
+  "passes": false
+}

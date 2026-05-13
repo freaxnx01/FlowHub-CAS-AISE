@@ -1,0 +1,10 @@
+{
+  "id": "J12",
+  "category": "functional",
+  "description": "Typing in the search field filters the grid by case-insensitive content match",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one capture exists"],
+  "steps": ["Type 'http' into the search field"],
+  "expected": ["Results counter updates and grid shows only matching rows"],
+  "passes": true
+}

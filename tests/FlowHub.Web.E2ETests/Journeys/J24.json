@@ -1,0 +1,10 @@
+{
+  "id": "J24",
+  "category": "functional",
+  "description": "The Cancel button on the New Capture form navigates back to the Dashboard",
+  "entryUrl": "/captures/new",
+  "preconditions": [],
+  "steps": ["Click Cancel"],
+  "expected": ["URL is / (root)"],
+  "passes": true
+}

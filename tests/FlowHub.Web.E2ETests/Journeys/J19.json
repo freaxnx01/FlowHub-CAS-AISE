@@ -1,0 +1,13 @@
+{
+  "id": "J19",
+  "category": "functional",
+  "description": "The 'Back to Captures' link on a detail page returns the user to /captures",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one capture exists"],
+  "steps": [
+    "Open the first row in the captures grid",
+    "Click '← Back to Captures'"
+  ],
+  "expected": ["URL ends with /captures"],
+  "passes": false
+}

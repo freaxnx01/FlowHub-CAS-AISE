@@ -1,0 +1,12 @@
+{
+  "id": "J22",
+  "category": "edge",
+  "description": "Submitting with empty Content shows a validation error and does not call the service",
+  "entryUrl": "/captures/new",
+  "preconditions": [],
+  "steps": ["Click Submit without typing anything"],
+  "expected": [
+    "Required-field error 'Content is required' is shown"
+  ],
+  "passes": true
+}

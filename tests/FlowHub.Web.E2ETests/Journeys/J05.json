@@ -1,0 +1,13 @@
+{
+  "id": "J05",
+  "category": "functional",
+  "description": "Clicking the orphan count on the Dashboard navigates to /captures with the orphan filter applied",
+  "entryUrl": "/",
+  "preconditions": ["At least one Orphan-stage capture exists"],
+  "steps": ["Click the 'N orphan captures' button on the Needs Attention card"],
+  "expected": [
+    "URL changes to /captures?lc=Orphan",
+    "Captures list pre-selects the Orphan lifecycle chip"
+  ],
+  "passes": false
+}

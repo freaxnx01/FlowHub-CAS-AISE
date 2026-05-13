@@ -1,0 +1,16 @@
+{
+  "id": "J16",
+  "category": "functional",
+  "description": "An Orphan capture shows the failure reason and offers Retry routing, Reassign skill, and Ignore",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one Orphan-stage capture exists"],
+  "steps": [
+    "Open /captures",
+    "Click the first row whose lifecycle badge reads 'orphan'"
+  ],
+  "expected": [
+    "Warning alert containing 'Routing failed' is visible",
+    "Buttons 'Retry routing', 'Reassign skill', 'Ignore' are present"
+  ],
+  "passes": true
+}

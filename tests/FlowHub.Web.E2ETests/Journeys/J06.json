@@ -1,0 +1,12 @@
+{
+  "id": "J06",
+  "category": "functional",
+  "description": "Clicking the unhandled count navigates to /captures filtered by Unhandled",
+  "entryUrl": "/",
+  "preconditions": ["At least one Unhandled-stage capture exists"],
+  "steps": ["Click the 'N unhandled captures' button on the Needs Attention card"],
+  "expected": [
+    "URL contains /captures?lc=Unhandled"
+  ],
+  "passes": false
+}

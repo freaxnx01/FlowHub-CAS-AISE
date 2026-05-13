@@ -1,0 +1,12 @@
+{
+  "id": "J13",
+  "category": "edge",
+  "description": "When filters produce zero results the user sees a no-match panel with a Clear filters action",
+  "entryUrl": "/captures",
+  "preconditions": [],
+  "steps": ["Type 'zzzzzzzz-no-such-string' into the search field"],
+  "expected": [
+    "Empty state shows 'No captures match' or similar zero-results message"
+  ],
+  "passes": false
+}

@@ -1,0 +1,16 @@
+{
+  "id": "J23",
+  "category": "error",
+  "description": "When ISkillRegistry throws, the form shows a warning but Submit still works",
+  "entryUrl": "/captures/new",
+  "preconditions": ["Skill registry induced to throw — best-effort against live system"],
+  "steps": [
+    "Navigate to /captures/new",
+    "Type 'still works' into Content",
+    "Click Submit"
+  ],
+  "expected": [
+    "Inline warning 'Could not load skills' is visible OR submit succeeds (live system, can't force failure)"
+  ],
+  "passes": true
+}

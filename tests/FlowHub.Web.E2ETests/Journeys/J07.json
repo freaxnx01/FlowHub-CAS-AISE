@@ -1,0 +1,12 @@
+{
+  "id": "J07",
+  "category": "functional",
+  "description": "Clicking a row in the Recent Captures card opens that capture's detail page",
+  "entryUrl": "/",
+  "preconditions": ["At least one capture exists"],
+  "steps": ["Click the first row in the Recent Captures grid"],
+  "expected": [
+    "URL changes to /captures/{guid}"
+  ],
+  "passes": false
+}

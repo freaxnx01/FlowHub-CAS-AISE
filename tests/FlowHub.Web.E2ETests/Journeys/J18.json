@@ -1,0 +1,15 @@
+{
+  "id": "J18",
+  "category": "functional",
+  "description": "Clicking any action on Orphan/Unhandled detail surfaces the Block-2 stub snackbar",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one Orphan or Unhandled capture exists"],
+  "steps": [
+    "Open the first Orphan or Unhandled capture",
+    "Click 'Ignore'"
+  ],
+  "expected": [
+    "Snackbar contains 'will work once backend Skills are wired in Block 3'"
+  ],
+  "passes": true
+}

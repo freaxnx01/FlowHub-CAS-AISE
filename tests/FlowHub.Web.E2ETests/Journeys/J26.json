@@ -1,0 +1,12 @@
+{
+  "id": "J26",
+  "category": "error",
+  "description": "When the skill registry throws, /skills shows an error alert with a Retry button",
+  "entryUrl": "/skills",
+  "preconditions": ["Skill registry induced to throw — best-effort against live system; bUnit covers the negative path"],
+  "steps": ["Navigate to /skills"],
+  "expected": [
+    "Error alert 'Could not load skills' is visible (live system, can't easily force failure path; bUnit covers it)"
+  ],
+  "passes": false
+}

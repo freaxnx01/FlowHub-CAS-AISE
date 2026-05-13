@@ -1,0 +1,12 @@
+{
+  "id": "J28",
+  "category": "error",
+  "description": "When the health service throws, /integrations shows an error alert with a Retry button",
+  "entryUrl": "/integrations",
+  "preconditions": ["Integration health service induced to throw — best-effort against live system; bUnit covers the negative path"],
+  "steps": ["Navigate to /integrations"],
+  "expected": [
+    "Error alert 'Could not load integrations' is visible (live system, can't easily force failure path; bUnit covers it)"
+  ],
+  "passes": false
+}

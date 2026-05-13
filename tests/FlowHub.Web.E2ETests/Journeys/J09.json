@@ -1,0 +1,10 @@
+{
+  "id": "J09",
+  "category": "functional",
+  "description": "Manage-integrations button on the Integration Health card navigates to /integrations",
+  "entryUrl": "/",
+  "preconditions": [],
+  "steps": ["Click the 'Manage integrations' button on the Integration Health card"],
+  "expected": ["URL ends with /integrations"],
+  "passes": true
+}

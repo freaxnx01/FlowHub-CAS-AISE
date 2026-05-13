@@ -1,0 +1,17 @@
+{
+  "id": "J17",
+  "category": "functional",
+  "description": "An Unhandled capture shows the integration failure and offers Assign skill + Ignore (no Retry routing)",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one Unhandled-stage capture exists"],
+  "steps": [
+    "Open /captures",
+    "Click the first row whose lifecycle badge reads 'unhandled'"
+  ],
+  "expected": [
+    "Error alert containing 'Skill integration failed' is visible",
+    "Button 'Assign skill' is present",
+    "Button 'Retry routing' is NOT present"
+  ],
+  "passes": true
+}

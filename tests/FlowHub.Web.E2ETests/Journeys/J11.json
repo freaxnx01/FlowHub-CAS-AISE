@@ -1,0 +1,12 @@
+{
+  "id": "J11",
+  "category": "functional",
+  "description": "Selecting a channel chip narrows the captures grid to that source",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one capture exists"],
+  "steps": ["Click the 'Web' chip in the Channel chip set"],
+  "expected": [
+    "Results counter reflects only Web-source rows"
+  ],
+  "passes": true
+}

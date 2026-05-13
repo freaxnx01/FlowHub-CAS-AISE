@@ -1,0 +1,13 @@
+{
+  "id": "J10",
+  "category": "functional",
+  "description": "Selecting a lifecycle chip narrows the captures grid to that stage",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one capture exists in any stage"],
+  "steps": ["Click the 'unhandled' chip in the Lifecycle chip set"],
+  "expected": [
+    "Results counter updates",
+    "Visible rows are limited to unhandled stage"
+  ],
+  "passes": true
+}

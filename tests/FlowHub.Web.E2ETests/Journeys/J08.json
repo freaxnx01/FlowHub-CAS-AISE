@@ -1,0 +1,10 @@
+{
+  "id": "J08",
+  "category": "functional",
+  "description": "View-all button on the Recent Captures card navigates to /captures",
+  "entryUrl": "/",
+  "preconditions": [],
+  "steps": ["Click the 'View all' button on the Recent Captures card"],
+  "expected": ["URL ends with /captures"],
+  "passes": true
+}

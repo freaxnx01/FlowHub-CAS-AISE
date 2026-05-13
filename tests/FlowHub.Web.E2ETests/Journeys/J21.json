@@ -1,0 +1,15 @@
+{
+  "id": "J21",
+  "category": "functional",
+  "description": "Submitting the New Capture form creates a capture and shows a success toast",
+  "entryUrl": "/captures/new",
+  "preconditions": ["Skill registry returns ≥0 skills"],
+  "steps": [
+    "Type 'Read this article tomorrow {nonce}' into the Content field",
+    "Click Submit"
+  ],
+  "expected": [
+    "Snackbar shows 'Captured ✓'"
+  ],
+  "passes": true
+}

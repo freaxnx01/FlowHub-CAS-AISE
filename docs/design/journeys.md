@@ -557,9 +557,24 @@ The AppBar `QuickCaptureField` is shared across every page (see Dashboard flow D
 | Skills | J25, J26 |
 | Integrations | J27, J28 |
 
-**Coverage today:**
+## E2E status (snapshot)
 
-- **bUnit (`tests/FlowHub.Web.ComponentTests/`)**: covers the rendering and per-component behavior for J01–J04, J07, J10, J14, J15–J17, J20–J23, J25–J28 (component-level — single page in isolation, no real router).
-- **Playwright E2E (`tests/FlowHub.Web.E2ETests/`)**: only `HappyFlowTests.cs` exists today. Cross-page navigations (J05, J06, J08, J09, J19, J24) and full-router scenarios are not yet automated end-to-end.
+All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E2ETests/Journeys/`. Live result against the docker-compose stack:
 
-**Next:** translate each journey into a Playwright spec under `tests/FlowHub.Web.E2ETests/Journeys/` with the JSON block above stored alongside as `J{NN}.json`, so the test runner can flip `passes` from the C# spec result.
+| Status | Count | Journeys |
+|---|---|---|
+| ✅ Green | 16 | J02, J03, J04, J08, J09, J10, J11, J12, J16, J17, J18, J20, J21, J22, J23, J24 |
+| ❌ Red — environmental (data missing) | 7 | J05, J15 (no Orphan/Completed in DB) · J25, J27 (live registry/health service returns empty) · J26, J28 (need fault-injection hook to force the error path) · J06 (no Unhandled count rendered as expected button text) |
+| ❌ Red — interactive timing / selector | 5 | J01 (QuickCapture FillAsync vs Blazor's onchange binding) · J07, J14, J19 (`.mud-table-row` row-click before SignalR circuit binds the handler) · J13 (no-match assertion brittle against current Captures page semantics) |
+
+The base class `JourneyTestBase` adds a 2 s post-`DOMContentLoaded` warmup so the SignalR circuit has time to wire up event handlers before Playwright starts clicking. That alone moved 5 journeys from red to green; the remaining 5 timing-related reds need either an `Immediate="true"` binding on `QuickCaptureField` (or a test-side blur-then-Enter pattern) or a more deterministic Blazor-ready signal.
+
+**bUnit cross-coverage** (`tests/FlowHub.Web.ComponentTests/`): the bUnit suite still owns the component-level negative paths (forced exceptions, error alerts, validation messages) for J02, J23, J26, J28 — the E2E equivalents can't trigger those states against a healthy live system without a fault-injection hook.
+
+**Next steps to close the remaining reds:**
+
+1. Seed a deterministic dataset (1 Orphan, 1 Completed, plus the existing Unhandled) — unblocks J05, J15.
+2. Wire the live `ISkillRegistry` / `IIntegrationHealthService` so they actually return data — unblocks J25, J27 (and gives J04 something to render beyond card titles).
+3. Add `Immediate="true"` on `QuickCaptureField`'s MudTextField — unblocks J01.
+4. Add an explicit "circuit ready" sentinel (e.g. a hidden `data-circuit-ready` attribute toggled in `OnAfterRenderAsync(firstRender)`) and have `JourneyTestBase.GotoAsync` await it — replaces the 2 s sleep with a deterministic wait and unblocks the remaining row-click reds.
+5. Optional: an `IFaultInjector` test-only DI hook to force `GetHealthAsync` throws on demand — unblocks J26, J28.

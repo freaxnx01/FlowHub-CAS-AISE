@@ -1,0 +1,12 @@
+{
+  "id": "J03",
+  "category": "edge",
+  "description": "Submitting an empty quick-capture input does not call the service and prompts the user",
+  "entryUrl": "/",
+  "preconditions": [],
+  "steps": ["Press Enter in the AppBar quick-capture field without typing anything"],
+  "expected": [
+    "Snackbar shows 'Type something first'"
+  ],
+  "passes": true
+}

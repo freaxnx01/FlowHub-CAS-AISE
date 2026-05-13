@@ -1,0 +1,17 @@
+{
+  "id": "J15",
+  "category": "functional",
+  "description": "A Completed capture renders content + metadata with no failure alert and no action buttons",
+  "entryUrl": "/captures",
+  "preconditions": ["At least one Completed-stage capture exists"],
+  "steps": [
+    "Open /captures",
+    "Click the first row whose lifecycle badge reads 'completed'"
+  ],
+  "expected": [
+    "'Metadata' section is visible",
+    "No 'Routing failed' alert",
+    "No Retry/Reassign/Ignore buttons"
+  ],
+  "passes": false
+}

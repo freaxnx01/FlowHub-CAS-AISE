@@ -1,0 +1,12 @@
+{
+  "id": "J27",
+  "category": "functional",
+  "description": "/integrations shows a row per integration with name, status, and last-write timing",
+  "entryUrl": "/integrations",
+  "preconditions": ["Integration health service returns the seeded integrations"],
+  "steps": ["Navigate to /integrations"],
+  "expected": [
+    "Grid contains at least Wallabag and Vikunja"
+  ],
+  "passes": false
+}

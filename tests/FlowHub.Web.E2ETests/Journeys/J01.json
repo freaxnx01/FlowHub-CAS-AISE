@@ -1,0 +1,16 @@
+{
+  "id": "J01",
+  "category": "functional",
+  "description": "User submits a capture from the AppBar quick-capture field on any page",
+  "entryUrl": "/",
+  "preconditions": ["Dev auth signed in", "ICaptureService backed by live persistence"],
+  "steps": [
+    "Type 'https://example.com/article-{nonce}' into the AppBar quick-capture field",
+    "Press Enter"
+  ],
+  "expected": [
+    "Snackbar shows 'Captured ✓'",
+    "Quick-capture input is cleared"
+  ],
+  "passes": false
+}
