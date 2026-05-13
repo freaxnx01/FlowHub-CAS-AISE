@@ -9,7 +9,8 @@
          analyzer rule contradicts the project convention, so suppress it for tests. -->
     <!-- CA1707: test naming uses underscores by convention (MethodName_State_Expected) -->
     <!-- CA1861: inline array literals in test assertions are single-use; perf warning is N/A -->
-    <NoWarn>$(NoWarn);CA1707;CA1861</NoWarn>
+    <!-- CA1716: test namespaces mirror the source folder layout (e.g. Shared/); cross-language consumption is N/A for a test assembly -->
+    <NoWarn>$(NoWarn);CA1707;CA1861;CA1716</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
