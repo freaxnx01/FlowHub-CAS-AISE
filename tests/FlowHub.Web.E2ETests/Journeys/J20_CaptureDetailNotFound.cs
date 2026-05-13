@@ -28,9 +28,12 @@ public sealed class J20_CaptureDetailNotFound
         });
         var page = await context.NewPageAsync();
 
-        await page.GotoAsync(_ac.EntryUrl, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        // NetworkIdle is unreliable under Interactive Server Blazor — the SignalR
+        // circuit keeps the network busy. Wait for DOMContentLoaded then poll the
+        // alert via a stable selector that survives the SSR → interactive handoff.
+        await page.GotoAsync(_ac.EntryUrl, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
 
-        await page.GetByText("Capture not found", new PageGetByTextOptions { Exact = false })
+        await page.Locator(".mud-alert", new PageLocatorOptions { HasText = "Capture not found" })
             .First.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
     }
 }

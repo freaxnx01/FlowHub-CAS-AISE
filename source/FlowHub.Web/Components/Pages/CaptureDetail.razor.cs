@@ -33,12 +33,11 @@ public partial class CaptureDetail : ComponentBase
 
         try
         {
-            var captureTask = CaptureService.GetByIdAsync(Id);
-            var skillsTask = SkillRegistry.GetHealthAsync();
-            await Task.WhenAll(captureTask, skillsTask);
-
-            _capture = captureTask.Result;
-            _skills = skillsTask.Result;
+            // Sequential awaits — both services share the same scoped EF DbContext
+            // (since the Beta MVP wired EfCaptureService + EF ISkillRegistry), and
+            // EF Core forbids concurrent operations on a single context instance.
+            _capture = await CaptureService.GetByIdAsync(Id);
+            _skills = await SkillRegistry.GetHealthAsync();
         }
         catch (Exception ex)
         {
