@@ -1,0 +1,107 @@
+# FlowHub public-demo overlay — extends docker-compose.yml.
+# Deploy on the VPS-DE host as:
+#   docker compose -f docker-compose.yml -f demo/docker-compose.yml up --build -d --wait
+#
+# See docs/runbooks/public-demo.md for the full design + operator runbook.
+
+services:
+  flowhub.web:
+    # Override the production env block so the demo profile cannot accidentally
+    # write to anyone's real Vikunja / Wallabag or burn embedding API quota.
+    # Only Ai__OpenRouter__* is honoured; everything else is forced empty.
+    environment:
+      ASPNETCORE_URLS: "http://+:5070"
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=flowhub;Username=flowhub;Password=${POSTGRES_PASSWORD:-dev-secret}"
+      Bus__Transport: RabbitMq
+      Bus__RabbitMq__Host: rabbitmq
+      Bus__RabbitMq__Username: ${RABBITMQ_USER:-flowhub}
+      Bus__RabbitMq__Password: ${RABBITMQ_PASSWORD:-dev-secret}
+      # Embeddings deliberately UNSET — search returns 503 (transparent demo posture).
+      Embeddings__BaseUrl: ""
+      Embeddings__ApiKey: ""
+      Embeddings__Model: ""
+      Embeddings__Dimensions: ""
+      # AI provider pinned to OpenRouter Gemma 4 31B free.
+      Ai__Provider: "OpenRouter"
+      Ai__OpenRouter__ApiKey: ${Ai__OpenRouter__ApiKey:?Ai__OpenRouter__ApiKey is required for the demo}
+      Ai__OpenRouter__Model: ${Ai__OpenRouter__Model:-google/gemma-4-31b-it:free}
+      Ai__Anthropic__ApiKey: ""
+      Ai__Anthropic__Model: ""
+      # Skill integrations UNSET — captures stop at Classified (no external writes).
+      Skills__Vikunja__BaseUrl: ""
+      Skills__Vikunja__ApiToken: ""
+      Skills__Vikunja__DefaultProjectId: ""
+      Skills__Wallabag__BaseUrl: ""
+      Skills__Wallabag__ApiToken: ""
+      # OIDC unset → DemoAuthHandler kicks in.
+      Auth__OIDC__Authority: ""
+      Auth__OIDC__ClientId: ""
+      Auth__OIDC__ClientSecret: ""
+      # Demo banner shown in the UI (read by FlowHub.Web layout).
+      Demo__Mode: "true"
+      Demo__BannerText: "Public demo — data resets every 15 minutes. Skill writes + embeddings disabled."
+    labels:
+      # Traefik route: demo.flowhub.freaxnx01.ch -> :5070
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-demo.rule=Host(`demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-demo.entrypoints=websecure"
+      - "traefik.http.routers.flowhub-demo.tls=true"
+      - "traefik.http.routers.flowhub-demo.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.flowhub-demo.middlewares=flowhub-demo-ratelimit@docker,flowhub-demo-headers@docker"
+      - "traefik.http.services.flowhub-demo.loadbalancer.server.port=5070"
+      # Rate-limit: average 10 req/min per IP, burst 20.
+      - "traefik.http.middlewares.flowhub-demo-ratelimit.ratelimit.average=10"
+      - "traefik.http.middlewares.flowhub-demo-ratelimit.ratelimit.burst=20"
+      - "traefik.http.middlewares.flowhub-demo-ratelimit.ratelimit.period=1m"
+      - "traefik.http.middlewares.flowhub-demo-ratelimit.ratelimit.sourcecriterion.ipstrategy.depth=1"
+      # Security headers (Cloudflare proxy strips host; we still want clickjacking + sniff guards).
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.framedeny=true"
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.contenttypenosniff=true"
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.browserxssfilter=true"
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.referrerpolicy=strict-origin-when-cross-origin"
+      # Network the VPS-DE Traefik is on (set this to whatever your dispatcher uses).
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}"
+    networks:
+      - default
+      - traefik_public
+    ports: !reset []
+
+  flowhub.demo-reset:
+    build:
+      context: demo/reset
+    image: flowhub-demo-reset:local
+    environment:
+      RESET_INTERVAL_SECONDS: ${RESET_INTERVAL_SECONDS:-900}
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: flowhub
+      PGUSER: flowhub
+      PGPASSWORD: ${POSTGRES_PASSWORD:-dev-secret}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-flowhub}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-dev-secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      flowhub.migrations:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # Suppress public port exposure for backing services + observability stack;
+  # internal compose network access is enough for the demo.
+  postgres:
+    ports: !reset []
+  rabbitmq:
+    ports: !reset []
+  prometheus:
+    ports: !reset []
+  grafana:
+    ports: !reset []
+
+networks:
+  traefik_public:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik_public}

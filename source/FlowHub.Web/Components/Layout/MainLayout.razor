@@ -36,6 +36,12 @@
     </MudDrawer>
 
     <MudMainContent>
+        @if (DemoMode)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Square="true" Dense="true" Class="ma-0">
+                @DemoBannerText
+            </MudAlert>
+        }
         <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
             @Body
         </MudContainer>
