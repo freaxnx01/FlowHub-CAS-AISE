@@ -34,11 +34,13 @@ public abstract class JourneyTestBase : IAsyncLifetime
     }
 
     /// <summary>
-    /// Stable navigation for Interactive Server Blazor: DOMContentLoaded for the
-    /// shell, then wait for the #blazor-circuit-ready sentinel that MainLayout
-    /// renders only after OnAfterRender(firstRender) fires (= SignalR circuit
-    /// connected, event handlers bound). Replaces the old fixed 2 s sleep with
-    /// a deterministic signal.
+    /// Stable navigation for Interactive Server Blazor:
+    /// 1. DOMContentLoaded for the shell.
+    /// 2. #blazor-circuit-ready sentinel — MainLayout renders this only after
+    ///    OnAfterRender(firstRender), proving the SignalR circuit is connected.
+    /// 3. All MudSkeleton placeholders gone — proves the page's OnInitializedAsync
+    ///    data load completed and the resulting interactive DOM (with bound event
+    ///    handlers like MudDataGrid.RowClick) has been rendered.
     /// </summary>
     protected async Task GotoAsync(string url)
     {
@@ -49,5 +51,17 @@ public abstract class JourneyTestBase : IAsyncLifetime
                 Timeout = 15_000,
                 State = WaitForSelectorState.Attached,
             });
+        // Best-effort: some pages keep a permanent skeleton when a backing service
+        // (e.g. integration health) is slow or empty. Wait briefly and move on.
+        try
+        {
+            await Page.WaitForFunctionAsync(
+                "() => document.querySelectorAll('.mud-skeleton').length === 0",
+                null,
+                new PageWaitForFunctionOptions { Timeout = 3_000 });
+        }
+        catch (TimeoutException)
+        {
+        }
     }
 }

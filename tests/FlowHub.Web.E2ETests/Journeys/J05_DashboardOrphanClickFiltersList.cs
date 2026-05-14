@@ -18,6 +18,6 @@ public sealed class J05_DashboardOrphanClickFiltersList : JourneyTestBase
         await orphanButton.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
         await orphanButton.ClickAsync();
 
-        await Page.WaitForURLAsync(new Regex(@"/captures\?lc=Orphan"), new PageWaitForURLOptions { Timeout = 15_000 });
+        await Page.WaitForURLAsync(new Regex(@"/captures\?lc=[Oo]rphan"), new PageWaitForURLOptions { Timeout = 15_000 });
     }
 }

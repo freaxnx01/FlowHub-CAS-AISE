@@ -33,17 +33,13 @@ public partial class Dashboard : ComponentBase
 
         try
         {
-            var recentTask = CaptureService.GetRecentAsync(10);
-            var countsTask = CaptureService.GetFailureCountsAsync();
-            var skillsTask = SkillRegistry.GetHealthAsync();
-            var integrationsTask = IntegrationHealthService.GetHealthAsync();
-
-            await Task.WhenAll(recentTask, countsTask, skillsTask, integrationsTask);
-
-            _recent = recentTask.Result;
-            _failureCounts = countsTask.Result;
-            _skills = skillsTask.Result;
-            _integrations = integrationsTask.Result;
+            // Sequential awaits — these services share the scoped EF DbContext,
+            // and EF Core forbids concurrent operations on a single context. Same
+            // root cause as the CaptureDetail fix.
+            _recent = await CaptureService.GetRecentAsync(10);
+            _failureCounts = await CaptureService.GetFailureCountsAsync();
+            _skills = await SkillRegistry.GetHealthAsync();
+            _integrations = await IntegrationHealthService.GetHealthAsync();
         }
         catch (Exception ex)
         {

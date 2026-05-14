@@ -8,5 +8,5 @@
   "expected": [
     "Empty state shows 'No captures match' or similar zero-results message"
   ],
-  "passes": false
+  "passes": true
 }

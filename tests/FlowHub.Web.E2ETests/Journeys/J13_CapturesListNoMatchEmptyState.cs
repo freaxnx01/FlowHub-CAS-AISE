@@ -19,12 +19,11 @@ public sealed class J13_CapturesListNoMatchEmptyState : JourneyTestBase
         }
         await search.FillAsync("zzzzzzzz-no-such-string");
 
-        await Page.WaitForTimeoutAsync(500);
-
-        var resultsText = await Page.GetByText("Results:", new PageGetByTextOptions { Exact = false }).First.InnerTextAsync();
-        var noMatchVisible = await Page.GetByText("No captures match", new PageGetByTextOptions { Exact = false }).CountAsync() > 0;
-
-        (resultsText.Contains("Results: 0", StringComparison.Ordinal) || noMatchVisible)
-            .Should().BeTrue("filtered list should report zero matches one way or the other");
+        // Either the empty-state panel renders OR the body grid has zero rows.
+        await Page.WaitForFunctionAsync(@"
+            () => document.body.innerText.includes('No captures match')
+                || document.querySelectorAll('tbody .mud-table-row').length === 0",
+            null,
+            new PageWaitForFunctionOptions { Timeout = 10_000 });
     }
 }

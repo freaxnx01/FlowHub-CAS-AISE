@@ -15,7 +15,7 @@ public sealed class J07_DashboardRowClickOpensDetail : JourneyTestBase
         await GotoAsync("/");
 
         // Wait for the Recent Captures grid to populate
-        var firstRow = Page.Locator(".mud-table-row").First;
+        var firstRow = Page.Locator("tbody .mud-table-row").First;
         await firstRow.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
         await firstRow.ClickAsync();
 

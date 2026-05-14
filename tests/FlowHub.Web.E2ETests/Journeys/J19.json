@@ -9,5 +9,5 @@
     "Click '← Back to Captures'"
   ],
   "expected": ["URL ends with /captures"],
-  "passes": false
+  "passes": true
 }

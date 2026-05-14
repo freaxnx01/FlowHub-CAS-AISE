@@ -9,5 +9,5 @@
     "URL changes to /captures?lc=Orphan",
     "Captures list pre-selects the Orphan lifecycle chip"
   ],
-  "passes": false
+  "passes": true
 }

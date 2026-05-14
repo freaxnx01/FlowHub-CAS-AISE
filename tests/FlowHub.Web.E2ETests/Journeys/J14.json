@@ -6,5 +6,5 @@
   "preconditions": ["At least one capture exists"],
   "steps": ["Click the first row in the captures grid"],
   "expected": ["URL changes to /captures/{guid}"],
-  "passes": false
+  "passes": true
 }

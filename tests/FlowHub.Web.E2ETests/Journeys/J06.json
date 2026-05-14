@@ -8,5 +8,5 @@
   "expected": [
     "URL contains /captures?lc=Unhandled"
   ],
-  "passes": false
+  "passes": true
 }

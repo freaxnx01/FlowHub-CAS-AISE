@@ -14,7 +14,7 @@ public sealed class J19_CaptureDetailBackLink : JourneyTestBase
     {
         await GotoAsync("/captures");
 
-        var firstRow = Page.Locator(".mud-table-row").First;
+        var firstRow = Page.Locator("tbody .mud-table-row").First;
         await firstRow.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
         await firstRow.ClickAsync();
 

@@ -8,5 +8,5 @@
   "expected": [
     "URL changes to /captures/{guid}"
   ],
-  "passes": false
+  "passes": true
 }

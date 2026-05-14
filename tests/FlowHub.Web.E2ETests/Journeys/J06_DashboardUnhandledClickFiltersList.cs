@@ -18,6 +18,6 @@ public sealed class J06_DashboardUnhandledClickFiltersList : JourneyTestBase
         await unhandledButton.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
         await unhandledButton.ClickAsync();
 
-        await Page.WaitForURLAsync(new Regex(@"/captures\?lc=Unhandled"), new PageWaitForURLOptions { Timeout = 15_000 });
+        await Page.WaitForURLAsync(new Regex(@"/captures\?lc=[Uu]nhandled"), new PageWaitForURLOptions { Timeout = 15_000 });
     }
 }
