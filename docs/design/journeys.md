@@ -563,8 +563,8 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 
 | Status | Count | Journeys |
 |---|---|---|
-| ✅ Green | 23 | J01–J14, J16–J19, J21–J24, plus the `HappyFlowTests` fixture |
-| ❌ Red — environmental (data / wiring missing) | 5 | J15 (no Completed-stage capture in DB) · J25, J27 (live skill/integration registries return rows from EF but the page renders empty — needs investigation) · J26, J28 (negative-path: need a fault-injection hook to force the error branch — bUnit already covers it) |
+| ✅ Green | 25 | J01–J14, J16–J19, J21–J25, J27, plus the `HappyFlowTests` fixture |
+| ❌ Red — environmental (data missing) | 3 | J15 (no Completed-stage capture in DB — contrived test scenario) · J26, J28 (negative-path: need a fault-injection hook to force the error branch — bUnit already covers it) |
 
 ### Closed in this iteration
 
@@ -576,12 +576,12 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 6. ✅ **Same parallel-DbContext bug as the earlier CaptureDetail fix surfaced in `Dashboard.LoadAsync`** — four services hitting the shared scoped EF context via `Task.WhenAll` silently threw "second operation on context instance", so all four cards rendered as null forever. Switched to sequential awaits → unblocked J05, J06, J07.
 7. ✅ J05/J06 URL regex made case-insensitive — Dashboard navigates to lowercase `?lc=orphan` / `?lc=unhandled`.
 
+8. ✅ **Investigation: not a wiring bug, just an empty DB.** EF queries on `Skills` / `Integrations` were correctly returning 0 rows. Added migration `0005_SeedSkillsAndIntegrations` with `HasData(...)` for the 6 baseline skills (Books, Movies, Articles, Quotes, Knowledge, Belege) and 6 baseline integrations (Wallabag, Wekan, Vikunja, Paperless, Obsidian, Authentik). Legitimate catalog values, not test fixtures — they ship with every deployment. Closes J25, J27.
+
 ### Still open
 
-8. ⏳ Seed a Completed-stage capture in the dev DB — unblocks J15.
-9. ⏳ Investigate why `/skills` and `/integrations` render empty even though the EF queries return rows in the logs — unblocks J25, J27.
+9. ⏳ Seed a Completed-stage capture in the dev DB — unblocks J15. Skipped here because a hard-coded "fake completed capture" feels wrong as production seed data; better tackled with a test-side helper that submits a capture and force-marks it complete.
 10. ⏳ Optional: an `IFaultInjector` test-only DI hook — unblocks J26, J28. bUnit already owns the negative path so this is low priority.
 11. ⏳ J07 occasionally flakes under full-suite load (passes solo in 1 s). A per-page `data-page-ready` marker (set in each page's `OnAfterRender(firstRender)`) would be the proper deterministic fix.
-7. ⏳ Optional: an `IFaultInjector` test-only DI hook — unblocks J26, J28. bUnit already owns the negative path so this is low priority.
 
 **bUnit cross-coverage** (`tests/FlowHub.Web.ComponentTests/`): still 126/126 green. The bUnit suite owns the component-level negative paths (forced exceptions, error alerts, validation messages) for J02, J23, J26, J28 — the E2E equivalents can't trigger those states against a healthy live system without a fault-injection hook.
