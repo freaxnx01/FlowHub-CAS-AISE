@@ -434,3 +434,9 @@ flowhub.db-wal
 .worktrees/
 .claude/worktrees/
 .make/
+
+# Moodle source content — copyright FFHS / third parties, never commit to public repo
+# (paraphrases/notes in vault/Blöcke, vault/Projektarbeit, etc. are fine)
+vault/_files/Moodle/
+**/Moodle/Modul/
+*_Moodle.pdf
