@@ -9,6 +9,7 @@ using FlowHub.Skills;
 using FlowHub.Web.Auth;
 using FlowHub.Web.Components;
 using FlowHub.Web.Pipeline;
+using FlowHub.Web.Testing;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -143,6 +144,14 @@ builder.Services.AddMassTransit(x =>
 // Block 3 Slice A — REST API surface for non-UI consumers.
 builder.Services.AddFlowHubApi();
 
+// E2E-only: fault-injection decorators (no-op unless FLOWHUB_E2E_FAULTS_ENABLED=true).
+// Used by the J26 / J28 Playwright specs to force ISkillRegistry / IIntegrationHealthService
+// to throw — bUnit owns the same negative path at the component level.
+if (E2EFaultExtensions.IsEnabled)
+{
+    builder.Services.AddE2EFaultInjection();
+}
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -163,6 +172,12 @@ app.MapRazorComponents<App>()
 app.MapFlowHubApi();
 app.MapOpenApi("/openapi/v1.json");
 app.MapScalarApiReference();
+
+// E2E-only test endpoints: POST /test/faults/{skills|integrations}/{arm|disarm}.
+if (E2EFaultExtensions.IsEnabled)
+{
+    app.MapE2EFaultEndpoints();
+}
 
 // Liveness — anonymous so the Docker healthcheck (and OIDC mode) doesn't get a 302/401.
 app.MapHealthChecks("/health/live").AllowAnonymous();

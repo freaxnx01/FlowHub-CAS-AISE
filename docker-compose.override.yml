@@ -7,6 +7,8 @@ services:
       - "5070:5070"
     environment:
       Serilog__MinimumLevel: Debug
+      # E2E fault-injection endpoints (used by Playwright J26 + J28). Dev-only.
+      FLOWHUB_E2E_FAULTS_ENABLED: "true"
 
   postgres:
     ports:

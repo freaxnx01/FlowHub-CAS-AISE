@@ -10,13 +10,22 @@ public sealed class J26_SkillsPageLoadFailure : JourneyTestBase
     [Fact]
     public async Task SkillsPage_ShowsErrorAlertWhenRegistryFails()
     {
-        // Cannot force the failure path against live persistence; bUnit
-        // (SkillsTests.Render_LoadFailure_ShowsErrorAlertWithRetry) covers it.
-        // This spec is intentionally red until a feature toggle / fault-injection
-        // hook lets us trigger the error branch from the test side.
-        await GotoAsync("/skills");
+        // Arms FlowHub.Web's IFaultInjector via /test/faults/skills/arm so the
+        // server-side ISkillRegistry decorator throws on the next call. Disarmed
+        // in finally so a failed assertion can't poison subsequent tests.
+        using var http = new HttpClient { BaseAddress = new Uri(Fixture.BaseUrl) };
+        var arm = await http.PostAsync("/test/faults/skills/arm", content: null);
+        arm.EnsureSuccessStatusCode();
+        try
+        {
+            await GotoAsync("/skills");
 
-        await Page.Locator(".mud-alert", new PageLocatorOptions { HasText = "Could not load skills" })
-            .First.WaitForAsync(new LocatorWaitForOptions { Timeout = 5_000 });
+            await Page.Locator(".mud-alert", new PageLocatorOptions { HasText = "Could not load skills" })
+                .First.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
+        }
+        finally
+        {
+            (await http.PostAsync("/test/faults/skills/disarm", content: null)).EnsureSuccessStatusCode();
+        }
     }
 }

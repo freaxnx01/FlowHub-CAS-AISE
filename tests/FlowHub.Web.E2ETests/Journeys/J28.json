@@ -8,5 +8,5 @@
   "expected": [
     "Error alert 'Could not load integrations' is visible (live system, can't easily force failure path; bUnit covers it)"
   ],
-  "passes": false
+  "passes": true
 }
