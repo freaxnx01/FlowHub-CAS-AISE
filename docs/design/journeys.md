@@ -563,21 +563,25 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 
 | Status | Count | Journeys |
 |---|---|---|
-| ✅ Green | 18 | J01, J02, J03, J04, J08, J09, J10, J11, J12, J16, J17, J18, J20, J21, J22, J23, J24, plus the `HappyFlowTests` fixture |
-| ❌ Red — environmental (data / wiring missing) | 7 | J05, J15 (no Orphan/Completed capture in DB) · J06 (NeedsAttentionCard renders no orphan/unhandled buttons even though 4 Unhandled captures exist — likely a `GetFailureCountsAsync` query mismatch worth its own bug) · J25, J27 (live registry/health service returns empty rows in the UI even though EF queries succeed) · J26, J28 (negative-path: need a fault-injection hook to force the error branch — bUnit already covers it) |
-| ❌ Red — Blazor handler-bind timing on row clicks | 4 | J07, J13, J14, J19 (MudDataGrid `RowClick` handlers wire up *after* `MainLayout.OnAfterRender`; the global circuit-ready sentinel isn't a fine-grained enough signal) |
+| ✅ Green | 23 | J01–J14, J16–J19, J21–J24, plus the `HappyFlowTests` fixture |
+| ❌ Red — environmental (data / wiring missing) | 5 | J15 (no Completed-stage capture in DB) · J25, J27 (live skill/integration registries return rows from EF but the page renders empty — needs investigation) · J26, J28 (negative-path: need a fault-injection hook to force the error branch — bUnit already covers it) |
 
 ### Closed in this iteration
 
-1. ✅ Added `Immediate="true"` to `QuickCaptureField`'s MudTextField — fixes J01 (and `HappyFlowTests`). bUnit test updated to use `input.Input(...)` instead of `input.Change(...)` to match the new oninput binding mode.
-2. ✅ Added a `#blazor-circuit-ready` sentinel to `MainLayout` (rendered only after `OnAfterRender(firstRender)`), and `JourneyTestBase.GotoAsync` now waits on `WaitForSelectorState.Attached` for it — replaces the previous fixed 2 s sleep with a deterministic signal.
+1. ✅ Added `Immediate="true"` to `QuickCaptureField`'s MudTextField — fixes J01 (and `HappyFlowTests`). bUnit test updated to use `input.Input(...)` instead of `input.Change(...)`.
+2. ✅ Added a `#blazor-circuit-ready` sentinel to `MainLayout` (rendered only after `OnAfterRender(firstRender)`), and `JourneyTestBase.GotoAsync` waits for it via `WaitForSelectorState.Attached` — deterministic replacement for the previous fixed 2 s sleep.
+3. ✅ `JourneyTestBase.GotoAsync` also waits (best-effort, 3 s cap) for all `.mud-skeleton` placeholders to clear — proves OnInitializedAsync data load completed and event handlers on data-derived elements are bound.
+4. ✅ Row-click selectors changed from `.mud-table-row` (also matches MudDataGrid header) to `tbody .mud-table-row` — closes J14, J19.
+5. ✅ J13 assertion uses a `WaitForFunction` accepting either the no-match panel text OR a body-row count of zero.
+6. ✅ **Same parallel-DbContext bug as the earlier CaptureDetail fix surfaced in `Dashboard.LoadAsync`** — four services hitting the shared scoped EF context via `Task.WhenAll` silently threw "second operation on context instance", so all four cards rendered as null forever. Switched to sequential awaits → unblocked J05, J06, J07.
+7. ✅ J05/J06 URL regex made case-insensitive — Dashboard navigates to lowercase `?lc=orphan` / `?lc=unhandled`.
 
 ### Still open
 
-3. ⏳ Per-page sentinel or post-data-load wait — needed to close the 4 row-click reds (J07, J13, J14, J19). Blazor's `MudDataGrid.RowClick` handlers don't bind until the grid finishes its own render *after* OnInitialized data load. Options: (a) add a per-page `data-page-ready` marker that flips in each page's `OnAfterRender(firstRender)`, (b) wait for a known data-derived element (e.g. a row whose content matches a freshly-submitted capture).
-4. ⏳ Seed a deterministic dataset (1 Orphan, 1 Completed) — unblocks J05, J15.
-5. ⏳ Investigate `GetFailureCountsAsync` — Captures-list shows 4 Unhandled but the Dashboard's NeedsAttentionCard shows zero buttons. Likely a real bug, not a test problem. Unblocks J06.
-6. ⏳ Wire the live `ISkillRegistry` / `IIntegrationHealthService` to render rows in the UI — unblocks J25, J27. EF queries are firing but the page renders empty; needs investigation.
+8. ⏳ Seed a Completed-stage capture in the dev DB — unblocks J15.
+9. ⏳ Investigate why `/skills` and `/integrations` render empty even though the EF queries return rows in the logs — unblocks J25, J27.
+10. ⏳ Optional: an `IFaultInjector` test-only DI hook — unblocks J26, J28. bUnit already owns the negative path so this is low priority.
+11. ⏳ J07 occasionally flakes under full-suite load (passes solo in 1 s). A per-page `data-page-ready` marker (set in each page's `OnAfterRender(firstRender)`) would be the proper deterministic fix.
 7. ⏳ Optional: an `IFaultInjector` test-only DI hook — unblocks J26, J28. bUnit already owns the negative path so this is low priority.
 
 **bUnit cross-coverage** (`tests/FlowHub.Web.ComponentTests/`): still 126/126 green. The bUnit suite owns the component-level negative paths (forced exceptions, error alerts, validation messages) for J02, J23, J26, J28 — the E2E equivalents can't trigger those states against a healthy live system without a fault-injection hook.
