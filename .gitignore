@@ -432,4 +432,5 @@ flowhub.db-wal
 
 # Git worktrees
 .worktrees/
+.claude/worktrees/
 .make/
