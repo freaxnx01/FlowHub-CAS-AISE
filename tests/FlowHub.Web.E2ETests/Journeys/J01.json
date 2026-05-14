@@ -12,5 +12,5 @@
     "Snackbar shows 'Captured ✓'",
     "Quick-capture input is cleared"
   ],
-  "passes": false
+  "passes": true
 }

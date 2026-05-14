@@ -8,8 +8,18 @@ public partial class MainLayout : LayoutComponentBase
     [Inject] private IConfiguration Configuration { get; set; } = default!;
 
     private bool _drawerOpen;
+    private bool _circuitReady;
 
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && !_circuitReady)
+        {
+            _circuitReady = true;
+            StateHasChanged();
+        }
+    }
 
     private bool DemoMode => string.Equals(
         Configuration["Demo:Mode"],

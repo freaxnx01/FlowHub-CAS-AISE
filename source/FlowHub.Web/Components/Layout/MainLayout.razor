@@ -47,3 +47,11 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
+@* E2E sentinel — only rendered after OnAfterRenderAsync(firstRender),
+   which guarantees the SignalR circuit is connected and event handlers
+   are bound. Playwright waits for this before clicking. *@
+@if (_circuitReady)
+{
+    <div id="blazor-circuit-ready" style="display:none"></div>
+}

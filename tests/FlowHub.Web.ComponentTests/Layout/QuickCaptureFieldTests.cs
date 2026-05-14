@@ -46,7 +46,8 @@ public class QuickCaptureFieldTests : TestContext
 
         var cut = RenderComponent<QuickCaptureField>();
         var input = cut.Find("input");
-        input.Change("https://example.com");
+        // MudTextField now uses Immediate="true" → bind on oninput, not onchange.
+        input.Input("https://example.com");
         input.TriggerEvent("onkeydown", new KeyboardEventArgs { Key = "Enter" });
 
         _captureService.Received(1).SubmitAsync(

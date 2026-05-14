@@ -35,13 +35,19 @@ public abstract class JourneyTestBase : IAsyncLifetime
 
     /// <summary>
     /// Stable navigation for Interactive Server Blazor: DOMContentLoaded for the
-    /// shell, then a brief warmup so the SignalR circuit can wire up event
-    /// handlers (RowClick, OnAdornmentClick, button OnClick, …). Without the
-    /// warmup, fast Playwright clicks fire before Blazor binds the handlers.
+    /// shell, then wait for the #blazor-circuit-ready sentinel that MainLayout
+    /// renders only after OnAfterRender(firstRender) fires (= SignalR circuit
+    /// connected, event handlers bound). Replaces the old fixed 2 s sleep with
+    /// a deterministic signal.
     /// </summary>
     protected async Task GotoAsync(string url)
     {
         await Page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
-        await Page.WaitForTimeoutAsync(2000);
+        await Page.Locator("#blazor-circuit-ready")
+            .WaitForAsync(new LocatorWaitForOptions
+            {
+                Timeout = 15_000,
+                State = WaitForSelectorState.Attached,
+            });
     }
 }
