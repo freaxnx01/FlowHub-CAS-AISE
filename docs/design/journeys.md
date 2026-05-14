@@ -563,8 +563,8 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 
 | Status | Count | Journeys |
 |---|---|---|
-| ✅ Green | 25 | J01–J14, J16–J19, J21–J25, J27, plus the `HappyFlowTests` fixture |
-| ❌ Red — environmental (data missing) | 3 | J15 (no Completed-stage capture in DB — contrived test scenario) · J26, J28 (negative-path: need a fault-injection hook to force the error branch — bUnit already covers it) |
+| ✅ Green | 27 | J01–J25, J27, plus the `HappyFlowTests` fixture |
+| ❌ Red — negative path needing fault injection | 2 | J26, J28 (live system can't be forced to throw `GetHealthAsync`; bUnit owns the negative path for both) |
 
 ### Closed in this iteration
 
@@ -578,9 +578,10 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 
 8. ✅ **Investigation: not a wiring bug, just an empty DB.** EF queries on `Skills` / `Integrations` were correctly returning 0 rows. Added migration `0005_SeedSkillsAndIntegrations` with `HasData(...)` for the 6 baseline skills (Books, Movies, Articles, Quotes, Knowledge, Belege) and 6 baseline integrations (Wallabag, Wekan, Vikunja, Paperless, Obsidian, Authentik). Legitimate catalog values, not test fixtures — they ship with every deployment. Closes J25, J27.
 
+9. ✅ **J15 via test-side fixture, not seed data.** Added `E2EDbHelpers.UpsertCompletedCaptureAsync` (idempotent INSERT … ON CONFLICT UPDATE) that the J15 spec calls before navigating. Stable Guid `1111…1111`. Direct `Npgsql` write — no dev-only product API endpoint, no fake Completed capture polluting the migration. The helper uses the same connection string as `FlowHubDbContextFactory` and is overridable via `FLOWHUB_E2E_DB`.
+
 ### Still open
 
-9. ⏳ Seed a Completed-stage capture in the dev DB — unblocks J15. Skipped here because a hard-coded "fake completed capture" feels wrong as production seed data; better tackled with a test-side helper that submits a capture and force-marks it complete.
 10. ⏳ Optional: an `IFaultInjector` test-only DI hook — unblocks J26, J28. bUnit already owns the negative path so this is low priority.
 11. ⏳ J07 occasionally flakes under full-suite load (passes solo in 1 s). A per-page `data-page-ready` marker (set in each page's `OnAfterRender(firstRender)`) would be the proper deterministic fix.
 

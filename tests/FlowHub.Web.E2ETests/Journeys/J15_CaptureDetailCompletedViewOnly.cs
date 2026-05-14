@@ -7,15 +7,19 @@ public sealed class J15_CaptureDetailCompletedViewOnly : JourneyTestBase
 {
     public J15_CaptureDetailCompletedViewOnly(PlaywrightFixture fixture) : base(fixture, "J15.json") { }
 
+    // Stable Guid for the J15 fixture row. Idempotent upsert means concurrent
+    // runs and re-runs are safe.
+    private static readonly Guid CompletedFixtureId =
+        Guid.Parse("11111111-1111-1111-1111-111111111111");
+
     [Fact]
     public async Task OpenCompletedCapture_ShowsMetadataWithoutActionButtons()
     {
-        await GotoAsync("/captures");
+        await E2EDbHelpers.UpsertCompletedCaptureAsync(
+            CompletedFixtureId,
+            "J15 fixture — Completed capture, view-only");
 
-        // Find a row whose lifecycle badge reads 'completed' and click it
-        var row = Page.Locator(".mud-table-row", new PageLocatorOptions { HasText = "completed" }).First;
-        await row.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
-        await row.ClickAsync();
+        await GotoAsync($"/captures/{CompletedFixtureId}");
 
         await Page.GetByText("Metadata", new PageGetByTextOptions { Exact = false })
             .First.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });

@@ -13,5 +13,5 @@
     "No 'Routing failed' alert",
     "No Retry/Reassign/Ignore buttons"
   ],
-  "passes": false
+  "passes": true
 }
