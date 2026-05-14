@@ -3,6 +3,8 @@
   <PropertyGroup>
     <RootNamespace>FlowHub.Persistence</RootNamespace>
     <AssemblyName>FlowHub.Persistence</AssemblyName>
+    <!-- CA1861: EF-generated migration files use inline array literals; rule is N/A for generated code. -->
+    <NoWarn>$(NoWarn);CA1861</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

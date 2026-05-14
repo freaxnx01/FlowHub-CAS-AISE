@@ -8,5 +8,5 @@
   "expected": [
     "Grid contains at least Books and Movies"
   ],
-  "passes": false
+  "passes": true
 }

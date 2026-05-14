@@ -8,5 +8,5 @@
   "expected": [
     "Grid contains at least Wallabag and Vikunja"
   ],
-  "passes": false
+  "passes": true
 }
