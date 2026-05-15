@@ -25,13 +25,42 @@ The full project description with stakeholders, scope, architecture, and risks l
 
 ---
 
-## 2. Repository
+## 2. Repository & demo environment
 
 - **GitHub:** <https://github.com/freaxnx01/FlowHub-CAS-AISE>
 - **Branch (submission state):** `main`
+- **Live demo:** <https://demo.flowhub.freaxnx01.ch> — see §2.1 below; operating notes in [`docs/runbooks/public-demo.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/public-demo.md)
 - **License / README:** [`README.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/README.md)
 - **Changelog:** [`CHANGELOG.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CHANGELOG.md)
 - **Agent conventions:** [`CLAUDE.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CLAUDE.md)
+
+### 2.1 What the demo environment shows
+
+The demo at <https://demo.flowhub.freaxnx01.ch> is a self-contained, public instance designed to let any reviewer experience the round-trip "submit a Capture → see it classified by AI → see lifecycle progress" without needing accounts, credentials, or local setup.
+
+**What is wired:**
+
+- **Capture submission** via Quick Capture (any page), Long Form, and the REST API (`POST /api/v1/captures`).
+- **AI classification** through `AiClassifier` against OpenRouter `google/gemma-4-31b-it:free`. The `MatchedSkill` and `Classified` lifecycle stage are visible on the dashboard within a few seconds of submission.
+- **Keyword-classifier auto-fallback** when OpenRouter is rate-limited or the daily free quota is exhausted — the demo continues serving without a hard error (transparent in the lifecycle metadata).
+- **Lifecycle pipeline** end-to-end: `Pending → Classified → Routed → Failed/Unmatched`, fully driven by the MassTransit async pipeline (in-memory transport in the demo overlay).
+- **Dashboard & lists** with per-stage counts, recent captures, lifecycle chips, and the captures list with filters and search.
+- **Health endpoints:** `/health/live` and `/metrics` are reachable; Prometheus-format metrics include `dotnet_*` and `http_*` series.
+- **Open access (no auth):** `DemoAuthHandler` auto-signs every request — fully open by design.
+- **Self-reset:** a sidecar truncates Captures + Tags + SkillRuns every 15 minutes and reseeds a small fixture set so the dashboard is never empty.
+
+**What is intentionally disabled (and why):**
+
+- **Real skill integrations** (Wallabag, Vikunja) — captures stop at the `Classified` stage so the demo never writes to anyone's real account. The routing target is still visible as `MatchedSkill` on each capture.
+- **Semantic search / embeddings** — the embedding key is unset; `GET /api/v1/captures/search` returns a 503 ProblemDetails with an explanatory body rather than fake results.
+- **Prometheus & Grafana UI** — not exposed publicly; metrics are still scraped internally by the operator.
+
+**Operational guard-rails:**
+
+- **Rate limit** at the Traefik edge: 10 req/min average, 20-req burst per source IP.
+- **Hard $1/month spend cap** on the OpenRouter key — exhaustion triggers the keyword fallback, never an out-of-pocket bill.
+- **Data lifetime ≤ 15 min** — nothing persists across the next reset, including any inappropriate user content.
+- **Public-demo posture** documented in detail in [`docs/runbooks/public-demo.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/public-demo.md).
 
 ---
 
