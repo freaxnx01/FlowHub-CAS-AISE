@@ -21,10 +21,14 @@ Three parallel slices:
 
 ## Lessons Learned
 
-- MassTransit's in-memory transport processes messages synchronously during `await bus.Publish()` — useful for integration tests but requires care not to block the request thread
-- `IChatClient` from MEAI abstracts provider differences cleanly; the `ConfigureOptions(o => o.ModelId = model)` pattern avoids repeating model name on every call
-- bUnit's `IRenderedComponent<T>.WaitForState()` is essential for testing components that await async service calls
+- MassTransit's in-memory transport processes messages synchronously during `await bus.Publish()` — useful for integration tests but requires care not to block the request thread in production code paths.
+- `IChatClient` from MEAI abstracts provider differences cleanly; the `ConfigureOptions(o => o.ModelId = model)` pattern avoids repeating model name on every call and keeps provider swaps to a single DI registration.
+- bUnit's `IRenderedComponent<T>.WaitForState()` is essential for testing components that await async service calls — `Render()` returns synchronously, leading to flaky tests if you assert directly.
+- **Three parallel slices only worked because each slice had its own port-in-Core contract.** API consumes `ICaptureService`, MassTransit consumers consume the same, the AI classifier consumes `IClassifier`. None of the slices touched another slice's implementation. The classic hexagonal payoff finally clicked here.
+- The async pipeline (ADR 0003) is the one place where MassTransit's developer-fault observer (`LifecycleFaultObserver`) earned its weight — DLQ events would otherwise vanish silently in dev when the in-memory transport drops them.
+- **Cost discipline matters once an LLM is wired in.** A leaky retry loop with Claude as the backend can rack up dollars in minutes. The `KeywordClassifier` fallback is not just a graceful-degradation feature — it is the cost-cap for "API key forgotten in CI".
+- AI-generated OpenAPI annotations were accurate in shape but generic in wording; rewriting summaries by hand was worth the time because Scalar renders them prominently to clients.
 
 ## AI Tooling
 
-Used Claude Code for the MassTransit consumer scaffold and FluentValidation setup. The generated `CaptureEnrichmentConsumer` required correction of message retry policy (exponential intervals instead of fixed). AI-generated OpenAPI metadata annotations were accurate. All business logic written by hand.
+Used Claude Code for the MassTransit consumer scaffold and FluentValidation setup. The generated `CaptureEnrichmentConsumer` required correction of message retry policy (exponential intervals instead of fixed). AI-generated OpenAPI metadata annotations were accurate. All business logic written by hand. The biggest tooling lesson of Block 3: **the `superpowers` spec → plan → implement loop with hard `/clear` between phases** made three parallel slices feasible in a single block budget — see `vault/Projektarbeit/Learnings.md` §5.

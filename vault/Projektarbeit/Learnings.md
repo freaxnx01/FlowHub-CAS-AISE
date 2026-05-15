@@ -2,7 +2,7 @@
 tags:
   - claude-generated
   - claude-updated
-updated: 2026-05-03
+updated: 2026-05-15
 ---
 
 # Learnings CAS AISE
@@ -54,3 +54,19 @@ Eng verwandt mit der Logs-via-File-Disziplin ist die Frage, wie man **mehrphasig
 3. **Implement** — wieder neue Session: `> Execute the xyz plan via subagent-driven-development`
 
 Der Trick liegt im `/clear`: jede Phase produziert ein **Artefakt auf Disk** (Spec-MD, Plan-MD, Code-Diff), das in der nächsten Phase als reiner Input zurückgelesen wird. Den vorherigen Hin-und-her-Dialog mitzuschleppen liefert keinen Mehrwert — die Entscheidungen sind im Artefakt festgehalten — kostet aber konstant Tokens und lenkt das Modell mit veralteten Zwischenstands-Diskussionen ab. Diese Disziplin ist die strukturelle Variante des Logs-via-File-Patterns: was zwischen Phasen weiterleben muss, gehört in eine Datei; was nur Gesprächs-Begleitmaterial war, darf gelöscht werden. Praktisch macht das bei nicht-trivialen Features den Unterschied zwischen einer fokussierten Implementierung und einem zähen, immer langsamer werdenden Mega-Thread.
+
+---
+
+## Bewertungs-Selbstcheck als kontinuierliche Disziplin
+
+Eine spezifische Lektion aus dem CAS-Kontext, die generischer ist als sie zunächst wirkt: die Moodle-Bewertungskriterien (18 Items, 100 Punkte) wurden bewusst nicht als Endkontrolle behandelt, sondern als **fortlaufend prüfbares Gerüst**. Konkret entstand dafür das Skill `cas-aise-grade-self-check`, das die Rubrik aus `vault/Organisation/Bewertungskriterien.md` einliest, jedes Item gegen reale Repo-Evidenz (ADRs, Tests, Docker-Compose, Insights-Files, …) klassifiziert und einen Punkte-Forecast plus priorisierte Lücken-Liste produziert. Am Ende jeder Block-Nachbereitung lief der Selfcheck — nicht erst kurz vor der Abgabe.
+
+Der Effekt war praktisch und psychologisch zugleich. Praktisch, weil Lücken früh sichtbar wurden, solange der Block-Kontext noch frisch im Kopf war — eine fehlende NfA-Spezifikation oder ein dünn geratenes Insight-Dokument lassen sich Tage nach dem PVA mit deutlich weniger Aufwand schliessen als nach drei Wochen. Psychologisch, weil das Skill den Druck aus der finalen Abgabe nimmt: statt zwei Wochen vor der Deadline herauszufinden, dass das höchstgewichtete 12-Punkte-Item (KI-Nutzung) noch undokumentiert ist, war jeder Block-Nachbereitungs-Endstand bereits ein bewertungsfähiges Mini-Submission. Die übertragbare Erkenntnis: **wenn es ein definiertes Erfolgskriterium gibt, lohnt es sich, dieses Kriterium in Code zu giessen** — als Linter, als Skill, als CI-Check — und kontinuierlich laufen zu lassen, nicht punktuell zu prüfen. Das gilt für Bewertungsrubriken genauso wie für Architekturkonventionen, Test-Coverage-Schwellen oder Compliance-Anforderungen in einem Berufskontext.
+
+---
+
+## Plan-vs-Execute strikt trennen
+
+Verwandt mit dem Phasen-Pattern, aber eine eigene Erkenntnis: Agents sind im **Planen** und im **Ausführen** sehr gut — aber schwach, wenn sie beides gleichzeitig sollen. Die typische Falle ist, einen Agent mit "Build feature X" zu beauftragen und dabei zu erwarten, dass er erst denkt und dann tippt. In der Praxis springt das Modell oft sofort in Code, weil die nächste Edit-Aktion eine niedrige Latenz hat — Planung kostet Tokens, Ausführen erzeugt sichtbaren Fortschritt. Das Resultat sind Implementierungen, die nach drei Iterationen plötzlich in eine Sackgasse laufen, weil eine grundlegende Designentscheidung übersprungen wurde.
+
+Die Gegenstrategie ist Werkzeug-gestützt: der `superpowers:writing-plans` Skill produziert in einer dedizierten Plan-Session einen Markdown-Plan mit nummerierten Schritten, Risiken und Reviewpunkten — ohne eine einzige Code-Edit. Erst danach, in einer frischen Session (`/clear`), wird der Plan via `subagent-driven-development` ausgeführt; der ausführende Agent sieht nur den Plan, nicht die Plan-Diskussion. Dieser harte Schnitt verhindert, dass Planung "im Vorbeigehen" passiert und liefert nebenbei ein durchsuchbares Artefakt unter `docs/superpowers/plans/`, das später als Begründung für Designentscheidungen taugt — der ADR-Light fürs eigene Tooling. Die übertragbare Lektion ist banal, aber zählt: **wer Plan und Execute mischt, kriegt am Ende beides schlechter**.

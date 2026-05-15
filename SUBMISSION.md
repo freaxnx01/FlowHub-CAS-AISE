@@ -59,8 +59,25 @@ The full project description with stakeholders, scope, architecture, and risks l
 - [System Context](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/system-context.md)
 - [Use Cases](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/use-cases.md)
 - [Non-functional requirements (SMART)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/nfa.md)
+- [Acceptance Criteria](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/acceptance-criteria.md) — Given/When/Then per use case + submission release checklist
 - [Testing Strategy](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/testing-strategy.md)
-- DB model: see [ADR 0005 — Persistence](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0005-persistence.md) plus EF migrations under [`source/FlowHub.Persistence/Migrations`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/source/FlowHub.Persistence/Migrations)
+- **Test results (submission snapshot — Tag `v0.1.0`):**
+
+  | Test project | Tests | Layer |
+  |---|--:|---|
+  | `FlowHub.Web.ComponentTests` | 119 | Blazor components (bUnit) |
+  | `FlowHub.Web.E2ETests` | 30 | End-to-end (Playwright) |
+  | `FlowHub.Persistence.Tests` | 29 | EF Core + Testcontainers |
+  | `FlowHub.Skills.Tests` | 20 | Skill unit tests |
+  | `FlowHub.Api.IntegrationTests` | 17 | Minimal-API + ASP.NET TestHost |
+  | `FlowHub.Skills.ContractTests` | 13 | Skill contract suite |
+  | `FlowHub.AI.IntegrationTests` | 4 | Live LLM (`SkippableFact`, env-gated) |
+  | `FlowHub.Skills.IntegrationTests` | 2 | Live skill (`SkippableFact`, env-gated) |
+  | **Total** | **234** | |
+
+  Last green CI run for Tag `v0.1.0`: see [GitHub Actions runs](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml?query=branch%3Amain) (`ci.yml` workflow). Coverage artifacts are uploaded per run; XPlat coverage collector runs across the full solution (`dotnet test FlowHub.slnx --collect:"XPlat Code Coverage"`).
+
+- [**DB model**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/db-model.md) — ER diagram (Mermaid) + table/index summary; design rationale in [ADR 0005](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/adr/0005-persistence.md); EF migrations under [`source/FlowHub.Persistence/Migrations`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/source/FlowHub.Persistence/Migrations)
 - UI design output (wireframes & flows per feature):
   - [Dashboard](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/docs/design/dashboard)
   - [Captures List](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/docs/design/captures-list)
@@ -166,7 +183,42 @@ Deeper notes from the lectures, not part of the primary grading scope but refere
 
 ---
 
-## 4. Notes for the reviewer
+## 4. Conclusion — what AI delivered and where it stopped
+
+This chapter is the consolidated reflection on AI-assisted engineering across the five CAS blocks. The detailed per-tool catalogue lives in [`docs/ai-usage.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/ai-usage.md); the personal Lessons-Learned essay in [`vault/Projektarbeit/Learnings.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Learnings.md). This section synthesises both.
+
+### 4.1 Where AI delivered most value
+
+- **Block 1 — Foundations.** Claude Code wrote the initial domain model (`Capture`, `LifecycleStage`, `ChannelKind`, port interfaces) from the FlowHub idea note alone. The skeleton was usable in under an hour; what previously took a half-day of typing was reduced to *reviewing* generated code.
+- **Block 2 — Frontend.** The mandatory 4-phase UI workflow (`/ui-brainstorm → /ui-flow → /ui-build → /ui-review`) prevented the typical AI failure mode of jumping straight to component code. ASCII wireframes and Mermaid flows became contracts the agent then implemented; bUnit tests were generated together with the components.
+- **Block 3 — Service.** Three independent slices (REST API, MassTransit pipeline, AI classifier) were developed via the `superpowers` spec → plan → implement loop with hard `/clear` between phases. This kept context lean and let me parallelise across agents without thread bleed.
+- **Block 4 — Persistence.** EF Core migrations, `EfCaptureService`, seed data, and skill/integration adapters (Wallabag, Vikunja) were largely AI-authored. The biggest win: schema decisions stayed traceable in ADR 0005 because the agent was *asked* to draft the ADR before writing code.
+- **Block 5 — Deployment.** Multi-stage Dockerfile, GitHub Actions workflows (`ci.yml`, `release.yml`, `migrations.yml`), Grafana dashboards, OIDC integration with Authentik — all scaffolded by Claude Code, reviewed and trimmed by hand. The pgvector + Mistral embedding search (ADR 0006) is the strongest example of "intelligent service built *with* AI."
+
+### 4.2 Where AI hit limits
+
+- **Cross-cutting refactors.** Renames or invariant changes that span 10+ files still need a human to plan the sequence — agents apply local edits well but lose track of subtle ordering (e.g. migrate-then-cleanup, change-port-then-adapter). LSP-driven exploration (see Learnings) only partly mitigated this.
+- **Test correctness vs. test coverage.** Agents produce passing tests easily; producing tests that would actually *fail on a regression* required strict TDD discipline (failing test first, never modify a test to make it green). Without the rule baked into `CLAUDE.md`, AI-written tests would have drifted into tautologies.
+- **Domain judgement.** "Is this the right abstraction?" remained a human call. The agent would happily generalise three similar lines into a premature abstraction unless explicitly told to prefer duplication until a pattern emerged. The `simplify` and `brainstorming` skills helped, but the final architectural judgement stayed with me.
+- **Hallucinated APIs.** MEAI and EF Core 10 are still recent; agents occasionally invented method signatures or used outdated patterns from the pre-`Microsoft.Extensions.AI` era. The `microsoft-code-reference` skill caught most cases, but not all — context7 / official docs lookups remained mandatory checkpoints.
+- **Cost / context discipline.** Without the "logs via file" rule (see Learnings §3), debug sessions inflated context to the point of degraded responses within a few iterations. Discipline is needed; the model does not enforce it.
+
+### 4.3 Recommendations for future projects
+
+1. **Treat agent instructions as production code.** `CLAUDE.md`, `.ai/base-instructions.md`, and the skill library are the single biggest leverage point. Invest in them early; refactor them as the project evolves.
+2. **Write skills, not prompt snippets.** Skills bring discoverability (trigger descriptions), verifiability (explicit steps), and reusability across agents (Claude Code, Codex, Gemini, Copilot all consume the same files).
+3. **Split skills into thematic plugins.** Loading every skill into every session is wasteful; activate only the plugins relevant to today's work. FlowHub-CAS sessions activate `cas-aise-*`, `flowhub`, and a narrow `superpowers` set — nothing else.
+4. **`/clear` between phases is not optional.** Spec → plan → implement, each in its own session, each handing off an artefact on disk. This single discipline made multi-day features feasible without context degradation.
+5. **Pin grading criteria into the instructions.** The `cas-aise-grade-self-check` skill reads the Moodle rubric and grades against actual repo evidence. Running it at the end of every block kept FlowHub close to "submission-ready" continuously instead of catching gaps in the final week.
+6. **Use AI for the things humans dislike doing.** Boilerplate (Dockerfiles, CI YAML, EF migrations, ADR scaffolding, test setup) is where AI saves the most time. Architecture decisions and domain modelling stay collaborative — the agent proposes, the human chooses.
+
+### 4.4 Personal bottom line
+
+FlowHub would have been 2–3× slower without AI assistance, and substantially less consistent. The hard work was not "getting the AI to write code" — that is solved. The hard work was building the surrounding discipline (instructions, skills, context hygiene, phase gates) so that the AI's output was repeatable, reviewable, and aligned with project conventions. That discipline is the deliverable I keep with me beyond this CAS.
+
+---
+
+## 5. Notes for the reviewer
 
 - **Primary entry point** is this file (`SUBMISSION.md`) — every other artefact is reachable via the links in section 3.
 - **Codebase** lives in the same repository under [`source/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/source) (module structure); tests under [`tests/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/tests).
