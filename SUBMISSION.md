@@ -176,7 +176,8 @@ Operational documentation from Block 5 (grading bucket *Sub-systems / containers
 - [Claude pipeline overview](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/CLAUDE-PIPELINE.md)
 - Runbooks:
   - [Authentik OIDC setup](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/authentik-oidc-setup.md)
-  - [Beta-MVP acceptance](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/beta-mvp-acceptance.md)
+  - [**v0.1.0 final acceptance**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/v0.1.0-final-acceptance.md) — submission-state end-to-end check
+  - [Beta-MVP acceptance (Block 4 milestone, historical)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/beta-mvp-acceptance.md)
   - [Public demo](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/public-demo.md)
   - [Test services](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/test-services.md)
 - Monitoring: [Grafana dashboards](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/docs/monitoring/grafana)

@@ -136,7 +136,7 @@ Acceptance criteria per use case in Given/When/Then form. Each row maps to a spe
 - **Then** `flowhub.web`, `postgres`, `rabbitmq`, `prometheus`, `grafana` become healthy within 60 s
 - **And** the EF migrations init container exits 0 before `flowhub.web` reports ready
 - **And** `https://<host>/health/live` and `/metrics` are reachable from the host
-- *Runbook: [`docs/runbooks/beta-mvp-acceptance.md`](../runbooks/beta-mvp-acceptance.md)*
+- *Runbook: [`docs/runbooks/v0.1.0-final-acceptance.md`](../runbooks/v0.1.0-final-acceptance.md) (final submission state); historical Block-4 milestone in [`beta-mvp-acceptance.md`](../runbooks/beta-mvp-acceptance.md)*
 
 ---
 

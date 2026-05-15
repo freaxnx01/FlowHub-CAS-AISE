@@ -1,15 +1,17 @@
-# Beta MVP — Operator Acceptance Runbook (Task 21)
+# End-to-end acceptance — Beta-MVP milestone (Block 4, historical)
 
-- **Source:** `docs/superpowers/plans/2026-05-04-beta-mvp.md` §"Task 21"
-- **Goal:** Validate the Beta MVP slice end-to-end against the real homelab Wallabag + Vikunja, then push the branch.
-- **Branch:** `feat/beta-mvp` (28 commits ahead of `main`)
-- **Pre-state:** `make build` clean, `make test` 138/138 green. All operator-facing changes already committed.
+> **Scope note.** This runbook captures the **end-to-end acceptance procedure executed when the Beta-MVP slice landed at the end of Block 4** (persistence + first real skill integrations). It is preserved as the canonical "first time the full pipeline ran against real homelab services" record. For the **final submission state** (`v0.1.0`, Block 5) see [`v0.1.0-final-acceptance.md`](v0.1.0-final-acceptance.md) — the same seven-step path, updated for the Docker Compose deployment, the demo overlay, and the 234-test suite. The Beta branch (`feat/beta-mvp`) has long since been merged into `main`; the references below to "Task 21" point to the original Block-4 implementation plan and are kept for traceability.
+
+- **Original source:** `docs/superpowers/plans/2026-05-04-beta-mvp.md` §"Task 21"
+- **Goal at the time:** Validate the Beta-MVP slice end-to-end against the real homelab Wallabag + Vikunja, then push the branch.
+- **Branch at the time:** `feat/beta-mvp` (28 commits ahead of `main` — since merged)
+- **Pre-state at the time:** `make build` clean, `make test` 138/138 green.
 
 ---
 
 ## What this runbook does
 
-Walks through the seven-step demo path from the spec's *"Demo path (acceptance)"* section, plus the live Beta-smoke test run and the final push. Without this validation the Beta MVP slice is technically complete but architecturally unverified.
+Walks through the seven-step demo path from the Beta-MVP spec's *"Demo path (acceptance)"* section, plus the live Beta-smoke test run and the final push. This is the procedure that first proved the end-to-end Capture → AI-classify → Skill-route → Integration-write pipeline against real services.
 
 **Time budget:** 30–60 min depending on how many test captures you make.
 
