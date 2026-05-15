@@ -254,6 +254,6 @@ pdf-submission-bundle: ## Build SUBMISSION-bundle.pdf — SUBMISSION.md + every 
 	tools/submission-bundle.sh tools/build/submission-bundle.md
 	node $(PDF_RENDERER) tools/build/submission-bundle.md SUBMISSION-bundle.pdf --title "FlowHub — CAS AISE Submission Bundle"
 
-pdf-eigenstaendigkeitserklaerung: ## Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration)
+pdf-eigenstaendigkeitserklaerung: ## Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
 	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
-	node $(PDF_RENDERER) docs/submission/eigenstaendigkeitserklaerung.md "Eigenständigkeitserklärung.pdf" --title "FlowHub — Hilfsmittelverzeichnis & Eigenständigkeitserklärung"
+	node $(PDF_RENDERER) docs/submission/eigenstaendigkeitserklaerung.md "Eigenständigkeitserklärung.pdf" --title "FlowHub — Hilfsmittelverzeichnis & Eigenständigkeitserklärung" --compact

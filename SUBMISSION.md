@@ -11,6 +11,16 @@
 
 This file is the single entry point for the CAS AISE project submission. It is rendered to PDF and uploaded to Moodle, and deliberately contains **no full content** — every artefact (architecture, ADRs, block notes, reflection, rubric self-check, …) lives in the linked GitHub repository and is reachable through the table of contents below. All links target the `main` branch and are clickable from within the PDF.
 
+### Reviewer quick path
+
+If you want to spend the minimum time and still cover the rubric, do this:
+
+1. **Open the live demo** at <https://demo.flowhub.freaxnx01.ch> (1 min) — submit a Capture, watch the lifecycle chip transition from `Pending → Classified → Routed`. This covers the *Container deployment*, *Intelligent services with AI*, and *async pipeline* rubric items in a single click, no clone required.
+2. **Skim this PDF top to bottom** (~10 min). Section 1 is the project summary; §3 is the table of contents into the repository; §4 is the consolidated AI-usage reflection; §6 points at the separately signed Eigenständigkeitserklärung.
+3. **Optional deep dive** (~30 min) by interest: §3.2 (ADRs 0001–0006), §3.3 (Use Cases, NfA, Acceptance Criteria, Testing Strategy, DB model), §3.5 (Block Nachbereitungen with per-block self-assessment), §3.4 + `docs/ai-usage.md` (the 12-pt rubric item).
+
+Every code-based rubric claim can be verified by clicking the corresponding link in §3 — no local clone required. If you do want to clone, the repository's [`README.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/README.md) has a 3-option onboarding (demo / docker compose / make build+test).
+
 ---
 
 ## 1. Project summary
