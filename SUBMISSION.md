@@ -274,6 +274,7 @@ The following table declares every aid used in producing this submission — tex
 | Claude Haiku 4.5 | Mechanical tasks under the same SDD workflow — project scaffolding, file moves, repetitive registrations, documentation stubs. | Various scaffolding and registration tasks in Blocks 3–5; details per-block in `docs/ai-usage.md`. |
 | GitHub Copilot | Inline code suggestions during editing in VS Code. | Sparingly — Claude Code drives sessions end-to-end; Copilot used only for short completions outside dedicated sessions. |
 | ChatGPT (GPT-4 family) | Ad-hoc concept clarification and side checks while Claude Code was mid-task on another track. | Occasional cross-checks; not used to generate submitted code or text directly. |
+| DeepL / Google Translate | Translation between German and English for selected passages (e.g. Moodle source wording in §2 and the original German vault notes referenced from English documents). | Selected German↔English passages in SUBMISSION.md, `docs/ai-usage.md`, `vault/Projektarbeit/Learnings.md`. |
 | Mistral `mistral-embed` (via API) | **Runtime component of the product itself** — embeddings for the FlowHub semantic-search feature (`Captures.Embedding`, ADR 0006). Not used to produce submission text. | Production code only: `FlowHub.AI` embedding adapter; `Captures` table column. |
 | OpenRouter (Gemma free tier) | **Runtime component of the public demo only** — classification fallback when the demo's $1 OpenRouter budget is not exhausted. Not used to produce submission text. | Demo environment only (`demo.flowhub.freaxnx01.ch`). |
 
@@ -290,6 +291,6 @@ Hiermit erkläre ich,
 - dass das Thema, die Arbeit oder Teile davon nicht bereits Gegenstand eines Leistungsnachweises eines anderen Moduls waren, sofern dies nicht ausdrücklich mit der Referentin oder dem Referenten im Voraus vereinbart wurde,
 - dass ich mir bewusst bin, dass meine Arbeit elektronisch auf Plagiate und auf Drittautorschaft menschlichen oder technischen Ursprungs überprüft werden kann und ich hiermit der FFHS das Nutzungsrecht so weit einräume, wie es für diese Verwaltungshandlungen notwendig ist.
 
-**Ort, Datum:** Zürich, vor der Abgabe am 2026-07-04
+**Ort, Datum:** Sisseln, vor der Abgabe am 2026-07-04
 **Name:** Andreas Imboden
 **Unterschrift:** _____________________________
