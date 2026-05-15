@@ -58,7 +58,7 @@ In der letzten Nachbearbeitungsphase geht es nun darum, die Lösung zu container
 ### Programmierung
 
 - [x] **Code lesbar/dokumentiert/strukturiert (7)** — alle Module sauber, README pro Hauptprojekt, Inline-Doku wo Why nicht obvious
-- [x] ~~Quarkus / Jakarta EE~~ — N/A (Stack: .NET 10)
+- [x] **Stack-Equivalence (Quarkus-Item, max 10)** — bewusst **nicht** auf 0/0 N/A gewertet, sondern als .NET-Äquivalenz argumentiert: CDI→`Microsoft.Extensions.DependencyInjection`, MicroProfile Config→`IConfiguration`, JAX-RS→Minimal API + OpenAPI, Reactive Messaging→MassTransit (ADR 0003), Hibernate→EF Core+Npgsql (ADR 0005), MicroProfile Health/Metrics→Health Checks+OTel/Prometheus, LangChain4j→`Microsoft.Extensions.AI` (ADR 0004), Vector Search→pgvector (ADR 0006), Container-First→Multi-Stage Dockerfile+Alpine. Vollständige Mapping-Tabelle im Submission Document §3.9.
 - [x] **Erkenntnisse dokumentiert (3)** — `docs/insights/` mit Block-1 bis -5 Erkenntnissen
 - [x] **Source in Git (2)** — alles auf `main` gepusht; Tag `v0.1.0` für die Abgabe-Version (Directory.Build.props ships 0.1.0; Bewertungskriterien-Item ist 0/2 binär — erreicht)
 

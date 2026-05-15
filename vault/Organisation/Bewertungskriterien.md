@@ -66,7 +66,7 @@ Offizielle Moodle-Rubrik für die Projektarbeit. **Source of truth** für alle B
 - 7 — überwiegend bzw. mehrheitlich
 - 10 — vollständig bzw. korrekt
 
-> **FlowHub-Kontext:** Stack-Mismatch — FlowHub ist .NET 10 / ASP.NET Core / Blazor / EF Core. Dieses Kriterium wird **nicht aktiv verfolgt**. Die generischen "modernen Konzepte" (DI, Configuration, OpenAPI, async/await, Testbarkeit) sind über das Stack-äquivalente .NET-Ökosystem ohnehin abgedeckt.
+> **FlowHub-Kontext:** Stack-Mismatch — FlowHub ist .NET 10 / ASP.NET Core / Blazor / EF Core. Bei der Abgabe wird das Item **nicht als N/A geführt**, sondern als **Stack-Equivalence** argumentiert: Die Rubrik-Formulierung *"Quarkus, Jakarta EE und modernen Java-Applikationen"* zielt auf moderne Applikationskonzepte, die in FlowHub vollständig im äquivalenten .NET-Ökosystem realisiert sind (CDI → `Microsoft.Extensions.DependencyInjection`, MicroProfile Config → `IConfiguration`, JAX-RS → Minimal API + OpenAPI, Reactive Messaging → MassTransit, JPA → EF Core, MicroProfile Health/Metrics → Health Checks + OTel/Prometheus, LangChain4j → `Microsoft.Extensions.AI`, pgvector, Multi-Stage Container). Vollständige Mapping-Tabelle im Submission Document §3.9.
 
 **Programmierung: Sind die Erkenntnisse aus der Programmierung dokumentiert**
 - 0 — nicht bzw. kaum
