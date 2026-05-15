@@ -59,17 +59,83 @@ The bundle inclusion list is defined in `tools/submission-bundle.sh`; edit there
 - Generated artefacts under `docs/superpowers/{specs,plans}/` (working notes, not deliverables).
 - The vault's `_files/Moodle/` directory (gitignored copyright FFHS).
 
-## Pre-flight checklist
+## Submission TODO checklist
 
-Before generating the final submission PDFs:
+Walk this list top-to-bottom. Each step is gated by the previous.
 
-- [ ] `git status` clean on `main`
-- [ ] Tag `v0.1.0` matches the version in `Directory.Build.props`
-- [ ] Last CI run on `main` is green (`gh run list --workflow=ci.yml --limit 1`)
-- [ ] `make pdf-submission` regenerates `SUBMISSION.pdf` without warnings
-- [ ] `make pdf-submission-bundle` regenerates `SUBMISSION-bundle.pdf` without warnings
-- [ ] Manual smoke read of `SUBMISSION.pdf` (table of contents links resolve, demo URL renders)
-- [ ] Upload before **2026-07-04 24:00** (two weeks after PVA 2026-06-20)
+### A — Code freeze (T-7 to T-1 days before deadline)
+
+- [ ] All Block-Nachbereitungen show `[x]` for every rubric item
+- [ ] `cas-aise-grade-self-check` skill reports ≥ 88 / 90 (or noted gaps consciously accepted)
+- [ ] `make test` green: **234 / 234** across all 8 test projects
+- [ ] `make build` clean with warnings-as-errors enforced
+- [ ] `git status` clean on `main`; no uncommitted/untracked files
+- [ ] Last CI run on `main` is green: `gh run list --workflow=ci.yml --branch=main --limit 1`
+- [ ] Tag `v0.1.0` exists and matches `<Version>0.1.0</Version>` in `Directory.Build.props`
+- [ ] GitHub Release for `v0.1.0` published with CHANGELOG content
+- [ ] No secret value leaked into the public tree (manual scan or `gitleaks`)
+
+### B — End-to-end acceptance (T-3 to T-1 days)
+
+- [ ] Run [`docs/runbooks/v0.1.0-final-acceptance.md`](docs/runbooks/v0.1.0-final-acceptance.md) on a clean host — all 7 steps pass
+- [ ] Public demo at `https://demo.flowhub.freaxnx01.ch` reachable, classification + keyword fallback both verified
+- [ ] OpenRouter spend dashboard shows the demo key well below the $1 cap
+
+### C — Submission document content (T-2 to T-1 days)
+
+- [ ] `SUBMISSION.md` proofread end-to-end (German *and* English passages)
+- [ ] Demo URL in §2 still resolves; demo currently running
+- [ ] §3 TOC: every link still resolves (no 404s — `gh repo view` against each path)
+- [ ] §6.1 Hilfsmittelverzeichnis covers every aid actually used (DeepL, Copilot, ChatGPT, Claude variants, …); ratios in line with `docs/ai-usage.md`
+- [ ] §6.2 Eigenständigkeitserklärung: **Ort = Sisseln**, Name = Andreas Imboden, Datum auf den Abgabe-Tag aktualisiert
+- [ ] Submission deadline (2026-07-04 24:00) reflected in §1 and §6.2
+
+### D — Render PDFs (T-1 day)
+
+- [ ] `make pdf-submission` → `SUBMISSION.pdf` regenerated without warnings
+- [ ] `make pdf-submission-bundle` → `SUBMISSION-bundle.pdf` regenerated without warnings
+- [ ] Open `SUBMISSION.pdf` in a viewer:
+  - [ ] Table of contents links are clickable
+  - [ ] Demo URL is clickable
+  - [ ] §6.1 Hilfsmittelverzeichnis renders as a clean table
+  - [ ] §6.2 Eigenständigkeitserklärung is on its own page break (or close to it)
+- [ ] Spot-check `SUBMISSION-bundle.pdf`: page-break separators present between sections, no missing files
+
+### E — Sign the Eigenständigkeitserklärung (T-1 to T-0)
+
+Pick **one** of the two paths:
+
+**E1 — Paper signature (classic):**
+- [ ] Print the page that contains §6.2 (or the whole PDF if you prefer)
+- [ ] Sign with pen
+- [ ] Scan the signed page back to PDF (single page is enough)
+- [ ] Either: merge the signed page into `SUBMISSION.pdf` (replace the unsigned §6.2 page), or upload the signed scan as a second attachment alongside `SUBMISSION.pdf`
+
+**E2 — Digital signature:**
+- [ ] Apply a digital signature to `SUBMISSION.pdf` on the §6.2 signature line (Adobe Acrobat / signed.com / FFHS smartcard certificate)
+- [ ] Verify the signature shows as valid after re-opening the PDF
+
+### F — Upload to Moodle (T-0, before 2026-07-04 24:00)
+
+- [ ] Log into FFHS Moodle, navigate to *PVA FS26 → Deployment & Abgabe Projektarbeit*
+- [ ] Upload `SUBMISSION.pdf` (signed, primary artefact)
+- [ ] If Moodle allows multiple attachments: also upload `SUBMISSION-bundle.pdf` (offline safety net)
+- [ ] Confirm the upload — Moodle shows the file and a submission timestamp
+- [ ] Take a screenshot of the confirmation (Moodle drops submissions occasionally; the screenshot is your fallback proof)
+
+### G — Post-submission (T+0)
+
+- [ ] Tag `v0.1.0-submitted` on the exact commit used to render the uploaded PDF (so the submitted state stays git-identifiable)
+- [ ] Push the tag: `git push origin v0.1.0-submitted`
+- [ ] Save the Moodle confirmation screenshot under `vault/_files/Moodle/` (gitignored, local only)
+- [ ] Update `vault/Blöcke/05 Deployment/05 Deployment - c) Nachbereitung.md` — mark *PDF auf Moodle hochladen* as `[x]`
+
+### Pre-flight quick check (one command)
+
+```bash
+make build && make test && make pdf-submission && make pdf-submission-bundle && \
+  echo "Pre-flight OK — proceed to sign + upload"
+```
 
 ## Outputs are gitignored
 
