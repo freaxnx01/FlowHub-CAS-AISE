@@ -581,8 +581,10 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 
 10. ✅ **J26 + J28 via opt-in fault injection.** `FlowHub.Web/Testing/` adds a tiny `IFaultInjector` singleton plus decorator wrappers around `ISkillRegistry` and `IIntegrationHealthService`. Both decorators and the `POST /test/faults/{name}/{arm|disarm}` endpoints register only when `FLOWHUB_E2E_FAULTS_ENABLED=true` is set in the environment; in any other deployment the namespace is dead code. The env var is set in `docker-compose.override.yml` (dev/demo overlay) so the local stack ships ready-to-use; production compose files don't set it. Specs arm in setup, disarm in `finally` so a failing assertion can't poison subsequent tests.
 
+11. ✅ **Legacy `HappyFlowTests` removed.** Investigation pinned the intermittent full-suite flake on the bootstrap fixture (not J07 as the earlier note suggested). HappyFlowTests used `WaitUntilState.NetworkIdle` and a bare `tr` selector — exactly the patterns we'd already replaced for the journey suite. Since J01 (QuickCapture submit) + J14 (captures-list row click) + J19 (back navigation) cover the same end-to-end flow with the deterministic sentinel + `tbody .mud-table-row` selector, the legacy fixture was redundant. Five consecutive full-suite runs pass at 28/28.
+
 ### Still open
 
-11. ⏳ J07 occasionally flakes under full-suite load (passes solo in 1 s). A per-page `data-page-ready` marker (set in each page's `OnAfterRender(firstRender)`) would be the proper deterministic fix.
+_(none — full journey suite is stable.)_
 
 **bUnit cross-coverage** (`tests/FlowHub.Web.ComponentTests/`): still 126/126 green. The bUnit suite owns the component-level negative paths (forced exceptions, error alerts, validation messages) for J02, J23, J26, J28 — the E2E equivalents can't trigger those states against a healthy live system without a fault-injection hook.
