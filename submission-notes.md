@@ -4,10 +4,12 @@ Operator notes for the CAS AISE submission. Not part of the submitted artefact i
 
 ## TL;DR
 
-- **Source of truth:** `SUBMISSION.md` (Markdown, English).
-- **Primary artefact uploaded to Moodle:** `SUBMISSION.pdf` (hub style, ~10 pages, clickable links into the GitHub `main` branch).
-- **Secondary artefact (safety net):** `SUBMISSION-bundle.pdf` (~150–250 pages, everything inlined).
-- **Build:** `make pdf-submission` and `make pdf-submission-bundle`. Both regenerate from the same Markdown sources, no manual edits to the PDFs.
+- **Source of truth:** `SUBMISSION.md` (Markdown, English) + `docs/submission/eigenstaendigkeitserklaerung.md` (German, the signed Beilage).
+- **Mandatory Moodle uploads:**
+  - `SUBMISSION.pdf` — hub-style submission document, ~10 pages, clickable links into the GitHub `main` branch.
+  - `Eigenständigkeitserklärung.pdf` — separate signed PDF with Hilfsmittelverzeichnis + Eigenständigkeitserklärung (FFHS mandatory beilage).
+- **Optional safety net:** `SUBMISSION-bundle.pdf` (~150–250 pages, everything inlined).
+- **Build:** `make pdf-submission`, `make pdf-eigenstaendigkeitserklaerung`, `make pdf-submission-bundle`. All three regenerate from the same Markdown sources, no manual edits to the PDFs.
 
 ## Why two PDFs?
 
@@ -86,41 +88,47 @@ Walk this list top-to-bottom. Each step is gated by the previous.
 - [ ] `SUBMISSION.md` proofread end-to-end (German *and* English passages)
 - [ ] Demo URL in §2 still resolves; demo currently running
 - [ ] §3 TOC: every link still resolves (no 404s — `gh repo view` against each path)
-- [ ] §6.1 Hilfsmittelverzeichnis covers every aid actually used (DeepL, Copilot, ChatGPT, Claude variants, …); ratios in line with `docs/ai-usage.md`
-- [ ] §6.2 Eigenständigkeitserklärung: **Ort = Sisseln**, Name = Andreas Imboden, Datum auf den Abgabe-Tag aktualisiert
-- [ ] Submission deadline (2026-07-04 24:00) reflected in §1 and §6.2
+- [ ] `docs/submission/eigenstaendigkeitserklaerung.md` §1 Hilfsmittelverzeichnis covers every aid actually used (DeepL, Copilot, ChatGPT, Claude variants, …); ratios in line with `docs/ai-usage.md`
+- [ ] `docs/submission/eigenstaendigkeitserklaerung.md` §2 Eigenständigkeitserklärung: **Ort = Sisseln**, Name = Andreas Imboden, Datum auf den Abgabe-Tag aktualisiert
+- [ ] Submission deadline (2026-07-04 24:00) reflected in §1 of SUBMISSION.md
 
 ### D — Render PDFs (T-1 day)
 
 - [ ] `make pdf-submission` → `SUBMISSION.pdf` regenerated without warnings
 - [ ] `make pdf-submission-bundle` → `SUBMISSION-bundle.pdf` regenerated without warnings
+- [ ] `make pdf-eigenstaendigkeitserklaerung` → `Eigenständigkeitserklärung.pdf` regenerated without warnings
 - [ ] Open `SUBMISSION.pdf` in a viewer:
   - [ ] Table of contents links are clickable
   - [ ] Demo URL is clickable
-  - [ ] §6.1 Hilfsmittelverzeichnis renders as a clean table
-  - [ ] §6.2 Eigenständigkeitserklärung is on its own page break (or close to it)
+  - [ ] §6 points to the separate `Eigenständigkeitserklärung.pdf`
+- [ ] Open `Eigenständigkeitserklärung.pdf` in a viewer:
+  - [ ] Hilfsmittelverzeichnis table renders cleanly
+  - [ ] Signature line is visible and reachable for pen or digital signature
 - [ ] Spot-check `SUBMISSION-bundle.pdf`: page-break separators present between sections, no missing files
 
 ### E — Sign the Eigenständigkeitserklärung (T-1 to T-0)
 
-Pick **one** of the two paths:
+The signature applies to the **separate `Eigenständigkeitserklärung.pdf`**, not to `SUBMISSION.pdf` itself. Pick **one** of the two paths:
 
 **E1 — Paper signature (classic):**
-- [ ] Print the page that contains §6.2 (or the whole PDF if you prefer)
-- [ ] Sign with pen
-- [ ] Scan the signed page back to PDF (single page is enough)
-- [ ] Either: merge the signed page into `SUBMISSION.pdf` (replace the unsigned §6.2 page), or upload the signed scan as a second attachment alongside `SUBMISSION.pdf`
+- [ ] Print `Eigenständigkeitserklärung.pdf` (1–2 pages)
+- [ ] Fill in the date next to "Sisseln, _________" by hand
+- [ ] Sign with pen on the signature line
+- [ ] Scan the signed pages back to PDF, replacing `Eigenständigkeitserklärung.pdf`
 
 **E2 — Digital signature:**
-- [ ] Apply a digital signature to `SUBMISSION.pdf` on the §6.2 signature line (Adobe Acrobat / signed.com / FFHS smartcard certificate)
+- [ ] Open `Eigenständigkeitserklärung.pdf` in a signature tool (Adobe Acrobat / signed.com / FFHS smartcard certificate)
+- [ ] Fill in the date and apply a digital signature on the signature line
+- [ ] Save the signed PDF, overwriting the unsigned version
 - [ ] Verify the signature shows as valid after re-opening the PDF
 
 ### F — Upload to Moodle (T-0, before 2026-07-04 24:00)
 
 - [ ] Log into FFHS Moodle, navigate to *PVA FS26 → Deployment & Abgabe Projektarbeit*
-- [ ] Upload `SUBMISSION.pdf` (signed, primary artefact)
-- [ ] If Moodle allows multiple attachments: also upload `SUBMISSION-bundle.pdf` (offline safety net)
-- [ ] Confirm the upload — Moodle shows the file and a submission timestamp
+- [ ] Upload `SUBMISSION.pdf` (primary artefact)
+- [ ] Upload `Eigenständigkeitserklärung.pdf` (**signed** — mandatory beilage)
+- [ ] If Moodle allows further attachments: also upload `SUBMISSION-bundle.pdf` (offline safety net)
+- [ ] Confirm the upload — Moodle shows all files and a submission timestamp
 - [ ] Take a screenshot of the confirmation (Moodle drops submissions occasionally; the screenshot is your fallback proof)
 
 ### G — Post-submission (T+0)
@@ -133,8 +141,9 @@ Pick **one** of the two paths:
 ### Pre-flight quick check (one command)
 
 ```bash
-make build && make test && make pdf-submission && make pdf-submission-bundle && \
-  echo "Pre-flight OK — proceed to sign + upload"
+make build && make test && \
+  make pdf-submission && make pdf-eigenstaendigkeitserklaerung && make pdf-submission-bundle && \
+  echo "Pre-flight OK — proceed to sign Eigenständigkeitserklärung.pdf and upload"
 ```
 
 ## Outputs are gitignored

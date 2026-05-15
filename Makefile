@@ -18,7 +18,7 @@ SECRET_EXEC = bash -c 'set -a; [ -f .env ] && . ./.env; set +a; \
 	if command -v passbolt >/dev/null 2>&1; then exec passbolt exec -- "$$@"; \
 	else exec "$$@"; fi' --
 
-.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-contract test-services test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-submission pdf-submission-bundle pdf-install
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-contract test-services test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-submission pdf-submission-bundle pdf-eigenstaendigkeitserklaerung pdf-install
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
@@ -253,3 +253,7 @@ pdf-submission-bundle: ## Build SUBMISSION-bundle.pdf — SUBMISSION.md + every 
 	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
 	tools/submission-bundle.sh tools/build/submission-bundle.md
 	node $(PDF_RENDERER) tools/build/submission-bundle.md SUBMISSION-bundle.pdf --title "FlowHub — CAS AISE Submission Bundle"
+
+pdf-eigenstaendigkeitserklaerung: ## Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration)
+	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
+	node $(PDF_RENDERER) docs/submission/eigenstaendigkeitserklaerung.md "Eigenständigkeitserklärung.pdf" --title "FlowHub — Hilfsmittelverzeichnis & Eigenständigkeitserklärung"

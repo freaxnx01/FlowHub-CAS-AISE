@@ -64,6 +64,8 @@ FILES=(
   "2|Runbook — Test services|docs/runbooks/test-services.md"
 
   "1|Grading rubric|vault/Organisation/Bewertungskriterien.md"
+
+  "1|Hilfsmittelverzeichnis & Eigenständigkeitserklärung|docs/submission/eigenstaendigkeitserklaerung.md"
 )
 
 : > "$OUT"
