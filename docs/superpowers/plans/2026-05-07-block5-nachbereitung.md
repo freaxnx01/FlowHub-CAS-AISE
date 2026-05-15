@@ -1975,7 +1975,7 @@ git commit -m "feat(api): semantic search endpoint (GET /captures/search) + admi
 # Block 5 — Insights
 
 **Block:** 5 — Deployment & Abgabe  
-**Date range:** 2026-05-07 – 2026-07-06
+**Date range:** 2026-05-07 – 2026-07-04
 
 ## What We Built
 

@@ -3,7 +3,7 @@
 **Date:** 2026-05-07  
 **Phase budget:** 22 h  
 **PVA:** 2026-06-20  
-**Submission deadline:** 2026-07-06 00:00  
+**Submission deadline:** 2026-07-04 24:00  
 **Repo:** github.com/freaxnx01/FlowHub-CAS-AISE
 
 ---
@@ -207,7 +207,7 @@ GET /api/v1/captures/search?q=<query>&limit=10
 git tag v1.0.0 -m "release: v1.0.0 — CAS AISE Projektarbeit Abgabe"
 git push origin v1.0.0
 ```
-Upload PDF to Moodle before **2026-07-06 00:00**.
+Upload PDF to Moodle before **2026-07-04 24:00**.
 
 ---
 

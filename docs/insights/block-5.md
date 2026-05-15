@@ -1,7 +1,7 @@
 # Block 5 — Insights
 
 **Block:** 5 — Deployment & Abgabe  
-**Date range:** 2026-05-07 – 2026-07-06
+**Date range:** 2026-05-07 – 2026-07-04
 
 ## What We Built
 
