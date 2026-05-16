@@ -23,7 +23,7 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public async Task DisposeAsync() => await _container.DisposeAsync();
 
-    public async Task<FlowHubDbContext> CreateFreshDbAsync()
+    public async Task<FlowHubDbContext> CreateFreshDbAsync(bool seedCatalog = true)
     {
         var dbName = $"testdb_{Guid.NewGuid():N}";
 
@@ -39,6 +39,12 @@ public sealed class PostgresFixture : IAsyncLifetime
             .Options;
         var db = new FlowHubDbContext(options);
         await db.Database.MigrateAsync();
+
+        if (!seedCatalog)
+        {
+            await db.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Skills\", \"Integrations\" RESTART IDENTITY CASCADE");
+        }
+
         return db;
     }
 }
