@@ -1,5 +1,39 @@
 # Next Session Prompt
 
+> **2026-05-16 update — see top of file.** The block snapshot below ("submission-ready on paper", 171 tests, `v1.0.0` plan, 2026-07-06 deadline) is **superseded**. Submission tag is now `v0.1.0`, deadline is **2026-07-04 24:00**, total test count is **234**, and the SUBMISSION-document side (TOC, Fazit, NfA SMART, ACs, ER, Hilfsmittelverzeichnis, Eigenständigkeitserklärung, README) has been overhauled — the docs PR is on branch `worktree-doc`, step 1 (operator tooling + README + build pipeline) already merged via commit `07c43ad`. Keep this header section authoritative; the legacy snapshot below is kept for traceability only.
+
+---
+
+## [Open · critical] CI on main is red — 5 Persistence tests fail vs. seed migration
+
+CI run [`25961611444`](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/runs/25961611444) on `main` (commit `07c43ad`, 2026-05-16) — **5 / 29 fail** in `FlowHub.Persistence.Tests`. **Not** caused by today's docs-only commit; pre-existing since commit `738079d` (*feat(persistence): seed baseline Skills + Integrations via EF migration*, 2026-05-12) introduced an EF seed that the tests still expect to be absent.
+
+**Failing tests** (all in `tests/FlowHub.Persistence.Tests/Repositories/EfSkillRegistryTests.cs`):
+
+- `GetHealthAsync_EmptyDb_ReturnsEmptyList` — expects an empty result; gets `Articles`, plus the four seeded skills (`Movies`, `Quotes`, `Wallabag`, `Vikunja`).
+- `GetHealthAsync_ReturnsAllSkills` — expects N seeded by the test; gets `N + 5` because the migration seeds first.
+- (+ three more in the same file, same root cause.)
+
+**Why it matters for the submission:**
+
+- SUBMISSION.md §3.3 claims "234 / 234 tests green" and links the CI dashboard. Currently red.
+- Two rubric items take a direct hit if not fixed: *Unit-Tests (3 pt)* and *Test-Ergebnisse dokumentiert (3 pt)*. Together that's a 6-point exposure on a 90-point effective max.
+- Pre-flight gate A in `submission-notes.md` requires `make test` green.
+
+**Fix options** (pick one — first is cheapest):
+
+1. **Update the tests** to account for the seed. Either swap to `Contains` assertions or set up the test fixture to TRUNCATE-then-reseed-an-empty-set per case. Keeps production migration unchanged.
+2. **Guard the seed** behind `if (env != "Testing")` in the migration's `OnModelCreating` / data-seeding entry point. Cleaner conceptually but touches a committed migration.
+3. **Use a separate test `DbContext`** that overrides `OnModelCreating` to skip the seed. Most surgical, requires a small infra change in `PostgresFixture`.
+
+Recommendation: **Option 1** unless you want to invest now in a test-context split — Option 1 lands in one commit, fits the next session.
+
+---
+
+## Legacy snapshot — Block 5 Nachbereitung (2026-05-12)
+
+> Kept below for traceability. Reality has moved on; see the 2026-05-16 update at the top of this file.
+
 Block 5 Nachbereitung is **submission-ready on paper** as of 2026-05-12. The grade self-check estimates ~88 / 90 (rubric items in Spezifikation, Entwurf, Programmierung, Validierung, KI bucket all addressed); the remaining gaps need a human action.
 
 ## Repo snapshot (2026-05-12)
