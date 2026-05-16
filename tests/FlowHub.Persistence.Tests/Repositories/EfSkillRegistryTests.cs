@@ -10,7 +10,7 @@ public sealed class EfSkillRegistryTests(PostgresFixture fixture)
     [Fact]
     public async Task GetHealthAsync_ReturnsAllSkills()
     {
-        var db = await fixture.CreateFreshDbAsync();
+        var db = await fixture.CreateFreshDbAsync(seedCatalog: false);
         var skillRepo = new EfSkillRepository(db);
         await skillRepo.UpsertAsync(new SkillHealth("Wallabag", HealthStatus.Healthy, 5));
         await skillRepo.UpsertAsync(new SkillHealth("Vikunja", HealthStatus.Degraded, 2));
@@ -26,7 +26,7 @@ public sealed class EfSkillRegistryTests(PostgresFixture fixture)
     [Fact]
     public async Task GetHealthAsync_EmptyDb_ReturnsEmptyList()
     {
-        var db = await fixture.CreateFreshDbAsync();
+        var db = await fixture.CreateFreshDbAsync(seedCatalog: false);
         var sut = new EfSkillRegistry(new EfSkillRepository(db));
 
         var result = await sut.GetHealthAsync();
