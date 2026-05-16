@@ -563,7 +563,7 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 
 | Status | Count | Journeys |
 |---|---|---|
-| ✅ Green | 25 | J01–J14, J16–J19, J21–J25, J27, plus the `HappyFlowTests` fixture |
+| ✅ Green | 25 | J01–J14, J16–J20, J21–J25, J27, plus the `HappyFlowTests` fixture |
 | ❌ Red — environmental (data missing) | 3 | J15 (no Completed-stage capture in DB — contrived test scenario) · J26, J28 (negative-path: need a fault-injection hook to force the error branch — bUnit already covers it) |
 
 ### Closed in this iteration
