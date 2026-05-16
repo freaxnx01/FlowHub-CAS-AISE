@@ -39,7 +39,8 @@ FILES=(
   "2|Non-functional requirements (SMART)|docs/spec/nfa.md"
   "2|Acceptance criteria|docs/spec/acceptance-criteria.md"
   "2|Testing strategy|docs/spec/testing-strategy.md"
-  "2|Database model|docs/spec/db-model.md"
+  "2|Database model — entities|docs/design/db/entities.md"
+  "2|Database model — ER diagram|docs/design/db/er.md"
 
   "1|AI usage|docs/ai-usage.md"
   "1|Learnings (personal)|vault/Projektarbeit/Learnings.md"
@@ -58,7 +59,6 @@ FILES=(
 
   "1|Operations — CI/CD|docs/ci-cd.md"
   "2|Runbook — Authentik OIDC setup|docs/runbooks/authentik-oidc-setup.md"
-  "2|Runbook — v0.1.0 final acceptance|docs/runbooks/v0.1.0-final-acceptance.md"
   "2|Runbook — Beta-MVP acceptance (Block 4 milestone, historical)|docs/runbooks/beta-mvp-acceptance.md"
   "2|Runbook — Public demo|docs/runbooks/public-demo.md"
   "2|Runbook — Test services|docs/runbooks/test-services.md"
