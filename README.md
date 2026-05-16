@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/flowhub-logo.png" alt="FlowHub" width="420" />
+</p>
+
 # FlowHub
 
 **AI-assisted personal inbox** — captures everyday information snippets (movie tips, articles, receipts, bookmarks, notes), classifies them with a local/remote LLM, and routes them to the right self-hosted services in the user's homelab. Single user, modular monolith on .NET 10.
