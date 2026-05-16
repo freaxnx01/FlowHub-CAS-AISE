@@ -28,19 +28,21 @@ import hljs from "highlight.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function parseArgs(argv) {
-  const args = { input: null, output: null, title: null };
+  const args = { input: null, output: null, title: null, compact: false };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--title") {
       args.title = argv[++i];
+    } else if (a === "--compact") {
+      args.compact = true;
     } else {
       rest.push(a);
     }
   }
   [args.input, args.output] = rest;
   if (!args.input || !args.output) {
-    console.error("usage: render.mjs <input.md> <output.pdf> [--title 'Title']");
+    console.error("usage: render.mjs <input.md> <output.pdf> [--title 'Title'] [--compact]");
     process.exit(64);
   }
   return args;
@@ -103,10 +105,23 @@ function buildMarkdownIt() {
   return md;
 }
 
-function wrapHtml({ title, body, css }) {
+function wrapHtml({ title, body, css, compact }) {
   const escapedTitle = (title ?? "").replace(/[<>&]/g, (c) =>
     c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&amp;",
   );
+  const compactCss = compact
+    ? `
+.markdown-body { font-size: 12px; line-height: 1.45; }
+.markdown-body h1 { font-size: 1.6em; margin: 0.4em 0 0.4em; padding-bottom: 0.2em; }
+.markdown-body h2 { font-size: 1.25em; margin: 0.8em 0 0.3em; padding-bottom: 0.15em; }
+.markdown-body h3 { font-size: 1.1em; margin: 0.6em 0 0.25em; }
+.markdown-body p, .markdown-body ul, .markdown-body ol { margin: 0.35em 0; }
+.markdown-body li { margin: 0.15em 0; }
+.markdown-body table { font-size: 11px; }
+.markdown-body table th, .markdown-body table td { padding: 4px 8px; }
+.markdown-body hr { margin: 0.6em 0; }
+`
+    : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -123,6 +138,7 @@ ${css}
   h1, h2, h3, h4 { page-break-after: avoid; }
 }
 .mermaid svg { max-width: 100%; height: auto; }
+${compactCss}
 </style>
 </head>
 <body class="markdown-body">
@@ -141,7 +157,7 @@ ${body}
 }
 
 async function main() {
-  const { input, output, title } = parseArgs(process.argv.slice(2));
+  const { input, output, title, compact } = parseArgs(process.argv.slice(2));
   const inputAbs = path.resolve(input);
   const outputAbs = path.resolve(output);
 
@@ -150,7 +166,7 @@ async function main() {
   const html = renderer.render(md);
 
   const css = await loadCss();
-  const fullHtml = wrapHtml({ title: title ?? path.basename(input, ".md"), body: html, css });
+  const fullHtml = wrapHtml({ title: title ?? path.basename(input, ".md"), body: html, css, compact });
 
   const browser = await puppeteer.launch({
     headless: true,
@@ -166,10 +182,13 @@ async function main() {
       console.error("mermaid render timed out — proceeding with whatever is rendered");
     }
     await page.emulateMediaType("print");
+    const printMargin = compact
+      ? { top: "12mm", right: "14mm", bottom: "14mm", left: "14mm" }
+      : { top: "20mm", right: "18mm", bottom: "22mm", left: "18mm" };
     await page.pdf({
       path: outputAbs,
       format: "A4",
-      margin: { top: "20mm", right: "18mm", bottom: "22mm", left: "18mm" },
+      margin: printMargin,
       printBackground: true,
       displayHeaderFooter: true,
       headerTemplate: "<span></span>",

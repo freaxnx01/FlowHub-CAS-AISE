@@ -440,3 +440,9 @@ flowhub.db-wal
 vault/_files/Moodle/
 **/Moodle/Modul/
 *_Moodle.pdf
+
+# Submission PDF build artefacts (regenerated from SUBMISSION.md on demand)
+SUBMISSION.pdf
+SUBMISSION-bundle.pdf
+tools/build/
+Eigenständigkeitserklärung.pdf

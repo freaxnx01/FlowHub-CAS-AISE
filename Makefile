@@ -18,7 +18,7 @@ SECRET_EXEC = bash -c 'set -a; [ -f .env ] && . ./.env; set +a; \
 	if command -v passbolt >/dev/null 2>&1; then exec passbolt exec -- "$$@"; \
 	else exec "$$@"; fi' --
 
-.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-contract test-services test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-install
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-contract test-services test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-submission pdf-submission-bundle pdf-eigenstaendigkeitserklaerung pdf-install
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
@@ -244,3 +244,16 @@ pdf: ## Render an arbitrary Markdown file to PDF. Usage: make pdf FILE=docs/foo.
 pdf-projektbeschreibung: ## Regenerate docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf from the matching .md
 	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
 	node $(PDF_RENDERER) $(PROJBESCHR_MD) $(PROJBESCHR_PDF) --title "FlowHub – Projektbeschreibung"
+
+pdf-submission: ## Render SUBMISSION.md → SUBMISSION.pdf (hub PDF — links into the GitHub main branch)
+	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
+	node $(PDF_RENDERER) SUBMISSION.md SUBMISSION.pdf --title "FlowHub — CAS AISE Submission Document"
+
+pdf-submission-bundle: ## Build SUBMISSION-bundle.pdf — SUBMISSION.md + every referenced artefact inlined (safety net)
+	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
+	tools/submission-bundle.sh tools/build/submission-bundle.md
+	node $(PDF_RENDERER) tools/build/submission-bundle.md SUBMISSION-bundle.pdf --title "FlowHub — CAS AISE Submission Bundle"
+
+pdf-eigenstaendigkeitserklaerung: ## Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
+	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
+	node $(PDF_RENDERER) docs/submission/eigenstaendigkeitserklaerung.md "Eigenständigkeitserklärung.pdf" --title "FlowHub — Hilfsmittelverzeichnis & Eigenständigkeitserklärung" --compact
