@@ -28,6 +28,7 @@ jobs:
           dotnet test FlowHub.slnx \
             --no-build \
             --configuration Release \
+            --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E" \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --logger "trx;LogFileName=results.trx"

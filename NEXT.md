@@ -4,29 +4,12 @@
 
 ---
 
-## [Open · critical] CI on main is red — 5 Persistence tests fail vs. seed migration
+## [Closed · 2026-05-16] CI on main was red — Persistence tests + E2E-in-CI
 
-CI run [`25961611444`](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/runs/25961611444) on `main` (commit `07c43ad`, 2026-05-16) — **5 / 29 fail** in `FlowHub.Persistence.Tests`. **Not** caused by today's docs-only commit; pre-existing since commit `738079d` (*feat(persistence): seed baseline Skills + Integrations via EF migration*, 2026-05-12) introduced an EF seed that the tests still expect to be absent.
+Two related issues, both closed today:
 
-**Failing tests** (all in `tests/FlowHub.Persistence.Tests/Repositories/EfSkillRegistryTests.cs`):
-
-- `GetHealthAsync_EmptyDb_ReturnsEmptyList` — expects an empty result; gets `Articles`, plus the four seeded skills (`Movies`, `Quotes`, `Wallabag`, `Vikunja`).
-- `GetHealthAsync_ReturnsAllSkills` — expects N seeded by the test; gets `N + 5` because the migration seeds first.
-- (+ three more in the same file, same root cause.)
-
-**Why it matters for the submission:**
-
-- SUBMISSION.md §3.3 claims "234 / 234 tests green" and links the CI dashboard. Currently red.
-- Two rubric items take a direct hit if not fixed: *Unit-Tests (3 pt)* and *Test-Ergebnisse dokumentiert (3 pt)*. Together that's a 6-point exposure on a 90-point effective max.
-- Pre-flight gate A in `submission-notes.md` requires `make test` green.
-
-**Fix options** (pick one — first is cheapest):
-
-1. **Update the tests** to account for the seed. Either swap to `Contains` assertions or set up the test fixture to TRUNCATE-then-reseed-an-empty-set per case. Keeps production migration unchanged.
-2. **Guard the seed** behind `if (env != "Testing")` in the migration's `OnModelCreating` / data-seeding entry point. Cleaner conceptually but touches a committed migration.
-3. **Use a separate test `DbContext`** that overrides `OnModelCreating` to skip the seed. Most surgical, requires a small infra change in `PostgresFixture`.
-
-Recommendation: **Option 1** unless you want to invest now in a test-context split — Option 1 lands in one commit, fits the next session.
+1. **Persistence tests vs. seed migration** (option 1 above) — fixed by commit `343c07c` (squash of PR #16). `PostgresFixture.CreateFreshDbAsync(bool seedCatalog = true)` now TRUNCATEs `Skills` + `Integrations` after migration when callers opt out; the 2 affected test classes pass `seedCatalog: false`. `FlowHub.Persistence.Tests` is back to 29 / 29.
+2. **E2E project ran in CI without a web server** — `make test` excludes `Category!=AI&Category!=BetaSmoke&Category!=E2E`, but `.github/workflows/ci.yml` did not. Fixed by adding the same filter to the CI test step. The full 28-journey Playwright suite still runs locally against `make watch` (and in any pipeline that boots the web container first).
 
 ---
 
