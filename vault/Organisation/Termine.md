@@ -39,3 +39,6 @@ Nachbereitung: 22 h
 Vorbereitung: 30 h
 PVA
 Nachbereitung: 22 h
+
+
+Abgabe (Block 5 / Final): 2026-07-04 24:00
