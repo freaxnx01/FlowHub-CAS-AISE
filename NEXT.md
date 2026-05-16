@@ -4,6 +4,24 @@
 
 ---
 
+## [Tooling · 2026-05-16] New `cas-aise-submission-preflight` skill
+
+Released `cas-aise-submission-preflight` v0.1.1 in the [freax-claude-code-plugins](https://github.com/freaxnx01/claude-code-plugins) marketplace — sibling to `cas-aise-grade-self-check` and `cas-aise-todo-list`. Read-only dry-run before clicking submit on Moodle: rebuilds `SUBMISSION-bundle.pdf`, verifies TOC integrity, scans for Moodle-content leaks, folds in the rubric self-check, and prints a copy-pasteable manual upload checklist.
+
+Caught a real bundle-build failure on first invocation against Block 5 (three missing TOC targets in `tools/submission-bundle.sh` — `acceptance-criteria.md`, `db-model.md`, `v0.1.0-final-acceptance.md`). Driving fix cascade led to today's submission-readiness work:
+
+- `docs/spec/acceptance-criteria.md` — consolidated 50 ACs across 5 categories with per-criterion verification pointers (46 verified / 4 deferred-historical). Closed the rubric **Abnahmekriterien** line.
+- `tools/submission-bundle.sh` — re-pointed `db-model.md` to existing `docs/design/db/{entities,er}.md`; dropped the unwritten `v0.1.0-final-acceptance.md` entry.
+- 5 short stubs fleshed out: `docs/adr/README.md`, `docs/insights/block-{1,2,3}.md`, `vault/Blöcke/01 Einführung/...Nachbereitung.md` — now match the structure of block-4/5 insights with per-slice AI usage, metrics tables, and KI-Reflexion sections.
+- `vault/Organisation/Termine.md` — added the Block 5 `Abgabe (Block 5 / Final): 2026-07-04 24:00` entry so the deadline source is no longer NEXT.md-only.
+- `vault/Knowledge/Coursework-Glossary.md` — tracked.
+
+Latest preflight verdict against `main@71d14d5`: **✅ READY**, all gates pass, no warnings. `cas-aise-grade-self-check` Block 5 estimate: **90 / 90** (pessimistic floor ~86; Quarkus N/A).
+
+Release: <https://github.com/freaxnx01/claude-code-plugins/releases/tag/cas-aise-submission-preflight/v0.1.1>
+
+---
+
 ## [Closed · 2026-05-16] CI on main was red — Persistence tests + E2E-in-CI
 
 Two related issues, both closed today:
