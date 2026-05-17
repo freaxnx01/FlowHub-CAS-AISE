@@ -79,7 +79,7 @@ public sealed class SkillsServiceCollectionExtensionsTests
         {
             ["Skills:Vikunja:BaseUrl"] = "https://vikunja.example.com",
             ["Skills:Vikunja:ApiToken"] = "tok",
-            ["Skills:Vikunja:DefaultProjectId"] = "42",
+            ["Skills:Vikunja:FallbackProjectId"] = "42",
         });
 
         sp.GetServices<ISkillIntegration>().Should().ContainSingle(i => i.Name == "Vikunja");
@@ -100,7 +100,7 @@ public sealed class SkillsServiceCollectionExtensionsTests
         sp.GetServices<ISkillIntegration>().Should().NotContain(i => i.Name == "Vikunja");
         sp.GetServices<SkillsRegistrationOutcome>()
             .Single(o => o.Skill == "Vikunja")
-            .Reason.Should().Be("missing-project-id");
+            .Reason.Should().Be("missing-fallback-project-id");
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public sealed class SkillsServiceCollectionExtensionsTests
             ["Skills:Wallabag:ApiToken"] = "wal-tok",
             ["Skills:Vikunja:BaseUrl"] = "https://vikunja.example.com",
             ["Skills:Vikunja:ApiToken"] = "vik-tok",
-            ["Skills:Vikunja:DefaultProjectId"] = "42",
+            ["Skills:Vikunja:FallbackProjectId"] = "42",
         });
 
         var integrations = sp.GetServices<ISkillIntegration>().Select(i => i.Name).ToList();
