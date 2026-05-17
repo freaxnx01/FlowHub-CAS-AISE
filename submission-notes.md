@@ -4,7 +4,7 @@ Operator notes for the CAS AISE submission. Not part of the submitted artefact i
 
 ## TL;DR
 
-- **Source of truth:** `SUBMISSION.md` (Markdown, English) + `docs/submission/eigenstaendigkeitserklaerung.md` (German, the signed Beilage).
+- **Source of truth:** `SUBMISSION.md` (Markdown, German) + `docs/submission/eigenstaendigkeitserklaerung.md` (German, the signed Beilage).
 - **Mandatory Moodle uploads:**
   - `SUBMISSION.pdf` — hub-style submission document, ~10 pages, clickable links into the GitHub `main` branch.
   - `Eigenständigkeitserklärung.pdf` — separate signed PDF with Hilfsmittelverzeichnis + Eigenständigkeitserklärung (FFHS mandatory beilage).
