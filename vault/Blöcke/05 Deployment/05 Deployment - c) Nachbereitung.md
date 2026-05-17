@@ -1,14 +1,14 @@
 ---
 tags:
   - claude-generated
-updated: 2026-04-29
+updated: 2026-05-17
 ---
 
 # Block 5 — Deployment & Abgabe Projektarbeit · Nachbereitung
 
 **Phase budget:** 22 h
 **PVA war:** 2026-06-20
-**Abgabe-Deadline:** **Montag, 2026-07-06, 00:00** (PDF-Upload mit Repo-URL)
+**Abgabe-Deadline:** **Samstag, 2026-07-04, 24:00** (PDF-Upload mit Repo-URL)
 
 > **Final Block.** Hier wird die Bewertungs-Rubrik aus [[Bewertungskriterien]] **vollständig** geprüft — alle 5 Buckets müssen Abgabe-fähig sein. Was im jeweiligen Block-Nachbereitung nicht erledigt wurde, gehört hier nachgezogen.
 
@@ -23,7 +23,7 @@ updated: 2026-04-29
 
 In der letzten Nachbearbeitungsphase geht es nun darum, die Lösung zu containerisieren und für den Betrieb zu verteilen. Nutzen Sie die Möglichkeit Ihrer Git-Host-Lösung, um den Deployment-Prozess weitgehend zu automatisieren. Erweitern Sie Ihre Applikation um KI-basierende Suche und Workflows. Schliessen Sie Ihre Arbeit ab und laden Sie diese als PDF hoch. Die Arbeit enthält die URL auf das Git-Repository Ihrer Lösung.
 
-**Termin:** Bis zwei Wochen nach der letzten PVA — **konkret: 2026-07-06, 00:00**.
+**Termin:** Bis zwei Wochen nach der letzten PVA — **konkret: 2026-07-04, 24:00**.
 
 **Reflexion & Auswertung:** Reflexion über die anschliessende Bewertung der Arbeit und der Lösung.
 
@@ -132,7 +132,7 @@ In der letzten Nachbearbeitungsphase geht es nun darum, die Lösung zu container
 - [x] **Projektarbeit-PDF schreiben** — Inhalte: Vision, Use Cases, NfAs, Architektur (alle ADRs), DB-Modell, Programmierung-Highlights, Test-Strategie + Resultate, KI-Nutzung + Reflexion, Repo-URL
 - [x] Repo-URL prominent ins PDF: `github.com/freaxnx01/FlowHub-CAS-AISE`
 - [x] Tag `v0.1.0` setzen + zu Release pushen, CHANGELOG-Eintrag final — Tag `v0.1.0` (matches `Directory.Build.props` `<Version>0.1.0</Version>`) gepusht, `release.yml` grün, GitHub-Release veröffentlicht: <https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/tag/v0.1.0>
-- [ ] PDF auf Moodle hochladen vor **2026-07-06 00:00**
+- [ ] PDF auf Moodle hochladen vor **2026-07-04 24:00**
 
 ### Spezifikation & Doku konsolidieren
 
