@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-05-03
+updated: 2026-05-17
 ---
 
 # Block 2 — Frontend · Nachbereitung
@@ -20,6 +20,49 @@ updated: 2026-05-03
 - Master-Detail-Übung in mehreren Varianten
 
 Volltext: `_files/Moodle/Modul/2-Frontend/pdf/W4B-C-AS001.AISE.ZH-Sa-1.PVA.FS26_ Projektarbeit_ Frontend _ Moodle.pdf`
+
+---
+
+## Bewertungskriterien (Block 2)
+
+Snapshot am Ende der Block-2-Phase (~2026-04-25) gegen die offizielle Moodle-Rubrik aus [[Bewertungskriterien]]. Punkteangaben in Klammern zeigen Max-Score. Die Rubrik wird kumulativ erst bei Block 5 abschliessend bewertet — diese Sektion dokumentiert den Stand zum Block-2-Abschluss.
+
+> **Sektion nachträglich ergänzt (2026-05-17)** — damit das Pattern aus Block 3 / 4 / 5 auch in Block 1 / 2 vorhanden ist.
+
+> Quarkus/Jakarta-EE-Item ist für FlowHub (.NET-Stack) **nicht relevant** — bewusst ausgeklammert.
+
+### Spezifikation
+
+- [-] **Use Cases & fachliche Anforderungen (5)** — informelle UCs über die 6 implementierten Pages (Dashboard, New Capture, Captures, Capture-Detail, Skills, Integrations) + Glossary (`vault/Projektarbeit/Glossary.md`); formales UC-Dokument folgt in Block 3 (`docs/spec/use-cases.md`)
+- [-] **NfA SMART (5)** — Frontend-NfAs implizit über ADR 0001 (Render-Mode-Latenz, Stub-Service-Performance); SMART-Formalisierung folgt in Block 3 (`docs/spec/nfa.md`)
+- [x] **Solution Vision (5)** — ADR 0001 hält Frontend-Vision (Web UI als Channel, Stub-First, OIDC-Pfad) fest; Idee FlowHub + Glossary konkretisieren die Domäne
+
+### Entwurf
+
+- [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0001 (Render Mode + Architektur) + Wireframes (`docs/design/dashboard/wireframe.md` u.a.) + Page-Flow-Diagramme via `/ui-flow`
+- [-] **Struktur / Verhalten / Interaktion (7)** — Struktur über MudLayout-Shell + Component-Hierarchie; Verhalten/Interaktion über Mermaid-Page-Flows; voller C4-Container-View folgt in Block 3
+- [ ] **DB-Modell (3)** — out of scope Block 2 (in-memory Bogus-Stubs); folgt Block 4
+
+### Programmierung
+
+- [x] **Code lesbar / strukturiert (7)** — `source/FlowHub.Web/` sauber gegliedert (Components/Layout, Components/Pages, Components/DashboardCards, Components/Shared, Stubs/); MudBlazor-Konventionen, code-behind via partial class
+- [x] ~~Quarkus / Jakarta EE~~ — N/A (Stack: .NET 10)
+- [-] **Erkenntnisse dokumentiert (3)** — Block-2-Insights in `docs/insights/block-2.md` (UI-Workflow-Phasen-Disziplin, ADR-Lifecycle); CHANGELOG `[Unreleased]` mit Block-2-Deliverables
+- [x] **Source in Git (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE`, Block-2-Commits gepusht
+
+### Validierung
+
+- [-] **Abnahmekriterien (5)** — die 17 + 14 bUnit-Tests dienen als executable acceptance per Page; formalisierte AC-Liste folgt Block 3 (`docs/spec/acceptance-criteria.md`)
+- [-] **Test-Strategie + Technologien (5)** — bUnit + xUnit + FluentAssertions + NSubstitute etabliert; dediziertes `docs/spec/testing-strategy.md` folgt Block 3
+- [x] **Unit-Tests (3)** — 17 bUnit-Tests + 14 Smoke-Tests (`SmokeTests.cs`), 31/31 grün
+- [x] **Test-Ergebnisse dokumentiert (3)** — CHANGELOG `[Unreleased]` mit Test-Counts; `dotnet test` voll grün
+
+### KI, Sub-Systeme & Reflexion
+
+- [-] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ — `/ui-brainstorm → /ui-flow → /ui-build → /ui-review` Pipeline als KI-gestützter Workflow etabliert und in Block-2-Insights dokumentiert; konsolidiertes `docs/ai-usage.md` folgt Block 3
+- [ ] **Intelligente Services mit KI (6)** — out of scope Block 2 (Stubs-only); folgt Block 3 mit `KeywordClassifier` + `AiClassifier`
+- [ ] **Sub-Systeme als Container (5)** — out of scope Block 2; folgt Block 5
+- [-] **KI-Reflexion / Fazit (7)** — Block-2-Insights enthalten Workflow-Reflexion (Phase-Disziplin, KI-generierte Tests, MudBlazor-Adaptionen); finales Fazit gehört ins Submission-PDF (Block 5)
 
 ---
 
