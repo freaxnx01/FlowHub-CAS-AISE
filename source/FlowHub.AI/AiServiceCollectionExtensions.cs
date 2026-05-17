@@ -6,11 +6,21 @@ using FlowHub.Core.Skills;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using System.ClientModel;
 
 namespace FlowHub.AI;
+
+internal sealed class EmptyVikunjaProjectCatalog : IVikunjaProjectCatalog
+{
+    private static readonly IReadOnlyDictionary<string, int> Empty =
+        new Dictionary<string, int>(StringComparer.Ordinal);
+
+    public Task<IReadOnlyDictionary<string, int>> GetAsync(CancellationToken cancellationToken) =>
+        Task.FromResult(Empty);
+}
 
 public static class AiServiceCollectionExtensions
 {
@@ -22,8 +32,10 @@ public static class AiServiceCollectionExtensions
     {
         services.AddSingleton<KeywordClassifier>();
 
-        // Enrichers (always registered — dispatcher is a no-op if no IChatClient bound).
-        services.AddSingleton<IEnricher, QuotesEnricher>();
+        // VikunjaFallback + EnricherDispatcher are always registered; the dispatcher
+        // is a no-op when no IEnricher implementations are bound. The fallback catalog
+        // here satisfies DI when Skills:Vikunja isn't configured; the real catalog
+        // registered by AddFlowHubSkills overrides it when present.
         services.AddSingleton(_ =>
         {
             var section = configuration.GetSection("Skills:Vikunja");
@@ -31,6 +43,7 @@ public static class AiServiceCollectionExtensions
             var fallbackId = int.TryParse(section["FallbackProjectId"], out var id) ? id : 0;
             return new VikunjaFallback(fallbackName, fallbackId);
         });
+        services.TryAddSingleton<IVikunjaProjectCatalog, EmptyVikunjaProjectCatalog>();
         services.AddSingleton<EnricherDispatcher>();
 
         var outcome = ResolveOutcome(configuration);
@@ -42,6 +55,9 @@ public static class AiServiceCollectionExtensions
             services.AddSingleton<IClassifier>(sp => sp.GetRequiredService<KeywordClassifier>());
             return services;
         }
+
+        // QuotesEnricher needs IChatClient — only register when AI is configured.
+        services.AddSingleton<IEnricher, QuotesEnricher>();
 
         var apiKey = configuration[$"Ai:{outcome.Provider}:ApiKey"]!;
         var model = outcome.Model!;
