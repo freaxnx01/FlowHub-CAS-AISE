@@ -1,6 +1,7 @@
 using Anthropic.SDK;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
+using FlowHub.Core.Skills;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +48,8 @@ public static class AiServiceCollectionExtensions
             sp.GetRequiredService<IChatClient>(),
             sp.GetRequiredService<KeywordClassifier>(),
             sp.GetRequiredService<ILogger<AiClassifier>>(),
-            new ChatOptions { MaxOutputTokens = maxTokens, Temperature = 0.2f }));
+            new ChatOptions { MaxOutputTokens = maxTokens, Temperature = 0.2f },
+            sp.GetRequiredService<IVikunjaProjectCatalog>()));
         services.AddSingleton<IClassifier>(sp => sp.GetRequiredService<AiClassifier>());
 
         return services;

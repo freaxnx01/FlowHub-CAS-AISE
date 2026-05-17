@@ -1,9 +1,11 @@
 using FlowHub.AI;
 using FlowHub.Core.Classification;
+using FlowHub.Core.Skills;
 using FluentAssertions;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 
 namespace FlowHub.Web.ComponentTests.Ai;
 
@@ -14,6 +16,13 @@ public sealed class AiServiceCollectionExtensionsTests
         var config = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
         var services = new ServiceCollection();
         services.AddLogging();
+
+        // Stub the catalog so AiClassifier can be resolved when AI is configured.
+        var catalog = Substitute.For<IVikunjaProjectCatalog>();
+        catalog.GetAsync(Arg.Any<CancellationToken>())
+               .Returns(new Dictionary<string, int> { ["Inbox"] = 1 });
+        services.AddSingleton(catalog);
+
         services.AddFlowHubAi(config);
         return services.BuildServiceProvider();
     }
