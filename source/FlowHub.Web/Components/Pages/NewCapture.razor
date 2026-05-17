@@ -32,9 +32,10 @@
                        Label="Skill override (optional)"
                        HelperText="Leave on 'Let AI decide' for automatic classification. Override only if you know which Skill should handle this."
                        Variant="Variant.Outlined"
+                       ShrinkLabel="true"
                        Disabled="_isSubmitting || _skills is null"
                        Class="mb-4">
-                <MudSelectItem T="string" Value="@string.Empty">— Let AI decide —</MudSelectItem>
+                <MudSelectItem T="string" Value="@AutoSkill">— Let AI decide —</MudSelectItem>
                 @if (_skills is not null)
                 {
                     @foreach (var skill in _skills)

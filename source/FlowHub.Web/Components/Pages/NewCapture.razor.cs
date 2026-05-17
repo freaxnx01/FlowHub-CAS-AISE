@@ -17,7 +17,8 @@ public partial class NewCapture : ComponentBase
 
     private MudForm _form = default!;
     private string? _content;
-    private string _selectedSkill = string.Empty;
+    private const string AutoSkill = "__auto__";
+    private string _selectedSkill = AutoSkill;
     private IReadOnlyList<SkillHealth>? _skills;
     private bool _isSubmitting;
     private string? _skillsLoadError;
@@ -53,7 +54,7 @@ public partial class NewCapture : ComponentBase
             Snackbar.Add($"Captured \u2713 — \"{preview}\"", Severity.Success);
 
             _content = null;
-            _selectedSkill = string.Empty;
+            _selectedSkill = AutoSkill;
             await _form.ResetAsync();
         }
         catch (Exception ex)
