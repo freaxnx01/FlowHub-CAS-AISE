@@ -13,16 +13,16 @@ public sealed class VikunjaLiveTests
     {
         var baseUrl = Environment.GetEnvironmentVariable("Skills__Vikunja__BaseUrl");
         var token = Environment.GetEnvironmentVariable("Skills__Vikunja__ApiToken");
-        var projectIdRaw = Environment.GetEnvironmentVariable("Skills__Vikunja__DefaultProjectId");
+        var projectIdRaw = Environment.GetEnvironmentVariable("Skills__Vikunja__FallbackProjectId");
         Skip.If(string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(projectIdRaw),
-            "Skills__Vikunja__BaseUrl/ApiToken/DefaultProjectId not configured");
+            "Skills__Vikunja__BaseUrl/ApiToken/FallbackProjectId not configured");
 
         var projectId = int.Parse(projectIdRaw!, System.Globalization.CultureInfo.InvariantCulture);
 
         using var http = new HttpClient { BaseAddress = new Uri(baseUrl!), Timeout = TimeSpan.FromSeconds(15) };
         var sut = new VikunjaSkillIntegration(
             http,
-            Options.Create(new VikunjaOptions { BaseUrl = baseUrl, ApiToken = token, DefaultProjectId = projectId }),
+            Options.Create(new VikunjaOptions { BaseUrl = baseUrl, ApiToken = token, FallbackProjectId = projectId }),
             NullLogger<VikunjaSkillIntegration>.Instance);
 
         var capture = new Capture(

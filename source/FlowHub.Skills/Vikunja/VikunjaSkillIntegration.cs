@@ -38,7 +38,7 @@ public sealed partial class VikunjaSkillIntegration : ISkillIntegration
         var path = string.Format(
             CultureInfo.InvariantCulture,
             "/api/v1/projects/{0}/tasks",
-            _options.DefaultProjectId);
+            _options.FallbackProjectId);
 
         using var request = new HttpRequestMessage(HttpMethod.Put, path)
         {

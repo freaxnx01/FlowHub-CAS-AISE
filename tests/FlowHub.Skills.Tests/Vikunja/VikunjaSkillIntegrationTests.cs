@@ -16,7 +16,7 @@ public sealed class VikunjaSkillIntegrationTests
         {
             BaseUrl = "https://vikunja.example.com",
             ApiToken = "test-token",
-            DefaultProjectId = 42,
+            FallbackProjectId = 42,
         };
         var mock = new MockHttpMessageHandler();
         var http = mock.ToHttpClient();

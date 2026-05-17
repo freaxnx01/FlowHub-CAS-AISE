@@ -30,7 +30,7 @@ public sealed class VikunjaContractTests : IClassFixture<WireMockServerFixture>,
             {
                 BaseUrl = _wire.BaseUrl,
                 ApiToken = ApiToken,
-                DefaultProjectId = ProjectId,
+                FallbackProjectId = ProjectId,
             }),
             NullLogger<VikunjaSkillIntegration>.Instance);
     }
