@@ -14,4 +14,5 @@ public sealed record Capture(
     string? MatchedSkill,
     string? FailureReason = null,
     string? Title = null,
-    string? ExternalRef = null);
+    string? ExternalRef = null,
+    string? VikunjaProject = null);
