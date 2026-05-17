@@ -18,7 +18,7 @@ SECRET_EXEC = bash -c 'set -a; [ -f .env ] && . ./.env; set +a; \
 	if command -v passbolt >/dev/null 2>&1; then exec passbolt exec -- "$$@"; \
 	else exec "$$@"; fi' --
 
-.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-contract test-services test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-submission pdf-submission-bundle pdf-eigenstaendigkeitserklaerung pdf-install
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-contract test-services test-watch playwright-install restore clean format db-up db-ping db-migrate migrate rabbit-ping ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-submission pdf-submission-bundle pdf-eigenstaendigkeitserklaerung pdf-install
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
@@ -169,6 +169,27 @@ db-ping: ## Verify the PostgreSQL connection (host:port reachable + SELECT 1)
 				| grep -q '^ok$$' && echo "psql: SELECT 1 ok" || { echo "psql: FAIL"; exit 1; }; \
 		else \
 			echo "psql: skipped (no docker compose container, no host psql)"; \
+		fi
+
+rabbit-ping: ## Verify the RabbitMQ connection (AMQP TCP + management /api/overview)
+	@HOST=$${Bus__RabbitMq__Host:-localhost}; PORT=$${Bus__RabbitMq__Port:-5672}; \
+		MGMT_PORT=$${Bus__RabbitMq__ManagementPort:-15672}; \
+		USER=$${Bus__RabbitMq__Username:-flowhub}; PASS=$${Bus__RabbitMq__Password:-dev-secret}; \
+		echo "==> ping rabbitmq at $$HOST:$$PORT (user=$$USER)"; \
+		( exec 3<>/dev/tcp/$$HOST/$$PORT ) 2>/dev/null && echo "amqp tcp: ok" || { echo "amqp tcp: FAIL ($$HOST:$$PORT unreachable)"; exit 1; }; \
+		if command -v curl >/dev/null 2>&1; then \
+			HTTP=$$(curl -s -o /dev/null -w "%{http_code}" -u "$$USER:$$PASS" "http://$$HOST:$$MGMT_PORT/api/overview" || echo 000); \
+			if [ "$$HTTP" = "200" ]; then \
+				echo "mgmt api: HTTP 200 ok"; \
+			elif [ "$$HTTP" = "401" ]; then \
+				echo "mgmt api: HTTP 401 (TCP ok, but Bus__RabbitMq__Username/Password rejected)"; exit 1; \
+			elif [ "$$HTTP" = "000" ]; then \
+				echo "mgmt api: skipped (port $$MGMT_PORT unreachable — management plugin may be off)"; \
+			else \
+				echo "mgmt api: HTTP $$HTTP (unexpected)"; exit 1; \
+			fi; \
+		else \
+			echo "mgmt api: skipped (no curl on host)"; \
 		fi
 
 db-migrate: ## Apply EF Core migrations against the Docker PostgreSQL
