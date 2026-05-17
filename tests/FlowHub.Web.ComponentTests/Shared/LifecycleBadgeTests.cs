@@ -40,4 +40,23 @@ public class LifecycleBadgeTests : TestContext
 
         cut.Markup.Should().Contain("mud-chip-color-warning");
     }
+
+    [Fact]
+    public void Renders_VikunjaProject_AsArrowChip_WhenSet()
+    {
+        var cut = RenderComponent<LifecycleBadge>(parameters => parameters
+            .Add(p => p.Stage, LifecycleStage.Classified)
+            .Add(p => p.VikunjaProject, "Quotes"));
+
+        cut.Markup.Should().Contain("→ Quotes");
+    }
+
+    [Fact]
+    public void Does_Not_Render_Arrow_When_VikunjaProject_Is_Null()
+    {
+        var cut = RenderComponent<LifecycleBadge>(parameters => parameters
+            .Add(p => p.Stage, LifecycleStage.Classified));
+
+        cut.Markup.Should().NotContain("→");
+    }
 }

@@ -114,7 +114,7 @@ else
             </PropertyColumn>
             <PropertyColumn Property="x => x.Stage" Title="State">
                 <CellTemplate>
-                    <LifecycleBadge Stage="@context.Item.Stage" />
+                    <LifecycleBadge Stage="@context.Item.Stage" VikunjaProject="@context.Item.VikunjaProject" />
                 </CellTemplate>
             </PropertyColumn>
             <PropertyColumn Property="x => x.Content" Title="Content">
