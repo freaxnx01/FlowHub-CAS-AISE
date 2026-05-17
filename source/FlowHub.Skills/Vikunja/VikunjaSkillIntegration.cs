@@ -45,7 +45,7 @@ public sealed partial class VikunjaSkillIntegration : ISkillIntegration
             "/api/v1/projects/{0}/tasks",
             projectId);
 
-        var description = capture.FailureReason;  // placeholder — Task 16 swaps to EnrichmentDescription
+        var description = capture.EnrichmentDescription;
         using var request = new HttpRequestMessage(HttpMethod.Put, path)
         {
             Content = JsonContent.Create(

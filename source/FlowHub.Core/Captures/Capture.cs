@@ -15,4 +15,5 @@ public sealed record Capture(
     string? FailureReason = null,
     string? Title = null,
     string? ExternalRef = null,
-    string? VikunjaProject = null);
+    string? VikunjaProject = null,
+    string? EnrichmentDescription = null);
