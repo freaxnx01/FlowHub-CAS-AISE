@@ -40,6 +40,9 @@ public sealed partial class VikunjaProjectCatalog : IVikunjaProjectCatalog, IDis
         await _gate.WaitAsync(cancellationToken);
         try
         {
+            // Re-read time inside the lock: a waiter that blocked through another
+            // thread's successful refresh must see the fresh _fetchedAt.
+            now = _time.GetUtcNow();
             if (_cache is not null && now - _fetchedAt < _options.Catalog.RefreshInterval)
             {
                 return _cache;

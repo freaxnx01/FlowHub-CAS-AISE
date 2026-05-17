@@ -32,10 +32,20 @@ public static class AiServiceCollectionExtensions
     {
         services.AddSingleton<KeywordClassifier>();
 
-        // VikunjaFallback + EnricherDispatcher are always registered; the dispatcher
-        // is a no-op when no IEnricher implementations are bound. The fallback catalog
-        // here satisfies DI when Skills:Vikunja isn't configured; the real catalog
-        // registered by AddFlowHubSkills overrides it when present.
+        // VikunjaFallback + EnricherDispatcher are always registered so the
+        // dispatcher resolves cleanly even when AI / Vikunja are unconfigured.
+        //   - VikunjaFallback reads Skills:Vikunja:Fallback* directly from
+        //     IConfiguration. The same keys back VikunjaOptions used by
+        //     VikunjaSkillIntegration, so both code paths see the same values
+        //     at startup. (FlowHub.Skills does not reference FlowHub.AI, so
+        //     VikunjaFallback can't be re-registered from AddVikunja today —
+        //     when adding IOptionsMonitor-style reload support, move this record
+        //     to FlowHub.Core.Skills and inject IOptions<VikunjaOptions> here.)
+        //   - IVikunjaProjectCatalog: TryAddSingleton with an empty no-op catalog
+        //     so DI validates when Skills:Vikunja isn't configured. AddVikunja's
+        //     AddSingleton on the real VikunjaProjectCatalog overrides at resolve
+        //     time — last AddSingleton wins. Must run before AddFlowHubSkills in
+        //     Program.cs for this to hold.
         services.AddSingleton(_ =>
         {
             var section = configuration.GetSection("Skills:Vikunja");

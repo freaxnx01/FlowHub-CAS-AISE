@@ -76,4 +76,25 @@ public class QuotesEnricherTests
         var enricher = new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance);
         enricher.BucketName.Should().Be("Quotes");
     }
+
+    [Fact]
+    public async Task EnrichAsync_TruncatesExcessivelyLongAuthorBeforeSendingToLlm()
+    {
+        IList<ChatMessage>? capturedMessages = null;
+        var chat = Substitute.For<IChatClient>();
+        chat.GetResponseAsync(
+                Arg.Do<IEnumerable<ChatMessage>>(m => capturedMessages = m.ToList()),
+                Arg.Any<ChatOptions?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(new ChatResponse(new ChatMessage(ChatRole.Assistant, "bio")));
+
+        var longAuthor = new string('x', 500);
+        var enricher = new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance);
+
+        await enricher.EnrichAsync(Sample(), Classification(longAuthor), default);
+
+        capturedMessages.Should().NotBeNull();
+        var userMessage = capturedMessages!.Single(m => m.Role == ChatRole.User).Text;
+        userMessage.Length.Should().BeLessThanOrEqualTo(120);
+    }
 }

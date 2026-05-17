@@ -19,6 +19,8 @@ public sealed partial class QuotesEnricher : IEnricher
 
     public string BucketName => "Quotes";
 
+    private const int MaxAuthorLength = 120;
+
     public async Task<EnrichmentResult?> EnrichAsync(
         Capture capture,
         ClassificationResult classification,
@@ -26,6 +28,14 @@ public sealed partial class QuotesEnricher : IEnricher
     {
         var quote = classification.Entities?.GetValueOrDefault("quote") ?? capture.Content.Trim();
         var author = classification.Entities?.GetValueOrDefault("author");
+
+        // Author comes from classifier-extracted entities (model-generated from
+        // arbitrary capture content). Cap length to bound the prompt-injection
+        // blast radius on the downstream bio-fetch LLM call.
+        if (author is { Length: > MaxAuthorLength })
+        {
+            author = author[..MaxAuthorLength];
+        }
 
         var description = new StringBuilder();
         description.Append("> \"").Append(quote.Trim('"', ' ', '\n')).Append('"');
@@ -56,6 +66,10 @@ public sealed partial class QuotesEnricher : IEnricher
                 new ChatOptions { MaxOutputTokens = 200, Temperature = 0.2f },
                 cancellationToken);
             return response.Messages.LastOrDefault()?.Text;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

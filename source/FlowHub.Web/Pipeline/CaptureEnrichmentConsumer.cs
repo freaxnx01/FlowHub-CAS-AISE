@@ -40,10 +40,17 @@ public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated
             return;
         }
 
-        var capture = await _captureService.GetByIdAsync(msg.CaptureId, ct)
-            ?? throw new InvalidOperationException($"Capture {msg.CaptureId} not found in store.");
+        // Skip the DB round-trip + enricher dispatch for non-Vikunja captures —
+        // dispatcher would early-return (null, null) anyway.
+        string? project = null;
+        EnrichmentResult? enrichment = null;
+        if (string.Equals(result.MatchedSkill, "Vikunja", StringComparison.Ordinal))
+        {
+            var capture = await _captureService.GetByIdAsync(msg.CaptureId, ct)
+                ?? throw new InvalidOperationException($"Capture {msg.CaptureId} not found in store.");
 
-        var (project, enrichment) = await _enricher.DispatchAsync(capture, result, ct);
+            (project, enrichment) = await _enricher.DispatchAsync(capture, result, ct);
+        }
 
         await _captureService.MarkClassifiedAsync(
             msg.CaptureId,
