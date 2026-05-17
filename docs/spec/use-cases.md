@@ -2,7 +2,7 @@
 
 ## Solution Vision
 
-FlowHub is an intelligent integration hub that captures heterogeneous inputs (URLs, text, images) from multiple channels (Telegram, Web UI), classifies them via AI, and routes them to the correct downstream service (Wallabag, Wekan, Vikunja, Paperless-ngx, Obsidian). It automates 80% of the manual workflow the operator currently performs by hand: receive input → decide where it goes → copy-paste into the right tool.
+FlowHub is an intelligent integration hub that captures heterogeneous inputs (URLs, text, images) from multiple channels (Telegram, Web UI), classifies them via AI, and routes them to the correct downstream service (Wallabag, Vikunja, Paperless-ngx, Obsidian). It automates 80% of the manual workflow the operator currently performs by hand: receive input → decide where it goes → copy-paste into the right tool.
 
 See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original concept and management summary.
 

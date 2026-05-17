@@ -37,7 +37,7 @@ Both skills target one Integration only: **Vikunja** at `https://todo.home.freax
 | # | Decision | Rationale |
 |---|---|---|
 | D1 | Two CC-skills, not one | Single-responsibility; `flowhub-capture` will later be the seam where the .NET FlowHub plugs in for any Channel. |
-| D2 | Vikunja-only for v1 | Focus. Other Integrations (Wallabag, Wekan, Obsidian) get their own CC-skills later. |
+| D2 | Vikunja-only for v1 | Focus. Other Integrations (Wallabag, Obsidian) get their own CC-skills later. |
 | D3 | Dynamic project discovery — no hardcoded category list | The classifier picks from the user's actual Vikunja project list at runtime. Mirrors FlowHub's "no hardcoded routing table" intent. |
 | D4 | Inbox detection via `GET /api/v1/user.settings.default_project_id` | Vikunja API does not expose `is_inbox` on `/projects`; the user's `default_project_id` is the canonical inbox pointer. Verified empirically — currently `2`. |
 | D5 | Auth via Passbolt at runtime | Per `feedback_credentials_passbolt_only`. Token resource UUID `c9e732ce-7737-49a7-9879-dd81258083af` ("Vikunja API Token 'api-token'"). |
@@ -163,7 +163,7 @@ A successful v1 implementation can:
 
 ## 9. Out-of-scope (deferred to later sub-projects)
 
-- Other Integrations (Wallabag, Wekan, Obsidian, Paperless-ngx)
+- Other Integrations (Wallabag, Obsidian, Paperless-ngx)
 - The QuickTask / repo-issue CC-skill
 - A dispatcher that picks which CC-skill to invoke given a Capture
 - Telegram / Web channel ingestion → those will pipe into `flowhub-capture` later

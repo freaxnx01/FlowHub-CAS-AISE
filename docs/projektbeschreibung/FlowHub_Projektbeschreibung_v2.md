@@ -108,7 +108,7 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
 | Skill | Erweiterung |
 |-------|-------------|
 | MovieSkill | IMDB/OMDB Metadaten (Titel, Rating, Jahr, Genre) |
-| TechArticleSkill | Zusätzlich: Wekan Task + Obsidian Notiz erstellen |
+| TechArticleSkill | Zusätzlich: Vikunja Task + Obsidian Notiz erstellen |
 | DocumentSkill | AI OCR-Analyse (Betrag, Datum, Händler, Tags) |
 | GiftIdeaSkill | Geschenkideen → Todoist (Gifts Projekt) |
 | NoteSkill | Notizen und Ideen → Obsidian |
@@ -117,7 +117,7 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
 #### Erweiterte Integrationen
 | Service | Erweiterung |
 |---------|-------------|
-| Wekan | Kanban-Board für Homelab-Tasks |
+| Vikunja | Tasks / Kanban für Homelab-Themen |
 | Obsidian | Knowledge Base via GitLab Sync |
 | paperless-ngx | AI-gestützte Tagging und Metadaten-Extraktion |
 
@@ -314,7 +314,7 @@ Cloud:
 | Werkzeug | Einsatzbereich |
 |----------|---------------|
 | **Claude (claude.ai)** | Architektur-Diskussion, Code-Reviews, Prototypen |
-| **Claude Code CLI** | LXC-Deployment Scripts für Wallabag und Wekan |
+| **Claude Code CLI** | LXC-Deployment Scripts für Wallabag und Vikunja |
 | **Ollama / LangChain4j** | Skill-Erkennung zur Laufzeit (im Produkt) |
 | **NotebookLM** | Lern-Podcasts aus FFHS-Leseempfehlungen |
 

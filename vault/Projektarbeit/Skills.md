@@ -1,3 +1,8 @@
+---
+tags:
+  - claude-updated
+updated: 2026-05-17
+---
 
 ## Base
 
@@ -8,7 +13,7 @@
 > - https://www.heise.de/select/ct/2026/4/2533109542020998570
 > - https://www.heise.de/ratgeber/Fluechtige-SSH-Schluessel-mit-opkssh-und-OpenID-Connect-generieren-10639864.html
 
-### Homelab, Services to try out (wekan)
+### Homelab, Services to try out (vikunja)
 
 > Example:
 > 

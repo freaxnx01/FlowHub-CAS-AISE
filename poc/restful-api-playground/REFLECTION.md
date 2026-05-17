@@ -37,7 +37,7 @@ Notably, the playground keeps a **synchronous gRPC call** from the consumer back
 Candidates in FlowHub that map naturally onto async/eventing:
 
 - **Capture-Enrichment pipeline** — a new `Capture` is persisted synchronously, then enrichment (classification, link preview, tag suggestion) runs via events. UI stays responsive; multiple enrichers can attach independently.
-- **Skill routing** — routing a Capture to the target Skill (Wallabag, Wekan, Vikunja, …) is a natural event, with each Skill consuming what it cares about.
+- **Skill routing** — routing a Capture to the target Skill (Wallabag, Vikunja, …) is a natural event, with each Skill consuming what it cares about.
 - **Health and integration probes** — status changes can be broadcast so the dashboard and logging pipeline both observe them without the probe knowing either consumer.
 
 Read-path lookups (open a Capture detail, load a Skill status snapshot) stay synchronous — request/response with a direct store or gRPC/REST call is the right tool there.
@@ -49,7 +49,7 @@ Short answer: **probably neither inside FlowHub today, MQ later when async enric
 ### Today (Block 2 → 3, modular monolith per ADR 0001)
 
 - Internal cross-module talk is in-process interfaces — no transport needed.
-- External Skills (Wallabag, Wekan, Vikunja) speak **REST**, not gRPC or AMQP, so the integration boundary is fixed by them.
+- External Skills (Wallabag, Vikunja) speak **REST**, not gRPC or AMQP, so the integration boundary is fixed by them.
 
 ### Where MQ earns its place in FlowHub
 

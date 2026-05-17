@@ -143,7 +143,7 @@ List all registered Skills with current health snapshot.
 {
   "items": [
     { "name": "Wallabag", "status": "Healthy", "routedToday": 12 },
-    { "name": "Wekan",    "status": "Degraded", "routedToday": 3  }
+    { "name": "Vikunja",  "status": "Degraded", "routedToday": 3  }
   ]
 }
 ```

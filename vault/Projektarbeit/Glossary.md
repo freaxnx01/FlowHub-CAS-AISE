@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-generated
-updated: 2026-04-10
+updated: 2026-05-17
 ---
 
 # FlowHub Glossary
@@ -54,7 +54,7 @@ A FlowHub processing unit that knows how to handle one category of Capture and r
 
 ### Integration
 
-A **downstream** third-party service that FlowHub writes Captures into via that service's API. Examples: Wallabag (read-later), Wekan (kanban), Vikunja (tasks/lists), Paperless-ngx (DMS), Obsidian (markdown via git).
+A **downstream** third-party service that FlowHub writes Captures into via that service's API. Examples: Wallabag (read-later), Vikunja (tasks/lists/kanban), Paperless-ngx (DMS), Obsidian (markdown via git).
 
 - **Code:** `IIntegration`, `WallabagIntegration`
 - An Integration is an **output target**, not a Channel. Don't confuse the two.

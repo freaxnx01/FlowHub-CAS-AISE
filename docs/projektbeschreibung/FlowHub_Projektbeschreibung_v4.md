@@ -24,7 +24,7 @@ FlowHub schafft einen einzigen Eingang für all diese Inputs und erledigt die Ab
 
 - Technisch versierter Anwender
 - Betreibt Self-Hosted Services im Heimnetzwerk (Proxmox, Docker)
-- Nutzt bereits: paperless-ngx, Passbolt, GitLab, Vikunja, Wekan, Wallabag
+- Nutzt bereits: paperless-ngx, Passbolt, GitLab, Vikunja, Wallabag
 - Problem: Informationsschnipsel landen überall, kein einheitlicher Eingang
 - Ziel: Schnelle, reibungslose Erfassung von Alltagsinformationen via Telegram
 
@@ -67,7 +67,6 @@ FlowHub integriert ausschliesslich Self-Hosted Services aus dem eigenen Homelab 
 | Vikunja | https://vikunja.io/ | Task-Management für Bücher, Filme/TV |
 | paperless-ngx | https://docs.paperless-ngx.com/ | Dokumenten-Management-System (DMS) |
 | Wallabag | https://wallabag.org/ | Read-Later Service für Artikel |
-| Wekan | https://wekan.fi/ | Kanban-Board für Homelab-Services |
 | GitLab (Self-Hosted) | https://gitlab.freaxnx01.ch/ | Repository mit Obsidian Markdown Files (Knowledge Base) |
 
 ---
@@ -88,7 +87,7 @@ Beispiele:
 
 ---
 
-#### HomelabSkill – Homelab-Services zum Ausprobieren (→ Wekan)
+#### HomelabSkill – Homelab-Services zum Ausprobieren (→ Vikunja)
 
 Erkennung: URL von Software/Service-Websites; Keywords: homelab, ausprobieren, install, self-host, try
 
@@ -185,7 +184,7 @@ Der MVP-Scope ist bewusst eng gefasst. Komplexität wird durch saubere Architekt
 | Skill | Erkennung | Ziel-Service | Status |
 |---|---|---|---|
 | ArticleSkill | URL (News/Blog/Fachmagazin) | Wallabag | ✅ MVP |
-| HomelabSkill | URL (Software/Service) + Keywords | Wekan | ✅ MVP |
+| HomelabSkill | URL (Software/Service) + Keywords | Vikunja | ✅ MVP |
 | BookSkill | URL (Buchshop) + Keywords | Vikunja | ✅ MVP |
 | MovieSkill | Keywords + Google-Share-URL | Vikunja | ✅ MVP |
 | DocumentSkill | Dateianhang (Foto/PDF) | paperless-ngx | ✅ MVP |
@@ -199,7 +198,6 @@ Der MVP-Scope ist bewusst eng gefasst. Komplexität wird durch saubere Architekt
 | Service | Typ | Integration | MVP-Umfang |
 |---|---|---|---|
 | Wallabag | Self-Hosted | REST API | URL speichern |
-| Wekan | Self-Hosted | REST API | Karte erstellen |
 | Vikunja | Self-Hosted | REST API | Task/Item erstellen |
 | paperless-ngx | Self-Hosted | REST API | Dokument hochladen |
 | Obsidian / GitLab | Self-Hosted | Git API | Markdown-Datei erstellen |
@@ -352,7 +350,7 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
   <rect x="426" y="312" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
   <text x="485" y="334" text-anchor="middle" font-size="18">&#x1F3E0;</text>
   <text x="485" y="352" text-anchor="middle" font-size="11.5" font-weight="600" fill="#333">HomelabSkill</text>
-  <text x="485" y="368" text-anchor="middle" font-size="10" fill="#888">→ Wekan</text>
+  <text x="485" y="368" text-anchor="middle" font-size="10" fill="#888">→ Vikunja</text>
 
   <!-- BookSkill -->
   <rect x="554" y="312" width="118" height="64" rx="8" fill="#FFFFFF" stroke="#F39C12" stroke-width="1.5" filter="url(#shadow-sm)"/>
@@ -417,10 +415,9 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
   <text x="927" y="463" text-anchor="middle" font-size="10" fill="#C0392B" font-style="italic">via Refit (typsicher)</text>
   <line x1="852" y1="470" x2="1002" y2="470" stroke="#E74C3C" stroke-width="1"/>
   <text x="927" y="490" text-anchor="middle" font-size="11.5" fill="#555">WallabagClient</text>
-  <text x="927" y="508" text-anchor="middle" font-size="11.5" fill="#555">WekanClient</text>
-  <text x="927" y="526" text-anchor="middle" font-size="11.5" fill="#555">VikunjaClient</text>
-  <text x="927" y="544" text-anchor="middle" font-size="11.5" fill="#555">PaperlessClient</text>
-  <text x="927" y="562" text-anchor="middle" font-size="11.5" fill="#555">GitLabClient</text>
+  <text x="927" y="508" text-anchor="middle" font-size="11.5" fill="#555">VikunjaClient</text>
+  <text x="927" y="526" text-anchor="middle" font-size="11.5" fill="#555">PaperlessClient</text>
+  <text x="927" y="544" text-anchor="middle" font-size="11.5" fill="#555">GitLabClient</text>
   <text x="927" y="580" text-anchor="middle" font-size="10" fill="#888" font-style="italic">ISkillHandler → Port-Abstraktion</text>
 
   <!-- Bidirectional arrow Skills ↔ AI -->
@@ -472,13 +469,6 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
   <text x="457" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Wallabag</text>
   <text x="457" y="803" text-anchor="middle" font-size="10" fill="#888">Read-Later</text>
   <text x="457" y="816" text-anchor="middle" font-size="9.5" fill="#aaa">wallabag.org</text>
-
-  <!-- Wekan -->
-  <rect x="524" y="748" width="115" height="72" rx="8" fill="#FFFFFF" stroke="#E67E22" stroke-width="1.5"/>
-  <text x="581" y="769" text-anchor="middle" font-size="16">&#x1F4CB;</text>
-  <text x="581" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Wekan</text>
-  <text x="581" y="803" text-anchor="middle" font-size="10" fill="#888">Kanban</text>
-  <text x="581" y="816" text-anchor="middle" font-size="9.5" fill="#aaa">wekan.fi</text>
 
   <!-- Vikunja -->
   <rect x="648" y="748" width="115" height="72" rx="8" fill="#FFFFFF" stroke="#E67E22" stroke-width="1.5"/>
@@ -623,8 +613,7 @@ Proxmox VE
 |
 +-- VM/LXC: Wallabag        (Self-Hosted Read-Later)
 +-- VM/LXC: paperless-ngx   (bereits vorhanden)
-+-- VM/LXC: Vikunja         (Task-Management)
-+-- VM/LXC: Wekan           (Kanban-Board)
++-- VM/LXC: Vikunja         (Task-Management / Kanban)
 +-- VPS (extern, DE):
     +-- GitLab              (Obsidian Markdown Repo)
 
@@ -727,10 +716,9 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 **Begründung:**
 - Datensouveränität: Alle persönlichen Daten bleiben im eigenen Homelab
 - Kostenfreiheit: Keine laufenden SaaS-Gebühren
-- Vikunja ersetzt Todoist vollständig für Task/Item-Management
-- Wekan für Kanban (Homelab-Services) bereits im Betrieb
+- Vikunja ersetzt Todoist vollständig für Task/Item-Management und übernimmt auch die Kanban-Sicht für Homelab-Services
 
-**Konsequenz:** Alle 5 Ziel-Services (Wallabag, Wekan, Vikunja, paperless-ngx, GitLab) sind Self-Hosted auf Proxmox.
+**Konsequenz:** Alle 4 Ziel-Services (Wallabag, Vikunja, paperless-ngx, GitLab) sind Self-Hosted auf Proxmox.
 
 ---
 
@@ -742,7 +730,7 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 |---|---|---|---|
 | 1 | Feb 21 | Konzeption, Einführung | ✅ Projektbeschreibung, Architekturentwurf, ADRs |
 | 2 | Mär 21 | Frontend, Web-Präsentation | Telegram Bot UI, Blazor SSR Dashboard (Admin-Ansicht) |
-| 3 | Apr 25 | Services, REST, MCP | Skill-System, REST Clients via Refit (Wallabag, Wekan, Vikunja, paperless) |
+| 3 | Apr 25 | Services, REST, MCP | Skill-System, REST Clients via Refit (Wallabag, Vikunja, paperless) |
 | 4 | Mai 23 | Persistence, Datenbanken | PostgreSQL Schema via EF Core, Redis State, Repository-Pattern |
 | 5 | Jun 20 | Docker, Kubernetes | Docker Compose finalisiert, optional: k3s Migration |
 | Abgabe | Jul 6 | – | Vollständiges MVP + Dokumentation + Git-Repository |
@@ -756,7 +744,7 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 | Werkzeug | Einsatzbereich |
 |---|---|
 | Claude (claude.ai) | Architektur-Diskussion, Code-Reviews, Prototypen |
-| Claude Code CLI | LXC-Deployment Scripts für Wallabag und Wekan |
+| Claude Code CLI | LXC-Deployment Scripts für Wallabag und Vikunja |
 | Ollama / Microsoft.Extensions.AI | Skill-Erkennung zur Laufzeit (im Produkt) |
 | NotebookLM | Lern-Podcasts aus FFHS-Leseempfehlungen |
 
@@ -787,7 +775,7 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 | Blazor SSR Lernkurve | Niedrig | Bekanntes C#-Ökosystem; gute Microsoft-Dokumentation |
 | Ollama zu langsam (kein GPU) | Mittel | Claude API als Fallback; Keyword-Detection als Basis |
 | Telegram API Änderungen | Niedrig | Abstraktion via ISkillHandler Interface |
-| Vikunja/Wekan API-Änderungen | Niedrig | Refit-Abstraktion, versionierte API-Clients |
+| Vikunja API-Änderungen | Niedrig | Refit-Abstraktion, versionierte API-Clients |
 | Zeitdruck (Abgabe Juli) | Mittel | MVP bewusst schlank, Future Features dokumentiert |
 
 ---
@@ -809,8 +797,7 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 | EF Core | Entity Framework Core – .NET ORM für Datenbankzugriffe |
 | Refit | Typsichere REST-Client-Library für .NET (deklarativ via Interfaces) |
 | M.E.AI | Microsoft.Extensions.AI – Abstraktion für LLM-Provider in .NET |
-| Vikunja | Self-Hosted Task-Management (ersetzt Todoist) |
-| Wekan | Self-Hosted Kanban-Board für Homelab-Services |
+| Vikunja | Self-Hosted Task-Management / Kanban (ersetzt Todoist) |
 | Wallabag | Self-Hosted Read-Later Service für Artikel |
 | Knowledge Base | Obsidian Markdown Files, versioniert in GitLab (Self-Hosted) |
 

@@ -38,7 +38,7 @@ The Block 3 Auftrag explicitly names *"asynchrone Kommunikation mittels einer Qu
 
 - Real AI classifier (Slice C / ADR 0004)
 - Real persistence and Outbox pattern (Block 4)
-- Real integration adapters — Wallabag, Wekan, Vikunja (Block 4/5)
+- Real integration adapters — Wallabag, Vikunja (Block 4/5)
 - RabbitMQ deployment (Block 5)
 - Sagas / state machines (rejected per ADR 0002)
 - `IRequestClient` / RPC over the bus (rejected per ADR 0002)
@@ -54,7 +54,7 @@ The Block 3 Auftrag explicitly names *"asynchrone Kommunikation mittels einer Qu
 | **D4** | Retry policy is per-consumer. Enrichment: `Intervals(100, 500)`. Routing: `Intervals(500, 2000, 5000)`. | Reflects the actual cost/latency profile of each consumer (in-process classification vs cross-process integration). Gives ADR 0003 something concrete to argue rather than handwaving. |
 | **D5** | `LifecycleFaultObserver` updates capture state on `Fault<T>`. `Fault<CaptureCreated>` → `Orphan`; `Fault<CaptureClassified>` → `Unhandled`. | Without it, the queue's resilience story is invisible — captures rot in `_error` while their `LifecycleStage` stays at `Raw`/`Classified`. The Dashboard FailureCounts tile and the API's `?stage=` filter both need these states actually being set. |
 | **D6** | Empty classification result → enrichment consumer sets `LifecycleStage=Orphan` **directly** (no fault, no `CaptureClassified` published). | Cleaner state machine: faults fire only on unexpected exceptions, not on successful-but-empty classifications. Gives `Orphan` two explicit entry points (no-skill-match, exhausted-retry) instead of bundling them via the fault path. |
-| **D7** | Routing integration in Slice B = `LoggingSkillIntegration` stub returning success. | Real Wallabag/Wekan/Vikunja adapters are Block 4/5 work. The stub keeps Slice B end-to-end testable without committing to integration code. |
+| **D7** | Routing integration in Slice B = `LoggingSkillIntegration` stub returning success. | Real Wallabag/Vikunja adapters are Block 4/5 work. The stub keeps Slice B end-to-end testable without committing to integration code. |
 | **D8** | Outbox pattern deferred to Block 4. | No persistence yet → no outbox surface. Note in ADR 0003 as future work. |
 | **D9** | Idempotency: best-effort in Slice B; formal `IdempotencyReceiver` filter deferred to Block 4. | In-memory transport is single-process and won't redeliver. RabbitMQ at-least-once warrants idempotency, but persistence is the prerequisite. Consumers SHOULD lookup by `CaptureId` before mutating state. |
 | **D10** | Endpoint name formatter = `KebabCaseEndpointNameFormatter`. | Stable queue names across in-memory and RabbitMQ transports (`capture-enrichment` rather than `CaptureEnrichmentConsumer`). |

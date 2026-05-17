@@ -77,7 +77,7 @@ Snapshot am Ende der Block-1-Phase (~2026-03-21) gegen die offizielle Moodle-Rub
 - [x] Sichten Materialien und Ergebnisse der Präsenzveranstaltung 1
 - [x] Projektbeschreibung ändern auf .NET, Upload
 - [x] Architekturen erklären lassen und entscheiden, dokumentieren — ADR 0001 (Frontend / Modular Monolith) + ADR 0002 (Service-Architektur)
-- [x] Focus on a few Services / Categories: Vikunja, Wekan, Wallabag — `vault/Projektarbeit/External Services.md` + `FlowHub.Integrations/` Placeholder
+- [x] Focus on a few Services / Categories: Vikunja, Wallabag — `vault/Projektarbeit/External Services.md` + `FlowHub.Integrations/` Placeholder
 - [x] Sample input data: Books, Movies, … — Bogus-Stubs in `source/FlowHub.Web/Stubs/` (umgesetzt in Block 2)
 - [x] Solution-Skelett `FlowHub.slnx` mit `FlowHub.Core` Domain-Modell (`Capture`, `LifecycleStage`, `ChannelKind`, `ICaptureService`, `ICaptureRepository`)
 - [x] `Directory.Build.props` (Warnings-as-Errors, embedded PDB) + `Directory.Packages.props` (zentrale Paketverwaltung) eingerichtet

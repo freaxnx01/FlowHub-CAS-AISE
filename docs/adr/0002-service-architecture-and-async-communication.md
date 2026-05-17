@@ -44,7 +44,7 @@ FlowHub stays a single deployable process. Each capability remains its own .NET 
 - `FlowHub.Core` — domain types, driving ports, domain services
 - `FlowHub.AI` — classification adapter
 - `FlowHub.Skills` — skill registry + skill implementations
-- `FlowHub.Integrations` — outbound adapters to Wallabag, Wekan, Vikunja, …
+- `FlowHub.Integrations` — outbound adapters to Wallabag, Vikunja, …
 - `FlowHub.Persistence` — EF Core (Block 4)
 - `FlowHub.Telegram` — inbound channel adapter
 - `FlowHub.Api` — REST API surface for non-UI consumers (new, scaffolded in this block)
@@ -65,7 +65,7 @@ The flow is:
    - `AI.ClassificationHandler` — calls the AI adapter, writes the classification back, publishes `CaptureClassified`.
    - `LinkPreviewHandler` — fetches an OpenGraph preview for URL captures.
    - (future) `TagSuggestionHandler`, `DuplicateDetectionHandler`, …
-5. `Skills.RoutingHandler` subscribes to `CaptureClassified` and dispatches to the matching `Skill`. Each `Skill` then calls the relevant `Integration` (Wallabag, Wekan, Vikunja). Failure handling (retry, DLQ) lives at this layer.
+5. `Skills.RoutingHandler` subscribes to `CaptureClassified` and dispatches to the matching `Skill`. Each `Skill` then calls the relevant `Integration` (Wallabag, Vikunja). Failure handling (retry, DLQ) lives at this layer.
 
 **Implementation:**
 
@@ -78,7 +78,7 @@ This gives Block 3 a clean answer to *"demonstrate asynchronous, event-based com
 
 ### 3. Outbound calls to external Skill integrations stay **synchronous REST**
 
-Wallabag, Wekan, Vikunja, etc. expose REST APIs. Skill implementations call them synchronously inside an MQ consumer. The consumer is the resilience boundary:
+Wallabag, Vikunja, etc. expose REST APIs. Skill implementations call them synchronously inside an MQ consumer. The consumer is the resilience boundary:
 
 - HTTP failures from external integrations are caught at the consumer and trigger MassTransit's retry policy.
 - After retries are exhausted the message moves to a dead-letter queue (RabbitMQ in prod, the in-memory transport simulates this via a fault consumer).
@@ -106,7 +106,7 @@ Reasons (carried over from `poc/restful-api-playground/REFLECTION.md`):
 
 - FlowHub is a single-language (.NET / C#) stack. The polyglot benefit of gRPC's code-generated multi-language clients does not apply.
 - Without a physical service split (Decision 1), there are no FlowHub-internal RPC calls to make. In-process method calls already give us typed, low-latency communication for free.
-- External integrations (Wallabag, Wekan, Vikunja) speak REST. The integration boundary is fixed by them.
+- External integrations (Wallabag, Vikunja) speak REST. The integration boundary is fixed by them.
 - Adding gRPC just to satisfy the Moodle reading list would be architecture-for-its-own-sake. The Block 3 reflection covers gRPC in writing instead, with the playground POC as the worked example.
 
 ### 6. Versioning and contract stability

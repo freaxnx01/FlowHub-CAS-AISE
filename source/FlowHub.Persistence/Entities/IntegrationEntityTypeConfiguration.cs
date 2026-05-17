@@ -12,12 +12,11 @@ internal sealed class IntegrationEntityTypeConfiguration : IEntityTypeConfigurat
         builder.Property(i => i.Name).HasMaxLength(64);
         builder.Property(i => i.Status).IsRequired().HasMaxLength(16);
 
-        // Baseline catalog — every deployment knows about these six integrations.
+        // Baseline catalog — every deployment knows about these five integrations.
         // Status defaults to Healthy; LastWriteAt stays null until the first real
         // write happens (no synthetic timestamps in seed data).
         builder.HasData(
             new IntegrationEntity { Name = "Wallabag",  Status = "Healthy" },
-            new IntegrationEntity { Name = "Wekan",     Status = "Healthy" },
             new IntegrationEntity { Name = "Vikunja",   Status = "Healthy" },
             new IntegrationEntity { Name = "Paperless", Status = "Healthy" },
             new IntegrationEntity { Name = "Obsidian",  Status = "Healthy" },

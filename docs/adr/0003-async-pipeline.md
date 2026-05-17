@@ -77,7 +77,7 @@ public interface ISkillIntegration
 }
 ```
 
-Slice B registers two `LoggingSkillIntegration` instances (one named `"Wallabag"`, one named `"Vikunja"`). Each stub logs `"would write to {Name} for capture {CaptureId}"` and returns successfully. The routing consumer resolves the correct integration via `IEnumerable<ISkillIntegration>` and selects by `Name` — if no match is found, it marks the Capture as `Unhandled` directly (Decision 6). Real adapters (Wallabag, Wekan, Vikunja HTTP clients) replace these stubs in Block 4/5 without any consumer changes.
+Slice B registers two `LoggingSkillIntegration` instances (one named `"Wallabag"`, one named `"Vikunja"`). Each stub logs `"would write to {Name} for capture {CaptureId}"` and returns successfully. The routing consumer resolves the correct integration via `IEnumerable<ISkillIntegration>` and selects by `Name` — if no match is found, it marks the Capture as `Unhandled` directly (Decision 6). Real adapters (Wallabag, Vikunja HTTP clients) replace these stubs in Block 4/5 without any consumer changes.
 
 ### 5. Per-consumer retry policy: enrichment `Intervals(100, 500)`, routing `Intervals(500, 2000, 5000)`
 

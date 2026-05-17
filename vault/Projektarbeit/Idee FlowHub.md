@@ -1,3 +1,8 @@
+---
+tags:
+  - claude-updated
+updated: 2026-05-17
+---
 
 ## Name
 
@@ -59,7 +64,7 @@ Fragmentierte Workflows: Signal Notes → manuell sortieren → Copy-Paste in ve
 - Integration Hub mit REST Clients
 - Passbolt für Credentials
 
-**Integriert:** Wallabag (Read-Later) | Wekan (Kanban) | n8n (Workflows) | Paperless-ngx | Obsidian (Doku)
+**Integriert:** Wallabag (Read-Later) | Vikunja (Tasks/Kanban) | n8n (Workflows) | Paperless-ngx | Obsidian (Doku)
 
 ## Workflow-Beispiel
 
@@ -67,12 +72,12 @@ Fragmentierte Workflows: Signal Notes → manuell sortieren → Copy-Paste in ve
 Signal: "Inception - rewatch"
 → FlowHub empfängt
 → AI: "Movie"
-→ Wekan: Card erstellt in "Movies → To Watch"
+→ Vikunja: Task erstellt in "Movies → To Watch"
 ```
 
 ## MVP (Phase 1)
 
-Signal Input → AI Categorization → Wallabag/Wekan Integration → Simple UI
+Signal Input → AI Categorization → Wallabag/Vikunja Integration → Simple UI
 
 ## Evolution
 

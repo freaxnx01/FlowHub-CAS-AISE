@@ -46,11 +46,11 @@
 │              │                                                                  │
 │              │  ┌─ Skill health ──────────────┐  ┌─ Integration health ───────┐ │
 │              │  │ Books        ✓ healthy   42 │  │ Wallabag    ✓ up   1m ago  │ │
-│              │  │ Movies       ✓ healthy    8 │  │ Wekan       ✓ up   8m ago  │ │
-│              │  │ Articles     ✓ healthy   15 │  │ Vikunja     ✓ up   4m ago  │ │
-│              │  │ Quotes       ⚠ degraded   2 │  │ Paperless   ✓ up   2h ago  │ │
-│              │  │ Knowledge    ✓ healthy    3 │  │ Obsidian    ⚠ slow 2m 1.2s │ │
-│              │  │ Belege       ✓ healthy    7 │  │ Authentik   ✓ up   —       │ │
+│              │  │ Movies       ✓ healthy    8 │  │ Vikunja     ✓ up   4m ago  │ │
+│              │  │ Articles     ✓ healthy   15 │  │ Paperless   ✓ up   2h ago  │ │
+│              │  │ Quotes       ⚠ degraded   2 │  │ Obsidian    ⚠ slow 2m 1.2s │ │
+│              │  │ Knowledge    ✓ healthy    3 │  │ Authentik   ✓ up   —       │ │
+│              │  │ Belege       ✓ healthy    7 │  │                            │ │
 │              │  │            [ Manage skills →]│  │       [ Manage integr. →]  │ │
 │              │  └─────────────────────────────┘  └────────────────────────────┘ │
 │              │                                                                  │

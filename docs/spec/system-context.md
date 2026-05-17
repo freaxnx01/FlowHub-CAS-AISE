@@ -16,8 +16,7 @@ graph TD
 
     subgraph Downstream ["Downstream Integrations (self-hosted)"]
         Wallabag["Wallabag<br/>Read-later"]
-        Wekan["Wekan<br/>Kanban"]
-        Vikunja["Vikunja<br/>Tasks / lists"]
+        Vikunja["Vikunja<br/>Tasks / lists / kanban"]
         Paperless["Paperless-ngx<br/>DMS"]
         Obsidian["Obsidian<br/>Markdown notes via git"]
     end
@@ -35,7 +34,6 @@ graph TD
     AI -- "REST (local)" --> Ollama
     Core --> Skills
     Skills -- "REST" --> Wallabag
-    Skills -- "REST" --> Wekan
     Skills -- "REST" --> Vikunja
     Skills -- "REST" --> Paperless
     Skills -- "git push" --> Obsidian

@@ -237,7 +237,6 @@ public class SmokeTests : TestContext
         var cut = RenderComponent<FlowHub.Web.Components.Pages.Integrations>();
 
         cut.Markup.Should().Contain("Wallabag");
-        cut.Markup.Should().Contain("Wekan");
         cut.Markup.Should().Contain("Vikunja");
         cut.Markup.Should().Contain("Paperless");
         cut.Markup.Should().Contain("Obsidian");
