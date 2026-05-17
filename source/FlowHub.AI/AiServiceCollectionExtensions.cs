@@ -1,4 +1,5 @@
 using Anthropic.SDK;
+using FlowHub.AI.Enrichers;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Skills;
@@ -20,6 +21,17 @@ public static class AiServiceCollectionExtensions
     public static IServiceCollection AddFlowHubAi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<KeywordClassifier>();
+
+        // Enrichers (always registered — dispatcher is a no-op if no IChatClient bound).
+        services.AddSingleton<IEnricher, QuotesEnricher>();
+        services.AddSingleton(_ =>
+        {
+            var section = configuration.GetSection("Skills:Vikunja");
+            var fallbackName = section["FallbackProject"] ?? "Inbox";
+            var fallbackId = int.TryParse(section["FallbackProjectId"], out var id) ? id : 0;
+            return new VikunjaFallback(fallbackName, fallbackId);
+        });
+        services.AddSingleton<EnricherDispatcher>();
 
         var outcome = ResolveOutcome(configuration);
         services.AddSingleton(outcome);
