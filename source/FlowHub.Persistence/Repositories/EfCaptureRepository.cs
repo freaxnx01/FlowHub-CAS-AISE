@@ -61,6 +61,7 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         entity.Title = capture.Title;
         entity.FailureReason = capture.FailureReason;
         entity.ExternalRef = capture.ExternalRef;
+        entity.VikunjaProject = capture.VikunjaProject;
         await _db.SaveChangesAsync(cancellationToken);
     }
 
@@ -144,7 +145,8 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         MatchedSkill: e.MatchedSkill,
         FailureReason: e.FailureReason,
         Title: e.Title,
-        ExternalRef: e.ExternalRef);
+        ExternalRef: e.ExternalRef,
+        VikunjaProject: e.VikunjaProject);
 
     private static CaptureEntity ToEntity(Capture c) => new()
     {
@@ -157,5 +159,6 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         Title = c.Title,
         FailureReason = c.FailureReason,
         ExternalRef = c.ExternalRef,
+        VikunjaProject = c.VikunjaProject,
     };
 }
