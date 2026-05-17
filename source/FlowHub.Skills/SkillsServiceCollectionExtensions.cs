@@ -3,6 +3,7 @@ using FlowHub.Skills.Vikunja;
 using FlowHub.Skills.Wallabag;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace FlowHub.Skills;
 
@@ -57,6 +58,7 @@ public static class SkillsServiceCollectionExtensions
         }
 
         services.Configure<VikunjaOptions>(section);
+        services.TryAddSingleton(TimeProvider.System);
         services.AddHttpClient<VikunjaSkillIntegration>(client =>
         {
             client.BaseAddress = new Uri(options.BaseUrl!);

@@ -1,7 +1,9 @@
 using FlowHub.Core.Captures;
+using FlowHub.Core.Skills;
 using FlowHub.Skills.Vikunja;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 
 namespace FlowHub.Skills.IntegrationTests;
 
@@ -19,10 +21,16 @@ public sealed class VikunjaLiveTests
 
         var projectId = int.Parse(projectIdRaw!, System.Globalization.CultureInfo.InvariantCulture);
 
+        var options = new VikunjaOptions { BaseUrl = baseUrl, ApiToken = token, FallbackProjectId = projectId };
+        var catalog = Substitute.For<IVikunjaProjectCatalog>();
+        catalog.GetAsync(Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<string, int> { [options.FallbackProject] = projectId });
+
         using var http = new HttpClient { BaseAddress = new Uri(baseUrl!), Timeout = TimeSpan.FromSeconds(15) };
         var sut = new VikunjaSkillIntegration(
             http,
-            Options.Create(new VikunjaOptions { BaseUrl = baseUrl, ApiToken = token, FallbackProjectId = projectId }),
+            Options.Create(options),
+            catalog,
             NullLogger<VikunjaSkillIntegration>.Instance);
 
         var capture = new Capture(
