@@ -81,7 +81,7 @@ public class SmokeTests : TestContext
 
         cut.Markup.Should().Contain("Wallabag");
         cut.Markup.Should().Contain("Vikunja");
-        cut.Markup.Should().Contain("Obsidian");
+        cut.Markup.Should().Contain("Paperless");
     }
 
     // ──────────────────────────────────────────────────────────
@@ -239,7 +239,6 @@ public class SmokeTests : TestContext
         cut.Markup.Should().Contain("Wallabag");
         cut.Markup.Should().Contain("Vikunja");
         cut.Markup.Should().Contain("Paperless");
-        cut.Markup.Should().Contain("Obsidian");
         cut.Markup.Should().Contain("Authentik");
     }
 }

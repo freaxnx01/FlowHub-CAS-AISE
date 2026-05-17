@@ -15,7 +15,6 @@ public sealed class IntegrationHealthServiceStub : IIntegrationHealthService
             new("Wallabag",   HealthStatus.Healthy,  now.AddMinutes(-1),  TimeSpan.FromMilliseconds(180)),
             new("Vikunja",    HealthStatus.Healthy,  now.AddMinutes(-4),  TimeSpan.FromMilliseconds(150)),
             new("Paperless",  HealthStatus.Healthy,  now.AddHours(-2),    TimeSpan.FromMilliseconds(310)),
-            new("Obsidian",   HealthStatus.Degraded, now.AddMinutes(-2),  TimeSpan.FromMilliseconds(1200)),
             new("Authentik",  HealthStatus.Healthy,  null,                null),
         ];
         return Task.FromResult(snapshot);

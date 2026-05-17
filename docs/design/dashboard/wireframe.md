@@ -48,8 +48,8 @@
 │              │  │ Books        ✓ healthy   42 │  │ Wallabag    ✓ up   1m ago  │ │
 │              │  │ Movies       ✓ healthy    8 │  │ Vikunja     ✓ up   4m ago  │ │
 │              │  │ Articles     ✓ healthy   15 │  │ Paperless   ✓ up   2h ago  │ │
-│              │  │ Quotes       ⚠ degraded   2 │  │ Obsidian    ⚠ slow 2m 1.2s │ │
-│              │  │ Knowledge    ✓ healthy    3 │  │ Authentik   ✓ up   —       │ │
+│              │  │ Quotes       ⚠ degraded   2 │  │ Authentik   ✓ up   —       │ │
+│              │  │ Knowledge    ✓ healthy    3 │  │                            │ │
 │              │  │ Belege       ✓ healthy    7 │  │                            │ │
 │              │  │            [ Manage skills →]│  │       [ Manage integr. →]  │ │
 │              │  └─────────────────────────────┘  └────────────────────────────┘ │

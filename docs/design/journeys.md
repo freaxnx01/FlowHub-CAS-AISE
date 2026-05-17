@@ -515,10 +515,10 @@ The AppBar `QuickCaptureField` is shared across every page (see Dashboard flow D
   "category": "functional",
   "description": "/integrations shows a row per integration with name, status, and last-write timing",
   "entryUrl": "/integrations",
-  "preconditions": ["IIntegrationHealthService returns the 5 seeded integrations"],
+  "preconditions": ["IIntegrationHealthService returns the 4 seeded integrations"],
   "steps": ["Navigate to /integrations"],
   "expected": [
-    "Grid contains Wallabag, Vikunja, Paperless, Obsidian, Authentik",
+    "Grid contains Wallabag, Vikunja, Paperless, Authentik",
     "Each row shows a HealthDot and a status label"
   ],
   "passes": false
@@ -575,7 +575,7 @@ All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E
 6. ✅ **Same parallel-DbContext bug as the earlier CaptureDetail fix surfaced in `Dashboard.LoadAsync`** — four services hitting the shared scoped EF context via `Task.WhenAll` silently threw "second operation on context instance", so all four cards rendered as null forever. Switched to sequential awaits → unblocked J05, J06, J07.
 7. ✅ J05/J06 URL regex made case-insensitive — Dashboard navigates to lowercase `?lc=orphan` / `?lc=unhandled`.
 
-8. ✅ **Investigation: not a wiring bug, just an empty DB.** EF queries on `Skills` / `Integrations` were correctly returning 0 rows. Added migration `0005_SeedSkillsAndIntegrations` with `HasData(...)` for the 6 baseline skills (Books, Movies, Articles, Quotes, Knowledge, Belege) and 5 baseline integrations (Wallabag, Vikunja, Paperless, Obsidian, Authentik). Legitimate catalog values, not test fixtures — they ship with every deployment. Closes J25, J27.
+8. ✅ **Investigation: not a wiring bug, just an empty DB.** EF queries on `Skills` / `Integrations` were correctly returning 0 rows. Added migration `0005_SeedSkillsAndIntegrations` with `HasData(...)` for the 6 baseline skills (Books, Movies, Articles, Quotes, Knowledge, Belege) and 4 baseline integrations (Wallabag, Vikunja, Paperless, Authentik). Legitimate catalog values, not test fixtures — they ship with every deployment. Closes J25, J27.
 
 9. ✅ **J15 via test-side fixture, not seed data.** Added `E2EDbHelpers.UpsertCompletedCaptureAsync` (idempotent INSERT … ON CONFLICT UPDATE) that the J15 spec calls before navigating. Stable Guid `1111…1111`. Direct `Npgsql` write — no dev-only product API endpoint, no fake Completed capture polluting the migration. The helper uses the same connection string as `FlowHubDbContextFactory` and is overridable via `FLOWHUB_E2E_DB`.
 
