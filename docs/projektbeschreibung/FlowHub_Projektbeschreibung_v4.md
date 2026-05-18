@@ -739,21 +739,65 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 
 ## 9. KI-Einsatz in der Entwicklung (Reflexion)
 
-**KI-Tools im Entwicklungsprozess**
+**Detaillierte Auswertung pro Block / Slice:** `docs/ai-usage.md` (531 Zeilen, gegliedert pro Block mit *generated-vs-handwritten*-Tabellen, Korrektur-Geschichten und Reflexion). Dieser Abschnitt fasst die Erkenntnisse über alle fünf Blöcke zusammen.
+
+### KI-Tools im Entwicklungsprozess
 
 | Werkzeug | Einsatzbereich |
 |---|---|
-| Claude (claude.ai) | Architektur-Diskussion, Code-Reviews, Prototypen |
-| Claude Code CLI | LXC-Deployment Scripts für Wallabag und Vikunja |
-| Ollama / Microsoft.Extensions.AI | Skill-Erkennung zur Laufzeit (im Produkt) |
-| NotebookLM | Lern-Podcasts aus FFHS-Leseempfehlungen |
+| Claude Code (Opus 4.7, 1M-Kontext) | Brainstorming, Spec/Plan-Erstellung, ADR-Drafts, Controller für Subagent-Dispatches |
+| Claude Sonnet 4.6 (Subagents) | Implementer + Spec-Reviewer + Code-Quality-Reviewer unter dem `superpowers:subagent-driven-development`-Workflow |
+| Claude Haiku 4.5 (Subagents) | Mechanische Tasks (csproj/Markdown/YAML), ca. 60 % Token-Ersparnis gegenüber Sonnet |
+| `/ultrareview` (Multi-Agent Branch-Review) | Architektonisches Review über ganzen Feature-Branch — fängt System-Invarianten ab, die Per-Task-Review nicht sieht |
+| Microsoft.Extensions.AI + Anthropic/OpenRouter | KI im Produkt (Classifier, Quote-Enricher, Embeddings) |
+| Eigenentwickelte CAS-Skills | `cas-aise-todo-list`, `cas-aise-grade-self-check`, `sync-ai-instructions` — Rubrik-Verankerung, Block/Phase-Steuerung, Cross-Project-Reuse |
 
-**Beobachtungen**
+### Workflow-Entwicklung (Block 1 → Block 5)
 
-- **Architektur-Diskussion:** KI sehr hilfreich für Abwägen von Alternativen (z.B. Hybrid vs. Pure-Code Skill-System, Stack-Entscheidung .NET vs. Quarkus)
-- **Scope-Kontrolle:** KI neigt dazu, Features vorzuschlagen – bewusste Eingrenzung auf MVP notwendig
-- **Code-Generierung:** Spart Boilerplate (z.B. EF Core Migrations, Refit-Interfaces), muss aber reviewed werden
-- **Prototyping:** KI ermöglicht schnelles Explorieren von Technologien (Microsoft.Extensions.AI, Telegram.Bot, Blazor SSR)
+Mit jedem Block wurde ad-hoc Chat gegen strukturierteren, isolierteren Subagent-Dispatch getauscht. Der Mehraufwand für Struktur hat sich durch weniger Mid-Task-Eskalationen und seltenere "Agent ist abgedriftet"-Momente bezahlt gemacht.
+
+| Block | Workflow-Verschiebung |
+|---|---|
+| 1 — Einführung | Ad-hoc Claude.ai-Chat für Architektur; Copilot inline für Code. |
+| 2 — Frontend | Erster sustained Claude-Code-CLI-Einsatz mit phasenbasierter Disziplin (`/ui-brainstorm` → `/ui-flow` → `/ui-build` → `/ui-review`). |
+| 3 — Service | Erster vollständiger `superpowers:brainstorming` → `writing-plans` → `subagent-driven-development`-Slice. Zweistufiges Review (Spec + Quality) pro Task. |
+| 4 — Persistence | Sonnet als Default, Haiku für Mechanik; Per-Task-Quality-Review fallen gelassen zugunsten einer Branch-Review am Slice-Ende — ca. 60 % Token-Burn reduziert ohne Qualitätsverlust. |
+| 5 — Deployment | `/ultrareview` (Multi-Agent Branch-Review) und rubrik-gegroundetes `cas-aise-grade-self-check` ergänzt; jede Block-Abschluss-Prüfung läuft durch die Skill. |
+
+Bis Block 5 verantworten Implementer-Subagents ganze Slices end-to-end. Die menschliche Arbeit konzentriert sich an zwei Stellen: **Spec** (wo Verträge festgenagelt werden) und **Review** (wo System-Invarianten geprüft werden). Der Engpass wandert vom Tippen zu diesen beiden Punkten.
+
+### Wiederkehrende Fehlerquellen
+
+1. **Single-Pass-AI-Review übersieht System-Invarianten.** Block-5-Beispiel: AI-generierter Code, der Embedding-Generation in `EfCaptureService.SubmitAsync` integrierte, war lokal korrekt (eine Transaktion) — global aber falsch, weil ein langsamer Provider das NfA-09 p95 < 200 ms Submit-Budget sprengt. Per-Task-Quality-Review konnte das nicht fangen; `/ultrareview` wurde dafür eingeführt und hat es beim ersten Lauf gefunden.
+2. **Deployment-Shape-Failures sind systematisch unter-getestet.** Compose-`${X:-}`-Interpolation substituiert leere Strings (nicht null), wodurch `??`-Defaults still no-op'en. `.editorconfig` nicht in den Docker-Build-Kontext kopiert → Analyzer-Suppressions werden zu Build-Errors. Casing-Mismatch `EMBEDDINGS__APIKEY` vs. `Embeddings__ApiKey` schaltete ein ganzes Feature aus. Fünf solcher Defekte in einem Nachmittag durch `make smoke-prod` gefangen.
+3. **Training-Data-Lag bei aktuellen Libraries.** `Pgvector.EntityFrameworkCore` wurde als in-the-box-Npgsql-10-Feature angenommen (ist aber ein separates Paket). `MassTransit.Testing` wurde als separates Paket angenommen (ist Teil der Haupt-Assembly). API-Behauptungen der KI müssen mechanisch gegen das tatsächlich installierte Paket verifiziert werden.
+4. **Offene Prompts inflationieren den Scope.** "Füge X hinzu" ohne Plan produziert eine Feature-Suite. Das Gegenmittel war `superpowers:writing-plans` — kleinteilige TDD-geordnete Tasks mit vollständigem Inline-Code, exakten Pfaden und Commit-Messages. Subagents gegen wohldefinierte Tasks meldeten DONE; Subagents gegen offene Prompts gingen explorieren.
+5. **Pläne aus unvollständigem Repo-Wissen.** Block-3-Slice-B-Plan übersah `CaptureServiceStubTests.cs` und die existierenden `ChannelKind`-Werte; Implementer mussten mid-Task adaptieren. Brainstorming/Planning liest seitdem jede referenzierte Datei *bevor* der Plan eingefroren wird.
+
+### Wiederkehrende Stärken
+
+1. **Der Plan ist der Vertrag.** Enthält der Plan exakte Pfade, exakten Code, exakte Commit-Messages und exakte Verifikationskommandos, operiert der Implementer mit engem Judgment-Spielraum und meldet DONE statt NEEDS_CONTEXT. Die 95 %+ "AI-drafted"-Anteile im Produktionscode sind nur deshalb erreichbar.
+2. **Review-Kadenz muss zur Fehlerklasse passen.** Per-Task-Spec + Per-Task-Quality war für Block 3 Slice B richtig (erster SDD-Lauf). Ab Block 4 fing Per-Task-Quality nichts Neues mehr, während ein Branch-weiter `/ultrareview` am Slice-Ende genau die Architektur-Fehler fand, die Per-Task-Review nicht sehen konnte.
+3. **Eigene Skills als Memory-Layer des Projekts.** `cas-aise-todo-list`, `cas-aise-grade-self-check`, `sync-ai-instructions` decken Concerns ab, die das Upstream-`superpowers`-Plugin nicht behandelt: Rubrik-Verankerung, kalender-getriebene Priorisierung, Cross-Project-Instruction-Reuse. Ohne `cas-aise-grade-self-check` driftete die Rubrik-Abdeckung in langen Sessions — die Skill fand fehlende Evidenz in genau dieser Reflexion vor Abgabe.
+4. **KI für rigide-Struktur-Artefakte, Mensch für architektonisches Urteil.** GitHub-Actions-YAML, ADR-Scaffolds, OpenAPI-ProblemDetails, EF-Migrationen — rigide Strukturen, in denen der 90-%-korrekte AI-Erstwurf reale Zeit spart. Architektur-Entscheidungen (hexagonaler Split für AI, In-Process vs. RabbitMQ Transport, Dispatcher-Event-Carries-Description vs. Inline-Skill-Call) bleiben beim Menschen; die KI listet Alternativen, sie wählt nicht.
+5. **Korrektur-Geschichten sind die Rubrik-Evidenz, die zählt.** `docs/insights/block-5.md` "Defects Found by the Smoke Run" und die "Ultrareview-driven correction" / "Smoke-driven correction"-Sektionen in `docs/ai-usage.md` sind auditierbar: konkreter Defekt, fixender Commit, Lehre. Pauschale "KI hat geholfen"-Aussagen schliessen keinen Rubrik-Loop; "KI produzierte X, Smoke fing Y, Fix landete in Commit Z" schliesst ihn.
+
+### Was ich anders machen würde
+
+- **Rubrik-Verankerung ab Block 1, nicht Block 3.** `cas-aise-grade-self-check` entstand mittendrin; Block 1–2 hatten keine formalen `use-cases.md` / `nfa.md` / `acceptance-criteria.md`. Retroaktive Doku-Arbeit in spätem Block 3 / frühem Block 4 kostete reale Zeit.
+- **`/ultrareview` ab Block 3, nicht Block 5.** Branch-weites Multi-Agent-Review fängt die Klasse von Architektur-Fehlern, die Per-Task-Review nicht sieht. Günstiger nach Slice B als nach einem 21-Task-Beta-MVP.
+- **Ein `make smoke`-Target pro Block, nicht nur Block 5.** Fünf latente Bugs in einem Nachmittag durch `make smoke-prod`. Ein einfacheres Smoke (App booten, Feature-Pfad curlen) hätte mindestens drei davon früher gefangen.
+- **`InternalsVisibleTo`- und EF-Core-Test-Host-Pattern im Plan-Template kodifizieren.** Block 3 Slice D und Block 4 hatten beide Implementer, die bei Compile-Errors per Default Sichtbarkeit aufweiteten. Das richtige Pattern ist mechanisch — sobald im Plan ausgeschrieben verschwindet die Friktion.
+
+### Hat die Ausgangshypothese gestimmt?
+
+Die Block-1-Annahme war: Claude ist "ein schneller Tipper mit guter Library-Kenntnis" — nützlich für Boilerplate, suspekt bei Architektur, im Wesentlichen ein Produktivitäts-Multiplikator und keine Workflow-Änderung. Bis Block 5 ist das in beide Richtungen weit daneben.
+
+**Boilerplate ist schneller als erwartet.** Der 95 %+ AI-drafted-Anteil im Produktionscode ist nicht "KI hat 95 % der Arbeit gemacht" — die 5 % Menschen-Input konzentrieren sich auf High-Judgment-Punkte (Scope, Verträge, Trade-offs). Das eigentliche Tippen ist aber wirklich ein kleiner Bruchteil der verstrichenen Zeit. Der Engpass wandert von der Implementation zu Spec und Review — exakt die Umkehrung, auf die SDD optimiert.
+
+**Architektur ist gefährlicher als erwartet.** Der Embedding-on-Submit-Fall ist ein Ein-Absatz-Rewrite, der im Nachhinein offensichtlich ist: KI produzierte lokal korrekten Code, der eine System-Invariante brach, und ein Single-Pass-Review hätte ihn ausgeliefert. Die Deployment-Shape-Failures haben die gleiche Form: lokal korrekt, global falsch. Die menschliche Rolle an der Architektur-Grenze ist nicht geschrumpft, sie ist gewachsen — weil der Agent jetzt genug Code schnell genug produziert, dass nur noch der Filter an Design und Review Sinn ergibt.
+
+KI hat keine Rolle im Workflow ersetzt. Sie hat verschoben, welche Rolle der Engpass ist. Für das nächste Projekt: zuerst die Spec-Dokumente, `/ultrareview` ab Tag eins, ein Smoke-Target vor dem ersten Feature. Implementations-Durchsatz ist nicht mehr die Beschränkung — Design- und Review-Durchsatz sind es.
 
 ---
 
