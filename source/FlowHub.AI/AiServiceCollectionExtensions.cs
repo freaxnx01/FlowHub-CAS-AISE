@@ -1,14 +1,26 @@
 using Anthropic.SDK;
+using FlowHub.AI.Enrichers;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
+using FlowHub.Core.Skills;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using System.ClientModel;
 
 namespace FlowHub.AI;
+
+internal sealed class EmptyVikunjaProjectCatalog : IVikunjaProjectCatalog
+{
+    private static readonly IReadOnlyDictionary<string, int> Empty =
+        new Dictionary<string, int>(StringComparer.Ordinal);
+
+    public Task<IReadOnlyDictionary<string, int>> GetAsync(CancellationToken cancellationToken) =>
+        Task.FromResult(Empty);
+}
 
 public static class AiServiceCollectionExtensions
 {
@@ -20,6 +32,30 @@ public static class AiServiceCollectionExtensions
     {
         services.AddSingleton<KeywordClassifier>();
 
+        // VikunjaFallback + EnricherDispatcher are always registered so the
+        // dispatcher resolves cleanly even when AI / Vikunja are unconfigured.
+        //   - VikunjaFallback reads Skills:Vikunja:Fallback* directly from
+        //     IConfiguration. The same keys back VikunjaOptions used by
+        //     VikunjaSkillIntegration, so both code paths see the same values
+        //     at startup. (FlowHub.Skills does not reference FlowHub.AI, so
+        //     VikunjaFallback can't be re-registered from AddVikunja today —
+        //     when adding IOptionsMonitor-style reload support, move this record
+        //     to FlowHub.Core.Skills and inject IOptions<VikunjaOptions> here.)
+        //   - IVikunjaProjectCatalog: TryAddSingleton with an empty no-op catalog
+        //     so DI validates when Skills:Vikunja isn't configured. AddVikunja's
+        //     AddSingleton on the real VikunjaProjectCatalog overrides at resolve
+        //     time — last AddSingleton wins. Must run before AddFlowHubSkills in
+        //     Program.cs for this to hold.
+        services.AddSingleton(_ =>
+        {
+            var section = configuration.GetSection("Skills:Vikunja");
+            var fallbackName = section["FallbackProject"] ?? "Inbox";
+            var fallbackId = int.TryParse(section["FallbackProjectId"], out var id) ? id : 0;
+            return new VikunjaFallback(fallbackName, fallbackId);
+        });
+        services.TryAddSingleton<IVikunjaProjectCatalog, EmptyVikunjaProjectCatalog>();
+        services.AddSingleton<EnricherDispatcher>();
+
         var outcome = ResolveOutcome(configuration);
         services.AddSingleton(outcome);
         services.AddHostedService<AiBootLogger>();
@@ -29,6 +65,9 @@ public static class AiServiceCollectionExtensions
             services.AddSingleton<IClassifier>(sp => sp.GetRequiredService<KeywordClassifier>());
             return services;
         }
+
+        // QuotesEnricher needs IChatClient — only register when AI is configured.
+        services.AddSingleton<IEnricher, QuotesEnricher>();
 
         var apiKey = configuration[$"Ai:{outcome.Provider}:ApiKey"]!;
         var model = outcome.Model!;
@@ -47,7 +86,8 @@ public static class AiServiceCollectionExtensions
             sp.GetRequiredService<IChatClient>(),
             sp.GetRequiredService<KeywordClassifier>(),
             sp.GetRequiredService<ILogger<AiClassifier>>(),
-            new ChatOptions { MaxOutputTokens = maxTokens, Temperature = 0.2f }));
+            new ChatOptions { MaxOutputTokens = maxTokens, Temperature = 0.2f },
+            sp.GetRequiredService<IVikunjaProjectCatalog>()));
         services.AddSingleton<IClassifier>(sp => sp.GetRequiredService<AiClassifier>());
 
         return services;

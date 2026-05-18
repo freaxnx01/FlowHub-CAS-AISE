@@ -14,6 +14,7 @@
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging" />

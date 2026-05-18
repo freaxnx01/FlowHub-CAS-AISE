@@ -17,7 +17,7 @@ public interface ICaptureService
 
     Task<Capture> SubmitAsync(string content, ChannelKind source, CancellationToken cancellationToken = default);
 
-    Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, CancellationToken cancellationToken = default);
+    Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, CancellationToken cancellationToken = default);
 
     Task MarkRoutedAsync(Guid id, CancellationToken cancellationToken = default);
 

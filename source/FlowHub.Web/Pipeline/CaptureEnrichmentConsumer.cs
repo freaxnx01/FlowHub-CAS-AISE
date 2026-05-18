@@ -1,3 +1,4 @@
+using FlowHub.AI;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Events;
@@ -9,15 +10,18 @@ namespace FlowHub.Web.Pipeline;
 public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated>
 {
     private readonly IClassifier _classifier;
+    private readonly EnricherDispatcher _enricher;
     private readonly ICaptureService _captureService;
     private readonly ILogger<CaptureEnrichmentConsumer> _logger;
 
     public CaptureEnrichmentConsumer(
         IClassifier classifier,
+        EnricherDispatcher enricher,
         ICaptureService captureService,
         ILogger<CaptureEnrichmentConsumer> logger)
     {
         _classifier = classifier;
+        _enricher = enricher;
         _captureService = captureService;
         _logger = logger;
     }
@@ -36,13 +40,32 @@ public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated
             return;
         }
 
-        await _captureService.MarkClassifiedAsync(msg.CaptureId, result.MatchedSkill, result.Title, ct);
+        // Skip the DB round-trip + enricher dispatch for non-Vikunja captures —
+        // dispatcher would early-return (null, null) anyway.
+        string? project = null;
+        EnrichmentResult? enrichment = null;
+        if (string.Equals(result.MatchedSkill, "Vikunja", StringComparison.Ordinal))
+        {
+            var capture = await _captureService.GetByIdAsync(msg.CaptureId, ct)
+                ?? throw new InvalidOperationException($"Capture {msg.CaptureId} not found in store.");
+
+            (project, enrichment) = await _enricher.DispatchAsync(capture, result, ct);
+        }
+
+        await _captureService.MarkClassifiedAsync(
+            msg.CaptureId,
+            result.MatchedSkill,
+            result.Title,
+            project,
+            ct);
 
         await context.Publish(new CaptureClassified(
             msg.CaptureId,
             result.Tags,
             result.MatchedSkill,
-            DateTimeOffset.UtcNow));
+            DateTimeOffset.UtcNow,
+            project,
+            enrichment?.Description));
     }
 
     [LoggerMessage(

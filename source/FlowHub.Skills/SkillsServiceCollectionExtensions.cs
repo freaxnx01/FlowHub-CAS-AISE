@@ -3,6 +3,7 @@ using FlowHub.Skills.Vikunja;
 using FlowHub.Skills.Wallabag;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace FlowHub.Skills;
 
@@ -48,7 +49,7 @@ public static class SkillsServiceCollectionExtensions
         string? reason = null;
         if (string.IsNullOrWhiteSpace(options.BaseUrl)) { reason = "missing-base-url"; }
         else if (string.IsNullOrWhiteSpace(options.ApiToken)) { reason = "missing-api-token"; }
-        else if (options.DefaultProjectId <= 0) { reason = "missing-project-id"; }
+        else if (options.FallbackProjectId <= 0) { reason = "missing-fallback-project-id"; }
 
         if (reason is not null)
         {
@@ -57,11 +58,18 @@ public static class SkillsServiceCollectionExtensions
         }
 
         services.Configure<VikunjaOptions>(section);
+        services.TryAddSingleton(TimeProvider.System);
         services.AddHttpClient<VikunjaSkillIntegration>(client =>
         {
             client.BaseAddress = new Uri(options.BaseUrl!);
             client.Timeout = TimeSpan.FromSeconds(10);
         });
+        services.AddHttpClient<VikunjaProjectCatalog>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl!);
+            client.Timeout = options.Catalog.RequestTimeout;
+        });
+        services.AddSingleton<IVikunjaProjectCatalog>(sp => sp.GetRequiredService<VikunjaProjectCatalog>());
         services.AddSingleton<ISkillIntegration>(sp => sp.GetRequiredService<VikunjaSkillIntegration>());
         services.AddSingleton(new SkillsRegistrationOutcome("Vikunja", Registered: true, Reason: "configured"));
     }

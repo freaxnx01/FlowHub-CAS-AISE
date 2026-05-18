@@ -1,9 +1,14 @@
 @namespace FlowHub.Web.Components.Shared
 
 <MudChip T="string" Size="Size.Small" Color="@_color" Variant="Variant.Filled">@_label</MudChip>
+@if (!string.IsNullOrWhiteSpace(VikunjaProject))
+{
+    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Text">@($"→ {VikunjaProject}")</MudChip>
+}
 
 @code {
     [Parameter, EditorRequired] public LifecycleStage Stage { get; set; }
+    [Parameter] public string? VikunjaProject { get; set; }
 
     private Color _color = Color.Default;
     private string _label = string.Empty;

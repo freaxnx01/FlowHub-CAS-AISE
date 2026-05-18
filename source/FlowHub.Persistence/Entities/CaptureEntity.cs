@@ -18,6 +18,7 @@ internal sealed class CaptureEntity
     public string? Title { get; set; }
     public string? FailureReason { get; set; }
     public string? ExternalRef { get; set; }
+    public string? VikunjaProject { get; set; }
     public ICollection<TagEntity> Tags { get; set; } = [];
     public Vector? Embedding { get; set; }
 }

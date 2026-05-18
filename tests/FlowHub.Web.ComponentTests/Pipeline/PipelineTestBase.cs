@@ -1,9 +1,12 @@
+using FlowHub.AI;
 using FlowHub.Core.Captures;
+using FlowHub.Core.Skills;
 using FlowHub.Web.Stubs;
 using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 
 namespace FlowHub.Web.ComponentTests.Pipeline;
 
@@ -28,6 +31,17 @@ internal static class PipelineTestBase
         services.AddSingleton(NullLoggerFactory.Instance);
         services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger<>),
             typeof(Microsoft.Extensions.Logging.Abstractions.NullLogger<>));
+
+        // Stub EnricherDispatcher: no enrichers, catalog returns empty dict, fallback Inbox/1.
+        var stubCatalog = Substitute.For<IVikunjaProjectCatalog>();
+        stubCatalog.GetAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyDictionary<string, int>>(
+                new Dictionary<string, int>()));
+        services.AddSingleton(new EnricherDispatcher(
+            [],
+            stubCatalog,
+            new VikunjaFallback("Inbox", 1),
+            NullLogger<EnricherDispatcher>.Instance));
 
         configure?.Invoke(services);
 

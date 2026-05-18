@@ -15,15 +15,18 @@ public sealed partial class VikunjaSkillIntegration : ISkillIntegration
 
     private readonly HttpClient _http;
     private readonly VikunjaOptions _options;
+    private readonly IVikunjaProjectCatalog _catalog;
     private readonly ILogger<VikunjaSkillIntegration> _log;
 
     public VikunjaSkillIntegration(
         HttpClient http,
         IOptions<VikunjaOptions> options,
+        IVikunjaProjectCatalog catalog,
         ILogger<VikunjaSkillIntegration> log)
     {
         _http = http;
         _options = options.Value;
+        _catalog = catalog;
         _log = log;
     }
 
@@ -35,14 +38,19 @@ public sealed partial class VikunjaSkillIntegration : ISkillIntegration
             ? capture.Title.Trim()
             : Truncate(capture.Content.Trim(), FallbackTitleMaxLength);
 
+        var projectId = await ResolveProjectIdAsync(capture.VikunjaProject, cancellationToken);
+
         var path = string.Format(
             CultureInfo.InvariantCulture,
             "/api/v1/projects/{0}/tasks",
-            _options.DefaultProjectId);
+            projectId);
 
+        var description = capture.EnrichmentDescription;
         using var request = new HttpRequestMessage(HttpMethod.Put, path)
         {
-            Content = JsonContent.Create(new { title }, options: JsonOptions),
+            Content = JsonContent.Create(
+                description is null ? (object)new { title } : new { title, description },
+                options: JsonOptions),
         };
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _options.ApiToken);
 
@@ -58,6 +66,22 @@ public sealed partial class VikunjaSkillIntegration : ISkillIntegration
         }
 
         return new SkillResult(Success: true, ExternalRef: payload.Id.Value.ToString(CultureInfo.InvariantCulture));
+    }
+
+    private async Task<int> ResolveProjectIdAsync(string? projectName, CancellationToken cancellationToken)
+    {
+        var map = await _catalog.GetAsync(cancellationToken);
+        if (!string.IsNullOrWhiteSpace(projectName) && map.TryGetValue(projectName, out var id))
+        {
+            return id;
+        }
+
+        if (map.TryGetValue(_options.FallbackProject, out var fallbackId))
+        {
+            return fallbackId;
+        }
+
+        return _options.FallbackProjectId;
     }
 
     private static string Truncate(string value, int max) =>

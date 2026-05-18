@@ -1,8 +1,10 @@
 using System.Net;
 using FlowHub.Core.Captures;
+using FlowHub.Core.Skills;
 using FlowHub.Skills.Vikunja;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 
@@ -23,15 +25,21 @@ public sealed class VikunjaContractTests : IClassFixture<WireMockServerFixture>,
         _wire = wire;
         _wire.Reset();
 
+        var options = new VikunjaOptions
+        {
+            BaseUrl = _wire.BaseUrl,
+            ApiToken = ApiToken,
+            FallbackProjectId = ProjectId,
+        };
+        var catalog = Substitute.For<IVikunjaProjectCatalog>();
+        catalog.GetAsync(Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<string, int> { [options.FallbackProject] = ProjectId });
+
         _http = new HttpClient { BaseAddress = new Uri(_wire.BaseUrl) };
         _sut = new VikunjaSkillIntegration(
             _http,
-            Options.Create(new VikunjaOptions
-            {
-                BaseUrl = _wire.BaseUrl,
-                ApiToken = ApiToken,
-                DefaultProjectId = ProjectId,
-            }),
+            Options.Create(options),
+            catalog,
             NullLogger<VikunjaSkillIntegration>.Instance);
     }
 

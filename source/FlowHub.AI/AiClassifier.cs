@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using FlowHub.Core.Classification;
+using FlowHub.Core.Skills;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
@@ -13,17 +14,20 @@ internal sealed partial class AiClassifier : IClassifier
     private readonly IClassifier _keyword;
     private readonly ILogger<AiClassifier> _log;
     private readonly ChatOptions _options;
+    private readonly IVikunjaProjectCatalog _catalog;
 
     public AiClassifier(
         IChatClient chat,
         IClassifier keyword,
         ILogger<AiClassifier> log,
-        ChatOptions options)
+        ChatOptions options,
+        IVikunjaProjectCatalog catalog)
     {
         _chat = chat;
         _keyword = keyword;
         _log = log;
         _options = options;
+        _catalog = catalog;
     }
 
     public async Task<ClassificationResult> ClassifyAsync(string content, CancellationToken cancellationToken)
@@ -33,8 +37,11 @@ internal sealed partial class AiClassifier : IClassifier
 
         try
         {
+            var catalog = await _catalog.GetAsync(cancellationToken);
+            var buckets = catalog.Keys.ToArray();
+
             var response = await _chat.GetResponseAsync<AiClassificationResponse>(
-                AiPrompts.BuildMessages(content),
+                AiPrompts.BuildMessages(content, buckets),
                 _options,
                 cancellationToken: cancellationToken);
 
@@ -48,7 +55,15 @@ internal sealed partial class AiClassifier : IClassifier
                 throw new InvalidOperationException("schema_violation");
             }
 
-            return new ClassificationResult(payload.Tags, payload.MatchedSkill, payload.Title);
+            var project = string.Equals(payload.MatchedSkill, "Vikunja", StringComparison.Ordinal)
+                ? payload.Project
+                : null;
+
+            IReadOnlyDictionary<string, string>? entities = payload.Entities is { Count: > 0 }
+                ? payload.Entities
+                : null;
+
+            return new ClassificationResult(payload.Tags, payload.MatchedSkill, payload.Title, project, entities);
         }
         catch (Exception ex)
         {

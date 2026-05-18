@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FlowHub.AI;
 using FlowHub.Core.Classification;
+using FlowHub.Core.Skills;
 using FluentAssertions;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
@@ -16,8 +17,15 @@ public sealed class AiClassifierTests
     private readonly IClassifier _keyword = Substitute.For<IClassifier>();
     private readonly FakeLogger<AiClassifier> _log = new();
     private readonly ChatOptions _opts = new() { MaxOutputTokens = 300, Temperature = 0.2f };
+    private readonly IVikunjaProjectCatalog _catalog = Substitute.For<IVikunjaProjectCatalog>();
 
-    private AiClassifier Sut() => new(_chat, _keyword, _log, _opts);
+    public AiClassifierTests()
+    {
+        _catalog.GetAsync(Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<string, int> { ["Inbox"] = 1, ["Quotes"] = 7 });
+    }
+
+    private AiClassifier Sut() => new(_chat, _keyword, _log, _opts, _catalog);
 
     private static ChatResponse JsonResponse(object payload) =>
         new(new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(payload)));
@@ -168,6 +176,31 @@ public sealed class AiClassifierTests
         record.Level.Should().Be(LogLevel.Warning);
         record.Message.Should().Contain(nameof(HttpRequestException));
         record.Message.Should().MatchRegex(@"duration_ms=\d+");
+    }
+
+    [Fact]
+    public async Task ClassifyAsync_PropagatesProjectAndEntitiesFromModel()
+    {
+        _chat.GetResponseAsync(Arg.Any<IEnumerable<ChatMessage>>(), Arg.Any<ChatOptions?>(), Arg.Any<CancellationToken>())
+             .Returns(JsonResponse(new
+             {
+                 tags = new[] { "quote", "computing" },
+                 matched_skill = "Vikunja",
+                 title = "Gabriel on Unix and C",
+                 project = "Quotes",
+                 entities = new Dictionary<string, string>
+                 {
+                     ["quote"] = "Unix and C are the ultimate computer viruses.",
+                     ["author"] = "Richard Gabriel",
+                 },
+             }));
+
+        var result = await Sut().ClassifyAsync("\"Unix and C…\" — Richard Gabriel", default);
+
+        result.MatchedSkill.Should().Be("Vikunja");
+        result.VikunjaProject.Should().Be("Quotes");
+        result.Entities.Should().NotBeNull();
+        result.Entities!["author"].Should().Be("Richard Gabriel");
     }
 
     // ---------------------------------------------------------------------------

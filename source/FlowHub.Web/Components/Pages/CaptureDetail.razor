@@ -44,7 +44,7 @@ else
     <MudCard Outlined="true" Style="max-width:800px;">
         <MudCardHeader>
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Style="width:100%;">
-                <LifecycleBadge Stage="@_capture.Stage" />
+                <LifecycleBadge Stage="@_capture.Stage" VikunjaProject="@_capture.VikunjaProject" />
                 <MudIcon Icon="@(_capture.Source == ChannelKind.Telegram ? Icons.Material.Filled.Send : Icons.Material.Filled.Computer)"
                          Size="Size.Small" />
                 <MudText Typo="Typo.body2">@FormatRelative(_capture.CreatedAt)</MudText>

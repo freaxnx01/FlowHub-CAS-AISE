@@ -1,9 +1,11 @@
 using System.Net;
 using System.Net.Http;
 using FlowHub.Core.Captures;
+using FlowHub.Core.Skills;
 using FlowHub.Skills.Vikunja;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using RichardSzalay.MockHttp;
 
 namespace FlowHub.Skills.Tests.Vikunja;
@@ -16,12 +18,15 @@ public sealed class VikunjaSkillIntegrationTests
         {
             BaseUrl = "https://vikunja.example.com",
             ApiToken = "test-token",
-            DefaultProjectId = 42,
+            FallbackProjectId = 42,
         };
+        var catalog = Substitute.For<IVikunjaProjectCatalog>();
+        catalog.GetAsync(Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<string, int> { [options.FallbackProject] = options.FallbackProjectId });
         var mock = new MockHttpMessageHandler();
         var http = mock.ToHttpClient();
         http.BaseAddress = new Uri(options.BaseUrl!);
-        return (new VikunjaSkillIntegration(http, Options.Create(options), NullLogger<VikunjaSkillIntegration>.Instance), mock);
+        return (new VikunjaSkillIntegration(http, Options.Create(options), catalog, NullLogger<VikunjaSkillIntegration>.Instance), mock);
     }
 
     private static Capture TodoCapture(string content, string? title = "Buy milk on Saturday") => new(
