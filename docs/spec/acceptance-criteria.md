@@ -200,11 +200,33 @@ Deferred ACs are all Block-3+ scope (Telegram channel implementation) or superse
 
 ---
 
+## Persistence-Layer Coverage (Block 4)
+
+The persistence layer underlies multiple user-facing UCs. The table below maps each Block-4-relevant UC to the Persistence test class that owns its data-access ACs, so the persistence acceptance criteria can be traced as a coherent set rather than scattered across the per-UC sections above.
+
+| UC | What persistence has to deliver | Verified by (`tests/FlowHub.Persistence.Tests/`) |
+|---|---|---|
+| UC-05 — Browse/filter Captures | Cursor pagination (`CreatedAt DESC, Id DESC`); `.Include(Tags)` round-trip; no N+1 | `EfCaptureRepositoryTests` |
+| UC-09 — Async pipeline (Classified stage) | `MarkClassifiedAsync` persists `MatchedSkill`, `Title`, `VikunjaProject` atomically | `EfCaptureServiceTests` |
+| UC-11 — Retry a failed Capture | Stage reset (`Failed → Raw`); idempotent re-publish; no duplicate `SkillRun` rows | `EfCaptureServiceTests`, `EfSkillRunRepositoryTests` |
+| UC-12 — Filter by Lifecycle Stage | Single-stage and multi-stage union filters on `IX_Captures_Stage` | `EfCaptureRepositoryTests` (AC-12-1, AC-12-2) |
+| UC-13 — Filter by Tag | M-N join via `CaptureTag`; tag-name filter | `EfCaptureRepositoryTests` (AC-13-1, AC-13-2) |
+| UC-14 — Substring search | PostgreSQL `ILIKE` over `Content` and `Title` | `EfCaptureRepositoryTests` (AC-14-1, AC-14-2) |
+| UC-15 — Skill-Run history per Capture | `SkillRun` rows ordered by `StartedAt DESC`; one row per skill invocation | `EfSkillRunRepositoryTests` (AC-15-1) |
+| UC-16 — Integration health history | Latest-per-integration sample query on `(IntegrationName, SampledAt DESC)` index | `EfIntegrationHealthServiceTests` (AC-16-1) |
+| UC-18 — Semantic search | pgvector `vector(1024)` column + HNSW index; `FromSqlRaw` with float-array literal | `EfCaptureRepositoryTests.SemanticSearch_*` |
+| **All migrations** | `0001_Initial` through `0008_AddVikunjaProjectToCapture` apply cleanly on an empty DB | `MigrationSmokeTest` |
+
+All Persistence tests run against real PostgreSQL 17 via Testcontainers — no in-memory provider drift. The 29 tests in the project are listed by class in `docs/insights/block-4.md` § "Persistence-Layer Coverage".
+
+---
+
 ## Cross-references
 
 - Use cases (authoritative per-UC narrative): `docs/spec/use-cases.md`
 - Non-functional requirements: `docs/spec/nfa.md`
 - Testing strategy and tooling: `docs/spec/testing-strategy.md`
-- ADRs: `docs/adr/0001..0006`
+- ADRs: `docs/adr/0001..0006` (ADR 0005 = Persistence design)
 - Smoke-test runbook: `make smoke-prod` (defined in `Makefile`)
 - Beta-MVP operator runbook: `docs/runbooks/beta-mvp-acceptance.md`
+- Block-4 insights (test counts + per-class coverage): `docs/insights/block-4.md`

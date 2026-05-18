@@ -90,3 +90,34 @@ KI-Unterstützung hat in Block 4 die Implementierungszeit für Persistence-Infra
 Die Kombination aus Brainstorming-Skill → Spec-Dokument → Plan-Dokument → Subagent-getriebene Implementierung hat sich bewährt: Jede Phase hat die nächste informiert, ohne dass die KI unkontrolliert in die falsche Richtung implementiert hat.
 
 **Einschätzung:** KI ist ein starker Accelerator für Infrastruktur-Code (Boilerplate, Migrations, Tests), erfordert aber menschliche Führung bei Architektur- und Domain-Entscheidungen.
+
+## Test Results (as of 2026-05-18)
+
+`dotnet test FlowHub.slnx --filter "FullyQualifiedName!~E2ETests"` — **223 tests pass, 0 fail, 6 skipped** (live-service integration tests requiring external API keys):
+
+| Project | Passed | Skipped | Duration | Coverage |
+|---|--:|--:|--:|---|
+| `FlowHub.Persistence.Tests` | 29 | 0 | ~24 s | EF Core + Testcontainers PostgreSQL — `EfCaptureRepository`, `EfCaptureService`, `EfSkillRegistry`, `EfIntegrationHealthService`, migration smoke test |
+| `FlowHub.Web.ComponentTests` | 144 | 0 | ~11 s | bUnit — every Razor page + MassTransit harness pipeline tests + classifier/dispatcher/enricher unit tests |
+| `FlowHub.Api.IntegrationTests` | 17 | 0 | ~11 s | `WebApplicationFactory` + Testcontainers — full HTTP pipeline against real Postgres |
+| `FlowHub.Skills.Tests` | 20 | 0 | ~1 s | Unit-level handler tests for Vikunja + Wallabag adapters |
+| `FlowHub.Skills.ContractTests` | 13 | 0 | ~1 s | WireMock.Net wire-contract tests on a real loopback socket |
+| `FlowHub.Skills.IntegrationTests` | 0 | 2 | — | `make test-beta` — needs live Wallabag + Vikunja |
+| `FlowHub.AI.IntegrationTests` | 0 | 4 | — | `make test-ai` — needs `Ai__*__ApiKey` |
+| **Total** | **223** | **6** | | |
+
+E2E tests (`FlowHub.Web.E2ETests`, Playwright) are run on demand via `make test-e2e` and gated by the Web server + Chromium dependency. Latest green CI run: <https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml>.
+
+### Persistence-Layer Coverage
+
+The 29 `FlowHub.Persistence.Tests` cover the full persistence surface introduced in this block:
+
+| Test class | What it verifies | Tooling |
+|---|---|---|
+| `EfCaptureRepositoryTests` | Create/Read/Update/Delete; cursor pagination ordering (`CreatedAt DESC, Id DESC`); filter composition (Stage / Source / Tag / SearchTerm); `.Include(Tags)` round-trip | Testcontainers PostgreSQL 17 |
+| `EfCaptureServiceTests` | Stage transitions: `Raw → Classified → Routed → Completed`; `MarkClassifiedAsync` now also persists `VikunjaProject`; `MarkOrphan`, `MarkUnhandled` paths | Testcontainers + `IPublishEndpoint` substitute |
+| `EfSkillRegistryTests` | Skill registry CRUD; deregistration; lookup-by-name | Testcontainers |
+| `EfIntegrationHealthServiceTests` | Health-sample insertion; latest-per-integration query | Testcontainers |
+| `MigrationSmokeTest` | All migrations from `0001_Initial` to `0008_AddVikunjaProjectToCapture` apply cleanly on an empty database | Testcontainers — bare `db.Database.MigrateAsync()` |
+
+The cursor-pagination edge cases (limit+1 probe, ordering precondition) and the FK-strategy choices documented in the AI-Usage section above are all covered by these 29 tests against real Postgres — no in-memory provider drift.
