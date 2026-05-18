@@ -471,6 +471,58 @@ The three skills above cover concerns that the upstream `superpowers` plugin doe
 
 All three skills are open-source and reusable by other CAS AISE students who fork the rubric/vault structure.
 
+## Fazit — across all five blocks
+
+The per-Block and per-Slice "Reflexion" sections above capture what happened block-by-block. This section steps back and names the patterns across the five months — what shifted, what kept failing, what kept working, and what I'd change.
+
+### Workflow evolution (Block 1 → Block 5)
+
+Each block traded ad-hoc chat for more structured, more isolated agent dispatch. The cost of structure paid back in fewer mid-task escalations.
+
+| Block | Workflow shift | Decisive tools |
+|---|---|---|
+| 1 — Einführung | Ad-hoc Claude.ai chat for architecture; Copilot inline for code. Hand-rolled `CLAUDE.md`. | Claude.ai, Copilot |
+| 2 — Frontend | First sustained Claude Code CLI use. Phase discipline via `/ui-brainstorm` → `/ui-flow` → `/ui-build` → `/ui-review`. | Claude Code (Opus 4.7) |
+| 3 — Service | First end-to-end `superpowers:brainstorming` → `writing-plans` → `subagent-driven-development` slice. Two-stage review (spec + quality) per task. | Superpowers SDD; `MEAI` |
+| 4 — Persistence | Sonnet defaults + Haiku for mechanical tasks; per-task quality review dropped for one branch-wide review at end — ~60% token-burn cut, no quality loss. | Testcontainers; first custom skill (`cas-aise-todo-list`) |
+| 5 — Deployment | `/ultrareview` (multi-agent branch review) added; rubric-grounded `cas-aise-grade-self-check` skill closes each block. | `/ultrareview`, custom skill repo |
+
+By Block 5 the implementer subagents own full slices. The human work concentrates at two endpoints: the spec (where contracts get nailed down) and the review (where system-wide invariants get checked). The bottleneck moved from typing to those two places.
+
+### Recurring failure modes
+
+1. **Single-pass AI review misses system-wide invariants.** The Block-5 embedding-on-submit rework is canonical: the AI-drafted code was locally correct (one transaction) but globally wrong — a slow provider tanks the NfA-09 p95 < 200 ms submit budget. Per-task code-quality review couldn't catch this. `/ultrareview` was introduced for exactly this class of mistake and found it on the first run.
+2. **Deployment-shape failures are systematically under-tested.** Compose `${X:-}` interpolates empty strings (not nulls), so `??` defaults silently no-op. `.editorconfig` not COPY-ed into Docker turned analyzer suppressions into build errors. Casing mismatch `EMBEDDINGS__APIKEY` vs `Embeddings__ApiKey` shadowed a whole feature. None surface in unit or integration tests; all five were caught by `make smoke-prod` in one afternoon. AI-generated deployment glue needs its own gate.
+3. **Training-data lag bites on recent libraries.** `Pgvector.EntityFrameworkCore` was assumed in-the-box with Npgsql 10 (it isn't — separate package). `MassTransit.Testing` was assumed to be a separate package (it isn't — `AddMassTransitTestHarness()` is in the main `MassTransit` assembly). Verify every AI-stated API against the actually-installed package, especially for libraries that shipped after the model's cutoff.
+4. **Open-ended prompts inflate scope.** "Add X" without a plan produces a feature suite. The antidote was `superpowers:writing-plans` — bite-sized TDD-ordered tasks with full inline code, exact file paths, exact commit messages. Subagents dispatched against well-specified tasks reported DONE; subagents dispatched against open-ended prompts went exploring.
+5. **Plans authored from incomplete repo knowledge.** Block 3 Slice B's plan missed `CaptureServiceStubTests.cs` and the existing `ChannelKind` values; implementers adapted mid-task. The plan-writing skill now reads every file the plan references *before* freezing it.
+6. **AI defaults to widening visibility when tests don't compile.** Block 4 Task 8: plan said `internal sealed class CaptureEntity`; first instinct on a compile error was `public`. The right answer (`InternalsVisibleTo` in `AssemblyInfo.cs`) has to be in the plan, not implied as a footnote.
+
+### Recurring wins
+
+1. **The plan is the contract.** When the plan contains exact file paths, exact code, exact commit messages, and exact verification commands, the implementer operates with narrow judgment space and reports DONE rather than NEEDS_CONTEXT. The 95%+ "AI-drafted" share on production code is only reachable because the plan removed the ambiguity that would otherwise force the agent to guess.
+2. **Review cadence has to match the failure mode it catches.** Per-task spec + per-task quality made sense for Block 3 Slice B (first SDD run, no muscle memory). By Block 4 the per-task quality review caught nothing new while the branch-wide `/ultrareview` at end-of-slice caught the architectural mistakes per-task review never could. Dropping per-task quality review cut ~60% of the token burn with no observed quality loss.
+3. **Custom skills are the project's memory layer.** `cas-aise-todo-list`, `cas-aise-grade-self-check`, and `sync-ai-instructions` cover concerns upstream `superpowers` doesn't: rubric grounding, schedule-driven prioritisation, cross-project instruction reuse. Without `cas-aise-grade-self-check` the rubric drifted during long sessions — the skill caught missing evidence in this very file before submission.
+4. **AI for rigid-structure artifacts, human for architectural judgment.** GitHub Actions YAML, ADRs, OpenAPI ProblemDetails shapes, EF migrations — rigid structure where AI's 90%-correct first draft saves real time. Architectural decisions (hexagonal split for AI, in-process vs. RabbitMQ transport, dispatcher-event-carries-description vs. inline-skill-call) stayed with the human; AI's role there was to surface alternatives, not to choose.
+5. **Correction stories are the rubric evidence that counts.** "Defects Found by the Smoke Run" in `docs/insights/block-5.md` and the "Ultrareview-driven correction" / "Smoke-driven correction" sections of this file are auditable: each names a concrete defect, the commit that fixed it, the lesson. Hand-wavy "AI helped overall" claims close no rubric loop; "AI produced X, smoke caught Y, fix landed in commit Z" does.
+
+### What I'd change next time
+
+- **Rubric grounding from Block 1, not Block 3.** `cas-aise-grade-self-check` was authored mid-project; Blocks 1–2 had no formal use-cases / nfa / acceptance-criteria docs. The retroactive doc-work in late Block 3 cost real time. Formalise the spec docs in the first week.
+- **`/ultrareview` from Block 3, not Block 5.** The branch-wide review catches the class of architectural mistake per-task review can't. Cheaper to catch it after Slice B than after a 21-task Beta MVP.
+- **A `make smoke` target per block, not just Block 5.** Five latent bugs found in one afternoon by `make smoke-prod`. A simpler smoke (boot the app, curl a feature path) would have caught at least three of them earlier.
+- **Codify `InternalsVisibleTo` and EF-Core-test-host patterns in the plan template.** Both Block 3 Slice D and Block 4 had implementers default-widen visibility when tests didn't compile. The pattern is mechanical once spelled out; the recurring friction was avoidable.
+
+### Did the original hypothesis hold?
+
+The Block 1 assumption was that Claude would be "a fast typist with good library knowledge" — useful for boilerplate, suspect on architecture, basically a productivity multiplier rather than a workflow change. By Block 5 that's wrong by a wide margin in both directions.
+
+**Boilerplate is faster than expected.** The 95%+ AI-drafted share on production code isn't "AI did 95% of the work" — the 5% human input is concentrated at the high-judgment endpoints (scope, contracts, trade-offs). But the typing genuinely is a small fraction of the elapsed time. The bottleneck moved from implementation to spec writing and review — exactly the inversion SDD optimises for.
+
+**Architecture is more dangerous than expected.** The embedding-on-submit case is a one-paragraph rewrite that's obvious in retrospect: AI produced locally-correct code that broke a system-wide invariant, and a single-pass review would have shipped it. The deployment-shape failures are the same shape: locally correct, globally wrong. The human role at the architecture boundary didn't shrink; it grew, because the agent now produces enough code fast enough that the only meaningful filter is at design and review.
+
+AI didn't replace any one role in the workflow. It moved which role is the bottleneck. For the next project: spec docs first, `/ultrareview` from day one, a smoke target before the first feature. Implementation throughput is no longer the constraint — design and review throughput are.
+
 ## References
 
 - ADR 0003: `docs/adr/0003-async-pipeline.md`
