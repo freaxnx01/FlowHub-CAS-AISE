@@ -40,8 +40,8 @@ git push origin v1.0.0
 
 ```bash
 # Apply migrations to local PostgreSQL (no auto-migration at app startup)
-make migrate
+just migrate
 
 # Run app without migration step
-make run
+just run
 ```

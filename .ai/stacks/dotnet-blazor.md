@@ -144,15 +144,17 @@ dotnet list package --outdated
 
 ---
 
-## Essential Make Targets
+## Essential just Recipes
 
-Projects using this stack ship a repo-root `Makefile` standardizing the common commands. Target names are canonical; recipe bodies may use project-local variables.
+Projects using this stack ship a repo-root `justfile` (using [casey/just](https://github.com/casey/just)) standardizing the common commands. Recipe names are canonical; recipe bodies may use project-local variables.
 
-Canonical targets exist for: build/run (`build`, `watch`, `run-edge`), testing (`test`, `test-unit`, `test-coverage`), Docker Compose (`docker-run`, `up`, `down`, `logs`, `rebuild`), quality (`lint`, `outdated`, `vuln`), versioning (`version`, `version-set`, `bump-major|minor|patch`, `bump-auto`), release (`changelog`, `release-notes`, `release`, `release-auto`, `push-release`, `package`), and `clean`. Document each target with an inline `## <description>` comment and expose a `help` target that greps them.
+Canonical recipes exist for: build/run (`build`, `watch`, `run-edge`), testing (`test`, `test-unit`, `test-coverage`), Docker Compose (`docker-run`, `up`, `down`, `logs`, `rebuild`), quality (`lint`, `outdated`, `vuln`), versioning (`version`, `version-set`, `bump-major|minor|patch`, `bump-auto`), release (`changelog`, `release-notes`, `release`, `release-auto`, `push-release`, `package`), and `clean`. Document each recipe with a leading `# <description>` comment; the default recipe runs `just --list --unsorted` so `just` with no args prints the documented set.
 
-A reference Makefile lives at `.ai/examples/dotnet/Makefile` — copy it and customize the top-of-file variables. Host/tool/project-specific targets (`run-edge`, `release-notes`, `package`) ship as stubs with per-OS examples in comments.
+A reference `justfile` lives at `.ai/examples/dotnet/justfile` — copy it and customize the top-of-file variables. Host-specific recipes (`run-edge`, `clean`, version/release helpers using `sed`) ship as `[unix]` + `[windows]` pairs so Windows contributors do not need WSL; tool/project-specific recipes (`release-notes`, `package`) ship as stubs with per-OS examples in comments.
 
-Full target list with descriptions: [`.ai/references/dotnet/makefile-targets.md`](https://github.com/freaxnx01/ai-instructions/blob/main/.ai/references/dotnet/makefile-targets.md)
+Install (requires just ≥ 1.20): `cargo install just` / `brew install just` / `winget install Casey.Just` / `sudo apt install just`. CI: `extractions/setup-just@v2`.
+
+Full recipe list with descriptions: [`.ai/references/dotnet/justfile-recipes.md`](https://github.com/freaxnx01/ai-instructions/blob/main/.ai/references/dotnet/justfile-recipes.md)
 
 ---
 

@@ -42,10 +42,10 @@ This document is the single source of truth for "what counts as done" per featur
 
 | ID | Criterion | Verified by |
 |---|---|---|
-| AC-08-1 | `POST /api/v1/captures` with a valid body returns 201 within NF-09 (p95 < 200 ms server-side). | `make smoke-prod` step [5/6]; `tests/FlowHub.Api.IntegrationTests/` |
+| AC-08-1 | `POST /api/v1/captures` with a valid body returns 201 within NF-09 (p95 < 200 ms server-side). | `just smoke-prod` step [5/6]; `tests/FlowHub.Api.IntegrationTests/` |
 | AC-08-2 | Response body matches the `Capture` schema and `Location: /api/v1/captures/{id}` header is present. | `tests/FlowHub.Api.IntegrationTests/CapturesEndpointTests.cs` |
 | AC-08-3 | Missing `content` / unknown `source` → 400 ValidationProblem (`type` = `validation.md`). | `tests/FlowHub.Api.IntegrationTests/CapturesEndpointTests.cs` |
-| AC-08-4 | Bruno collection `bruno/captures/submit-capture.bru` round-trips against a live stack. | `make smoke-prod`; manual Bruno run |
+| AC-08-4 | Bruno collection `bruno/captures/submit-capture.bru` round-trips against a live stack. | `just smoke-prod`; manual Bruno run |
 
 ---
 
@@ -55,8 +55,8 @@ This document is the single source of truth for "what counts as done" per featur
 
 | ID | Criterion | Verified by |
 |---|---|---|
-| AC-09-1 | A URL-content Capture reaches `Completed` with `MatchedSkill = "Wallabag"` and a non-empty `ExternalRef`. | `Skills.ContractTests`; `make test-beta` |
-| AC-09-2 | A todo-content Capture reaches `Completed` with `MatchedSkill = "Vikunja"` and a non-empty `ExternalRef`. | `Skills.ContractTests`; `make test-beta` |
+| AC-09-1 | A URL-content Capture reaches `Completed` with `MatchedSkill = "Wallabag"` and a non-empty `ExternalRef`. | `Skills.ContractTests`; `just test-beta` |
+| AC-09-2 | A todo-content Capture reaches `Completed` with `MatchedSkill = "Vikunja"` and a non-empty `ExternalRef`. | `Skills.ContractTests`; `just test-beta` |
 | AC-09-3 | MassTransit harness tests prove the three consumer hops fire in order (Created → Classified → Routed). | `tests/FlowHub.Web.ComponentTests/Pipeline/*` (6 harness tests) |
 
 ### UC-10 — Graceful AI-classifier fallback
@@ -128,7 +128,7 @@ This document is the single source of truth for "what counts as done" per featur
 
 | ID | Criterion | Verified by |
 |---|---|---|
-| AC-18-1 | `POST /api/v1/captures` followed by polling `Captures.Embedding` populates the column within 30 s when `Embeddings__ApiKey` is set (actual ~2 s). | `make smoke-prod` step [6/6] |
+| AC-18-1 | `POST /api/v1/captures` followed by polling `Captures.Embedding` populates the column within 30 s when `Embeddings__ApiKey` is set (actual ~2 s). | `just smoke-prod` step [6/6] |
 | AC-18-2 | `GET /api/v1/captures/search?q=...` with a non-empty `q` returns 200 with an array body when at least one embedded Capture exists. | `tests/FlowHub.Api.IntegrationTests/SemanticSearchEndpointTests.cs` |
 | AC-18-3 | Empty `q` returns 400 ValidationProblem; with `Embeddings__ApiKey` unset, returns 503 ProblemDetails. | Same test class |
 | AC-18-4 | `POST /api/v1/admin/embeddings/rebuild` returns 200 `{ processed, skipped, failed }` when keys are present, 503 otherwise. | Same test class |
@@ -165,10 +165,10 @@ This document is the single source of truth for "what counts as done" per featur
 
 | ID | Criterion | Verified by |
 |---|---|---|
-| AC-17-1 | `docker compose up --build -d --wait` returns exit 0 with all `service_healthy` dependencies satisfied. | `make smoke-prod` step [1/6] |
-| AC-17-2 | `flowhub.migrations` container reaches `service_completed_successfully` with exit code 0. | `make smoke-prod` step [1/6] |
-| AC-17-3 | `GET /health/live` from inside the compose network returns 200 within NF-D3 (30 s) of container start. | `make smoke-prod` step [2/6] |
-| AC-17-4 | `GET /metrics` returns a Prometheus exposition containing at least one `^dotnet_` and one `^http_` series. | `make smoke-prod` step [3/6] |
+| AC-17-1 | `docker compose up --build -d --wait` returns exit 0 with all `service_healthy` dependencies satisfied. | `just smoke-prod` step [1/6] |
+| AC-17-2 | `flowhub.migrations` container reaches `service_completed_successfully` with exit code 0. | `just smoke-prod` step [1/6] |
+| AC-17-3 | `GET /health/live` from inside the compose network returns 200 within NF-D3 (30 s) of container start. | `just smoke-prod` step [2/6] |
+| AC-17-4 | `GET /metrics` returns a Prometheus exposition containing at least one `^dotnet_` and one `^http_` series. | `just smoke-prod` step [3/6] |
 
 ---
 
@@ -227,6 +227,6 @@ All Persistence tests run against real PostgreSQL 17 via Testcontainers — no i
 - Non-functional requirements: `docs/spec/nfa.md`
 - Testing strategy and tooling: `docs/spec/testing-strategy.md`
 - ADRs: `docs/adr/0001..0006` (ADR 0005 = Persistence design)
-- Smoke-test runbook: `make smoke-prod` (defined in `Makefile`)
+- Smoke-test runbook: `just smoke-prod` (defined in `justfile`)
 - Beta-MVP operator runbook: `docs/runbooks/beta-mvp-acceptance.md`
 - Block-4 insights (test counts + per-class coverage): `docs/insights/block-4.md`

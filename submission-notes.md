@@ -9,7 +9,7 @@ Operator notes for the CAS AISE submission. Not part of the submitted artefact i
   - `SUBMISSION.pdf` — hub-style submission document, ~10 pages, clickable links into the GitHub `main` branch.
   - `Eigenständigkeitserklärung.pdf` — separate signed PDF with Hilfsmittelverzeichnis + Eigenständigkeitserklärung (FFHS mandatory beilage).
 - **Optional safety net:** `SUBMISSION-bundle.pdf` (~150–250 pages, everything inlined).
-- **Build:** `make pdf-submission`, `make pdf-eigenstaendigkeitserklaerung`, `make pdf-submission-bundle`. All three regenerate from the same Markdown sources, no manual edits to the PDFs.
+- **Build:** `just pdf-submission`, `just pdf-eigenstaendigkeitserklaerung`, `just pdf-submission-bundle`. All three regenerate from the same Markdown sources, no manual edits to the PDFs.
 
 ## Why two PDFs?
 
@@ -32,7 +32,7 @@ The Hub is small, current, and the natural fit for the wording. The Bundle elimi
 ### Hub PDF (primary)
 
 ```bash
-make pdf-submission
+just pdf-submission
 # writes SUBMISSION.pdf in the repo root
 ```
 
@@ -41,7 +41,7 @@ Renders `SUBMISSION.md` only. Links to repo content remain hyperlinks in the PDF
 ### Bundle PDF (safety net)
 
 ```bash
-make pdf-submission-bundle
+just pdf-submission-bundle
 # writes SUBMISSION-bundle.pdf in the repo root
 ```
 
@@ -69,8 +69,8 @@ Walk this list top-to-bottom. Each step is gated by the previous.
 
 - [ ] All Block-Nachbereitungen show `[x]` for every rubric item
 - [ ] `cas-aise-grade-self-check` skill reports ≥ 88 / 90 (or noted gaps consciously accepted)
-- [ ] `make test` green: **234 / 234** across all 8 test projects
-- [ ] `make build` clean with warnings-as-errors enforced
+- [ ] `just test` green: **234 / 234** across all 8 test projects
+- [ ] `just build` clean with warnings-as-errors enforced
 - [ ] `git status` clean on `main`; no uncommitted/untracked files
 - [ ] Last CI run on `main` is green: `gh run list --workflow=ci.yml --branch=main --limit 1`
 - [ ] Tag `v0.1.0` exists and matches `<Version>0.1.0</Version>` in `Directory.Build.props`
@@ -94,9 +94,9 @@ Walk this list top-to-bottom. Each step is gated by the previous.
 
 ### D — Render PDFs (T-1 day)
 
-- [ ] `make pdf-submission` → `SUBMISSION.pdf` regenerated without warnings
-- [ ] `make pdf-submission-bundle` → `SUBMISSION-bundle.pdf` regenerated without warnings
-- [ ] `make pdf-eigenstaendigkeitserklaerung` → `Eigenständigkeitserklärung.pdf` regenerated without warnings
+- [ ] `just pdf-submission` → `SUBMISSION.pdf` regenerated without warnings
+- [ ] `just pdf-submission-bundle` → `SUBMISSION-bundle.pdf` regenerated without warnings
+- [ ] `just pdf-eigenstaendigkeitserklaerung` → `Eigenständigkeitserklärung.pdf` regenerated without warnings
 - [ ] Open `SUBMISSION.pdf` in a viewer:
   - [ ] Table of contents links are clickable
   - [ ] Demo URL is clickable
@@ -141,8 +141,8 @@ The signature applies to the **separate `Eigenständigkeitserklärung.pdf`**, no
 ### Pre-flight quick check (one command)
 
 ```bash
-make build && make test && \
-  make pdf-submission && make pdf-eigenstaendigkeitserklaerung && make pdf-submission-bundle && \
+just build && just test && \
+  just pdf-submission && just pdf-eigenstaendigkeitserklaerung && just pdf-submission-bundle && \
   echo "Pre-flight OK — proceed to sign Eigenständigkeitserklärung.pdf and upload"
 ```
 

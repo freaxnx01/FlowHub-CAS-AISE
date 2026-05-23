@@ -131,7 +131,7 @@ This resolves the captive-dependency problem because `IBus` is itself singleton-
 
 ### 9. One process in code; multi-container topology documented in `docker-compose.yml`
 
-FlowHub stays a single deployable process per ADR 0002 Decision 1. `make run` still starts everything with no broker dependency. However, a `docker-compose.yml` sketch is committed alongside the code that demonstrates the multi-container topology for Block 5:
+FlowHub stays a single deployable process per ADR 0002 Decision 1. `just run` still starts everything with no broker dependency. However, a `docker-compose.yml` sketch is committed alongside the code that demonstrates the multi-container topology for Block 5:
 
 ```
 services:
@@ -140,7 +140,7 @@ services:
   rabbitmq:      image: rabbitmq:3-management-alpine
 ```
 
-This compose file is **not** invoked by `make run` (which remains single-process via `dotnet run`). Its purpose is to satisfy the Bewertungskriterien dimension *"Sub-Systeme als unabhängige Container deploybar"* (max 5 pts) without introducing the operational complexity of a physical process split during development. Block 5 fleshes out the full deployment story with real image builds and an override file.
+This compose file is **not** invoked by `just run` (which remains single-process via `dotnet run`). Its purpose is to satisfy the Bewertungskriterien dimension *"Sub-Systeme als unabhängige Container deploybar"* (max 5 pts) without introducing the operational complexity of a physical process split during development. Block 5 fleshes out the full deployment story with real image builds and an override file.
 
 ### 10. Tests in `tests/FlowHub.Web.ComponentTests/Pipeline/`
 

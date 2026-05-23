@@ -3,7 +3,7 @@
 - **Source:** `docs/superpowers/plans/2026-05-04-beta-mvp.md` §"Task 21"
 - **Goal:** Validate the Beta MVP slice end-to-end against the real homelab Wallabag + Vikunja, then push the branch.
 - **Branch:** `feat/beta-mvp` (28 commits ahead of `main`)
-- **Pre-state:** `make build` clean, `make test` 138/138 green. All operator-facing changes already committed.
+- **Pre-state:** `just build` clean, `just test` 138/138 green. All operator-facing changes already committed.
 
 ---
 
@@ -53,7 +53,7 @@ You should see all 7 keys listed. Tokens are visible in plaintext (that's how us
 ## Step 21.2 — Boot and verify EventIds
 
 ```bash
-make run > /tmp/flowhub-boot.log 2>&1 &
+just run > /tmp/flowhub-boot.log 2>&1 &
 sleep 8
 grep -E "EventId.*(3020|4020|5010|5011)" /tmp/flowhub-boot.log
 ```
@@ -88,7 +88,7 @@ For a strictly-clean start (optional):
 ```bash
 pkill -f FlowHub.Web
 rm -f source/FlowHub.Web/flowhub.db
-make run > /tmp/flowhub-boot.log 2>&1 &
+just run > /tmp/flowhub-boot.log 2>&1 &
 sleep 8
 ```
 
@@ -176,7 +176,7 @@ This validates the Orphan path: AI classifier returned empty `MatchedSkill`, `Ca
 
 ```bash
 pkill -f FlowHub.Web
-make run > /tmp/flowhub-boot.log 2>&1 &
+just run > /tmp/flowhub-boot.log 2>&1 &
 sleep 8
 ```
 
@@ -196,7 +196,7 @@ pkill -f FlowHub.Web
 
 ---
 
-## Step 21.8 — Run live Beta tests (`make test-beta`)
+## Step 21.8 — Run live Beta tests (`just test-beta`)
 
 Export the same secrets as env vars (the trait-gated tests resolve them via `Environment.GetEnvironmentVariable`):
 
@@ -207,7 +207,7 @@ export Skills__Vikunja__BaseUrl=https://vikunja.home.freaxnx01.ch
 export Skills__Vikunja__ApiToken=<vikunja-pat>
 export Skills__Vikunja__DefaultProjectId=42
 
-make test-beta
+just test-beta
 ```
 
 **Expected:** 2 tests pass (`WallabagLiveTests.HandleAsync_LiveWallabag_PostsUrlAndReturnsExternalRef`, `VikunjaLiveTests.HandleAsync_LiveVikunja_PutsTaskAndReturnsExternalRef`).
@@ -221,7 +221,7 @@ If the tests fail with `Skip:` messages, the env vars aren't being read — chec
 ## Step 21.9 — Final default suite
 
 ```bash
-make build && make test
+just build && just test
 ```
 
 **Expected:** clean build (warnings-as-errors), 138/138 tests pass under `Category!=AI&Category!=BetaSmoke`.
@@ -269,7 +269,7 @@ User-secrets persist on the dev machine (`~/.microsoft/usersecrets/`) — leave 
 
 ## What this validates (rubric mapping)
 
-- **Block 3 — KI-Werkzeug-Nutzung (12 pts):** the URL/todo flow exercises the production-runtime AI classifier; `make test-beta` evidence + screenshots strengthen the Block 5 submission section.
+- **Block 3 — KI-Werkzeug-Nutzung (12 pts):** the URL/todo flow exercises the production-runtime AI classifier; `just test-beta` evidence + screenshots strengthen the Block 5 submission section.
 - **Block 4 — Sub-Systeme als unabhängige Container deploybar (5 pts):** Wallabag + Vikunja are external homelab services; FlowHub talks to them via HTTP. Validates the integration boundary.
 - **Block 5 — Intelligente Services mit KI (6 pts):** AI classifier in the request path with graceful fallback (per ADR 0004) — exercised live.
 - **Cross-block — Demo path (acceptance):** the seven steps above are the exact gating criteria the brainstorm spec called out (`docs/superpowers/specs/2026-05-04-beta-mvp-design.md` §"Demo path (acceptance)").

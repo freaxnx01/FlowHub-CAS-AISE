@@ -416,11 +416,11 @@ dotnet list package --outdated
 
 ## Essential Make Targets
 
-Projects using this stack ship a repo-root `Makefile` standardizing the common commands. Target names are canonical; recipe bodies may use project-local variables.
+Projects using this stack ship a repo-root `justfile` standardizing the common commands. Target names are canonical; recipe bodies may use project-local variables.
 
 Canonical targets exist for: build/run (`build`, `watch`, `run-edge`), testing (`test`, `test-unit`, `test-coverage`), Docker Compose (`docker-run`, `up`, `down`, `logs`, `rebuild`), quality (`lint`, `outdated`, `vuln`), versioning (`version`, `version-set`, `bump-major|minor|patch`, `bump-auto`), release (`changelog`, `release-notes`, `release`, `release-auto`, `push-release`, `package`), and `clean`. Document each target with an inline `## <description>` comment and expose a `help` target that greps them.
 
-A reference Makefile lives at `.ai/examples/dotnet/Makefile` — copy it and customize the top-of-file variables. Host/tool/project-specific targets (`run-edge`, `release-notes`, `package`) ship as stubs with per-OS examples in comments.
+A reference justfile lives at `.ai/examples/dotnet/justfile` — copy it and customize the top-of-file variables. Host/tool/project-specific targets (`run-edge`, `release-notes`, `package`) ship as stubs with per-OS examples in comments.
 
 Full target list with descriptions: [`.ai/references/dotnet/makefile-targets.md`](https://github.com/freaxnx01/ai-instructions/blob/main/.ai/references/dotnet/makefile-targets.md)
 

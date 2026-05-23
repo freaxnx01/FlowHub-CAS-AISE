@@ -28,7 +28,7 @@
 - EF Core's `FromSqlRaw` with a float-array vector literal is injection-safe since all values are IEEE 754 floats
 - Authentik's OIDC discovery endpoint makes `.AddOpenIdConnect()` configuration minimal — just `Authority`, `ClientId`, `ClientSecret`
 - Building efbundle in CI and shipping it as an artifact decouples migration tooling from the runtime image
-- 12-Factor XII (migrations as separate step) forces explicit migration management; `make migrate` fills the local dev gap
+- 12-Factor XII (migrations as separate step) forces explicit migration management; `just migrate` fills the local dev gap
 
 ## Test Results (as of 2026-05-12)
 
@@ -42,17 +42,17 @@
 | `FlowHub.Skills.ContractTests` | 13 | ~1 s | **New (Block 5):** WireMock.Net wire-contract tests on a real loopback socket — path, bearer, JSON shape, 401/500 mapping for both skills |
 | `FlowHub.Api.IntegrationTests` | 17 | ~17 s | `WebApplicationFactory` + Testcontainers — full HTTP pipeline against real Postgres |
 
-**Excluded by category in default `make test`** (run on demand):
+**Excluded by category in default `just test`** (run on demand):
 
 | Trait | Project | When |
 |---|---|---|
-| `Category=AI` | `FlowHub.AI.IntegrationTests` | `make test-ai` — needs `Ai__*__ApiKey` |
-| `Category=BetaSmoke` | `FlowHub.Skills.IntegrationTests` | `make test-beta` — needs live Wallabag + Vikunja |
-| `Category=E2E` | `FlowHub.Web.E2ETests` | `make test-e2e` — needs running web server + Playwright Chromium |
+| `Category=AI` | `FlowHub.AI.IntegrationTests` | `just test-ai` — needs `Ai__*__ApiKey` |
+| `Category=BetaSmoke` | `FlowHub.Skills.IntegrationTests` | `just test-beta` — needs live Wallabag + Vikunja |
+| `Category=E2E` | `FlowHub.Web.E2ETests` | `just test-e2e` — needs running web server + Playwright Chromium |
 
 CI run reference: latest green `ci.yml` workflow at <https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml>.
 
-## Production-Stack Smoke (`make smoke-prod`, 2026-05-12)
+## Production-Stack Smoke (`just smoke-prod`, 2026-05-12)
 
 End-to-end probe of the deployment claim from `vault/Blöcke/05 Deployment/05 Deployment - c) Nachbereitung.md`, wired as a make target on 2026-05-12 (commit `f0424ec`). Six steps, last run pass:
 
@@ -63,7 +63,7 @@ End-to-end probe of the deployment claim from `vault/Blöcke/05 Deployment/05 De
 [4/6] GET /metrics — expect dotnet_* and http_* series              ✓ dotnet_* + http_*
 [5/6] POST /api/v1/captures (URL capture for embedding round-trip)  ✓ id 738dd52a-…
 [6/6] polling Captures.Embedding (up to 30s)                        ✓ populated after ~2s (Mistral)
-==> smoke OK — stack left running. Tear down with: make smoke-down
+==> smoke OK — stack left running. Tear down with: just smoke-down
 ```
 
 The smoke uses a `curlimages/curl:8.10.1` sidecar joined to the `flowhub.web` network namespace, so no host port needs to be published — production network topology is preserved.
@@ -80,7 +80,7 @@ The first attempts caught real, latent bugs that would have blocked the submissi
 
 4. **Mistral rejects `dimensions` request field**. The default `.env.example` included `Embeddings__Dimensions=1024`; Mistral's `mistral-embed` returned 422 Unprocessable Entity. (`dimensions` is OpenAI-`text-embedding-3-*` only.) Fix: comment the default in `.env.example` with an explanatory note.
 
-5. **Passbolt `passbolt://` refs were shadowed by Makefile-imported .env**. The Makefile's `-include .env / export` pulled raw `passbolt://<uuid>` strings into recipe env, overriding whatever a parent `passbolt exec` had already resolved. `make ai-classify` therefore *appeared* to succeed (output matched the keyword-classifier fallback exactly — `[task]`, `Wallabag`) but had never actually reached the AI provider. Caught only by inspecting latencies. Fix: a `SECRET_EXEC` wrapper that re-sources `.env` *inside* the recipe shell and reroutes through `passbolt exec --` when present.
+5. **Passbolt `passbolt://` refs were shadowed by justfile-imported .env**. The justfile's `-include .env / export` pulled raw `passbolt://<uuid>` strings into recipe env, overriding whatever a parent `passbolt exec` had already resolved. `just ai-classify` therefore *appeared* to succeed (output matched the keyword-classifier fallback exactly — `[task]`, `Wallabag`) but had never actually reached the AI provider. Caught only by inspecting latencies. Fix: a `SECRET_EXEC` wrapper that re-sources `.env` *inside* the recipe shell and reroutes through `passbolt exec --` when present.
 
 Each was committed independently with a one-line "caught by smoke" reference in the commit body; the smoke target paid for itself within a single afternoon.
 

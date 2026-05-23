@@ -154,7 +154,7 @@ though the schema enforces it.
 `AddFlowHubAi(IConfiguration)` inspects `Ai__Provider` and the matching `ApiKey`
 and registers `KeywordClassifier` as the active `IClassifier` whenever either is
 missing. Invalid `Ai__Provider` values throw `InvalidOperationException` at
-startup. `make run` works zero-config for a fresh `git clone` — same dev-friendly
+startup. `just run` works zero-config for a fresh `git clone` — same dev-friendly
 philosophy as `DevAuthHandler` for auth.
 
 Boot logs: `EventId 3020 AiProviderRegistered` (Information) on the AI path,
@@ -173,11 +173,11 @@ a pure DI helper.
   (`AiServiceCollectionExtensionsTests.cs`).
 - 4 trait-gated live integration tests
   (`tests/FlowHub.AI.IntegrationTests/`, `[Trait("Category","AI")]`) that talk to
-  real providers — excluded from default `make test`, run via `make test-ai` when
+  real providers — excluded from default `just test`, run via `just test-ai` when
   the operator has keys.
 
-`Makefile` filters: `make test` → `--filter "Category!=AI"`. CI runs `make test`
-only; `make test-ai` is operator-on-demand.
+`justfile` filters: `just test` → `--filter "Category!=AI"`. CI runs `just test`
+only; `just test-ai` is operator-on-demand.
 
 ### 10. Active provider selection = explicit `Ai__Provider` env var
 

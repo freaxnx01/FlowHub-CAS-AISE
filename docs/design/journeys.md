@@ -559,7 +559,7 @@ The AppBar `QuickCaptureField` is shared across every page (see Dashboard flow D
 
 ## E2E status (snapshot)
 
-All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E2ETests/Journeys/`. Live result against `make watch` + the docker-compose backing services:
+All 28 journeys have a Playwright spec + JSON sidecar under `tests/FlowHub.Web.E2ETests/Journeys/`. Live result against `just watch` + the docker-compose backing services:
 
 | Status | Count | Journeys |
 |---|---|---|

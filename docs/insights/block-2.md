@@ -9,7 +9,7 @@ Blazor UI prototype with MudBlazor. Six routable pages designed and implemented 
 
 `source/FlowHub.Web/Stubs/` folder: Bogus-backed `StubCaptureService`, `SkillRegistryStub`, `IntegrationHealthServiceStub` for realistic fake data without a real database. All UI components unit-tested with bUnit; a full smoke-test walkthrough lands in `tests/FlowHub.Web.SmokeTests/` and replaces the manual click-through that the Nachbereitung TODO originally called for.
 
-`Makefile` added with `run` / `watch` / `build` / `test` / `format` targets — the entry point used by every subsequent block. CHANGELOG bootstrapped. Five FlowHub Claude Code skills authored (`flowhub-capture`, `flowhub-triage`, `flowhub-issue`, `flowhub`, `flowhub-dispatcher`) to support the workflow that drives the captures themselves.
+`justfile` added with `run` / `watch` / `build` / `test` / `format` targets — the entry point used by every subsequent block. CHANGELOG bootstrapped. Five FlowHub Claude Code skills authored (`flowhub-capture`, `flowhub-triage`, `flowhub-issue`, `flowhub`, `flowhub-dispatcher`) to support the workflow that drives the captures themselves.
 
 ## Key Decisions
 
@@ -71,7 +71,7 @@ Mostly mechanical given the patterns established by the earlier pages — AI gen
 | bUnit tests (~30 tests across pages) | ~700 | ~595 | ~105 | 85% |
 | Smoke tests | ~150 | ~120 | ~30 | 80% |
 | Wireframes + Mermaid flows | ~400 | ~280 | ~120 | 70% |
-| Makefile + Make targets doc | ~80 | ~60 | ~20 | 75% |
+| justfile + Make targets doc | ~80 | ~60 | ~20 | 75% |
 | FlowHub CC-skills (5 skills) | ~500 | ~350 | ~150 | 70% |
 
 Human contributions concentrated in: filter-composition logic (AND vs OR), parallel data-fetch refactor, deep-link param parsing, Block-3-stub UX policy, and skill design (the FlowHub triage logic is human-authored after AI failed to converge on a workable classification policy).

@@ -26,8 +26,8 @@ graph TD
 
 | Layer | Framework | What it tests | When to run | Block |
 |---|---|---|---|---|
-| **Unit** | xUnit + FluentAssertions + NSubstitute | Domain types, service logic, validators, pure functions | Every build (`make test`) | Block 2-3 (active) |
-| **Component (bUnit)** | bUnit + MudBlazor.Services | Razor components render correctly, props/events wire up, states (loading/empty/error) display properly | Every build (`make test`) | Block 2-3 (active) |
+| **Unit** | xUnit + FluentAssertions + NSubstitute | Domain types, service logic, validators, pure functions | Every build (`just test`) | Block 2-3 (active) |
+| **Component (bUnit)** | bUnit + MudBlazor.Services | Razor components render correctly, props/events wire up, states (loading/empty/error) display properly | Every build (`just test`) | Block 2-3 (active) |
 | **Integration** | WebApplicationFactory + Testcontainers (PostgreSQL) | Full HTTP pipeline, DI composition, auth middleware, EF Core queries, API endpoints | Before merge / CI | Block 3 (active — API; Block 4 will add DB-backed) |
 | **E2E** | Playwright | Browser-level: page navigation, SignalR circuit, visual layout, cross-page flows | Before release / CI | Block 5 (when deployed) |
 
@@ -35,7 +35,7 @@ graph TD
 
 ### What's implemented
 
-- **99 default-suite tests** passing on `make test` (excluding `Category=AI`):
+- **99 default-suite tests** passing on `just test` (excluding `Category=AI`):
   - **82 component tests** in `tests/FlowHub.Web.ComponentTests/` covering Razor components, service stubs, classification, and the MassTransit pipeline
   - **17 API integration tests** in `tests/FlowHub.Api.IntegrationTests/` covering REST endpoints via `WebApplicationFactory<Program>`
 
@@ -121,9 +121,9 @@ public sealed class AnthropicHaikuLiveTests
 }
 ```
 
-- `make test` excludes the `Category=AI` trait and all live tests remain **Skipped** (not silently passed)
-- `make test-ai` runs only that trait — intended for operator-on-demand validation when keys are loaded
-- CI runs `make test` only; live tests are operator-local
+- `just test` excludes the `Category=AI` trait and all live tests remain **Skipped** (not silently passed)
+- `just test-ai` runs only that trait — intended for operator-on-demand validation when keys are loaded
+- CI runs `just test` only; live tests are operator-local
 
 #### Trait filtering strategy
 
@@ -215,10 +215,10 @@ The smoke tests (`SmokeTests.cs`) automate verification of these states against 
 ## Running Tests
 
 ```bash
-make test          # run all tests (99 default-suite, excl. AI)
-make test-ai       # run AI trait-gated tests only (requires Ai__*__ApiKey env vars)
-make test-watch    # watch mode for component tests
-make build         # build also catches analyzer warnings (TreatWarningsAsErrors)
+just test          # run all tests (99 default-suite, excl. AI)
+just test-ai       # run AI trait-gated tests only (requires Ai__*__ApiKey env vars)
+just test-watch    # watch mode for component tests
+just build         # build also catches analyzer warnings (TreatWarningsAsErrors)
 ```
 
 ## Persistence Layer Testing

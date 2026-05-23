@@ -4,32 +4,32 @@ Manual smoke-test list for the new `make` targets, Playwright E2E, Bruno
 collection, and the AiPing console runner. Run from the repo root.
 
 Prereqs once: Docker, .NET 10 SDK, `pwsh` (for `playwright-install`),
-Microsoft Edge installed (or `xdg-open` configured) for `make test-all`.
+Microsoft Edge installed (or `xdg-open` configured) for `just test-all`.
 
 ---
 
 ## 1. Make targets
 
-### `make help`
+### `just`
 - [ ] Lists every target including `test-e2e`, `test-backend`, `test-frontend`,
       `test-all`, `playwright-install`, `db-ping`, `ai-ping`, `ai-classify`,
       `ai-embed`.
 
-### `make db-ping`
+### `just db-ping`
 - [ ] With Postgres compose container running → prints `tcp: ok` and
       `psql: SELECT 1 ok`, exits 0.
 - [ ] With Postgres stopped (`docker compose stop postgres`) → prints
       `tcp: FAIL …`, exits non-zero.
 - [ ] Overriding env works:
-      `PGHOST=127.0.0.1 PGPORT=5432 PGUSER=flowhub PGPASSWORD=dev-secret make db-ping`.
+      `PGHOST=127.0.0.1 PGPORT=5432 PGUSER=flowhub PGPASSWORD=dev-secret just db-ping`.
 
-### `make test-backend`
+### `just test-backend`
 - [ ] Runs `FlowHub.Persistence.Tests`, `FlowHub.Skills.Tests`, and
       `FlowHub.Skills.ContractTests` (Category=SkillContract).
 - [ ] Does **not** run `FlowHub.Web.ComponentTests` or any `*IntegrationTests`.
 - [ ] Does not require AI / Beta env vars.
 
-### `make test-backend` — Skill contract tests (WireMock.Net)
+### `just test-backend` — Skill contract tests (WireMock.Net)
 - [ ] Vikunja contract suite (6 tests) green: happy path, title fallback to
       content, 401 / 500 error mapping, missing-id response, bearer header
       on exact path `/api/v1/projects/{id}/tasks`.
@@ -41,10 +41,10 @@ Microsoft Edge installed (or `xdg-open` configured) for `make test-all`.
       port (no fixed port collisions if tests run in parallel).
 - [ ] No `Skills__*` env vars required — contract tests run offline.
 
-### `make test-frontend`
+### `just test-frontend`
 - [ ] Runs `FlowHub.Web.ComponentTests` only. Green on a clean checkout.
 
-### `make test-e2e`
+### `just test-e2e`
 - [ ] First run: triggers `db-up`, `db-migrate`, `playwright-install`,
       starts FlowHub.Web, waits for `/health/live`, runs the happy-flow test,
       stops the server. Exit code reflects the test outcome.
@@ -54,7 +54,7 @@ Microsoft Edge installed (or `xdg-open` configured) for `make test-all`.
 - [ ] If `pwsh` is not installed, `playwright-install` fails with a clear
       message — install pwsh and retry.
 
-### `make test-all`
+### `just test-all`
 - [ ] Runs backend + frontend tests, then starts Postgres and FlowHub.Web in
       the background and opens `http://localhost:5070` in Microsoft Edge.
 - [ ] Server keeps running after make exits; `cat .make/web.pid` returns a PID
@@ -64,7 +64,7 @@ Microsoft Edge installed (or `xdg-open` configured) for `make test-all`.
 - [ ] If Edge is missing, falls back to `microsoft-edge-stable` or `xdg-open`,
       else prints the manual-open hint.
 
-### `make test`
+### `just test`
 - [ ] Still works. Excludes `[Category=AI]`, `[Category=BetaSmoke]`,
       `[Category=E2E]`. Does **not** boot Playwright or the web server.
 
@@ -72,10 +72,10 @@ Microsoft Edge installed (or `xdg-open` configured) for `make test-all`.
 
 ## 2. Playwright E2E (`tests/FlowHub.Web.E2ETests`)
 
-Run via `make test-e2e`, or manually with a server already running:
+Run via `just test-e2e`, or manually with a server already running:
 
 ```bash
-make watch &  # in another shell, or use `make run`
+just watch &  # in another shell, or use `just run`
 FLOWHUB_E2E_BASE_URL=http://localhost:5070 dotnet test tests/FlowHub.Web.E2ETests --filter "Category=E2E"
 ```
 
@@ -86,7 +86,7 @@ FLOWHUB_E2E_BASE_URL=http://localhost:5070 dotnet test tests/FlowHub.Web.E2ETest
       - navigates to `/captures`
       - finds a table row containing the input text
       - clicks the row and lands on `/captures/{guid}` with the content rendered.
-- [ ] Headed mode works: `FLOWHUB_E2E_HEADED=true make test-e2e` opens a visible
+- [ ] Headed mode works: `FLOWHUB_E2E_HEADED=true just test-e2e` opens a visible
       Chromium window.
 - [ ] Test is idempotent (each run uses a fresh GUID in the content; previous
       runs don't break filters).
@@ -96,8 +96,8 @@ FLOWHUB_E2E_BASE_URL=http://localhost:5070 dotnet test tests/FlowHub.Web.E2ETest
 ## 3. Bruno collection (`bruno/`)
 
 Open the `bruno/` folder in [Bruno](https://www.usebruno.com/), select the
-`local` environment, then ensure the app is running (`make run` or
-`make watch`). Run requests in this order:
+`local` environment, then ensure the app is running (`just run` or
+`just watch`). Run requests in this order:
 
 ### `system/`
 - [ ] `Health Live` → 200, body `"Healthy"`.
@@ -129,29 +129,29 @@ Open the `bruno/` folder in [Bruno](https://www.usebruno.com/), select the
 
 ## 4. AiPing runner (`tools/FlowHub.AiPing`)
 
-- [ ] `make ai-ping` with no env → exits with `FAIL: AI provider not configured`
+- [ ] `just ai-ping` with no env → exits with `FAIL: AI provider not configured`
       and a hint to set `Ai__Provider` + `Ai__<Provider>__ApiKey`.
-- [ ] `Ai__Provider=Anthropic Ai__Anthropic__ApiKey=… make ai-ping`
+- [ ] `Ai__Provider=Anthropic Ai__Anthropic__ApiKey=… just ai-ping`
       → prints `OK` plus latency.
-- [ ] `Ai__Provider=OpenRouter Ai__OpenRouter__ApiKey=… make ai-ping` → idem.
+- [ ] `Ai__Provider=OpenRouter Ai__OpenRouter__ApiKey=… just ai-ping` → idem.
 - [ ] Model override picks up: e.g.
-      `Ai__Anthropic__Model=claude-sonnet-4-6 make ai-ping` shows the
+      `Ai__Anthropic__Model=claude-sonnet-4-6 just ai-ping` shows the
       Sonnet model in the config dump.
-- [ ] `make ai-classify TEXT="todo: buy milk"` → `MatchedSkill = Vikunja`.
-- [ ] `make ai-classify TEXT="https://en.wikipedia.org/wiki/Hexagonal_architecture"`
+- [ ] `just ai-classify "todo: buy milk"` → `MatchedSkill = Vikunja`.
+- [ ] `just ai-classify "https://en.wikipedia.org/wiki/Hexagonal_architecture"`
       → `MatchedSkill = Wallabag`.
-- [ ] `make ai-embed TEXT="hello"` with `Embeddings__ApiKey` set → prints
+- [ ] `just ai-embed "hello"` with `Embeddings__ApiKey` set → prints
       `dimensions = …` and a numeric preview.
-- [ ] `make ai-embed` without `Embeddings__ApiKey` → clean FAIL message.
+- [ ] `just ai-embed` without `Embeddings__ApiKey` → clean FAIL message.
 
 ---
 
-## 5. Production compose stack (`make smoke-prod`)
+## 5. Production compose stack (`just smoke-prod`)
 
 End-to-end smoke against the real docker-compose stack — the deployment
 claim that was never exercised before submission.
 
-- [ ] `make smoke-prod` step [1/6] — `docker compose up --build -d --wait`
+- [ ] `just smoke-prod` step [1/6] — `docker compose up --build -d --wait`
       returns 0 (all `depends_on: service_healthy` satisfied,
       `flowhub.migrations` reaches `service_completed_successfully`).
 - [ ] Step [2/6] — migrations exit code printed as `0`.
@@ -166,14 +166,14 @@ claim that was never exercised before submission.
 - [ ] Without `EMBEDDINGS__APIKEY`: step [6/6] prints "skipped — …"
       and the smoke still exits 0 (consumer no-ops by design).
 - [ ] On any failure the stack is left running for diagnosis (no
-      auto-teardown). `make smoke-down` cleanly stops it (volumes preserved).
+      auto-teardown). `just smoke-down` cleanly stops it (volumes preserved).
 
 ---
 
 ## 6. Regression checks
 
 - [ ] `dotnet build FlowHub.slnx` is green with 0 warnings.
-- [ ] `make test` skips E2E (no Playwright browser launch).
-- [ ] Existing `make watch` still hot-reloads on .razor / .cs changes.
-- [ ] `git status` after `make test-all` shows nothing new outside `.make/`
+- [ ] `just test` skips E2E (no Playwright browser launch).
+- [ ] Existing `just watch` still hot-reloads on .razor / .cs changes.
+- [ ] `git status` after `just test-all` shows nothing new outside `.make/`
       (which is gitignored).

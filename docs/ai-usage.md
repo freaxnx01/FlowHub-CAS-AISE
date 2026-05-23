@@ -71,7 +71,7 @@ The 5% human input is high-value: scope correction, package-name correction, fac
 - The brainstorming-skill A/B/C question format forced explicit decision-making instead of hand-waving. 13 decisions written down, each with rationale.
 - Subagent-driven development per task gave clean isolation: each implementer started with a fresh context, the controller curated exactly what they needed, and the two-stage review (spec then quality) caught real issues twice.
 - LoggerMessage source-gen caught CA1848/CA1873 analyzer rules early; the team established an EventId namespacing convention (Pipeline 1000–1999, Skills 2000–2999) before the third consumer landed.
-- The smoke-test gate (`make run` + `curl /` returning 200) revealed the captive-dependency issue immediately when it would have been silent in a unit-test-only run.
+- The smoke-test gate (`just run` + `curl /` returning 200) revealed the captive-dependency issue immediately when it would have been silent in a unit-test-only run.
 
 ⚠ **What needed correction**
 
@@ -168,14 +168,14 @@ Authored by Claude Code via the `writing-plans` skill from the approved spec. 15
 tasks total, TDD-ordered: packages → ClassificationResult extension → FlowHub.AI
 csproj → AiPrompts → AiClassificationResponse DTO → AiClassifier (10 unit tests) →
 AddFlowHubAi (8 unit tests covering D8 matrix) → Program.cs wiring → integration
-test project → 4 trait-gated live tests → Makefile filter → ai-usage.md → ADR 0004
+test project → 4 trait-gated live tests → justfile filter → ai-usage.md → ADR 0004
 → CLAUDE.md placeholder note → vault checklist + CHANGELOG + final pass.
 
 ### Implementation execution
 
 Subagent-driven. Sonnet 4.6 for TDD/judgment-heavy tasks (T2, T4–T10); Haiku for
 mechanical tasks (T1 packages, T3 csproj scaffolding, T9 integration test scaffold,
-T11 Makefile, T14 CLAUDE.md tweak, T15 vault checklist).
+T11 justfile, T14 CLAUDE.md tweak, T15 vault checklist).
 
 ### Production-runtime AI use
 
@@ -262,7 +262,7 @@ particularly well-suited to the failure-path tests: the plan enumerated all five
 fallback scenarios (network error, timeout, JSON parse failure, schema violation,
 generic exception) in advance, so the implementer just typed each case and watched
 it go red then green. The zero-config startup behaviour was validated immediately
-by the `make run` smoke test: EventId 3021 `AiProviderNotConfigured` appeared on the
+by the `just run` smoke test: EventId 3021 `AiProviderNotConfigured` appeared on the
 first boot with no `Ai__Provider` env var set, exactly matching the dev-friendly
 philosophy from the spec.
 
@@ -283,11 +283,11 @@ compile clean on first attempt.
 
 **Honest note on live integration tests**
 
-The four trait-gated live integration tests (`make test-ai`) were not exercised in
+The four trait-gated live integration tests (`just test-ai`) were not exercised in
 this implementation run — running them requires real Anthropic or OpenRouter API keys
 in the environment, making them an operator-only step. The mocked unit tests (18 of
 them) cover all failure paths and the full D8 registration matrix; the live tests
-exist as a fast sanity gate for whoever runs `make test-ai` with keys configured.
+exist as a fast sanity gate for whoever runs `just test-ai` with keys configured.
 
 ## Prompts of note
 
@@ -305,7 +305,7 @@ End-to-end vertical slice that landed Block-4 (persistence) and Block-5 (real Sk
 - `superpowers:writing-plans` produced this plan (`docs/superpowers/plans/2026-05-04-beta-mvp.md`).
 - `superpowers:subagent-driven-development` drove the 21 tasks. 22 commits on `feat/beta-mvp` (21 task commits + 1 final-review fixup commit + 1 plan-write commit + 1 vault-update commit).
 
-Branch state at end of automated execution: 138/138 tests pass under `make test` (excludes `Category=AI` and `Category=BetaSmoke`); Task 21 (operator-driven demo + push) is the only remaining item.
+Branch state at end of automated execution: 138/138 tests pass under `just test` (excludes `Category=AI` and `Category=BetaSmoke`); Task 21 (operator-driven demo + push) is the only remaining item.
 
 ### Notable adaptations the implementers caught (real value, not hallucinations)
 
@@ -324,7 +324,7 @@ These are catches the subagent dispatches made during the 21-task run. Each repr
 - **`SkillsServiceCollectionExtensionsTests.Build` return type (Task 13):** the helper was authored to return `IServiceProvider`, but CA1859 (under warnings-as-errors in tests) flagged that the only callers use `GetServices<T>` extension methods which work on the concrete `ServiceProvider` just as well. Implementer changed the return type to `ServiceProvider`. Trivial but worth noting because it shows up across the codebase wherever a helper *could* return concrete.
 - **CA1859 implications for csproj packages (Task 6):** Haiku implementer added `Microsoft.Extensions.Configuration.Abstractions` and `Microsoft.Extensions.DependencyInjection.Abstractions` to `Directory.Packages.props` because the new `FlowHub.Persistence.csproj` declared them as `<PackageReference Include="..." />` without versions, and central package management failed without the central pin. Not in the plan; correctly added.
 - **MassTransit reference in `FlowHub.Persistence` (Task 8):** `EfCaptureService` depends on `IPublishEndpoint` (MassTransit); plan didn't list `MassTransit` in the Persistence csproj's `<PackageReference>` block. Implementer added it.
-- **`flowhub.db` `.gitignore` entry (Task 10):** sensible add not in plan; SQLite file lands in `source/FlowHub.Web/` working dir on `make run` and shouldn't be committed.
+- **`flowhub.db` `.gitignore` entry (Task 10):** sensible add not in plan; SQLite file lands in `source/FlowHub.Web/` working dir on `just run` and shouldn't be committed.
 - **Rate-limit interruption mid-Task-12 (Wallabag implementer dispatch):** the Anthropic plan rate limit hit during the implementer subagent's run. The subagent had created all three files (`WallabagOptions.cs`, `WallabagSkillIntegration.cs`, `WallabagSkillIntegrationTests.cs`) but hadn't reached the `git commit` step before the rate cap. Files survived on disk; controller verified each one matched the plan content, ran the tests (7/7 pass, 138/138 full suite), committed manually. Recovery pattern: subagent work products are durable to rate-limit cutoffs because the filesystem is the boundary; the missing step is just the commit, which the controller can complete from outside. Worth knowing for any long-running plan execution.
 - **Final-review-only catch — `CaptureDetail` Unhandled message:** the per-task spec-compliance review wouldn't have caught this; it's a UX issue visible only end-to-end. The original page rendered `"No Skill matched this Capture. The AI classifier could not determine a category."` for every Unhandled capture — but `Unhandled` actually means a skill *did* match, the integration was *attempted*, and the integration *failed*. (The "no skill matched" case lives in `Orphan`, written by `CaptureEnrichmentConsumer`.) Reviewer caught the semantic mismatch and proposed a one-line razor change to surface `FailureReason` correctly. Same fix updated the corresponding bUnit smoke test, which was asserting on the now-incorrect string. The lesson is that branch-wide review caught what 21 per-task reviews wouldn't have.
 
@@ -345,7 +345,7 @@ The 15% human share in production code is concentrated in the test infrastructur
 
 **What worked**
 
-The 21-task plan executed across one session with one rate-limit interruption (mid-Task-12) and zero `BLOCKED` / `NEEDS_CONTEXT` escalations. The Sonnet/Haiku dispatch defaults from the user's standing memory feedback continued to pay off — Haiku handled the eight csproj/Makefile/markdown tasks for low cost, and Sonnet handled all TDD work without needing Opus escalation. Skipping per-task code-quality reviews (also from the standing feedback) saved roughly 60% of the token burn that Slice B's full two-stage-review pattern would have consumed; the single final branch-wide code review caught the one semantically wrong UX message that no per-task review could have surfaced. TDD discipline against EF Core's `InMemory` provider produced 13 unit tests that caught the cursor-pagination edge cases (limit+1 probe, ordering by `CreatedAt DESC, Id DESC`, filter composition) before any of the integration tests touched real persistence.
+The 21-task plan executed across one session with one rate-limit interruption (mid-Task-12) and zero `BLOCKED` / `NEEDS_CONTEXT` escalations. The Sonnet/Haiku dispatch defaults from the user's standing memory feedback continued to pay off — Haiku handled the eight csproj/justfile/markdown tasks for low cost, and Sonnet handled all TDD work without needing Opus escalation. Skipping per-task code-quality reviews (also from the standing feedback) saved roughly 60% of the token burn that Slice B's full two-stage-review pattern would have consumed; the single final branch-wide code review caught the one semantically wrong UX message that no per-task review could have surfaced. TDD discipline against EF Core's `InMemory` provider produced 13 unit tests that caught the cursor-pagination edge cases (limit+1 probe, ordering by `CreatedAt DESC, Id DESC`, filter composition) before any of the integration tests touched real persistence.
 
 The slice's strategic choice — landing Block-4 (persistence) and Block-5 (real Skills + Integrations) work *early* to validate the architecture against a real homelab Wallabag/Vikunja before doing the rubric-driven Block 4 and Block 5 work — proved its value in two ways. First, it forced an honest trade-off conversation about what the Beta scope is *not*: SQLite not Postgres, no Repository layer, in-process MigrationRunner instead of the 12-Factor-XII separate init container, only `ICaptureService` swapped to EF (Skill/Integration health stay stubs). Each of those will be re-addressed in Block 4 with the Beta as the working baseline rather than designing from a blank page. Second, it revealed an interface-shape decision (`ISkillIntegration.HandleAsync` returning a `SkillResult` with `ExternalRef`) that the brainstorming spec hadn't fully landed — a real downstream system has an id, the consumer needs to persist it, the lifecycle needs a `Completed` terminal state. None of that surfaced in Slice C because Slice C's classifier doesn't have an external persistence target. The Beta MVP forced these contracts into existence.
 
@@ -369,7 +369,7 @@ The spec error table contained one runtime-incorrect claim that survived through
 
 ### Honest note on Task 21 (operator demo)
 
-The 21-task plan reserved Task 21 for the operator: set user-secrets (Anthropic key, Wallabag PAT, Vikunja PAT + project id), boot the app, verify EventIds 3020/4020/5010/5011 in the boot log, browser-test URL → Wallabag / `todo:` → Vikunja / nonsense → Orphan, restart-survival check, optional `make test-beta` against the live homelab, then push. That step is not part of this writeup — it was deliberately gated for human-driven validation against the real homelab services. The 138/138 unit-and-integration-test count above is the upper bound of what the automated pipeline can guarantee; the Task-21 evidence (screenshots, log lines, live Wallabag/Vikunja entries) will land in this section when the operator runs it.
+The 21-task plan reserved Task 21 for the operator: set user-secrets (Anthropic key, Wallabag PAT, Vikunja PAT + project id), boot the app, verify EventIds 3020/4020/5010/5011 in the boot log, browser-test URL → Wallabag / `todo:` → Vikunja / nonsense → Orphan, restart-survival check, optional `just test-beta` against the live homelab, then push. That step is not part of this writeup — it was deliberately gated for human-driven validation against the real homelab services. The 138/138 unit-and-integration-test count above is the upper bound of what the automated pipeline can guarantee; the Task-21 evidence (screenshots, log lines, live Wallabag/Vikunja entries) will land in this section when the operator runs it.
 
 ## Block 4 — Persistence (May 2026)
 
@@ -445,7 +445,7 @@ The first AI-drafted design wired embedding generation directly into `EfCaptureS
 
 ### Smoke-driven correction: empty-string env defaults
 
-The first run of `make smoke-prod` against the compose stack (2026-05-12) crashed `flowhub.web` at startup with `System.ArgumentException: Value cannot be an empty string. (Parameter 'model')`. Root cause: AI-generated configuration code used `configuration["Embeddings:Model"] ?? "mistral-embed"`, which fails for compose's `${X:-}` interpolation (substitutes empty string, not null). Same trap on `Ai__<Provider>__Model`. The fix (`is { Length: > 0 } m ? m : default`) is a one-character change in semantics but invisible to an AI focused on the in-memory case. Lesson: deployment-shape failure modes are systematically under-tested in AI-generated code; the smoke target is what closed this gap.
+The first run of `just smoke-prod` against the compose stack (2026-05-12) crashed `flowhub.web` at startup with `System.ArgumentException: Value cannot be an empty string. (Parameter 'model')`. Root cause: AI-generated configuration code used `configuration["Embeddings:Model"] ?? "mistral-embed"`, which fails for compose's `${X:-}` interpolation (substitutes empty string, not null). Same trap on `Ai__<Provider>__Model`. The fix (`is { Length: > 0 } m ? m : default`) is a one-character change in semantics but invisible to an AI focused on the in-memory case. Lesson: deployment-shape failure modes are systematically under-tested in AI-generated code; the smoke target is what closed this gap.
 
 ## Custom Skills (self-authored)
 
@@ -492,7 +492,7 @@ By Block 5 the implementer subagents own full slices. The human work concentrate
 ### Recurring failure modes
 
 1. **Single-pass AI review misses system-wide invariants.** The Block-5 embedding-on-submit rework is canonical: the AI-drafted code was locally correct (one transaction) but globally wrong — a slow provider tanks the NfA-09 p95 < 200 ms submit budget. Per-task code-quality review couldn't catch this. `/ultrareview` was introduced for exactly this class of mistake and found it on the first run.
-2. **Deployment-shape failures are systematically under-tested.** Compose `${X:-}` interpolates empty strings (not nulls), so `??` defaults silently no-op. `.editorconfig` not COPY-ed into Docker turned analyzer suppressions into build errors. Casing mismatch `EMBEDDINGS__APIKEY` vs `Embeddings__ApiKey` shadowed a whole feature. None surface in unit or integration tests; all five were caught by `make smoke-prod` in one afternoon. AI-generated deployment glue needs its own gate.
+2. **Deployment-shape failures are systematically under-tested.** Compose `${X:-}` interpolates empty strings (not nulls), so `??` defaults silently no-op. `.editorconfig` not COPY-ed into Docker turned analyzer suppressions into build errors. Casing mismatch `EMBEDDINGS__APIKEY` vs `Embeddings__ApiKey` shadowed a whole feature. None surface in unit or integration tests; all five were caught by `just smoke-prod` in one afternoon. AI-generated deployment glue needs its own gate.
 3. **Training-data lag bites on recent libraries.** `Pgvector.EntityFrameworkCore` was assumed in-the-box with Npgsql 10 (it isn't — separate package). `MassTransit.Testing` was assumed to be a separate package (it isn't — `AddMassTransitTestHarness()` is in the main `MassTransit` assembly). Verify every AI-stated API against the actually-installed package, especially for libraries that shipped after the model's cutoff.
 4. **Open-ended prompts inflate scope.** "Add X" without a plan produces a feature suite. The antidote was `superpowers:writing-plans` — bite-sized TDD-ordered tasks with full inline code, exact file paths, exact commit messages. Subagents dispatched against well-specified tasks reported DONE; subagents dispatched against open-ended prompts went exploring.
 5. **Plans authored from incomplete repo knowledge.** Block 3 Slice B's plan missed `CaptureServiceStubTests.cs` and the existing `ChannelKind` values; implementers adapted mid-task. The plan-writing skill now reads every file the plan references *before* freezing it.
@@ -510,7 +510,7 @@ By Block 5 the implementer subagents own full slices. The human work concentrate
 
 - **Rubric grounding from Block 1, not Block 3.** `cas-aise-grade-self-check` was authored mid-project; Blocks 1–2 had no formal use-cases / nfa / acceptance-criteria docs. The retroactive doc-work in late Block 3 cost real time. Formalise the spec docs in the first week.
 - **`/ultrareview` from Block 3, not Block 5.** The branch-wide review catches the class of architectural mistake per-task review can't. Cheaper to catch it after Slice B than after a 21-task Beta MVP.
-- **A `make smoke` target per block, not just Block 5.** Five latent bugs found in one afternoon by `make smoke-prod`. A simpler smoke (boot the app, curl a feature path) would have caught at least three of them earlier.
+- **A `just smoke` recipe per block, not just Block 5.** Five latent bugs found in one afternoon by `just smoke-prod`. A simpler smoke (boot the app, curl a feature path) would have caught at least three of them earlier.
 - **Codify `InternalsVisibleTo` and EF-Core-test-host patterns in the plan template.** Both Block 3 Slice D and Block 4 had implementers default-widen visibility when tests didn't compile. The pattern is mechanical once spelled out; the recurring friction was avoidable.
 
 ### Did the original hypothesis hold?

@@ -11,7 +11,7 @@
 ## Context
 
 Block 2 shipped `CaptureServiceStub` — a Bogus-backed in-memory `ICaptureService`
-implementation that survives only the lifetime of one `make run`. Block 4's Moodle
+implementation that survives only the lifetime of one `just run`. Block 4's Moodle
 Auftrag asks for "ein geeignetes Datenmodell entwerfen und über ORM-Abstraktion
 realisieren ... mit dynamischen Abfragen" — i.e., real persistence, with an ORM,
 backing the same driving port the UI already consumes.
@@ -53,11 +53,11 @@ The hexagonal seam stays unchanged: `ICaptureService` (driving port, in
 
 The Beta MVP runs on SQLite (`Microsoft.EntityFrameworkCore.Sqlite` 10.0.7).
 Connection-string fallback is `Data Source=flowhub.db` (relative to working dir,
-which is `source/FlowHub.Web/` under `make run`). This is a deliberate scope
+which is `source/FlowHub.Web/` under `just run`). This is a deliberate scope
 decision:
 
-- Zero infrastructure setup — no Docker container, no `make db-up`, no port
-  conflicts. The user can `make run` and have a working app immediately.
+- Zero infrastructure setup — no Docker container, no `just db-up`, no port
+  conflicts. The user can `just run` and have a working app immediately.
 - The EF Core API surface is provider-agnostic for the Beta's query shapes (no
   Postgres-specific operators, no `JSONB` columns, no full-text search yet). All
   13 unit tests in `FlowHub.Persistence.Tests` run against `Microsoft.EntityFrameworkCore.InMemory`,
@@ -115,7 +115,7 @@ slice). This means:
 
 For migration *application*, the Beta uses a `MigrationRunner` `IHostedService`
 that calls `db.Database.MigrateAsync()` at app startup (EventIds 5010/5011). This
-is **convenient for `make run`** but is explicitly out-of-line with **12-Factor
+is **convenient for `just run`** but is explicitly out-of-line with **12-Factor
 XII** ("Run admin/management tasks as one-off processes"). Block 5 will:
 
 - Move migration application to a separate init container in the production
@@ -311,7 +311,7 @@ Items the Beta intentionally did NOT do, deferred to Block 4 or Block 5:
 | Soft-delete strategy | Block 4 | Lifecycle stages already provide pseudo-deletion via `Orphan` / `Unhandled` |
 | Full audit fields (`UpdatedAt`, `CreatedBy`) | Block 4 | Single-user system; `CreatedAt` is sufficient until OIDC lands |
 | Testcontainers PostgreSQL for repository tests | Block 4 | Beta uses InMemory for speed; provider fidelity in Block 4 |
-| `make db-up` / `make db-migrate` Make targets | Block 4 | Tied to PostgreSQL switch |
+| `just db-up` / `just db-migrate` Make targets | Block 4 | Tied to PostgreSQL switch |
 | `docs/insights/block-4.md` | Block 4 | Captures Block-4 lessons learned |
 | ER diagram of full domain | Block 4 | Beta has only `Capture`; full ER is Block 4 deliverable |
 

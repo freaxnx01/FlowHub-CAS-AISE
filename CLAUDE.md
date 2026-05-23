@@ -53,21 +53,21 @@ This applies to *every* Block, not only the final one — each block's work cont
 
 ### Make targets (preferred)
 
-The repo ships a `Makefile` with the common dev tasks. Plain `make` with no target prints help.
+The repo ships a `justfile` with the common dev tasks. Plain `make` with no target prints help.
 
 ```bash
 make            # show help
-make run        # run FlowHub.Web on http://localhost:5070 (no hot reload)
-make watch      # run FlowHub.Web with hot reload (dotnet watch)
-make build      # build the full solution
-make test       # run all tests
-make test-watch # watch component tests
-make restore    # restore NuGet packages
-make clean      # remove build artifacts
-make format     # apply dotnet format
+just run        # run FlowHub.Web on http://localhost:5070 (no hot reload)
+just watch      # run FlowHub.Web with hot reload (dotnet watch)
+just build      # build the full solution
+just test       # run all tests
+just test-watch # watch component tests
+just restore    # restore NuGet packages
+just clean      # remove build artifacts
+just format     # apply dotnet format
 ```
 
-`make run` and `make watch` set `ASPNETCORE_URLS=http://localhost:5070` and pass `--no-launch-profile` so they ignore `launchSettings.json`. Use these in preference to running `dotnet run` directly — the paths and env vars stay consistent.
+`just run` and `just watch` set `ASPNETCORE_URLS=http://localhost:5070` and pass `--no-launch-profile` so they ignore `launchSettings.json`. Use these in preference to running `dotnet run` directly — the paths and env vars stay consistent.
 
 ### Underlying dotnet commands
 
@@ -184,7 +184,7 @@ The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modul
 ├── Directory.Build.props               ← nullable, warnings as errors, embedded PDB
 ├── Directory.Packages.props            ← central package management
 ├── FlowHub.slnx                        ← root solution (new XML format)
-├── Makefile                            ← dev task targets (run, watch, build, test, …)
+├── justfile                            ← dev task targets (run, watch, build, test, …)
 ├── CLAUDE.md                           ← this file
 ├── README.md
 └── SKILL.md                            ← OpenClaw skill definition
@@ -192,7 +192,7 @@ The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modul
 
 **Note:** The `## Docker` section further down describes the `docker-compose.yml`-based workflow that runs the full stack (Web + Postgres + RabbitMQ + Prometheus + Grafana). Both workflows are valid:
 
-- `make run` / `make watch` — runs only `FlowHub.Web` against backing services that are still up (typically Postgres + RabbitMQ left running in Docker). Fast inner-dev loop with hot reload.
+- `just run` / `just watch` — runs only `FlowHub.Web` against backing services that are still up (typically Postgres + RabbitMQ left running in Docker). Fast inner-dev loop with hot reload.
 - `docker compose up -d --build flowhub.web` — rebuilds the Web container against the full stack. Use after merging code that needs to be picked up by the container, or to verify against the production-shaped image.
 
 ---

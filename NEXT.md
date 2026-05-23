@@ -27,7 +27,7 @@ Release: <https://github.com/freaxnx01/claude-code-plugins/releases/tag/cas-aise
 Two related issues, both closed today:
 
 1. **Persistence tests vs. seed migration** (option 1 above) — fixed by commit `343c07c` (squash of PR #16). `PostgresFixture.CreateFreshDbAsync(bool seedCatalog = true)` now TRUNCATEs `Skills` + `Integrations` after migration when callers opt out; the 2 affected test classes pass `seedCatalog: false`. `FlowHub.Persistence.Tests` is back to 29 / 29.
-2. **E2E project ran in CI without a web server** — `make test` excludes `Category!=AI&Category!=BetaSmoke&Category!=E2E`, but `.github/workflows/ci.yml` did not. Fixed by adding the same filter to the CI test step. The full 28-journey Playwright suite still runs locally against `make watch` (and in any pipeline that boots the web container first).
+2. **E2E project ran in CI without a web server** — `just test` excludes `Category!=AI&Category!=BetaSmoke&Category!=E2E`, but `.github/workflows/ci.yml` did not. Fixed by adding the same filter to the CI test step. The full 28-journey Playwright suite still runs locally against `just watch` (and in any pipeline that boots the web container first).
 
 ---
 
@@ -40,7 +40,7 @@ Block 5 Nachbereitung is **submission-ready on paper** as of 2026-05-12. The gra
 ## Repo snapshot (2026-05-12)
 
 - `main` ahead of `origin/main` by 2 commits: `58b316c` (rubric-gap doc fixes) + this CHANGELOG/ai-usage update.
-- 171 tests pass (`make test`, excludes AI/BetaSmoke/E2E). `make smoke-prod` green end-to-end including embedding round-trip via Mistral.
+- 171 tests pass (`just test`, excludes AI/BetaSmoke/E2E). `just smoke-prod` green end-to-end including embedding round-trip via Mistral.
 - All NEXT.md items 1 + 2 from the previous session closed.
 
 ## What still requires a human
@@ -62,7 +62,7 @@ Block 5 Nachbereitung is **submission-ready on paper** as of 2026-05-12. The gra
 
 ## Done in this session
 
-- `make smoke-prod` — full compose-stack probe, six-step. Caught five real defects (`.editorconfig` missing from Docker context, env-casing mismatch, empty-string model fallback, Mistral `dimensions` 422, Makefile/Passbolt shadowing) — each fixed in a separate commit. See `docs/insights/block-5.md` "Defects Found by the Smoke Run".
+- `just smoke-prod` — full compose-stack probe, six-step. Caught five real defects (`.editorconfig` missing from Docker context, env-casing mismatch, empty-string model fallback, Mistral `dimensions` 422, justfile/Passbolt shadowing) — each fixed in a separate commit. See `docs/insights/block-5.md` "Defects Found by the Smoke Run".
 - `cas-aise-grade-self-check` walked, gap report produced (76/90), six top-leverage gaps closed in commit `58b316c`:
   - ADR drift in v4 § 7 → renamed to PE-1..PE-7 with implementation-ADR cross-reference index.
   - `docs/design/perspectives.md` created — Struktur / Verhalten / Interaktion + Mermaid lifecycle state diagram + hot-path sequence.
@@ -75,4 +75,4 @@ Block 5 Nachbereitung is **submission-ready on paper** as of 2026-05-12. The gra
 ## Notes
 
 - The `[v1.0.0]` rename is a deliberate manual step — don't auto-tag from the agent. The user confirms PDF + final content before pushing the tag that triggers a public release.
-- `make smoke-prod` should be the **last** thing run before regenerating the PDF, to confirm the deployment claim is reproducible.
+- `just smoke-prod` should be the **last** thing run before regenerating the PDF, to confirm the deployment claim is reproducible.

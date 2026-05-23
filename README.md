@@ -40,13 +40,13 @@ Detailed step-by-step including the demo overlay: [`docs/runbooks/v0.1.0-final-a
 
 ### Option C — build and test locally
 
-Requires .NET 10 SDK (`global.json` pins the version). The `Makefile` exposes every common task — run `make` with no target for a help listing.
+Requires .NET 10 SDK (`global.json` pins the version). The `justfile` exposes every common task — run `make` with no target for a help listing.
 
 ```bash
-make build       # build the full solution (warnings as errors)
-make test        # run all 234 tests across 8 test projects
-make run         # run FlowHub.Web on http://localhost:5070
-make watch       # same, with hot reload
+just build       # build the full solution (warnings as errors)
+just test        # run all 234 tests across 8 test projects
+just run         # run FlowHub.Web on http://localhost:5070
+just watch       # same, with hot reload
 ```
 
 CI build for `v0.1.0`: [GitHub Actions runs](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml?query=branch%3Amain).
@@ -79,7 +79,7 @@ SUBMISSION.md           ← the Moodle submission document (rendered to PDF)
 submission-notes.md     ← operator notes: how the submission PDF is produced
 ```
 
-## Makefile cheat sheet
+## justfile cheat sheet
 
 `make` with no target prints the help listing. The most useful targets:
 
@@ -87,58 +87,58 @@ submission-notes.md     ← operator notes: how the submission PDF is produced
 
 | Target | What it does |
 |---|---|
-| `make run` | Run `FlowHub.Web` on http://localhost:5070 (no hot reload) |
-| `make watch` | Same, with `dotnet watch` (hot reload) |
-| `make build` | Build the full solution (warnings as errors) |
-| `make restore` | Restore NuGet packages |
-| `make clean` | Remove build artifacts |
-| `make format` | Apply `dotnet format` |
+| `just run` | Run `FlowHub.Web` on http://localhost:5070 (no hot reload) |
+| `just watch` | Same, with `dotnet watch` (hot reload) |
+| `just build` | Build the full solution (warnings as errors) |
+| `just restore` | Restore NuGet packages |
+| `just clean` | Remove build artifacts |
+| `just format` | Apply `dotnet format` |
 
 ### Tests
 
 | Target | What it does |
 |---|---|
-| `make test` | All non-live tests (skips AI, BetaSmoke, E2E categories) |
-| `make test-backend` | Backend unit + skill contract tests |
-| `make test-frontend` | Frontend (bUnit) component tests |
-| `make test-all` | Backend + frontend, then start Postgres + Web and open in browser |
-| `make test-ai` | Live integration tests against real AI providers (needs API keys) |
-| `make test-contract` | WireMock contract tests for Vikunja + Wallabag (offline) |
-| `make test-services` | Live skill-integration tests against `flowhub-test-services` |
-| `make playwright-install` | One-time Playwright browser install |
+| `just test` | All non-live tests (skips AI, BetaSmoke, E2E categories) |
+| `just test-backend` | Backend unit + skill contract tests |
+| `just test-frontend` | Frontend (bUnit) component tests |
+| `just test-all` | Backend + frontend, then start Postgres + Web and open in browser |
+| `just test-ai` | Live integration tests against real AI providers (needs API keys) |
+| `just test-contract` | WireMock contract tests for Vikunja + Wallabag (offline) |
+| `just test-services` | Live skill-integration tests against `flowhub-test-services` |
+| `just playwright-install` | One-time Playwright browser install |
 
 ### Database
 
 | Target | What it does |
 |---|---|
-| `make db-up` | Start PostgreSQL in Docker (detached, waits until healthy) |
-| `make db-ping` | Verify Postgres connectivity |
-| `make db-migrate` | Apply EF Core migrations against the Docker Postgres |
+| `just db-up` | Start PostgreSQL in Docker (detached, waits until healthy) |
+| `just db-ping` | Verify Postgres connectivity |
+| `just db-migrate` | Apply EF Core migrations against the Docker Postgres |
 
 ### AI smoke tests
 
 | Target | What it does |
 |---|---|
-| `make ai-ping` | Smoke-test the configured AI provider with a tiny chat call |
-| `make ai-classify TEXT="…"` | Run `IClassifier` against an input |
-| `make ai-embed TEXT="…"` | Run `IEmbeddingService` against an input |
+| `just ai-ping` | Smoke-test the configured AI provider with a tiny chat call |
+| `just ai-classify "…"` | Run `IClassifier` against an input |
+| `just ai-embed "…"` | Run `IEmbeddingService` against an input |
 
 ### End-to-end smoke
 
 | Target | What it does |
 |---|---|
-| `make smoke-prod` | Boot full prod compose stack and smoke health, `/metrics`, capture submit + embedding round-trip |
-| `make smoke-down` | Stop the prod stack (volumes preserved) |
+| `just smoke-prod` | Boot full prod compose stack and smoke health, `/metrics`, capture submit + embedding round-trip |
+| `just smoke-down` | Stop the prod stack (volumes preserved) |
 
 ### Submission PDFs
 
 | Target | What it does |
 |---|---|
-| `make pdf-submission` | Render `SUBMISSION.md` → `SUBMISSION.pdf` (the Moodle hub PDF) |
-| `make pdf-eigenstaendigkeitserklaerung` | Render `docs/submission/eigenstaendigkeitserklaerung.md` → `Eigenständigkeitserklärung.pdf` (mandatory FFHS beilage) |
-| `make pdf-submission-bundle` | Build `SUBMISSION-bundle.pdf` — every referenced artefact inlined (offline safety net) |
-| `make pdf-projektbeschreibung` | Regenerate the project description PDF |
-| `make pdf FILE=… [OUT=…]` | Render any Markdown file to PDF via the puppeteer renderer |
+| `just pdf-submission` | Render `SUBMISSION.md` → `SUBMISSION.pdf` (the Moodle hub PDF) |
+| `just pdf-eigenstaendigkeitserklaerung` | Render `docs/submission/eigenstaendigkeitserklaerung.md` → `Eigenständigkeitserklärung.pdf` (mandatory FFHS beilage) |
+| `just pdf-submission-bundle` | Build `SUBMISSION-bundle.pdf` — every referenced artefact inlined (offline safety net) |
+| `just pdf-projektbeschreibung` | Regenerate the project description PDF |
+| `just pdf … [OUT=…]` | Render any Markdown file to PDF via the puppeteer renderer |
 
 ## Configuration
 

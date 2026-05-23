@@ -102,11 +102,11 @@ Die Kombination aus Brainstorming-Skill → Spec-Dokument → Plan-Dokument → 
 | `FlowHub.Api.IntegrationTests` | 17 | 0 | ~11 s | `WebApplicationFactory` + Testcontainers — full HTTP pipeline against real Postgres |
 | `FlowHub.Skills.Tests` | 20 | 0 | ~1 s | Unit-level handler tests for Vikunja + Wallabag adapters |
 | `FlowHub.Skills.ContractTests` | 13 | 0 | ~1 s | WireMock.Net wire-contract tests on a real loopback socket |
-| `FlowHub.Skills.IntegrationTests` | 0 | 2 | — | `make test-beta` — needs live Wallabag + Vikunja |
-| `FlowHub.AI.IntegrationTests` | 0 | 4 | — | `make test-ai` — needs `Ai__*__ApiKey` |
+| `FlowHub.Skills.IntegrationTests` | 0 | 2 | — | `just test-beta` — needs live Wallabag + Vikunja |
+| `FlowHub.AI.IntegrationTests` | 0 | 4 | — | `just test-ai` — needs `Ai__*__ApiKey` |
 | **Total** | **223** | **6** | | |
 
-E2E tests (`FlowHub.Web.E2ETests`, Playwright) are run on demand via `make test-e2e` and gated by the Web server + Chromium dependency. Latest green CI run: <https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml>.
+E2E tests (`FlowHub.Web.E2ETests`, Playwright) are run on demand via `just test-e2e` and gated by the Web server + Chromium dependency. Latest green CI run: <https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml>.
 
 ### Persistence-Layer Coverage
 

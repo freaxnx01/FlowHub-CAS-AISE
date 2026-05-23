@@ -159,7 +159,7 @@ sequenceDiagram
 ### Observability
 
 - **Traces:** OpenTelemetry ASP.NET Core + runtime instrumentation; MEAI chat/embedding spans (`UseOpenTelemetry()` on the IChatClient).
-- **Metrics:** Prometheus scrape at `/metrics` — `dotnet_*` + `http_*` series verified by `make smoke-prod` step [4/6].
+- **Metrics:** Prometheus scrape at `/metrics` — `dotnet_*` + `http_*` series verified by `just smoke-prod` step [4/6].
 - **Logs:** Structured Serilog → stdout (12-Factor XI); event IDs in `source/FlowHub.*/` LoggerMessage attributes.
 
 ### References

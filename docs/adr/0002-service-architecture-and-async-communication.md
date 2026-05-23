@@ -70,7 +70,7 @@ The flow is:
 **Implementation:**
 
 - Use **MassTransit** as the abstraction so the same producer / consumer code works against multiple transports.
-- **Default transport in dev and test:** MassTransit's **in-memory transport**. No broker dependency for `make run` / `make watch` / `dotnet test`.
+- **Default transport in dev and test:** MassTransit's **in-memory transport**. No broker dependency for `just run` / `just watch` / `dotnet test`.
 - **Production / staging transport:** **RabbitMQ**, configured via `Bus__Transport=RabbitMq` and `Bus__RabbitMq__Host=…`. Wired up in Block 5 (Deployment) alongside Docker Compose.
 - The transport choice is a `Program.cs` registration concern. Producer and consumer code is transport-agnostic.
 
@@ -145,7 +145,7 @@ Reasons (carried over from `poc/restful-api-playground/REFLECTION.md`):
 
 ### E. RabbitMQ as the only transport (no in-memory option)
 
-- ❌ Forces every developer to run Docker for `make watch` and every CI run to spin up a broker container.
+- ❌ Forces every developer to run Docker for `just watch` and every CI run to spin up a broker container.
 - ❌ Slows the test suite.
 - → Rejected. MassTransit's in-memory transport is purpose-built for this case.
 
@@ -155,7 +155,7 @@ Reasons (carried over from `poc/restful-api-playground/REFLECTION.md`):
 
 ### Positive
 
-- **One deployment unit** — `make run` still starts everything. CI stays simple. Docker Compose in Block 5 has one app container plus its dependencies (DB, broker), not seven.
+- **One deployment unit** — `just run` still starts everything. CI stays simple. Docker Compose in Block 5 has one app container plus its dependencies (DB, broker), not seven.
 - **Clear logical boundaries** with the option to split later — ports in `Core`, adapters in capability projects, no sibling project references.
 - **Async pipeline answers the Moodle Lernziel** for event-based / asynchronous communication with a worked example (`CaptureCreated` → enrichment fan-out → routing).
 - **Resilience to flaky external integrations** — MQ retry / DLQ wraps every outbound Skill call.

@@ -163,7 +163,7 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Note:** API surface documented in `docs/design/api/api-surface.md`; OpenAPI schema browsable at `/scalar` (ADR 0002).
 
 **Akzeptanzkriterien:**
-- `POST /api/v1/captures` with a valid body returns 201 within NF-09 (p95 < 200 ms server-side). Verified by `make smoke-prod` step [5/6] and `tests/FlowHub.Api.IntegrationTests/`.
+- `POST /api/v1/captures` with a valid body returns 201 within NF-09 (p95 < 200 ms server-side). Verified by `just smoke-prod` step [5/6] and `tests/FlowHub.Api.IntegrationTests/`.
 - Response body matches the `Capture` schema and `Location: /api/v1/captures/{id}` header is present.
 - Missing `content` / unknown `source` → 400 ValidationProblem (`type` = `validation.md`).
 - Bruno collection `bruno/captures/submit-capture.bru` round-trips against a live stack.
@@ -189,7 +189,7 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Reference:** ADR 0003 (async pipeline), ADR 0004 (AI classifier).
 
 **Akzeptanzkriterien:**
-- A URL-content Capture reaches `Completed` with `MatchedSkill = "Wallabag"` and a non-empty `ExternalRef` (Skills.ContractTests + `make test-beta`).
+- A URL-content Capture reaches `Completed` with `MatchedSkill = "Wallabag"` and a non-empty `ExternalRef` (Skills.ContractTests + `just test-beta`).
 - A todo-content Capture reaches `Completed` with `MatchedSkill = "Vikunja"` and a non-empty `ExternalRef`.
 - MassTransit harness tests (`tests/FlowHub.Web.ComponentTests/Pipeline/*`) prove the three consumer hops fire in order.
 
@@ -280,12 +280,12 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 | NF-03 | **Concurrency** — system supports a single concurrent operator | 1 concurrent SignalR circuit without degradation | Architecture (Interactive Server, no horizontal scaling needed) |
 | NF-04 | **Security** — all pages require authentication | 0 pages accessible without a valid auth session | `[Authorize]` on pages + DevAuthHandler in dev, OIDC in prod |
 | NF-05 | **Testability** — all UI components testable in isolation | 100% of page components renderable in bUnit without a running server | bUnit test suite (currently 31 tests) |
-| NF-06 | **Maintainability** — code compiles with zero warnings | `TreatWarningsAsErrors=true` in `Directory.Build.props` | `make build` in CI |
-| NF-07 | **Portability** — runs on Linux (homelab Docker) and WSL2 (dev) | `make run` works on both environments | Manual verification |
+| NF-06 | **Maintainability** — code compiles with zero warnings | `TreatWarningsAsErrors=true` in `Directory.Build.props` | `just build` in CI |
+| NF-07 | **Portability** — runs on Linux (homelab Docker) and WSL2 (dev) | `just run` works on both environments | Manual verification |
 | NF-08 | **Data privacy** — no Capture content leaves the operator's infrastructure | 0 external API calls for data processing (AI classification runs locally via Ollama in future blocks) | Architecture review |
 | NF-09 | **API latency** — REST endpoints respond within tight bounds for an interactive integration hub | `POST /api/v1/captures` p95 < 200 ms (server-side, excluding async bus-publish); `GET /api/v1/captures` p95 < 100 ms with cursor pagination | Block 5 load test (k6/nbomber); Block 3 evidence: integration-test wall-clock < 1 s end-to-end against in-memory stubs |
 | NF-10 | **Async pipeline retry budget** — transient failures in the enrichment, embedding, or routing consumers are retried before a Capture is marked `Unhandled` | `CaptureEnrichmentConsumer`: 2 retries at 100 ms / 500 ms; `CaptureEmbeddingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms (failure leaves the Capture without an embedding — backfill via admin rebuild); `SkillRoutingConsumer`: 3 retries at 500 ms / 2 000 ms / 5 000 ms; after exhaustion `LifecycleFaultObserver` marks `Unhandled` | MassTransit `TestHarness` tests in `tests/FlowHub.Web.ComponentTests/Pipeline/` (6 harness tests) |
-| NF-11 | **AI classifier fallback rate** — an AI provider outage must not propagate to availability loss | < 5% of classifications fall back to keyword during normal provider availability (Anthropic Haiku 4.5 SLA ~99.5%); fallback always succeeds — `AiClassifier` never throws to the caller | EventId 3010 log volume in production; `make test-ai` live integration runs demonstrate the success path; ADR 0004 D5 |
+| NF-11 | **AI classifier fallback rate** — an AI provider outage must not propagate to availability loss | < 5% of classifications fall back to keyword during normal provider availability (Anthropic Haiku 4.5 SLA ~99.5%); fallback always succeeds — `AiClassifier` never throws to the caller | EventId 3010 log volume in production; `just test-ai` live integration runs demonstrate the success path; ADR 0004 D5 |
 | NF-12 | **AI classification cost** — per-capture cost is sub-cent to keep the homelab budget bounded | `MaxOutputTokens=300`, `Temperature=0.2`; estimated ~200 tokens input + ~150 tokens output → < $0.001 per classification on Haiku 4.5 pricing | Anthropic dashboard usage report from operator runs; cost guard configured in `AddFlowHubAi(IConfiguration)`; ADR 0004 §"Cost guards" |
 | NF-13 | **OpenAPI versioning SLA** — the REST API is URL-versioned from day one so clients are not broken by future changes | Breaking changes land only in a new major version (`/api/v2/...`); v1 is retained for at least one major-version overlap period | ADR 0002 D6; endpoint catalogue in `docs/design/api/api-surface.md`; version prefix verified in route registration |
 
@@ -303,7 +303,7 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 **Exception:** If migrations fail, `flowhub.web` does not start (depends_on condition).
 
 **Akzeptanzkriterien:**
-- `docker compose up --build -d --wait` returns exit 0 with all `service_healthy` dependencies satisfied (verified by `make smoke-prod` step [1/6]).
+- `docker compose up --build -d --wait` returns exit 0 with all `service_healthy` dependencies satisfied (verified by `just smoke-prod` step [1/6]).
 - `flowhub.migrations` container reaches `service_completed_successfully` with exit code 0.
 - `GET /health/live` from inside the compose network returns 200 within NF-D3 (30 s) of container start.
 - `GET /metrics` returns a Prometheus exposition that contains at least one `^dotnet_` and one `^http_` series.
@@ -327,7 +327,7 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 - `limit` is clamped to 1..200 (mirrors the list-endpoint contract).
 
 **Akzeptanzkriterien:**
-- `POST /api/v1/captures` followed by polling `Captures.Embedding` populates the column within 30 s when `Embeddings__ApiKey` is set (verified by `make smoke-prod` step [6/6] — actual measurement ~2 s).
+- `POST /api/v1/captures` followed by polling `Captures.Embedding` populates the column within 30 s when `Embeddings__ApiKey` is set (verified by `just smoke-prod` step [6/6] — actual measurement ~2 s).
 - `GET /api/v1/captures/search?q=...` with a non-empty `q` returns 200 with an array body when at least one embedded Capture exists.
 - Same endpoint with empty `q` returns 400 ValidationProblem; with `Embeddings__ApiKey` unset, returns 503 ProblemDetails (`type` ends with `/validation.md`).
 - `POST /api/v1/admin/embeddings/rebuild` returns 200 `{ processed, skipped, failed }` when keys are present, 503 otherwise.
