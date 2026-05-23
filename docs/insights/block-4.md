@@ -91,6 +91,22 @@ Die Kombination aus Brainstorming-Skill → Spec-Dokument → Plan-Dokument → 
 
 **Einschätzung:** KI ist ein starker Accelerator für Infrastruktur-Code (Boilerplate, Migrations, Tests), erfordert aber menschliche Führung bei Architektur- und Domain-Entscheidungen.
 
+## Vom CAS in die Projektarbeit
+
+Was wurde aus dem CAS in Block 4 konkret in die Projektarbeit übernommen — und wie:
+
+| CAS-Input (Vorbereitung / PVA #4 / Skript) | Übertragung in FlowHub (.NET-Stack) | Wo im Repo sichtbar |
+|---|---|---|
+| **ORM-Abstraktion** (Hibernate ORM, Jakarta Persistence) als Pflicht zwischen Domain und DB | EF Core 10 als ORM, `DbSet<T>` + `IEntityTypeConfiguration<T>` pro Entity statt Annotations | `source/FlowHub.Persistence/Entities/*EntityTypeConfiguration.cs`, ADR 0005 §1 + §8 |
+| **Panache / Repository-Pattern**-Diskussion (Active-Record vs. Repository) | Bewusste Entscheidung *gegen* Repository-per-Entity zu Beta-Zeit (ADR 0005 §3), *für* Repository-Layer nach realer Schmerz-Erfahrung in Block 4 (`ICaptureRepository` etc. in `FlowHub.Core`, EF-Adapter in `FlowHub.Persistence`) | `source/FlowHub.Core/Repositories/`, ADR 0005 §3 + Alternatives-Sektion |
+| **Criteria API / typsichere dynamische Abfragen** | LINQ + Expression Trees als .NET-Pendant — `CaptureQueryBuilder` komponiert `Expression<Func<Capture,bool>>` für Stage/Source/Tag/SearchTerm | `source/FlowHub.Persistence/CaptureQueryBuilder.cs`, getestet in `EfCaptureRepositoryTests` |
+| **Datenmodell-Antizipation** ("Daten überleben jede Technologie") aus dem Moodle-Auftrag-Wording | Hard- vs. Soft-FK-Entscheidung pro Beziehung (Audit-Trail hart, deregistrierbare Referenzen soft); `LifecycleStage` als Soft-Delete-Ersatz statt `IsDeleted`-Flag | `docs/design/db/er.md` §FK Strategy + §Delete Strategy, ADR 0005 §6 |
+| **12-Factor-Prinzipien** (Backing Services IV, Admin Processes XII) aus Block 1/Vorbereitung | PostgreSQL als ge-attachte Resource über `ConnectionStrings__Default`; Migrations als separater `flowhub.migrations`-Init-Container (nicht in `app.Run()`) | `docker-compose.yml` (`flowhub.migrations` service), `CLAUDE.md` §12-Factor, ADR 0005 §4 |
+| **Testcontainers / provider-parity** (Diskussion in PVA #4 zu Test-Strategien gegen reale DB) | Testcontainers PostgreSQL 17 statt EF-Core `InMemory` für alle Repository- und Integration-Tests; Provider-Drift bewusst ausgeschlossen | `tests/FlowHub.Persistence.Tests/PostgresFixture.cs`, `tests/FlowHub.Api.IntegrationTests/IntegrationTestFactory.cs`, ADR 0005 §10 |
+| **ADR-Workflow** (Architecture Decision Records als CAS-vermittelte Disziplin) | ADR 0005 als Persistence-Master-Entscheid (355 Zeilen, 10 nummerierte Entscheidungen + Alternatives-Sektion), kreuzreferenziert aus Code, CHANGELOG und Block-Nachbereitung | `docs/adr/0005-persistence.md` |
+
+Die Übersetzung *vom Java-/Jakarta-EE-Vokabular der CAS-Skripten in das .NET-Ökosystem* war in Block 4 ein durchgehender Aufwandsposten — aber sie hat den fachlichen Kern der Vorgaben (ORM-Abstraktion, dynamische Abfragen, Datenmodell-Antizipation, 12-Factor-Disziplin) nicht verändert, sondern nur die Werkzeuge.
+
 ## Test Results (as of 2026-05-18)
 
 `dotnet test FlowHub.slnx --filter "FullyQualifiedName!~E2ETests"` — **223 tests pass, 0 fail, 6 skipped** (live-service integration tests requiring external API keys):

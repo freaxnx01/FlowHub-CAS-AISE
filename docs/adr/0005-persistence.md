@@ -34,6 +34,41 @@ intro.
 
 ---
 
+## Architecture at a glance
+
+```mermaid
+flowchart LR
+    UI["FlowHub.Web<br/>(Blazor pages + API endpoints)"]
+    APP["Application services<br/>(ICaptureService, ISkillRegistry,<br/>IIntegrationHealthService)"]
+    PORT["Driven ports<br/>(ICaptureRepository, ISkillRepository,<br/>IIntegrationRepository, …)"]
+    REPO["EF Core adapters<br/>(EfCaptureRepository, EfSkillRepository, …)"]
+    CTX[("FlowHubDbContext<br/>+ EntityTypeConfiguration&lt;T&gt;")]
+    PG[("PostgreSQL 17 container<br/>(docker-compose)")]
+    MIG{{"flowhub.migrations<br/>init container<br/>(12-Factor XII)"}}
+
+    UI -->|"in-process call"| APP
+    APP -->|"domain types"| PORT
+    PORT -.->|"implemented by"| REPO
+    REPO -->|"LINQ → SQL"| CTX
+    CTX -->|"Npgsql, ConnectionStrings__Default"| PG
+    MIG -.->|"applies migrations before app start"| PG
+```
+
+### Legende
+
+| Notation | Meaning |
+|---|---|
+| Rectangle (`UI`, `APP`, `PORT`, `REPO`) | In-process .NET component / layer inside `FlowHub.*` projects. |
+| Cylinder (`CTX`, `PG`) | Data-bearing element — `DbContext` (in-memory tracking graph) or the physical PostgreSQL database. |
+| Hexagon (`MIG`) | Out-of-band lifecycle process — separate container, runs before the app, not part of request flow. |
+| Solid arrow `-->` | Runtime call on the request path; control + data flow. |
+| Dashed arrow `-.->` | Compile-time / lifecycle relationship — "implemented by" or "applies before". Not on the per-request hot path. |
+| Arrow label | Wire format or protocol crossing the boundary (`domain types`, `LINQ → SQL`, `Npgsql`). |
+
+The boundary that matters for testability is `APP → PORT`: tests substitute the EF adapter with an in-memory or Testcontainers-backed implementation without touching the application services.
+
+---
+
 ## Decision
 
 ### 1. ORM = `Microsoft.EntityFrameworkCore` 10.0.7

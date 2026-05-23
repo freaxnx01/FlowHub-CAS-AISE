@@ -68,6 +68,24 @@ erDiagram
     Integrations ||--o{ IntegrationHealthSamples : "sampled"
 ```
 
+## Legende
+
+The diagram is a Mermaid `erDiagram` (Chen-style entity-relationship). Read it together with the FK Strategy table below — soft FKs are deliberately **not drawn** because they have no DB-level constraint.
+
+| Symbol / column marker | Meaning |
+|---|---|
+| `Entity { … }` | Database table. Box title is the table name (always plural in this schema). |
+| `type Field PK` | Column belonging to the primary key. Composite PKs list every member with `PK`. |
+| `type Field FK` | Column carrying a **hard** foreign-key constraint (enforced by PostgreSQL). |
+| `type Field` (no marker) | Regular column. For soft references (`Capture.Source`, `Capture.MatchedSkill`), this is intentional — see FK Strategy below. |
+| `"…"` after a column | Inline note (e.g., the Block-5 `Embedding` column carries its provider note here). |
+| `A ||--o{ B : "verb"` | One-to-many relationship from `A` to `B`. The verb labels the relationship from `A`'s side ("Capture *has* Tags"). |
+| ` ` ` | one-and-only-one cardinality on `A`'s side. |
+| `o{` | zero-or-more cardinality on `B`'s side. |
+| (no line drawn) | Soft reference — application-level only, no DB FK. Listed only in the FK Strategy table. |
+
+`varchar(N)`, `text`, `uuid`, `timestamptz`, `bool`, `bigint`, `vector(N)` are PostgreSQL types; `int` reads as `int4`.
+
 ## FK Strategy
 
 | Relationship | Type | Reason |

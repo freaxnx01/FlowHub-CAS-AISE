@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-05-17
+updated: 2026-05-23
 ---
 
 ## Name
@@ -90,3 +90,13 @@ Block 1-2: Modularer Monolith | Block 3: Microservices | Block 4: RAG (Homelab-D
 ## Value
 
 Automatisiert 80% der manuellen Workflow-Arbeit. Kostenlos (~$0-5). Demonstriert Enterprise-Integration-Patterns.
+
+---
+
+## Solution Vision — Stack-Update (Block 4, 2026-05)
+
+Der "Architektur"-Abschnitt oben ist die ursprüngliche Skizze und nennt noch Quarkus/Java — das war die initiale Stackwahl vor Block 1. Während der Umsetzung wurde **.NET 10 / ASP.NET Core / Blazor** als Stack gewählt (siehe ADR 0001 für das Frontend-Rendering, ADR 0004 für die KI-Integration). Diese Vision-Notiz hält den heutigen Stand fest, damit das Dokument konsistent zu Code und Submission bleibt.
+
+**Persistenzschicht (Block 4):** FlowHub speichert Captures, Skills, Skill-Runs, Integrations und deren Health-Samples in **PostgreSQL 17**, abstrahiert über **EF Core 10** (`Microsoft.EntityFrameworkCore` + `Npgsql.EntityFrameworkCore.PostgreSQL`). Die Domäne in `FlowHub.Core` definiert reine POCO-Typen und treibende Ports (`ICaptureService` etc.) sowie getriebene Ports (`ICaptureRepository`, `ISkillRepository`, `IIntegrationRepository`, `ISkillRunRepository`, `ITagRepository`, `IChannelRepository`). Die EF-Core-Adapter liegen ausschließlich in `FlowHub.Persistence` — das Repository-Pattern ist also bewusst pro Aggregate eingezogen, nicht generisch (ADR 0005 §3). Dynamische Abfragen werden über LINQ-Expression-Trees komponiert (`CaptureQueryBuilder`), Migrationen über `dotnet-ef` erzeugt und über einen separaten `flowhub.migrations`-Init-Container vor App-Start ausgerollt (12-Factor XII). Soft-Delete-Semantik trägt der `LifecycleStage`-Zustandsautomat (`Raw → Classified → Routed → Completed`, plus `Orphan` / `Unhandled`) — es gibt bewusst kein `IsDeleted`-Flag.
+
+**Warum dieser Stack:** Der Wechsel zu .NET hat keine fachliche Vorgabe der Projektarbeit verletzt — die CAS-Inhalte (ORM-Abstraktion, dynamische Abfragen, Datenmodell-Antizipation, 12-Factor) übertragen sich 1:1 ins .NET-Ökosystem (EF Core ↔ JPA, LINQ-Expression-Trees ↔ Criteria API, `IServiceCollection`-DI ↔ CDI, Health-Endpoints ↔ MicroProfile Health). Die Stack-Mappings sind in jeder Block-Nachbereitung im Auftrags-Intro dokumentiert.
