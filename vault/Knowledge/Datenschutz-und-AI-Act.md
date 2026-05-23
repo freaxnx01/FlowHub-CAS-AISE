@@ -1,0 +1,80 @@
+---
+tags:
+  - claude-generated
+updated: 2026-05-23
+---
+
+# Datenschutz & AI-Act — FlowHub im CAS-AISE-Kontext
+
+## TL;DR
+
+- **Rubrik-Status:** Kein eigenes Bewertungskriterium in `Organisation/Bewertungskriterien.md`. Wirkt **indirekt** auf drei Buckets: Spezifikation (NfA/SMART), Entwurf (Datenfluss/Residenz), KI-Reflexion (AI-Act-Klassifikation als Teil der KI-Nutzungsbeschreibung).
+- **FlowHub-Realität:** Single-User-Homelab-App. Haushaltsausnahme (GDPR Art. 2(2)(c)) und das CH-DSG-Äquivalent greifen, **solange** keine Personendaten Dritter verarbeitet werden. Trigger sind: Telegram-Peers, E-Mail-Absender in Captures, externe Skill-Provider-Daten.
+- **AI-Act-Einstufung:** **Minimal risk / Art. 50 (Transparenzpflicht)**. LLM-Klassifikation von Captures ist weder Annex-III high-risk noch Art. 5 prohibited. Umsetzung: UI markiert KI-klassifizierte Items sichtbar.
+- **Cloud-LLM ist die einzige echte Compliance-Entscheidung:** Lokales Ollama → kein Datenexport, trivial. OpenAI/Anthropic → Auftragsverarbeitung + SCCs / CH-US-DPF dokumentieren.
+- **Pflichten, die NICHT gelten:** keine DSFA, kein Verarbeitungsverzeichnis (Art. 30), keine Datenschutzerklärung im Submission-PDF.
+- **In der Projektarbeit unterbringen:** 1 NfA-Eintrag (SMART), 1 Datenfluss-Diagramm mit Legende, 1 Absatz AI-Act-Klassifikation in KI-Reflexion, 1 Risiko-Tabelle (3–5 Zeilen), 2 ADRs (LLM-Hosting, Logging-PII-Policy). Insgesamt ≤2 Seiten.
+
+---
+
+## 1. Geltungsbereich für FlowHub
+
+| Regime | Trifft zu? | Trigger |
+|---|---|---|
+| EU GDPR | nur falls Daten Dritter im System | Telegram-Captures von anderen Personen, Mail-Sender, Kontakte in Capture-Text |
+| CH revDSG (09/2023) | analog GDPR | dieselben Trigger; "Bearbeitung Personendaten Dritter" durch eine Privatperson |
+| EU AI Act | ja, aber niedrigste Stufe | Art. 50 — Transparenzpflicht für KI-Interaktion |
+
+**Haushaltsausnahme:** Solange FlowHub nur eigene Daten des Betreibers verarbeitet, greift die persönliche/familiäre Nutzungsausnahme. Sobald ein Capture die Daten einer dritten Person enthält (Name, E-Mail, Telefonnummer, Telegram-Handle), verlässt der Use-Case diese Ausnahme.
+
+## 2. AI-Act-Klassifikation (Kurzfassung)
+
+- **Art. 5 — Verbotene Praktiken:** ❌ trifft nicht zu (kein Social Scoring, keine Biometrie, keine subliminale Manipulation).
+- **Annex III — High-Risk:** ❌ trifft nicht zu (kein Employment, Credit, Education, Critical Infrastructure, Law Enforcement).
+- **Art. 50 — Transparenzpflicht:** ✅ greift. FlowHub klassifiziert Captures via LLM → Nutzer muss erkennen können, dass es sich um KI-Output handelt.
+  - **Umsetzung:** `LifecycleBadge` markiert KI-klassifizierte Captures; Reflexions-Text im Submission-PDF benennt die Klassifikation explizit.
+- **GPAI-Pflichten:** ❌ FlowHub *baut* kein GPAI-Modell, sondern *nutzt* eines. Anbieter-Pflichten liegen beim LLM-Provider.
+
+## 3. Konkrete Deliverables für die Projektarbeit
+
+### 3.1 NfA (SMART) in der Spezifikation
+
+> Personendaten Dritter werden nur pseudonymisiert oder gar nicht gespeichert. Alle Captures bleiben auf selbst betriebener Infrastruktur (SQLite lokal, Vikunja/Wallabag self-hosted). LLM-Inferenz erfolgt lokal via Ollama; keine Capture-Inhalte verlassen das Homelab. Messbar durch Daten-Fluss-Diagramm + Code-Review der Skill-Outbound-Calls.
+
+### 3.2 Architektur-Abschnitt "Datenfluss & Residenz"
+
+- Pfeil-Diagramm mit **Legende** (Werner-Vorgabe!): Quelle → Capture → Klassifikation → Skill-Routing → Senke.
+- Markiere: was bleibt im Homelab, was geht raus (z.B. Wallabag-URL-Fetch → Zielserver).
+- Falls Cloud-LLM eingesetzt wird: separater Pfad mit Hinweis auf Auftragsverarbeitung + SCCs / CH-US-DPF.
+
+### 3.3 Risiko-Tabelle
+
+| Datenkategorie | Regime | Mitigation |
+|---|---|---|
+| Eigene Captures (Text, URL) | Haushaltsausnahme | self-hosted Storage, lokales LLM |
+| Telegram-Peer-Namen | GDPR/DSG | nicht persistieren oder Hash; Pseudonymisierung im Capture-Parser |
+| URLs externer Websites | – | Outbound-Fetch ist Eigeninitiative, kein Datenschutz-Trigger |
+| Log-Inhalte (Serilog) | GDPR/DSG | keine Capture-Bodies loggen; nur Capture-IDs + Klassifikation |
+| LLM-Prompt-Inhalte | GDPR/DSG/AI-Act | lokales Modell bevorzugt; falls Cloud → DPA-Hinweis |
+
+### 3.4 ADRs (zwei genügen)
+
+- **ADR-XXXX — LLM-Hosting:** Lokal (Ollama) vs. Cloud — Kompromiss Datenschutz ↔ Klassifikationsqualität.
+- **ADR-XXXX — Logging-Policy:** Kein PII / Capture-Body in Serilog-Output (Definition + Code-Beispiel).
+
+### 3.5 Reflexions-Absatz
+
+Kurzer Text in der KI-Reflexion: AI-Act-Einstufung benennen (Art. 50 minimal risk), Umsetzungs-Nachweis verlinken (UI-Badge + Datenfluss-Diagramm), eine Lessons-Learned-Zeile ("Compliance war früh als NfA fixiert → vermied späte Architektur-Umbauten").
+
+## 4. Was bewusst NICHT gemacht wird
+
+- ❌ Vollständige DSFA / DPIA — Overkill für Single-User-Tool.
+- ❌ Verzeichnis von Verarbeitungstätigkeiten (Art. 30 GDPR) — gilt nicht für Privatperson.
+- ❌ Eigene Datenschutzerklärung — FlowHub hat keine Nutzer Dritter.
+- ❌ Stack-Cross-Walk Java/Quarkus → .NET im Compliance-Kapitel — Stack-Neutralität (siehe `Projektarbeit/`-Konvention).
+
+## 5. Verweise
+
+- Rubrik: `Organisation/Bewertungskriterien.md`
+- Werner-Vorgaben PVA #4 (2026-05-23): Diagramm-Legenden, Roter Faden, Reflexion CAS→Projektarbeit, Moodle ≤20 MB
+- Block 5 (Deployment) ist der natürliche Ort, dieses Material ins Submission-PDF zu überführen
