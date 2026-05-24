@@ -16,6 +16,11 @@ public class NewCaptureTests : TestContext
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddSingleton(_captureService);
         Services.AddSingleton(_skillRegistry);
+        var policy = Substitute.For<IUploadPolicy>();
+        policy.MaxBytes.Returns(2_097_152L);
+        policy.AllowedContentTypes.Returns(new[] { "application/pdf" });
+        policy.AcceptAttribute.Returns("application/pdf");
+        Services.AddSingleton(policy);
         RenderComponent<MudPopoverProvider>();
 
         _skillRegistry.GetHealthAsync(Arg.Any<CancellationToken>())

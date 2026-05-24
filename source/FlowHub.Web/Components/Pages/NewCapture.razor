@@ -1,5 +1,6 @@
 @page "/captures/new"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
 
 <PageTitle>FlowHub — New Capture</PageTitle>
 
@@ -18,14 +19,14 @@
             <MudTextField T="string"
                           @bind-Value="_content"
                           Label="Content"
-                          Required="true"
+                          Required="@(_stagedFile is null)"
                           RequiredError="Content is required"
                           Lines="5"
                           Placeholder="Paste a URL, type a quote, or describe what you want to capture."
-                          HelperText="Paste a URL, type a quote, or describe what you want to capture."
+                          HelperText="@(_stagedFile is null ? "Paste a URL, type a quote, or describe what you want to capture." : "File overrides text")"
                           Variant="Variant.Outlined"
                           Class="mb-4"
-                          Disabled="_isSubmitting" />
+                          Disabled="_isSubmitting || _stagedFile is not null" />
 
             <MudSelect T="string"
                        @bind-Value="_selectedSkill"
@@ -44,6 +45,25 @@
                     }
                 }
             </MudSelect>
+
+            <MudFileUpload T="IBrowserFile"
+                           Accept="@UploadPolicy.AcceptAttribute"
+                           MaximumFileCount="1"
+                           OnFilesChanged="OnFileSelected"
+                           Class="mb-4">
+                <ActivatorContent>
+                    <MudButton HtmlTag="label"
+                               Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.AttachFile"
+                               Disabled="_isSubmitting">
+                        @(_stagedFile is null ? "Attach file (optional)" : $"{_stagedFile.Name} — change")
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+            @if (_fileError is not null)
+            {
+                <MudText Color="Color.Error" Typo="Typo.caption" Class="mb-4">@_fileError</MudText>
+            }
         </MudForm>
     </MudCardContent>
     <MudCardActions>
