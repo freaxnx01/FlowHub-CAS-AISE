@@ -446,3 +446,6 @@ SUBMISSION.pdf
 SUBMISSION-bundle.pdf
 tools/build/
 Eigenständigkeitserklärung.pdf
+
+# Capture attachment blobs (demo storage)
+source/FlowHub.Web/App_Data/uploads/
