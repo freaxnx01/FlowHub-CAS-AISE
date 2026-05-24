@@ -1,15 +1,45 @@
 @namespace FlowHub.Web.Components.Layout
+@using Microsoft.AspNetCore.Components.Forms
 
-<MudTextField T="string"
-              @bind-Value="_input"
-              Immediate="true"
-              Placeholder="+ Quick capture: paste URL or type…"
-              Variant="Variant.Outlined"
-              Margin="Margin.Dense"
-              Class="mx-4"
-              Style="max-width:560px;"
-              Adornment="Adornment.End"
-              AdornmentIcon="@(_isSubmitting ? Icons.Material.Filled.HourglassTop : Icons.Material.Filled.KeyboardReturn)"
-              OnAdornmentClick="SubmitAsync"
-              OnKeyDown="OnKeyDownAsync"
-              Disabled="_isSubmitting" />
+<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mx-4" Style="max-width:640px;">
+    <MudFileUpload T="IBrowserFile"
+                   Accept="@UploadPolicy.AcceptAttribute"
+                   MaximumFileCount="1"
+                   OnFilesChanged="OnFileSelected">
+        <ActivatorContent>
+            <MudIconButton Icon="@Icons.Material.Filled.AttachFile"
+                           aria-label="Attach file"
+                           Disabled="_isSubmitting" />
+        </ActivatorContent>
+    </MudFileUpload>
+
+    @if (_stagedFile is not null)
+    {
+        <MudChip T="string"
+                 Icon="@Icons.Material.Filled.InsertDriveFile"
+                 OnClose="ClearFile"
+                 Color="@(_fileError is null ? Color.Default : Color.Error)">
+            @_stagedFile.Name (@FormatBytes(_stagedFile.Size))
+        </MudChip>
+        @if (_fileError is not null)
+        {
+            <MudText Color="Color.Error" Typo="Typo.caption">@_fileError</MudText>
+        }
+    }
+    else
+    {
+        <MudTextField T="string"
+                      @bind-Value="_input"
+                      Immediate="true"
+                      Placeholder="+ Quick capture: paste URL or type…"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      OnKeyDown="OnKeyDownAsync"
+                      Disabled="_isSubmitting" />
+    }
+
+    <MudIconButton Icon="@(_isSubmitting ? Icons.Material.Filled.HourglassTop : Icons.Material.Filled.KeyboardReturn)"
+                   aria-label="Submit capture"
+                   OnClick="SubmitAsync"
+                   Disabled="_isSubmitting || (_stagedFile is not null && _fileError is not null)" />
+</MudStack>

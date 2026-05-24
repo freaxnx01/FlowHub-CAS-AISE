@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
+using NSubstitute;
 
 namespace FlowHub.Web.ComponentTests.Layout;
 
@@ -15,6 +16,13 @@ public class QuickCaptureFieldTests : TestContext
         Services.AddMudServices();
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddSingleton(_captureService);
+
+        var policy = Substitute.For<IUploadPolicy>();
+        policy.MaxBytes.Returns(2_097_152L);
+        policy.AllowedContentTypes.Returns(Array.Empty<string>());
+        policy.AcceptAttribute.Returns(string.Empty);
+        Services.AddSingleton(policy);
+
         RenderComponent<MudPopoverProvider>();
     }
 
@@ -31,7 +39,7 @@ public class QuickCaptureFieldTests : TestContext
     {
         var cut = RenderComponent<QuickCaptureField>();
 
-        cut.Find("input").TriggerEvent("onkeydown", new KeyboardEventArgs { Key = "Enter" });
+        cut.Find("input[type='text']").TriggerEvent("onkeydown", new KeyboardEventArgs { Key = "Enter" });
 
         _captureService.DidNotReceive().SubmitAsync(
             Arg.Any<string>(), Arg.Any<ChannelKind>(), Arg.Any<CancellationToken>());
@@ -45,7 +53,7 @@ public class QuickCaptureFieldTests : TestContext
                 DateTimeOffset.UtcNow, LifecycleStage.Raw, null));
 
         var cut = RenderComponent<QuickCaptureField>();
-        var input = cut.Find("input");
+        var input = cut.Find("input[type='text']");
         // MudTextField now uses Immediate="true" → bind on oninput, not onchange.
         input.Input("https://example.com");
         input.TriggerEvent("onkeydown", new KeyboardEventArgs { Key = "Enter" });
@@ -61,7 +69,7 @@ public class QuickCaptureFieldTests : TestContext
             .Returns(Task.FromException<Capture>(new InvalidOperationException("backend down")));
 
         var cut = RenderComponent<QuickCaptureField>();
-        var input = cut.Find("input");
+        var input = cut.Find("input[type='text']");
         input.Change("anything");
         input.TriggerEvent("onkeydown", new KeyboardEventArgs { Key = "Enter" });
 
