@@ -8,13 +8,16 @@ public sealed class EfCaptureService : ICaptureService
 {
     private readonly ICaptureRepository _repository;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IAttachmentStorage _attachmentStorage;
 
     public EfCaptureService(
         ICaptureRepository repository,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        IAttachmentStorage attachmentStorage)
     {
         _repository = repository;
         _publishEndpoint = publishEndpoint;
+        _attachmentStorage = attachmentStorage;
     }
 
     public Task<Capture?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
@@ -50,7 +53,28 @@ public sealed class EfCaptureService : ICaptureService
             return await SubmitAsync(content ?? throw new ArgumentNullException(nameof(content)), source, cancellationToken);
         }
 
-        throw new NotImplementedException("Attachment orchestration lands in Task 9.");
+        var fileName = Path.GetFileName(attachment.FileName);
+        var relativePath = await _attachmentStorage.SaveAsync(
+            attachment.Content, fileName, attachment.ContentType, cancellationToken);
+
+        var att = new Attachment(fileName, attachment.ContentType, attachment.SizeBytes, relativePath, DateTimeOffset.UtcNow);
+        var capture = new Capture(
+            Guid.NewGuid(), source, fileName, DateTimeOffset.UtcNow,
+            LifecycleStage.Raw, MatchedSkill: null, Attachment: att);
+
+        try
+        {
+            var saved = await _repository.AddAsync(capture, cancellationToken);
+            await _publishEndpoint.Publish(
+                new CaptureCreated(saved.Id, saved.Content, saved.Source, saved.CreatedAt),
+                cancellationToken);
+            return saved;
+        }
+        catch
+        {
+            await _attachmentStorage.DeleteAsync(relativePath, CancellationToken.None);
+            throw;
+        }
     }
 
     public async Task MarkClassifiedAsync(
