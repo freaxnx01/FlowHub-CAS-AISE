@@ -1,3 +1,4 @@
+using System.IO;
 using Bogus;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Events;
@@ -113,6 +114,31 @@ public sealed class CaptureServiceStub : ICaptureService
             cancellationToken);
 
         return capture;
+    }
+
+    public async Task<Capture> SubmitAsync(
+        string? content, ChannelKind source, AttachmentInput? attachment, CancellationToken cancellationToken = default)
+    {
+        var effectiveContent = attachment is null
+            ? (content ?? throw new ArgumentNullException(nameof(content)))
+            : Path.GetFileName(attachment.FileName);
+
+        var capture = await SubmitAsync(effectiveContent, source, cancellationToken);
+
+        if (attachment is null)
+        {
+            return capture;
+        }
+
+        return capture with
+        {
+            Attachment = new Attachment(
+                FileName: Path.GetFileName(attachment.FileName),
+                ContentType: attachment.ContentType,
+                SizeBytes: attachment.SizeBytes,
+                RelativePath: $"stub/{Guid.NewGuid():N}",
+                UploadedAt: DateTimeOffset.UtcNow),
+        };
     }
 
     public Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, CancellationToken cancellationToken = default) =>
