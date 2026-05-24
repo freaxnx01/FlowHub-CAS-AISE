@@ -19,7 +19,7 @@ public class QuickCaptureFieldTests : TestContext
 
         var policy = Substitute.For<IUploadPolicy>();
         policy.MaxBytes.Returns(2_097_152L);
-        policy.AllowedContentTypes.Returns(Array.Empty<string>());
+        policy.AllowedContentTypes.Returns(new[] { "application/pdf" });
         policy.AcceptAttribute.Returns(string.Empty);
         Services.AddSingleton(policy);
 
