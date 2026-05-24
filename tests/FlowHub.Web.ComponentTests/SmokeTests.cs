@@ -27,6 +27,11 @@ public class SmokeTests : TestContext
         Services.AddSingleton<ICaptureService>(_captureService);
         Services.AddSingleton<ISkillRegistry>(_skillRegistry);
         Services.AddSingleton<IIntegrationHealthService>(_integrationHealthService);
+        var policy = Substitute.For<IUploadPolicy>();
+        policy.MaxBytes.Returns(2_097_152L);
+        policy.AllowedContentTypes.Returns(new[] { "application/pdf" });
+        policy.AcceptAttribute.Returns("application/pdf");
+        Services.AddSingleton(policy);
         RenderComponent<MudPopoverProvider>();
     }
 
