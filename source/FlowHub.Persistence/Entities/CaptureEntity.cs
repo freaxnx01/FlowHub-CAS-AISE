@@ -21,4 +21,5 @@ internal sealed class CaptureEntity
     public string? VikunjaProject { get; set; }
     public ICollection<TagEntity> Tags { get; set; } = [];
     public Vector? Embedding { get; set; }
+    public AttachmentEntity? Attachment { get; set; }
 }

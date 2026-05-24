@@ -146,7 +146,10 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         FailureReason: e.FailureReason,
         Title: e.Title,
         ExternalRef: e.ExternalRef,
-        VikunjaProject: e.VikunjaProject);
+        VikunjaProject: e.VikunjaProject,
+        Attachment: e.Attachment is null
+            ? null
+            : new Attachment(e.Attachment.FileName, e.Attachment.ContentType, e.Attachment.SizeBytes, e.Attachment.RelativePath, e.Attachment.UploadedAt));
 
     private static CaptureEntity ToEntity(Capture c) => new()
     {
@@ -160,5 +163,13 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         FailureReason = c.FailureReason,
         ExternalRef = c.ExternalRef,
         VikunjaProject = c.VikunjaProject,
+        Attachment = c.Attachment is null ? null : new AttachmentEntity
+        {
+            FileName = c.Attachment.FileName,
+            ContentType = c.Attachment.ContentType,
+            SizeBytes = c.Attachment.SizeBytes,
+            RelativePath = c.Attachment.RelativePath,
+            UploadedAt = c.Attachment.UploadedAt,
+        },
     };
 }
