@@ -63,3 +63,27 @@ Npgsql connection pool defaults (min=0, max=100) are sufficient for single-insta
 **Statement:** The running `flowhub.web` process MUST expose Prometheus-format metrics at `/metrics`.  
 **Measurement:** `curl http://localhost:5070/metrics` returns HTTP 200 with `Content-Type: text/plain; version=0.0.4`.  
 **Target:** Endpoint available and returns at least `dotnet_*` and `http_*` metrics.
+
+## NfA-P1: Personendaten-Residenz
+
+**Category:** Privacy & Compliance
+**Statement:** Capture-Inhalte (Body, URL, Metadaten) MÜSSEN auf vom Betreiber selbst betriebener Infrastruktur verarbeitet und persistiert werden. Outbound-Calls an Drittsysteme sind ausschliesslich für explizite Skill-Targets (Vikunja, Wallabag) zulässig; LLM-Inferenz erfolgt per Default lokal via Ollama.
+**Measurable:**
+1. Statisch: `dotnet list package` zeigt keinen Cloud-LLM-Client als transitive Default-Dependency. Cloud-LLM-Provider sind hinter `EmbeddingsOptions.Provider != "Local"` opt-in.
+2. Dynamisch: integration test `OutboundCallAuditTests` verifiziert, dass im Default-Profil kein HTTP-Request an `*.openai.com`, `*.anthropic.com` oder `api.cohere.ai` erfolgt.
+3. Doku: `docs/design/data-flow.md` enthält ein Sequenzdiagramm mit Legende, das Capture-Pfad → Klassifikation → Skill-Routing zeigt und Homelab-Boundary markiert.
+**Achievable:** Standard-Konfiguration in `source/FlowHub.Web/appsettings.json` setzt `Embeddings:Provider=Local`; Cloud-Provider erfordern bewusste Environment-Variable `Embeddings__Provider=OpenAI` + `Embeddings__ApiKey`.
+**Relevant:** GDPR Art. 2(2)(c) Haushaltsausnahme + CH revDSG bleiben nur tragfähig, solange Capture-Inhalte das Homelab nicht verlassen. Cloud-Opt-in dokumentiert die bewusste Abkehr von diesem Default und zwingt zu separater DPA-Betrachtung.
+**Time-bound:** Verifiziert bis Ende Block 5 — Outbound-Audit-Test grün in CI, Data-Flow-Diagramm im Submission-PDF, ADR LLM-Hosting gemerged.
+
+## NfA-P2: KI-Transparenz (AI Act Art. 50)
+
+**Category:** Privacy & Compliance
+**Statement:** Jeder Capture, dessen `MatchedSkill` durch eine LLM-gestützte Klassifikation gesetzt wurde, MUSS in der UI sichtbar als "AI-classified" gekennzeichnet sein und im Datensatz die Klassifikations-Provenienz tragen (`ClassificationSource`, `ClassifiedAt`, optional `ConfidenceScore`).
+**Measurable:**
+1. UI: bUnit-Test `LifecycleBadgeTests.AiClassified_ShowsAiBadge` bestätigt, dass `LifecycleBadge` für `ClassificationSource = "AI"` das KI-Badge rendert.
+2. Datenmodell: `Capture` hat Spalten `ClassificationSource` (enum: `None | Heuristic | AI | Manual`), `ClassifiedAt`, `ConfidenceScore`; EF-Migration committed.
+3. API: `GET /api/captures/{id}` gibt diese Felder in der Response zurück.
+**Achievable:** Bereits vorhandener `LifecycleBadge`-Component wird um einen AI-Zweig erweitert; `IClassifier`-Implementierung in `FlowHub.AI` setzt `ClassificationSource` beim Schreiben des Resultats.
+**Relevant:** EU AI Act Art. 50 verpflichtet Anbieter / Betreiber von KI-Systemen, Nutzer:innen erkennbar zu machen, dass sie mit KI-Output interagieren. Minimal-Risk-Einstufung von FlowHub ist nur tragfähig, wenn diese Transparenzpflicht aktiv umgesetzt ist.
+**Time-bound:** Verifiziert bis Ende Block 5 — bUnit-Test grün, Migration angewandt, UI-Screenshot im Submission-PDF.

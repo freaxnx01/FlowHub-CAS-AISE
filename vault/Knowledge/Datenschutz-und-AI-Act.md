@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-generated
-updated: 2026-05-23
+updated: 2026-05-24
 ---
 
 # Datenschutz & AI-Act — FlowHub im CAS-AISE-Kontext
@@ -39,7 +39,12 @@ updated: 2026-05-23
 
 ### 3.1 NfA (SMART) in der Spezifikation
 
-> Personendaten Dritter werden nur pseudonymisiert oder gar nicht gespeichert. Alle Captures bleiben auf selbst betriebener Infrastruktur (SQLite lokal, Vikunja/Wallabag self-hosted). LLM-Inferenz erfolgt lokal via Ollama; keine Capture-Inhalte verlassen das Homelab. Messbar durch Daten-Fluss-Diagramm + Code-Review der Skill-Outbound-Calls.
+Konkret als `NfA-P1` (Personendaten-Residenz) und `NfA-P2` (KI-Transparenz / AI Act Art. 50) in `docs/spec/nfa.md` hinterlegt — Format konsistent zu `NfA-D*` und `NfA-O*` (Category / Statement / Measurable / Achievable / Relevant / Time-bound).
+
+- **NfA-P1** verankert: Capture-Inhalte bleiben auf eigener Infrastruktur; Cloud-LLM ist Opt-in via Env-Var; Outbound-Audit-Test + Data-Flow-Diagramm als Nachweise.
+- **NfA-P2** verankert: KI-klassifizierte Captures tragen `ClassificationSource = "AI"` und werden via `LifecycleBadge` sichtbar markiert; bUnit-Test + EF-Migration als Nachweise.
+
+Beide laufen auf Block 5 als Verifikations-Fenster.
 
 ### 3.2 Architektur-Abschnitt "Datenfluss & Residenz"
 
@@ -75,6 +80,7 @@ Kurzer Text in der KI-Reflexion: AI-Act-Einstufung benennen (Art. 50 minimal ris
 
 ## 5. Verweise
 
+- NfA-Spec: `docs/spec/nfa.md` → `NfA-P1`, `NfA-P2`
 - Rubrik: `Organisation/Bewertungskriterien.md`
 - Werner-Vorgaben PVA #4 (2026-05-23): Diagramm-Legenden, Roter Faden, Reflexion CAS→Projektarbeit, Moodle ≤20 MB
 - Block 5 (Deployment) ist der natürliche Ort, dieses Material ins Submission-PDF zu überführen
