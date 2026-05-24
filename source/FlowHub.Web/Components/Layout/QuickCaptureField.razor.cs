@@ -37,7 +37,7 @@ public partial class QuickCaptureField : ComponentBase
     {
         if (file.Size > UploadPolicy.MaxBytes)
             return $"File too large ({FormatBytes(file.Size)} > {FormatBytes(UploadPolicy.MaxBytes)})";
-        if (UploadPolicy.AllowedContentTypes.Count > 0 && !UploadPolicy.AllowedContentTypes.Contains(file.ContentType))
+        if (!UploadPolicy.AllowedContentTypes.Contains(file.ContentType))
             return $"Type {file.ContentType} not allowed";
         return null;
     }
