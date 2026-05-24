@@ -48,9 +48,12 @@ Beide laufen auf Block 5 als Verifikations-Fenster.
 
 ### 3.2 Architektur-Abschnitt "Datenfluss & Residenz"
 
-- Pfeil-Diagramm mit **Legende** (Werner-Vorgabe!): Quelle → Capture → Klassifikation → Skill-Routing → Senke.
-- Markiere: was bleibt im Homelab, was geht raus (z.B. Wallabag-URL-Fetch → Zielserver).
-- Falls Cloud-LLM eingesetzt wird: separater Pfad mit Hinweis auf Auftragsverarbeitung + SCCs / CH-US-DPF.
+Umgesetzt in `docs/design/data-flow.md` — zwei Mermaid-Diagramme mit Legende (Werner-Vorgabe):
+
+- **A. Trust-Boundary-Übersicht** (flowchart): Homelab-Boundary umfasst Web + Classifier + DB + Ollama + Vikunja + Wallabag. Cloud-LLM ist als gestrichelter Opt-in-Pfad ausserhalb der Boundary markiert. Outbound-Pfade zu Vikunja/Wallabag transportieren nur Tag + URL, nicht den Capture-Body.
+- **B. Capture-Lebenszyklus** (sequenceDiagram): zeigt zwei Boundary-Crossings (Eingang vom externen Source, Ausgang zum Skill-Target) und markiert den Punkt, an dem `ClassificationSource = "AI"` persistiert wird (NfA-P2-Hook).
+
+Beide Diagramme haben Legenden + Invarianten-Liste und sind direkt im Submission-PDF einsetzbar.
 
 ### 3.3 Risiko-Tabelle
 
@@ -81,6 +84,7 @@ Kurzer Text in der KI-Reflexion: AI-Act-Einstufung benennen (Art. 50 minimal ris
 ## 5. Verweise
 
 - NfA-Spec: `docs/spec/nfa.md` → `NfA-P1`, `NfA-P2`
+- Data-Flow-Diagramm: `docs/design/data-flow.md`
 - Rubrik: `Organisation/Bewertungskriterien.md`
 - Werner-Vorgaben PVA #4 (2026-05-23): Diagramm-Legenden, Roter Faden, Reflexion CAS→Projektarbeit, Moodle ≤20 MB
 - Block 5 (Deployment) ist der natürliche Ort, dieses Material ins Submission-PDF zu überführen
