@@ -57,18 +57,24 @@ Beide Diagramme haben Legenden + Invarianten-Liste und sind direkt im Submission
 
 ### 3.3 Risiko-Tabelle
 
-| Datenkategorie | Regime | Mitigation |
-|---|---|---|
-| Eigene Captures (Text, URL) | Haushaltsausnahme | self-hosted Storage, lokales LLM |
-| Telegram-Peer-Namen | GDPR/DSG | nicht persistieren oder Hash; Pseudonymisierung im Capture-Parser |
-| URLs externer Websites | – | Outbound-Fetch ist Eigeninitiative, kein Datenschutz-Trigger |
-| Log-Inhalte (Serilog) | GDPR/DSG | keine Capture-Bodies loggen; nur Capture-IDs + Klassifikation |
-| LLM-Prompt-Inhalte | GDPR/DSG/AI-Act | lokales Modell bevorzugt; falls Cloud → DPA-Hinweis |
+| Datenkategorie | Regime | Mitigation | Nachweis |
+|---|---|---|---|
+| Eigene Captures (Body, URL) | Haushaltsausnahme — *nur bei lokalem LLM* | Self-hosted Storage; Cloud-LLM nur opt-in via `Embeddings__Provider` | `docs/design/data-flow.md` Abschnitt A; `NfA-P1` |
+| Telegram-Peer-Handles | GDPR / revDSG | Capture-Parser pseudonymisiert Handle vor Persistierung; nur Hash in DB | `TelegramCaptureParserTests.Handle_IsHashed_BeforePersist` (Block 5) |
+| Mail-Sender-Adressen | GDPR / revDSG | Capture-Parser pseudonymisiert lokalen Teil der Mailadresse (`user@` → Hash, Domain bleibt) | `MailCaptureParserTests.Sender_LocalPart_IsHashed` (Block 5) |
+| Externe URLs (Web-Captures) | – | Outbound-Fetch ist Eigeninitiative; keine PII-Last per Definition | n/a |
+| Embedding-Vektoren | GDPR / revDSG (grenzwertig — Re-Identifikation theoretisch möglich) | Vektoren bleiben in der lokalen DB; werden nicht an Drittsysteme propagiert | `NfA-P1`; `OutboundCallAuditTests` |
+| LLM-Prompt-Inhalte | GDPR / revDSG / AI Act | Default lokales Ollama; Cloud-Pfad erfordert bewusste Konfiguration + DPA-Vermerk | `NfA-P1`; `ADR-0006 LLM-Hosting` |
+| Skill-Outbound-Payloads (Vikunja/Wallabag) | GDPR / revDSG | Skill-Adapter senden nur Tag + URL, nicht den Capture-Body | `docs/design/data-flow.md` Abschnitt A Invariante 3; `SkillOutboundContractTests` |
+| Log-Inhalte (Serilog) | GDPR / revDSG | Kein Capture-Body in Logs; nur Capture-ID + Stage + Klassifikations-Metadaten | `ADR-0007 Logging-Policy`; `SerilogPiiAuditTests` (Block 5) |
+| OpenTelemetry-Span-Tags | GDPR / revDSG | Span-Attribute enthalten nur IDs und Stage-Werte, keine Bodies/Handles | `TracingPiiAuditTests` (Block 5) |
+| DB-Backups | GDPR / revDSG | Backups bleiben auf demselben Homelab-Host, identisches Trust-Niveau wie Live-DB; keine Off-Site-Cloud-Backups im Default | Backup-Skript-Pfad in `docs/ops/backup.md`; ADR ggf. nachziehen |
 
-### 3.4 ADRs (zwei genügen)
+### 3.4 ADRs (drei genügen)
 
-- **ADR-XXXX — LLM-Hosting:** Lokal (Ollama) vs. Cloud — Kompromiss Datenschutz ↔ Klassifikationsqualität.
-- **ADR-XXXX — Logging-Policy:** Kein PII / Capture-Body in Serilog-Output (Definition + Code-Beispiel).
+- **ADR-0006 — LLM-Hosting:** Lokal (Ollama) vs. Cloud — Kompromiss Datenschutz ↔ Klassifikationsqualität.
+- **ADR-0007 — Logging-Policy:** Kein PII / Capture-Body in Serilog-Output (Definition + verbotene Felder + Beispiel-Enricher).
+- **ADR-0008 — Telemetry-PII-Policy:** OpenTelemetry-Span-Tags dürfen nur IDs und Lifecycle-Stages enthalten (Liste erlaubter Tag-Keys).
 
 ### 3.5 Reflexions-Absatz
 
