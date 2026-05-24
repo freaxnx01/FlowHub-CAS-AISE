@@ -42,6 +42,17 @@ public sealed class EfCaptureService : ICaptureService
         return saved;
     }
 
+    public async Task<Capture> SubmitAsync(
+        string? content, ChannelKind source, AttachmentInput? attachment, CancellationToken cancellationToken = default)
+    {
+        if (attachment is null)
+        {
+            return await SubmitAsync(content ?? throw new ArgumentNullException(nameof(content)), source, cancellationToken);
+        }
+
+        throw new NotImplementedException("Attachment orchestration lands in Task 9.");
+    }
+
     public async Task MarkClassifiedAsync(
         Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, CancellationToken cancellationToken = default)
     {
