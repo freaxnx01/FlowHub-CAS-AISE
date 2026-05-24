@@ -78,7 +78,11 @@ Beide Diagramme haben Legenden + Invarianten-Liste und sind direkt im Submission
 
 ### 3.5 Reflexions-Absatz
 
-Kurzer Text in der KI-Reflexion: AI-Act-Einstufung benennen (Art. 50 minimal risk), Umsetzungs-Nachweis verlinken (UI-Badge + Datenfluss-Diagramm), eine Lessons-Learned-Zeile ("Compliance war früh als NfA fixiert → vermied späte Architektur-Umbauten").
+> **Datenschutz und AI-Act in der KI-Nutzung von FlowHub.** FlowHub verwendet ein LLM zur Klassifikation von Capture-Inhalten und fällt damit unter den EU AI Act, konkret unter Art. 50 (Transparenzpflicht für KI-Interaktionen). Das System ist weder eine prohibierte Praxis nach Art. 5 noch ein high-risk-Use-Case nach Annex III — entsprechend beschränkt sich die regulatorische Pflicht auf die Erkennbarkeit der KI-Beteiligung für die Nutzer:in. Umgesetzt ist diese Pflicht über das Feld `ClassificationSource` am `Capture` (`None | Heuristic | AI | Manual`) und ein dazu renderndes `LifecycleBadge` im UI; beide werden in NfA-P2 spezifiziert und durch einen bUnit-Test geprüft.
+>
+> Datenschutzseitig profitiert FlowHub als Single-User-Homelab-Anwendung von der Haushaltsausnahme nach GDPR Art. 2(2)(c) und der entsprechenden Regelung im revidierten CH-DSG — solange Capture-Inhalte das Homelab nicht verlassen. Diese Voraussetzung wird durch NfA-P1 als Default-Verhalten verankert (lokales Ollama, keine Cloud-LLM-Outbound-Calls ausserhalb expliziter Operator-Konfiguration) und durch das Datenfluss-Diagramm in `docs/design/data-flow.md` dokumentiert. ADR-0007 fixiert den Opt-in-Mechanismus für Cloud-LLM-Nutzung; ADR-0008 und ADR-0009 schliessen die zwei weiteren Datenpfade (strukturierte Logs, Telemetry-Spans), über die Capture-Inhalte unbeabsichtigt die Trust-Boundary verlassen könnten.
+>
+> **Erkenntnis:** Die Compliance-Anforderung früh als messbare NfA zu formulieren — nicht erst gegen Ende der Projektarbeit — hat zwei konkrete Architektur-Umbauten vermieden: einen nachgelagerten Cloud-LLM-Default-Switch und eine spätere PII-Scrubbing-Schicht in der Log-Pipeline. Die Default-Konfiguration war ab Block 3 bereits compliance-konform; spätere Blöcke mussten nur die Verifikations-Werkzeuge (Outbound-Audit-Test, Tracing-Audit-Test) nachziehen.
 
 ## 4. Was bewusst NICHT gemacht wird
 
