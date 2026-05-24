@@ -529,3 +529,23 @@ AI didn't replace any one role in the workflow. It moved which role is the bottl
 - Spec: `docs/superpowers/specs/2026-04-30-async-pipeline-design.md`
 - Plan: `docs/superpowers/plans/2026-04-30-async-pipeline.md`
 - Bewertungskriterien: `vault/Organisation/Bewertungskriterien.md`
+
+## 2026-05-24 — Capture file upload (PVA 4 follow-up)
+
+Driver: PVA 4 (2026-05-23) feedback — add browse/upload to the Capture input so a future paperless-ngx skill can ingest documents directly; cap demo uploads at 2 MB.
+
+Workflow (Claude Opus 4.7 controller + Sonnet/Haiku subagents under the `superpowers:subagent-driven-development` skill):
+
+1. **Brainstorming skill** — controller asked four bundled multiple-choice questions to pin scope (entry points, domain shape, storage, config) and two follow-ups (Content rule, MIME allowlist). Result: design spec at `docs/superpowers/specs/2026-05-24-capture-file-upload-design.md`.
+2. **Writing-plans skill** — produced `docs/superpowers/plans/2026-05-24-capture-file-upload.md` with 16 bite-sized TDD tasks (failing test → impl → green → commit per task).
+3. **Subagent-driven execution** — one implementer subagent per task, followed by a combined spec-compliance + code-quality reviewer subagent. Haiku for mechanical tasks (records, gitignore, config wiring), Sonnet for orchestration / UI / EF mapping. One review caught a security smell on Task 12 (`QuickCaptureField.ValidateFile` short-circuited the allowlist check on empty list) — fixed in a separate `fix(web):` commit so the bisect log preserves the lesson.
+4. **Auto-verification approximation** for Task 14 (manual smoke): controller booted the app, asserted `/health/live=Healthy` and `/captures/new=200`. Full browser interaction smoke deferred to the user on PR review.
+
+What worked:
+
+- **Implementer + reviewer subagents on small, well-specified tasks** — review caught one real security issue (`Count > 0` short-circuit hiding an unrestricted upload path on misconfig) that would have shipped under a single-agent flow. Worth the cost.
+- **TDD per task** — every task started with a failing test; no test was modified to pass.
+- **Splitting EF entity mapping (Task 7) and migration generation (Task 8)** — left the suite intermittently red on commit `85f2240`. Acceptable for bisect, but next time bundle the two when `PendingModelChangesWarning` is configured as a hard error.
+
+Spec: `docs/superpowers/specs/2026-05-24-capture-file-upload-design.md`
+Plan: `docs/superpowers/plans/2026-05-24-capture-file-upload.md`
