@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Capture file attachments (paperless-ngx prep): optional `Attachment` value object on `Capture` (1:0..1), persisted via `FilesystemAttachmentStorage` under `App_Data/uploads/<yyyy>/<MM>/<guid><ext>`. Upload entry points in both `QuickCaptureField` (appbar paperclip) and `/captures/new` (drop zone). 2 MB demo cap + PDF/PNG/JPEG allowlist, configurable under `FlowHub:Uploads` (`MaxBytes`, `AllowedContentTypes`, `StoragePath`). Server-side validation + Kestrel/Form limits enforce the cap at the framework boundary.
+
 ## [0.1.0] — 2026-05-12
 
 CAS AISE Abgabe-Version. Consolidates all five course blocks (Einführung, Frontend, Service, Persistence, Deployment) plus the post-Block-5 production-smoke + rubric-gap pass. Repository version is `0.1.0` per `Directory.Build.props`.
