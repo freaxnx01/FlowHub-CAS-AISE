@@ -95,6 +95,16 @@ builder.Services.AddOpenTelemetry()
 // Migrations apply at startup via the MigrationRunner IHostedService.
 builder.Services.AddFlowHubPersistence(builder.Configuration);
 
+// Capture file uploads: bind options, register storage + policy.
+builder.Services
+    .AddOptions<FlowHub.Core.Captures.UploadOptions>()
+    .Bind(builder.Configuration.GetSection("FlowHub:Uploads"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddSingleton<FlowHub.Core.Captures.IAttachmentStorage, FlowHub.Persistence.FilesystemAttachmentStorage>();
+builder.Services.AddSingleton<FlowHub.Core.Captures.IUploadPolicy, FlowHub.Web.Uploads.UploadPolicy>();
+
 // Block 3 Slice C — AI-backed classifier (per ADR 0004) with keyword fallback.
 // Uses real provider when Ai:Provider + Ai:<P>:ApiKey are set; silently falls back
 // to the deterministic KeywordClassifier otherwise so `make run` works zero-config.
@@ -151,6 +161,14 @@ if (E2EFaultExtensions.IsEnabled)
 {
     builder.Services.AddE2EFaultInjection();
 }
+
+var maxUpload = builder.Configuration.GetValue<long?>("FlowHub:Uploads:MaxBytes")
+    ?? FlowHub.Core.Captures.UploadOptions.DefaultMaxBytes;
+
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(o =>
+    o.Limits.MaxRequestBodySize = maxUpload);
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(o =>
+    o.MultipartBodyLengthLimit = maxUpload);
 
 var app = builder.Build();
 
