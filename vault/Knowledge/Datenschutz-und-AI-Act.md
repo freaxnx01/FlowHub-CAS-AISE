@@ -64,17 +64,17 @@ Beide Diagramme haben Legenden + Invarianten-Liste und sind direkt im Submission
 | Mail-Sender-Adressen | GDPR / revDSG | Capture-Parser pseudonymisiert lokalen Teil der Mailadresse (`user@` → Hash, Domain bleibt) | `MailCaptureParserTests.Sender_LocalPart_IsHashed` (Block 5) |
 | Externe URLs (Web-Captures) | – | Outbound-Fetch ist Eigeninitiative; keine PII-Last per Definition | n/a |
 | Embedding-Vektoren | GDPR / revDSG (grenzwertig — Re-Identifikation theoretisch möglich) | Vektoren bleiben in der lokalen DB; werden nicht an Drittsysteme propagiert | `NfA-P1`; `OutboundCallAuditTests` |
-| LLM-Prompt-Inhalte | GDPR / revDSG / AI Act | Default lokales Ollama; Cloud-Pfad erfordert bewusste Konfiguration + DPA-Vermerk | `NfA-P1`; `ADR-0006 LLM-Hosting` |
+| LLM-Prompt-Inhalte | GDPR / revDSG / AI Act | Default lokales Ollama; Cloud-Pfad erfordert bewusste Konfiguration + DPA-Vermerk | `NfA-P1`; `ADR-0007 LLM-Hosting` |
 | Skill-Outbound-Payloads (Vikunja/Wallabag) | GDPR / revDSG | Skill-Adapter senden nur Tag + URL, nicht den Capture-Body | `docs/design/data-flow.md` Abschnitt A Invariante 3; `SkillOutboundContractTests` |
-| Log-Inhalte (Serilog) | GDPR / revDSG | Kein Capture-Body in Logs; nur Capture-ID + Stage + Klassifikations-Metadaten | `ADR-0007 Logging-Policy`; `SerilogPiiAuditTests` (Block 5) |
+| Log-Inhalte (Serilog) | GDPR / revDSG | Kein Capture-Body in Logs; nur Capture-ID + Stage + Klassifikations-Metadaten | `ADR-0008 Logging-Policy`; `SerilogPiiAuditTests` (Block 5) |
 | OpenTelemetry-Span-Tags | GDPR / revDSG | Span-Attribute enthalten nur IDs und Stage-Werte, keine Bodies/Handles | `TracingPiiAuditTests` (Block 5) |
 | DB-Backups | GDPR / revDSG | Backups bleiben auf demselben Homelab-Host, identisches Trust-Niveau wie Live-DB; keine Off-Site-Cloud-Backups im Default | Backup-Skript-Pfad in `docs/ops/backup.md`; ADR ggf. nachziehen |
 
 ### 3.4 ADRs (drei genügen)
 
-- **ADR-0006 — LLM-Hosting:** Lokal (Ollama) vs. Cloud — Kompromiss Datenschutz ↔ Klassifikationsqualität.
-- **ADR-0007 — Logging-Policy:** Kein PII / Capture-Body in Serilog-Output (Definition + verbotene Felder + Beispiel-Enricher).
-- **ADR-0008 — Telemetry-PII-Policy:** OpenTelemetry-Span-Tags dürfen nur IDs und Lifecycle-Stages enthalten (Liste erlaubter Tag-Keys).
+- **ADR-0007 — LLM-Hosting:** Lokal (Ollama) vs. Cloud — Kompromiss Datenschutz ↔ Klassifikationsqualität. Geschrieben in `docs/adr/0007-llm-hosting.md`.
+- **ADR-0008 — Logging-Policy:** Kein PII / Capture-Body in Serilog-Output (Definition + verbotene Felder + Beispiel-Enricher).
+- **ADR-0009 — Telemetry-PII-Policy:** OpenTelemetry-Span-Tags dürfen nur IDs und Lifecycle-Stages enthalten (Liste erlaubter Tag-Keys).
 
 ### 3.5 Reflexions-Absatz
 
