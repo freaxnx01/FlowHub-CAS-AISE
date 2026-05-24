@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>FlowHub.Core.Tests</RootNamespace>
+    <AssemblyName>FlowHub.Core.Tests</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- CLAUDE.md test naming is MethodName_StateUnderTest_ExpectedBehavior; the
+         analyzer rule contradicts the project convention, so suppress it for tests. -->
+    <!-- CA1707: test naming uses underscores by convention (MethodName_State_Expected) -->
+    <!-- CA1861: inline array literals in test assertions are single-use; perf warning is N/A -->
+    <!-- CA1716: test namespaces mirror the source folder layout (e.g. Shared/); cross-language consumption is N/A for a test assembly -->
+    <NoWarn>$(NoWarn);CA1707;CA1861;CA1716</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\FlowHub.Core\FlowHub.Core.csproj" />
+  </ItemGroup>
+
+</Project>
