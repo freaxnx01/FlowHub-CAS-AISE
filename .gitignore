@@ -435,6 +435,9 @@ flowhub.db-wal
 .claude/worktrees/
 .make/
 
+# Claude Code scheduled-tasks lock (transient runtime lock)
+.claude/scheduled_tasks.lock
+
 # Moodle source content — copyright FFHS / third parties, never commit to public repo
 # (paraphrases/notes in vault/Blöcke, vault/Projektarbeit, etc. are fine)
 vault/_files/Moodle/
