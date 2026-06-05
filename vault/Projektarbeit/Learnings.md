@@ -2,7 +2,7 @@
 tags:
   - claude-generated
   - claude-updated
-updated: 2026-05-03
+updated: 2026-06-05
 ---
 
 # Learnings CAS AISE
@@ -54,3 +54,19 @@ Eng verwandt mit der Logs-via-File-Disziplin ist die Frage, wie man **mehrphasig
 3. **Implement** — wieder neue Session: `> Execute the xyz plan via subagent-driven-development`
 
 Der Trick liegt im `/clear`: jede Phase produziert ein **Artefakt auf Disk** (Spec-MD, Plan-MD, Code-Diff), das in der nächsten Phase als reiner Input zurückgelesen wird. Den vorherigen Hin-und-her-Dialog mitzuschleppen liefert keinen Mehrwert — die Entscheidungen sind im Artefakt festgehalten — kostet aber konstant Tokens und lenkt das Modell mit veralteten Zwischenstands-Diskussionen ab. Diese Disziplin ist die strukturelle Variante des Logs-via-File-Patterns: was zwischen Phasen weiterleben muss, gehört in eine Datei; was nur Gesprächs-Begleitmaterial war, darf gelöscht werden. Praktisch macht das bei nicht-trivialen Features den Unterschied zwischen einer fokussierten Implementierung und einem zähen, immer langsamer werdenden Mega-Thread.
+
+---
+
+## Vom CAS in die Projektarbeit — was konkret eingeflossen ist
+
+Rückblickend lässt sich für jeden der fünf CAS-Blöcke ein konkreter Niederschlag in FlowHub benennen — die Projektarbeit war nicht parallele Spielwiese, sondern der Ort, an dem die jeweiligen Block-Inhalte unmittelbar zur Entscheidung wurden. Der rote Faden ist dabei bewusst, dass fast jede dieser Entscheidungen in einem **ADR** festgehalten ist: Das im CAS gelehrte Abwägen von Optionen wurde so vom Vorlesungsthema zur dokumentierten Projektpraxis.
+
+| CAS-Block | Mitgenommener Inhalt | Konkrete FlowHub-Entscheidung |
+|---|---|---|
+| **1 — Einführung** | Architekturoptionen (Monolith / Modular Monolith / Microservices) begründet gegeneinander abwägen; KI-Tooling für ein neues Repo aufsetzen | Entscheidung für **Modular Monolith mit hexagonaler Schichtung** statt verteilter Microservices (ADR 0001) — und die ADR-Praxis selbst als Format. Das Tooling-Fundament (`CLAUDE.md`, `.ai/`-Instructions, eigene Skills) entstand direkt aus diesem Block. |
+| **2 — Frontend** | Frontend-Architektur und Render-Modelle | **Blazor Interactive Server** statt WASM-SPA (ADR 0001), MudBlazor als einzige Komponenten-Bibliothek, und die vierstufige UI-Pipeline `/ui-brainstorm → /ui-flow → /ui-build → /ui-review`, die Entwurf vor Code erzwingt. |
+| **3 — Service** | Service-/Microservice-Architekturen, Protokolle (REST/gRPC), KI-gestützte Services | Bewusste Wahl einer **asynchronen In-Process-Pipeline** (RabbitMQ + MassTransit, ADR 0002/0003) statt eines synchronen Microservice-Geflechts — konsequent zur Modular-Monolith-Entscheidung. REST-Minimal-API für die Aussengrenze; die KI-Klassifikation als erster „intelligenter Service" (ADR 0004). |
+| **4 — Persistence** | Geeignete Persistenzform wählen, DB-Zugriff über ORM abstrahieren, dynamische Abfragen | **EF Core + PostgreSQL** mit Port-/Repository-Abstraktion (ADR 0005). Das im Block geschärfte „passende Persistenzform wählen" führte direkt zum Entscheid, die KI-Suche über **pgvector auf derselben Postgres** zu lösen statt eine separate Vector-DB einzuführen (ADR 0006). |
+| **5 — Deployment** | Containerisierung, CI/CD-Automatisierung, Monitoring/Observability | Multi-Stage-Dockerfile + Compose-Stack aus **unabhängig deploybaren Containern**, drei GitHub-Actions-Workflows (CI, Release → GHCR, Migrations) und **OpenTelemetry + Prometheus + Grafana** als Observability-Schicht. Die geschärfte Betriebssicht schlug sich zusätzlich in den Policy-ADRs 0007–0009 (LLM-Hosting, Logging-/Telemetry-PII) nieder. |
+
+Über die einzelnen Blöcke hinaus war das eigentliche Querschnittsthema des CAS — **KI-assistierte Software-Entwicklung** — zugleich die Arbeitsweise der gesamten Projektarbeit. Mitgenommen habe ich daraus weniger einzelne Tools als die in diesem Dokument beschriebenen Disziplinen: gepflegte Agent-Instructions, eigene Skills für wiederkehrende Workflows, Context-Hygiene über Datei-Artefakte und den Spec→Plan→Implement-Rhythmus mit harten `/clear`-Schnitten. Diese Praktiken sind der direkteste Transfer aus dem CAS in die Projektarbeit — und zugleich das, was ich über FlowHub hinaus in zukünftige Projekte mitnehme. Die vollständige, blockweise Aufschlüsselung der konkreten KI-Nutzung liegt in [`docs/ai-usage.md`](../../docs/ai-usage.md).
