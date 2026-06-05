@@ -41,7 +41,7 @@ Snapshot am Ende der Block-2-Phase (~2026-04-25) gegen die offizielle Moodle-Rub
 
 - [x] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0001 (Render Mode + Architektur) + Wireframes (`docs/design/dashboard/wireframe.md` u.a.) + Page-Flow-Diagramme via `/ui-flow`
 - [-] **Struktur / Verhalten / Interaktion (7)** — Struktur über MudLayout-Shell + Component-Hierarchie; Verhalten/Interaktion über Mermaid-Page-Flows; voller C4-Container-View folgt in Block 3
-- [ ] **DB-Modell (3)** — out of scope Block 2 (in-memory Bogus-Stubs); folgt Block 4
+- [x] **DB-Modell (3)** — out of scope Block 2 (in-memory Bogus-Stubs); ✅ geliefert Block 4 (ADR 0005, `docs/design/db/er.md`)
 
 ### Programmierung
 
@@ -60,8 +60,8 @@ Snapshot am Ende der Block-2-Phase (~2026-04-25) gegen die offizielle Moodle-Rub
 ### KI, Sub-Systeme & Reflexion
 
 - [-] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ — `/ui-brainstorm → /ui-flow → /ui-build → /ui-review` Pipeline als KI-gestützter Workflow etabliert und in Block-2-Insights dokumentiert; konsolidiertes `docs/ai-usage.md` folgt Block 3
-- [ ] **Intelligente Services mit KI (6)** — out of scope Block 2 (Stubs-only); folgt Block 3 mit `KeywordClassifier` + `AiClassifier`
-- [ ] **Sub-Systeme als Container (5)** — out of scope Block 2; folgt Block 5
+- [x] **Intelligente Services mit KI (6)** — out of scope Block 2 (Stubs-only); ✅ geliefert Block 3 (`KeywordClassifier` + `AiClassifier`) mit `KeywordClassifier` + `AiClassifier`
+- [x] **Sub-Systeme als Container (5)** — out of scope Block 2; ✅ geliefert Block 5 (docker-compose Stack)
 - [-] **KI-Reflexion / Fazit (7)** — Block-2-Insights enthalten Workflow-Reflexion (Phase-Disziplin, KI-generierte Tests, MudBlazor-Adaptionen); finales Fazit gehört ins Submission-PDF (Block 5)
 
 ---

@@ -38,14 +38,14 @@ Snapshot am Ende der Block-1-Phase (~2026-03-21) gegen die offizielle Moodle-Rub
 ### Spezifikation
 
 - [-] **Use Cases & fachliche Anforderungen (5)** — informelle Liste in `vault/Projektarbeit/Idee FlowHub.md` (Capture-Idee, Channel-Konzept); formales UC-Dokument folgt in Block 2/3
-- [ ] **NfA SMART (5)** — nicht in Block 1; folgt mit Block 2 (UI-NfAs) und Block 3 (API-NfAs)
+- [x] **NfA SMART (5)** — nicht in Block 1; ✅ geliefert Block 3 (NF-09..NF-13 in `docs/spec/use-cases.md`)
 - [x] **Solution Vision (5)** — `vault/Projektarbeit/Idee FlowHub.md` + Projektbeschreibung-Draft + ADR 0001/0002 (Vision der modularen Lösung)
 
 ### Entwurf
 
 - [-] **Lösungsansatz & Architektur textuell + bildlich (7)** — ADR 0001 + ADR 0002 textuell vorhanden; Diagramme (C4, Sequence) folgen ab Block 2/3
 - [-] **Struktur / Verhalten / Interaktion (7)** — Struktur über ADR 0002 Modul-Split angerissen; Verhalten/Interaktion noch nicht modelliert
-- [ ] **DB-Modell (3)** — out of scope Block 1; folgt mit Block 4 (siehe ADR 0005)
+- [x] **DB-Modell (3)** — out of scope Block 1; ✅ geliefert Block 4 (ADR 0005, `docs/design/db/er.md`)
 
 ### Programmierung
 
@@ -56,16 +56,16 @@ Snapshot am Ende der Block-1-Phase (~2026-03-21) gegen die offizielle Moodle-Rub
 
 ### Validierung
 
-- [ ] **Abnahmekriterien (5)** — folgt mit UC-Definition ab Block 2/3
-- [ ] **Test-Strategie + Technologien (5)** — folgt mit `docs/spec/testing-strategy.md` ab Block 2
-- [ ] **Unit-Tests (3)** — kein Test-Projekt in Block 1 (kommt mit bUnit in Block 2)
-- [ ] **Test-Ergebnisse dokumentiert (3)** — folgt
+- [x] **Abnahmekriterien (5)** — out of scope Block 1; ✅ geliefert Block 3 (UC-08..UC-11 mit Acceptance in `docs/spec/use-cases.md`)
+- [x] **Test-Strategie + Technologien (5)** — out of scope Block 1; ✅ geliefert ab Block 2 (`docs/spec/testing-strategy.md`)
+- [x] **Unit-Tests (3)** — kein Test-Projekt in Block 1; ✅ geliefert Block 2 (bUnit, 31/31 grün)
+- [x] **Test-Ergebnisse dokumentiert (3)** — out of scope Block 1; ✅ geliefert ab Block 2 (CHANGELOG `[Unreleased]` + `dotnet test` Counts)
 
 ### KI, Sub-Systeme & Reflexion
 
 - [-] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ — Reflexion-Sektion dieser Datei listet eingesetzte Tools (Claude Code, Brainstorming-Skill) und konkrete KI-Korrekturen; konsolidierte Doku in `docs/ai-usage.md` folgt ab Block 3
-- [ ] **Intelligente Services mit KI (6)** — out of scope Block 1; folgt mit `FlowHub.AI` in Block 3
-- [ ] **Sub-Systeme als Container (5)** — out of scope Block 1; folgt mit Block 5
+- [x] **Intelligente Services mit KI (6)** — out of scope Block 1; ✅ geliefert Block 3 (`FlowHub.AI`: KeywordClassifier + AiClassifier)
+- [x] **Sub-Systeme als Container (5)** — out of scope Block 1; ✅ geliefert Block 5 (docker-compose Stack)
 - [-] **KI-Reflexion / Fazit (7)** — Block-1-Reflexion-Sektion enthält Tooling-Erfahrungen; finales Fazit gehört in `vault/Projektarbeit/Learnings.md` und das Submission-PDF (Block 5)
 
 ---
