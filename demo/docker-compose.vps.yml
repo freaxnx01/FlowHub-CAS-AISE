@@ -1,0 +1,26 @@
+# VPS-DE (IONOS) override — aligns the demo's Traefik labels with the host's Traefik.
+# The base demo/docker-compose.yml ships generic labels (websecure / letsencrypt /
+# traefik_public); the freaxnx01 VPS-DE Traefik uses entrypoint `web-secure`,
+# certresolver `default`, and the external proxy network `web`. Set TRAEFIK_NETWORK=web
+# in .env so the external-network reference resolves to it.
+#
+# Deploy:
+#   docker compose -f docker-compose.yml -f demo/docker-compose.yml -f demo/docker-compose.vps.yml up --build -d --wait
+services:
+  flowhub.web:
+    labels: !override
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-demo.rule=Host(`demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-demo.entrypoints=web-secure"
+      - "traefik.http.routers.flowhub-demo.tls=true"
+      - "traefik.http.routers.flowhub-demo.tls.certresolver=default"
+      - "traefik.http.routers.flowhub-demo.middlewares=flowhub-demo-ratelimit@docker,flowhub-demo-headers@docker"
+      - "traefik.http.services.flowhub-demo.loadbalancer.server.port=5070"
+      - "traefik.http.middlewares.flowhub-demo-ratelimit.ratelimit.average=10"
+      - "traefik.http.middlewares.flowhub-demo-ratelimit.ratelimit.burst=20"
+      - "traefik.http.middlewares.flowhub-demo-ratelimit.ratelimit.period=1m"
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.framedeny=true"
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.contenttypenosniff=true"
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.browserxssfilter=true"
+      - "traefik.http.middlewares.flowhub-demo-headers.headers.referrerpolicy=strict-origin-when-cross-origin"
+      - "traefik.docker.network=web"

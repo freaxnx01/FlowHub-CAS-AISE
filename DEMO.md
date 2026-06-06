@@ -2,8 +2,8 @@
 
 A fully open, rate-limited, self-resetting FlowHub instance — designed so the operator pays **€4.50/mo** for the VPS and **€0** for AI inference, while still giving a visitor a working "submit Capture → see it classified by AI" round-trip.
 
-- **URL (planned):** <https://demo.flowhub.freaxnx01.ch>
-- **Status:** Scaffold landed (`5bb1a0b`); **not yet deployed**.
+- **URL (live):** <https://demo.flowhub.freaxnx01.ch>
+- **Status:** **Live** on VPS-DE (IONOS) — valid Let's Encrypt cert, OpenRouter Gemma classification active, data resets every 15 min.
 - **Full runbook:** [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md)
 
 ## Posture at a glance
@@ -44,10 +44,12 @@ docs/runbooks/public-demo.md   ← full design + operator playbook
 git clone https://github.com/freaxnx01/FlowHub-CAS-AISE.git
 cd FlowHub-CAS-AISE
 cp demo/.env.example .env
-# Edit .env → set Ai__OpenRouter__ApiKey to the demo key
-# (created at https://openrouter.ai/keys with a $1/mo hard cap)
+# Edit .env → set Ai__OpenRouter__ApiKey (openrouter.ai/keys, $1/mo cap)
+#            and TRAEFIK_NETWORK=web (the VPS-DE Traefik's external proxy network)
 
-docker compose -f docker-compose.yml -f demo/docker-compose.yml up --build -d --wait
+# demo/docker-compose.vps.yml aligns the Traefik labels with the VPS-DE host
+# (entrypoint web-secure, certresolver default, network web).
+docker compose -f docker-compose.yml -f demo/docker-compose.yml -f demo/docker-compose.vps.yml up --build -d --wait
 ```
 
 Cloudflare DNS entry (handled by the `homelab-service-routing` skill once you're ready):
