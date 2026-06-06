@@ -12,7 +12,8 @@ This is a living document — extend it whenever a new coursework term lands.
 
 | English             | Deutsch              | Notes |
 |---------------------|----------------------|-------|
-| Instructor          | Dozent               | Lecturer / course teacher |
+| Instructor          | Dozent               | Lecturer / course teacher (FlowHub has two) |
+| Examiner            | Prüfer               | The instructor who grades the Projektarbeit (one of the two) |
 | Class               | Klasse               | Course cohort / lecture session |
 | Fellow student      | Kommilitone          | Peer in the same cohort |
 | Submission document | Projektdokumentation | Final written deliverable per block / thesis |
