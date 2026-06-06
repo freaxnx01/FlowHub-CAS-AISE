@@ -21,7 +21,7 @@ You probably don't need to run anything to grade this. The submission document a
 
 ### Option A — see it running, zero install
 
-Open <https://demo.flowhub.freaxnx01.ch>. The demo is intentionally open (no login) and resets every 15 min. What it shows is documented in `SUBMISSION.md` §2.1.
+Open <https://demo.flowhub.freaxnx01.ch>. The demo is intentionally open (no login) and resets every 15 min. What it shows — and what's intentionally disabled in the demo (embeddings, external skill writes) — is documented in [`DEMO.md`](DEMO.md) and [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md).
 
 ### Option B — local stack via Docker
 
