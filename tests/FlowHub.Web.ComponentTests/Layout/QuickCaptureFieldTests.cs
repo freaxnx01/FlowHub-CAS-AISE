@@ -75,4 +75,36 @@ public class QuickCaptureFieldTests : TestContext
 
         cut.Markup.Should().Contain("Quick capture");
     }
+
+    [Fact]
+    public void DemoMode_ShowsExampleChips()
+    {
+        var cut = RenderComponent<QuickCaptureField>(p => p.Add(c => c.DemoMode, true));
+
+        cut.Markup.Should().Contain("Try:");
+        cut.Markup.Should().Contain("The Matrix");
+    }
+
+    [Fact]
+    public void DemoMode_Off_HidesExampleChips()
+    {
+        var cut = RenderComponent<QuickCaptureField>();
+
+        cut.Markup.Should().NotContain("The Matrix");
+    }
+
+    [Fact]
+    public void ExampleChip_Click_SubmitsCapture_WithWebChannel()
+    {
+        _captureService.SubmitAsync(Arg.Any<string>(), Arg.Any<ChannelKind>(), Arg.Any<CancellationToken>())
+            .Returns(new Capture(Guid.NewGuid(), ChannelKind.Web, "The Matrix is a great movie",
+                DateTimeOffset.UtcNow, LifecycleStage.Raw, null));
+
+        var cut = RenderComponent<QuickCaptureField>(p => p.Add(c => c.DemoMode, true));
+        var chip = cut.FindAll(".mud-chip").First(c => c.TextContent.Contains("Matrix"));
+        chip.Click();
+
+        _captureService.Received(1).SubmitAsync(
+            "The Matrix is a great movie", ChannelKind.Web, Arg.Any<CancellationToken>());
+    }
 }

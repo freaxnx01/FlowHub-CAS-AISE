@@ -21,6 +21,17 @@ public partial class QuickCaptureField : ComponentBase
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IUploadPolicy UploadPolicy { get; set; } = default!;
 
+    /// <summary>Set by <c>MainLayout</c> from <c>Demo:Mode</c> — shows one-click example prompts.</summary>
+    [Parameter] public bool DemoMode { get; set; }
+
+    /// <summary>Demo example prompts (label shown on the chip, content submitted).</summary>
+    private static readonly (string Label, string Content)[] Examples =
+    [
+        ("🎬 The Matrix is a great movie", "The Matrix is a great movie"),
+        ("✅ todo: buy milk", "todo: buy milk"),
+        ("🔗 example URL", "https://en.wikipedia.org/wiki/Personal_knowledge_management"),
+    ];
+
     private string? _input;
     private bool _isSubmitting;
     private IBrowserFile? _stagedFile;
@@ -70,6 +81,8 @@ public partial class QuickCaptureField : ComponentBase
         }
         await SubmitTextAsync(content);
     }
+
+    private Task SubmitExampleAsync(string content) => SubmitTextAsync(content);
 
     private async Task SubmitTextAsync(string content)
     {
