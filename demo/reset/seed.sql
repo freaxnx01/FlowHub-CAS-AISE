@@ -24,8 +24,8 @@ VALUES
 
   -- 2. "todo" -> Vikunja, completed write + VikunjaProject (keyword: todo rule)
   ('22222222-2222-4222-8222-222222222222',
-   'todo: review Block 5 Nachbereitung before submission','Web','Completed', NOW() - INTERVAL '14 minutes',
-   'Vikunja','Review Block 5 Nachbereitung','vk-demo-002',NULL,'Inbox', NULL,NULL,NULL,NULL,NULL),
+   'todo: prepare slides for the team meeting','Web','Completed', NOW() - INTERVAL '14 minutes',
+   'Vikunja','Prepare slides for the team meeting','vk-demo-002',NULL,'Inbox', NULL,NULL,NULL,NULL,NULL),
 
   -- 3. free-text movie -> Vikunja, completed (AI-style: generated Title + project routing)
   ('33333333-3333-4333-8333-333333333333',
@@ -44,8 +44,8 @@ VALUES
 
   -- 6. "todo" -> Vikunja, ORPHAN (integration failed, retryable)
   ('66666666-6666-4666-8666-666666666666',
-   'todo: rotate Passbolt master key','Web','Orphan', NOW() - INTERVAL '8 minutes',
-   'Vikunja','Rotate Passbolt master key',NULL,'Vikunja API returned 503 (simulated for demo)',NULL, NULL,NULL,NULL,NULL,NULL),
+   'todo: book a dentist appointment','Web','Orphan', NOW() - INTERVAL '8 minutes',
+   'Vikunja','Book a dentist appointment',NULL,'Vikunja API returned 503 (simulated for demo)',NULL, NULL,NULL,NULL,NULL,NULL),
 
   -- 7. free-text -> UNHANDLED (no matching skill) via Telegram
   ('77777777-7777-4777-8777-777777777777',

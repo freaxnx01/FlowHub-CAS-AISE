@@ -1,4 +1,5 @@
 using FlowHub.Web.Components.Layout;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
@@ -106,5 +107,21 @@ public class QuickCaptureFieldTests : TestContext
 
         _captureService.Received(1).SubmitAsync(
             "The Matrix is a great movie", ChannelKind.Web, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public void ExampleChip_AfterSuccessfulSubmit_NavigatesToCapturesList()
+    {
+        _captureService.SubmitAsync(Arg.Any<string>(), Arg.Any<ChannelKind>(), Arg.Any<CancellationToken>())
+            .Returns(new Capture(Guid.NewGuid(), ChannelKind.Web, "The Matrix is a great movie",
+                DateTimeOffset.UtcNow, LifecycleStage.Raw, null));
+        var nav = Services.GetRequiredService<NavigationManager>();
+
+        var cut = RenderComponent<QuickCaptureField>(p => p
+            .Add(c => c.DemoMode, true)
+            .Add(c => c.ExampleSubmitDelayMs, 0));
+        cut.FindAll(".mud-chip").First(c => c.TextContent.Contains("Matrix")).Click();
+
+        cut.WaitForAssertion(() => nav.Uri.Should().EndWith("/captures"), TimeSpan.FromSeconds(2));
     }
 }

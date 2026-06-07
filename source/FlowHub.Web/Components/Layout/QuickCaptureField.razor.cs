@@ -24,6 +24,9 @@ public partial class QuickCaptureField : ComponentBase
     /// <summary>Set by <c>MainLayout</c> from <c>Demo:Mode</c> — shows one-click example prompts.</summary>
     [Parameter] public bool DemoMode { get; set; }
 
+    /// <summary>Pause after an example submit before jumping to the Captures list (ms). Test seam.</summary>
+    [Parameter] public int ExampleSubmitDelayMs { get; set; } = 2000;
+
     /// <summary>Demo example prompts (label shown on the chip, content submitted).</summary>
     private static readonly (string Label, string Content)[] Examples =
     [
@@ -82,9 +85,16 @@ public partial class QuickCaptureField : ComponentBase
         await SubmitTextAsync(content);
     }
 
-    private Task SubmitExampleAsync(string content) => SubmitTextAsync(content);
+    private async Task SubmitExampleAsync(string content)
+    {
+        if (!await SubmitTextAsync(content)) return;
+        // Let the visitor read the "Captured ✓" toast, then refresh the Captures
+        // list so the new capture is visible (the list doesn't live-push).
+        await Task.Delay(ExampleSubmitDelayMs);
+        Navigation.NavigateTo("captures", forceLoad: true);
+    }
 
-    private async Task SubmitTextAsync(string content)
+    private async Task<bool> SubmitTextAsync(string content)
     {
         _isSubmitting = true;
         try
@@ -92,8 +102,9 @@ public partial class QuickCaptureField : ComponentBase
             var capture = await CaptureService.SubmitAsync(content, ChannelKind.Web);
             Snackbar.Add("Captured ✓", Severity.Success, key: capture.Id.ToString());
             _input = string.Empty;
+            return true;
         }
-        catch (Exception ex) { Snackbar.Add($"Capture failed: {ex.Message}", Severity.Error); }
+        catch (Exception ex) { Snackbar.Add($"Capture failed: {ex.Message}", Severity.Error); return false; }
         finally { _isSubmitting = false; }
     }
 
