@@ -41,6 +41,10 @@ services:
       # Demo banner shown in the UI (read by FlowHub.Web layout).
       Demo__Mode: "true"
       Demo__BannerText: "Public demo — try the quick-capture box (top): paste a URL, type 'todo: buy milk', or a note like 'The Matrix is a great movie' to see it classified. Data resets every 15 min; external skill-writes + search are disabled."
+      # Demo-only operator notifications to ntfy.sh (set via .env; dormant if unset).
+      Demo__Notify__Ntfy__BaseUrl: ${Demo__Notify__Ntfy__BaseUrl:-}
+      Demo__Notify__Ntfy__Topic: ${Demo__Notify__Ntfy__Topic:-}
+      Demo__Notify__Ntfy__AccessToken: ${Demo__Notify__Ntfy__AccessToken:-}
     labels:
       # Traefik route: demo.flowhub.freaxnx01.ch -> :5070
       - "traefik.enable=true"

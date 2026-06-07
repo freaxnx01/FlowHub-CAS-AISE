@@ -8,6 +8,7 @@ using FlowHub.Persistence;
 using FlowHub.Skills;
 using FlowHub.Web.Auth;
 using FlowHub.Web.Components;
+using FlowHub.Web.Notifications;
 using FlowHub.Web.Pipeline;
 using FlowHub.Web.Testing;
 using MassTransit;
@@ -115,6 +116,22 @@ builder.Services.AddFlowHubEmbeddings(builder.Configuration);
 // AddFlowHubAi: silent fallback if Skills:<X>:BaseUrl or :ApiToken is missing.
 builder.Services.AddFlowHubSkills(builder.Configuration);
 
+// Demo-only operator notifications → ntfy.sh. Dormant unless Demo:Notify:Ntfy:BaseUrl + Topic
+// are set, so the normal app / agent-dev trial never call out. ntfy → Telegram is bridged at
+// the ntfy layer, keeping FlowHub transport-agnostic.
+var demoNotify = builder.Configuration.GetSection(DemoNotifyOptions.SectionName).Get<DemoNotifyOptions>()
+    ?? new DemoNotifyOptions();
+var demoNotifyEnabled = demoNotify.IsConfigured;
+if (demoNotifyEnabled)
+{
+    builder.Services.Configure<DemoNotifyOptions>(builder.Configuration.GetSection(DemoNotifyOptions.SectionName));
+    builder.Services.AddHttpClient<ICaptureNotifier, NtfyCaptureNotifier>(client =>
+    {
+        client.BaseAddress = new Uri(demoNotify.BaseUrl!.TrimEnd('/') + "/");
+        client.Timeout = TimeSpan.FromSeconds(10);
+    });
+}
+
 // Block 3 Slice B — MassTransit pipeline.
 builder.Services.AddMassTransit(x =>
 {
@@ -132,6 +149,11 @@ builder.Services.AddMassTransit(x =>
     // No retry policy — fault observer is best-effort per spec D5
     // (recursive retry on Fault<T> would loop forever).
     x.AddConsumer<LifecycleFaultObserver>();
+
+    // Demo-only: announce new captures to ntfy.sh (registered only when configured).
+    if (demoNotifyEnabled)
+        x.AddConsumer<CaptureNotificationConsumer>(c =>
+            c.UseMessageRetry(r => r.Intervals(500, 2000)));
 
     if (string.Equals(builder.Configuration["Bus:Transport"], "RabbitMq", StringComparison.OrdinalIgnoreCase))
     {
