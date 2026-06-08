@@ -165,7 +165,7 @@ public sealed class AnthropicHaikuLiveTests
 #### Trait filtering strategy
 
 Tests use `[Trait("Category", "AI")]` to partition:
-- **Default suite** (`Category!=AI`): 99 tests, runs every build, no external dependencies
+- **Default suite** (`Category!=AI&Category!=BetaSmoke&Category!=E2E`): 253 tests, runs every build, no external dependencies
 - **Live AI suite** (`Category=AI`): 4 tests, runs on-demand, requires real API credentials
 
 ## Test Naming Convention

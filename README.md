@@ -60,7 +60,7 @@ Requires .NET 10 SDK (`global.json` pins the version). The `justfile` exposes ev
 
 ```bash
 just build       # build the full solution (warnings as errors)
-just test        # run all 234 tests across 8 test projects
+just test        # run the default suite — 253 tests (excludes live AI / BetaSmoke / E2E)
 just run         # run FlowHub.Web on http://localhost:5070
 just watch       # same, with hot reload
 ```
@@ -80,7 +80,7 @@ source/                 ← application code (one project per capability)
   FlowHub.Persistence/  ← EF Core + Npgsql + pgvector
   FlowHub.Skills/       ← Wallabag + Vikunja ISkillIntegration adapters
   FlowHub.Telegram/     ← Telegram capture channel
-tests/                  ← 8 test projects (unit, component, integration, E2E)
+tests/                  ← 9 test projects (unit, component, integration, E2E)
 docs/                   ← architecture, specs, runbooks, insights
   adr/                  ← 6 Architecture Decision Records
   spec/                 ← use-cases, NfA (SMART), acceptance criteria, DB model, testing strategy
