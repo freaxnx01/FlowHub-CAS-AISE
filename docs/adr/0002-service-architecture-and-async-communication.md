@@ -57,11 +57,11 @@ Cross-capability communication is via **interfaces declared in `FlowHub.Core`**,
 > `FlowHub.AI`, `FlowHub.Skills`, `FlowHub.Persistence`, `FlowHub.Api`, `FlowHub.Web`.
 > Two refinements: (1) the Wallabag and Vikunja outbound adapters landed in
 > **`FlowHub.Skills`** as `ISkillIntegration` implementations — the separately
-> sketched `FlowHub.Integrations` project was not needed and remains an empty
-> placeholder (not in the solution). (2) `FlowHub.Telegram` likewise remains a
-> placeholder — the implemented capture channels are the Web Quick-Capture field
-> and the REST API. Both placeholder folders carry a `README.md` stating this.
-> See `docs/spec/system-context.md` → "Current state (Block 5)".
+> sketched `FlowHub.Integrations` project was not needed and is **not** part of the
+> source tree. (2) `FlowHub.Telegram` is likewise **not yet scaffolded** — the
+> implemented capture channels are the Web Quick-Capture field and the REST API.
+> Both are planned, intentionally absent until built, and documented as such in
+> `docs/spec/system-context.md` → "Current state (Block 5)".
 
 This satisfies the Moodle learning objectives at the **logical** level: clear service boundaries, ports and adapters, dependency inversion, and a documented reason for each boundary. It does **not** introduce the operational complexity (separate deployments, network calls, distributed tracing across processes, eventual consistency between data stores) that a physical microservice split would require.
 
