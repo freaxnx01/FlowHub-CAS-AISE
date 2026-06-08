@@ -283,6 +283,56 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
 > jeweils mit „As built"-Notiz). Siehe auch `docs/spec/system-context.md`
 > → „Current state (Block 5)".
 
+**Ist-Architektur (Block 5, as built)** — der tatsächlich gebaute Modular Monolith:
+
+```mermaid
+flowchart TB
+    subgraph channels["Capture-Kanäle"]
+        web["Web Quick-Capture<br/>(Blazor)"]
+        api["REST API<br/>/api/v1/captures"]
+    end
+
+    subgraph host["FlowHub.Web — einziger Host-Prozess (Modular Monolith)"]
+        direction TB
+        apilib["FlowHub.Api<br/>(Endpoints, In-Process-Library)"]
+        core["FlowHub.Core<br/>Domäne + Ports (keine Infra-Refs)"]
+        subgraph pipe["MassTransit-Pipeline (5 Consumer)"]
+            enrich["CaptureEnrichmentConsumer"]
+            route["SkillRoutingConsumer"]
+            embed["CaptureEmbeddingConsumer"]
+            notify["CaptureNotificationConsumer"]
+            fault["LifecycleFaultObserver"]
+        end
+        ai["FlowHub.AI<br/>AiClassifier : IClassifier"]
+        skills["FlowHub.Skills<br/>Wallabag / Vikunja : ISkillIntegration"]
+        persist["FlowHub.Persistence<br/>EF Core + 6 Repositories"]
+    end
+
+    subgraph backing["Backing Services (eigene Container)"]
+        pg[("PostgreSQL<br/>+ pgvector")]
+        mq["RabbitMQ"]
+        obs["Prometheus + Grafana"]
+        mig["flowhub.migrations<br/>(Init-Job)"]
+    end
+
+    cloud["Cloud-LLM<br/>OpenRouter / Mistral"]
+
+    web --> apilib
+    api --> apilib
+    apilib --> core
+    core --> pipe
+    enrich --> ai
+    ai -.HTTP.-> cloud
+    route --> skills
+    skills -.HTTP.-> ext["Wallabag / Vikunja"]
+    core --> persist
+    persist --> pg
+    pipe <--> mq
+    mig --> pg
+```
+
+**Zielbild (Konzeptphase)** — enthält noch nicht gebaute Bausteine:
+
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 980" font-family="Segoe UI, Arial, sans-serif">
   <defs>
     <!-- Arrow marker -->

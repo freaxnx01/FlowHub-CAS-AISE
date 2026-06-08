@@ -65,8 +65,10 @@ intentional, not-yet-implemented placeholders.
   - `FlowHub.AI` — LLM-backed classifier behind the `IClassifier` port (provider abstraction + keyword fallback)
   - `FlowHub.Persistence` — EF Core + PostgreSQL repositories and migrations
   - `FlowHub.Skills` — Wallabag and Vikunja `ISkillIntegration` adapters
-- **Placeholder (folder only, not in the solution, planned for a later iteration):**
-  `FlowHub.Telegram`, `FlowHub.Integrations` — each carries a `README.md` describing its planned role.
+- **Planned, not yet scaffolded (no project in the source tree):** a Telegram
+  inbound channel and a generic integrations layer. They are intentionally absent
+  until built — the Wallabag/Vikunja adapters that an early draft placed under
+  `FlowHub.Integrations` live in `FlowHub.Skills` (see ADR 0002 "As built").
 - **Not yet wired:** Authentik OIDC (dev bypass only), Ollama-hosted inference (see ADR 0007), the Telegram channel.
 - **REST API:** available since Block 3 (`/api/v1/captures`, exercised live on the public demo).
 
