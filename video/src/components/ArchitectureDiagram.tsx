@@ -24,7 +24,7 @@ export const ArchitectureDiagram: React.FC<{title: string; modules: string[]}> =
           });
           return (
             <div
-              key={m}
+              key={`${i}-${m}`}
               style={{
                 opacity: appear,
                 background: theme.colors.surface,

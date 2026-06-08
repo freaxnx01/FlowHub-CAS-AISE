@@ -8,12 +8,18 @@ export const SceneFrame: React.FC<{
   children: React.ReactNode;
 }> = ({durationInFrames, bg, children}) => {
   const frame = useCurrentFrame();
-  const opacity = interpolate(
-    frame,
-    [0, 12, durationInFrames - 12, durationInFrames],
-    [0, 1, 1, 0],
-    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
-  );
+  // Clamp the fade width so the input range stays strictly increasing even for
+  // very short scenes (durationInFrames <= 24). fade < 1 → no fade, constant opacity.
+  const fade = Math.min(12, Math.floor((durationInFrames - 1) / 2));
+  const opacity =
+    fade < 1
+      ? 1
+      : interpolate(
+          frame,
+          [0, fade, durationInFrames - fade, durationInFrames],
+          [0, 1, 1, 0],
+          {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
+        );
   return (
     <AbsoluteFill
       style={{

@@ -20,7 +20,7 @@ export const BadgeRow: React.FC<{title: string; badges: string[]}> = ({
           });
           return (
             <div
-              key={b}
+              key={`${i}-${b}`}
               style={{
                 opacity: appear,
                 background: theme.colors.primary,

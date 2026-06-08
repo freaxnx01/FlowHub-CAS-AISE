@@ -22,7 +22,7 @@ export const BenefitList: React.FC<{
           });
           return (
             <div
-              key={it.label}
+              key={`${i}-${it.label}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',

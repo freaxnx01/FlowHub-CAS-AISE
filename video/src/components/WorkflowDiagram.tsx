@@ -20,7 +20,7 @@ export const WorkflowDiagram: React.FC<{steps: string[]}> = ({steps}) => {
           extrapolateRight: 'clamp',
         });
         return (
-          <React.Fragment key={s}>
+          <React.Fragment key={`${i}-${s}`}>
             {i > 0 && (
               <span style={{fontSize: 64, color: theme.colors.accent, opacity: appear}}>
                 →
