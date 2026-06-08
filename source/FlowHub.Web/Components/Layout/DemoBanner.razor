@@ -1,0 +1,16 @@
+@namespace FlowHub.Web.Components.Layout
+
+<MudAlert Severity="Severity.Info" Variant="Variant.Filled" Square="true" Dense="true" Class="ma-0">
+    @BannerText
+    @if (!string.IsNullOrWhiteSpace(RepoUrl))
+    {
+        <MudLink Href="@RepoUrl"
+                 Target="_blank"
+                 rel="noopener noreferrer"
+                 Color="Color.Inherit"
+                 Underline="Underline.Always"
+                 Class="ml-1">
+            Source on GitHub
+        </MudLink>
+    }
+</MudAlert>

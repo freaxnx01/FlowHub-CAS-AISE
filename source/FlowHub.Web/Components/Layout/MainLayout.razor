@@ -38,9 +38,7 @@
     <MudMainContent>
         @if (DemoMode)
         {
-            <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Square="true" Dense="true" Class="ma-0">
-                @DemoBannerText
-            </MudAlert>
+            <DemoBanner BannerText="@DemoBannerText" RepoUrl="@DemoRepoUrl" />
         }
         <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
             @Body

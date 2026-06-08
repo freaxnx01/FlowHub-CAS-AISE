@@ -28,4 +28,6 @@ public partial class MainLayout : LayoutComponentBase
 
     private string DemoBannerText => Configuration["Demo:BannerText"]
         ?? "Public demo — data resets every 15 minutes. Skill writes + embeddings disabled.";
+
+    private string? DemoRepoUrl => Configuration["Demo:RepoUrl"];
 }
