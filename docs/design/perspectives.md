@@ -23,9 +23,11 @@ source/
 ├── FlowHub.Api/           ← Minimal API endpoint definitions (CaptureEndpoints, SearchEndpoints, AdminEndpoints)
 ├── FlowHub.AI/            ← AiClassifier + AiEmbeddingService over Microsoft.Extensions.AI
 ├── FlowHub.Persistence/   ← EF Core + PostgreSQL + pgvector adapter for ICaptureRepository
-├── FlowHub.Skills/        ← Wallabag + Vikunja ISkillIntegration adapters
-└── FlowHub.Integrations/  ← (placeholder)
+└── FlowHub.Skills/        ← Wallabag + Vikunja ISkillIntegration adapters
 ```
+
+> The six projects above are the complete solution (`FlowHub.slnx`). A Telegram
+> channel and a generic integrations layer are planned but not yet scaffolded.
 
 ### Deployment topology (`docker-compose.yml`)
 
@@ -66,10 +68,10 @@ source/
 stateDiagram-v2
     [*] --> Raw : POST /api/v1/captures (Submit)
     Raw --> Classified : CaptureEnrichmentConsumer<br/>(AiClassifier → KeywordClassifier fallback)
-    Raw --> Unhandled : KI/Keyword finden keinen Skill
+    Raw --> Orphan : kein Skill gefunden (MatchedSkill = "")<br/>oder Enrichment-Fault
     Classified --> Routed : SkillRoutingConsumer ruft<br/>ISkillIntegration.HandleAsync
     Routed --> Completed : Integration write succeeded<br/>(ExternalRef persistiert)
-    Routed --> Orphan : Integration failed nach<br/>MassTransit-Retry-Policy
+    Routed --> Unhandled : kein Integration-Adapter registriert /<br/>Routing-Fault nach Retry-Policy
     Orphan --> Raw : POST /api/v1/captures/{id}/retry
     Unhandled --> Raw : POST /api/v1/captures/{id}/retry
     Completed --> [*]
@@ -77,17 +79,17 @@ stateDiagram-v2
 
 | Stage | Bedeutung | Eingang | Ausgang |
 |---|---|---|---|
-| `Raw` | Just arrived, no classification yet | Submit / Retry | → Classified, → Unhandled |
+| `Raw` | Just arrived, no classification yet | Submit / Retry | → Classified, → Orphan |
 | `Classified` | AI/Keyword has assigned a target skill | CaptureEnrichmentConsumer | → Routed |
-| `Routed` | Skill processing in flight | SkillRoutingConsumer dispatched | → Completed, → Orphan |
+| `Routed` | Skill processing in flight | SkillRoutingConsumer dispatched | → Completed, → Unhandled |
 | `Completed` | Happy terminal state — write succeeded, `ExternalRef` set | Integration write returned 2xx | terminal |
-| `Orphan` | Skill / integration failed (retryable) | All MassTransit retries exhausted; LifecycleFaultObserver sets stage | → Raw via Retry |
-| `Unhandled` | No matching skill found (retryable) | Classifier returned `""` for MatchedSkill | → Raw via Retry |
+| `Orphan` | No matching skill found, or enrichment failed (retryable) | Classifier returned `""` for `MatchedSkill`, or `Fault<CaptureCreated>` → `MarkOrphanAsync` | → Raw via Retry |
+| `Unhandled` | Skill assigned but not routed: no integration adapter registered, or routing failed (retryable) | Routing sets directly, or `Fault<CaptureClassified>` → `MarkUnhandledAsync` | → Raw via Retry |
 
 ### Retry / error semantics
 
 - **Per-consumer retry** (ADR 0003): `CaptureEnrichmentConsumer` retries with intervals `[100ms, 500ms]`. `CaptureEmbeddingConsumer` + `SkillRoutingConsumer` retry with `[500ms, 2s, 5s]`.
-- **Fault observer**: `LifecycleFaultObserver` consumes `Fault<TMessage>` and flips the Capture to `Orphan` with a `FailureReason`. No retry on the fault itself (would loop).
+- **Fault observer**: `LifecycleFaultObserver` maps each fault to the matching terminal stage with a `FailureReason` — `Fault<CaptureCreated>` (enrichment) → `MarkOrphanAsync`, `Fault<CaptureClassified>` (routing) → `MarkUnhandledAsync`. No retry on the fault itself (would loop).
 - **Embedding pipeline is best-effort**: `AiEmbeddingService` catches provider errors and stores the Capture without an embedding (search degrades to non-vector path).
 
 ### References

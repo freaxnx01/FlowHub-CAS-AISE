@@ -71,14 +71,16 @@ flowchart LR
 
 **Invarianten:**
 
-- Es gibt genau drei Outbound-Konnektoren aus der Homelab-Boundary heraus:
-  Vikunja, Wallabag und (optional) Cloud-LLM. Alle drei sind im
-  `FlowHub.Skills`- bzw. `FlowHub.AI`-Modul kapselt; der Audit-Test
-  `OutboundCallAuditTests` verifiziert, dass kein anderer Modul-Code
-  HTTP-Aufrufe nach extern initiiert.
-- Cloud-LLM-Pfad ist **per Default deaktiviert**. Aktivierung erfordert
-  `Embeddings__Provider=OpenAI` + `Embeddings__ApiKey` als Environment-
-  Variablen — bewusste Konfigurationsentscheidung mit DPA-Konsequenz.
+- Es gibt drei Outbound-Konnektoren aus der Homelab-Boundary heraus:
+  Vikunja, Wallabag und Cloud-LLM. Alle drei sind im `FlowHub.Skills`- bzw.
+  `FlowHub.AI`-Modul gekapselt. Ein Audit-Test `OutboundCallAuditTests`, der
+  erzwingt, dass kein anderer Modul-Code extern ruft, ist **geplant, aber noch
+  nicht implementiert** (siehe NfA-P1 / ADR 0007).
+- **Honest current state:** Der Cloud-LLM-Pfad ist im Abgabestand **aktiv** —
+  Klassifikation läuft über OpenRouter, Embeddings über Mistral. Capture-Inhalte
+  verlassen damit heute für die KI-Inferenz das Homelab. Der lokale (Ollama-)
+  Pfad mit `Embeddings__Provider=Local` ist das dokumentierte Ziel (ADR 0007),
+  noch nicht der Default.
 - Capture-Bodies werden **nicht** an Vikunja oder Wallabag weitergereicht;
   Skill-Adapter übergeben nur den minimalen Nutzlast-Slice (Tag + URL).
   Dies hält die Outbound-Boundary auch dann sauber, wenn ein Skill-Target

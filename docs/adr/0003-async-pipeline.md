@@ -141,10 +141,14 @@ This resolves the captive-dependency problem because `IBus` is itself singleton-
 
 FlowHub stays a single deployable process per ADR 0002 Decision 1. `just run` still starts everything with no broker dependency. However, a `docker-compose.yml` sketch is committed alongside the code that demonstrates the multi-container topology for Block 5:
 
+_Illustrative target topology — see the "As built" note below: the separate
+`flowhub.api` container was **not** built; `FlowHub.Api` runs in-process inside
+`flowhub.web`._
+
 ```
 services:
   flowhub.web:   image: flowhub-web:dev    (Bus__Transport: RabbitMq)
-  flowhub.api:   image: flowhub-api:dev    (Bus__Transport: RabbitMq)
+  flowhub.api:   image: flowhub-api:dev    (Bus__Transport: RabbitMq)  # not built — folded into flowhub.web
   rabbitmq:      image: rabbitmq:3-management-alpine
 ```
 
