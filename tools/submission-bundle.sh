@@ -42,6 +42,15 @@ FILES=(
   "2|Database model — entities|docs/design/db/entities.md"
   "2|Database model — ER diagram|docs/design/db/er.md"
 
+  "2|Design — Perspektiven (Struktur, Verhalten, Interaktion)|docs/design/perspectives.md"
+  "2|Design — Datenfluss|docs/design/data-flow.md"
+  "2|Design — Sequenzdiagramme (Übersicht)|docs/design/sequences/README.md"
+  "3|Sequenz — Capture-Intake|docs/design/sequences/capture-intake.md"
+  "3|Sequenz — Capture-Enrichment|docs/design/sequences/capture-enrichment.md"
+  "3|Sequenz — Skill-Routing|docs/design/sequences/skill-routing.md"
+  "3|Sequenz — Skill-Routing (Hot Path)|docs/design/sequences/skill-routing-hot-path.md"
+  "2|Design — User Journeys|docs/design/journeys.md"
+
   "1|AI usage|docs/ai-usage.md"
   "1|Learnings (personal)|vault/Projektarbeit/Learnings.md"
 

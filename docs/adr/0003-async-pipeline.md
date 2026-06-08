@@ -203,7 +203,7 @@ An outbox pattern guarantees that database writes and message publishes happen a
 
 This ADR and its implementation directly address four Bewertungskriterien dimensions:
 
-- **Entwurf: Lösungsansatz und Architektur beschrieben** (max 7 pts) — the ASCII architecture diagram in the spec and the state-machine diagram in this ADR cover both bildlich and textuell.
+- **Entwurf: Lösungsansatz und Architektur beschrieben** (max 7 pts) — the ASCII architecture diagram in the spec, plus the capture-lifecycle state machine and the pipeline sequence diagrams in `docs/design/perspectives.md` and `docs/design/sequences/`, cover both bildlich and textuell.
 - **Programmierung: Code lesbar, nach Layer, Modulen und Sub-Systemen strukturiert** (max 7 pts) — `IClassifier` + `ISkillIntegration` ports in `FlowHub.Core`, consumers in `FlowHub.Web/Pipeline/`, transport config isolated to `Program.cs`.
 - **KI / Sub-Systeme als unabhängige Container deploybar** (max 5 pts) — `docker-compose.yml` demonstrates the multi-container topology; Decision 9 explains why the code stays single-process during development.
 - **KI / Intelligente und flexible Services** (max 6 pts) — the pipeline itself (async enrichment, classification port, fault observer, retry policy) is the worked example of an intelligent, failure-tolerant service.
