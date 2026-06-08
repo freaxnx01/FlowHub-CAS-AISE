@@ -7,11 +7,13 @@ graph TD
     Operator["👤 Operator<br/>(single user)"]
 
     subgraph FlowHub ["FlowHub (this system)"]
-        Web["FlowHub.Web<br/>Blazor Interactive Server<br/>Dashboard, Captures, Skills, Integrations"]
+        Web["FlowHub.Web<br/>Blazor Interactive Server + REST API host"]
         Core["FlowHub.Core<br/>Domain types + driving ports"]
-        AI["FlowHub.AI<br/>AI classification<br/>(Ollama, future)"]
-        Skills["FlowHub.Skills<br/>Skill implementations<br/>(future)"]
-        Telegram["FlowHub.Telegram<br/>Telegram bot channel<br/>(future)"]
+        Api["FlowHub.Api<br/>REST endpoints (in-process library)"]
+        AI["FlowHub.AI<br/>AI classification<br/>(cloud LLM; Ollama geplant)"]
+        Persistence["FlowHub.Persistence<br/>EF Core + PostgreSQL + pgvector"]
+        Skills["FlowHub.Skills<br/>Wallabag + Vikunja adapters"]
+        Telegram["FlowHub.Telegram<br/>Telegram bot channel (geplant)"]
     end
 
     subgraph Downstream ["Downstream Integrations (self-hosted)"]
@@ -69,7 +71,11 @@ intentional, not-yet-implemented placeholders.
   inbound channel and a generic integrations layer. They are intentionally absent
   until built — the Wallabag/Vikunja adapters that an early draft placed under
   `FlowHub.Integrations` live in `FlowHub.Skills` (see ADR 0002 "As built").
-- **Not yet wired:** Authentik OIDC (dev bypass only), Ollama-hosted inference (see ADR 0007), the Telegram channel.
+- **Not yet wired:** Authentik OIDC (dev bypass only) and the Telegram channel.
+- **AI hosting — honest current state:** classification and embeddings run on **cloud
+  providers today** (OpenRouter / Mistral), so capture content **leaves the homelab
+  for AI inference**. Local-by-default Ollama hosting is the documented target (ADR
+  0007, NfA-P1), **not yet implemented** — this is a deliberate, tracked gap.
 - **REST API:** available since Block 3 (`/api/v1/captures`, exercised live on the public demo).
 
 ## Deployment context (Block 5, future)

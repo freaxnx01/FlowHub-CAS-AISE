@@ -87,6 +87,10 @@ Die Warnung im Log ist der bewusste "Stolperdraht" für den Betreiber.
 
 ### 4. Outbound-Audit-Test verriegelt den Default
 
+> **Status: geplant, nicht implementiert.** Der hier beschriebene Test existiert
+> noch nicht in `tests/` (siehe „As built"-Notiz oben und NfA-P1). Der folgende
+> Absatz beschreibt das Soll-Design.
+
 `tests/FlowHub.Web.IntegrationTests/OutboundCallAuditTests.cs` (Block 5) instanziiert
 die App mit der Default-Konfiguration und prüft via einem `DelegatingHandler`, dass
 während eines vollen Capture-Klassifikations-Zyklus kein HTTP-Request an
