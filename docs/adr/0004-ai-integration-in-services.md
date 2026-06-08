@@ -243,10 +243,16 @@ claim it. Asymmetry documented here as a real difference between adapters.
 
 ### OpenTelemetry
 
-`Microsoft.Extensions.AI.UseOpenTelemetry()` decorator emits `gen_ai.client.operation
-.duration` and token-count metrics on the existing OTEL pipeline. Will surface in
-the Block-5 Grafana dashboard alongside MassTransit traces (`AI calls / sec, p95
-latency, fallback rate`).
+> **As built (Block 5): planned, not yet wired.** The `gen_ai.*` AI metrics and
+> MassTransit traces described here are **not** exported in the submission build —
+> the OTEL pipeline registers metrics, but no AI `Meter`/`WithTracing`/MassTransit
+> trace source is wired, and no Grafana JSON dashboard ships. This is the intended
+> design; treat it as future work, not as an enforced capability.
+
+The intended design: the `Microsoft.Extensions.AI.UseOpenTelemetry()` decorator
+emits `gen_ai.client.operation.duration` and token-count metrics on the OTEL
+pipeline, to surface in a Grafana dashboard alongside MassTransit traces
+(`AI calls / sec, p95 latency, fallback rate`).
 
 ### Reflexion — `Microsoft.Extensions.AI` vs Semantic Kernel
 
@@ -288,8 +294,9 @@ deliberately stops short.
 - Integration-test secret rotation: `Ai__Anthropic__ApiKey` /
   `Ai__OpenRouter__ApiKey` move from User Secrets into the Block-5 deployment
   secret store (Authentik or Docker secrets).
-- OTEL: `gen_ai.*` metrics export already; Grafana panel for "AI calls / sec, p95
-  latency, fallback rate" comes nearly free.
+- OTEL: once the AI `Meter`/tracing source is wired (planned — see the
+  "As built" note above), `gen_ai.*` metrics make a Grafana panel for "AI calls /
+  sec, p95 latency, fallback rate" nearly free.
 - Optional Semantic-Kernel adoption — additive on top of MEAI.
 
 ---
