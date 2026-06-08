@@ -62,6 +62,7 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         entity.FailureReason = capture.FailureReason;
         entity.ExternalRef = capture.ExternalRef;
         entity.VikunjaProject = capture.VikunjaProject;
+        entity.EnrichmentDescription = capture.EnrichmentDescription;
         await _db.SaveChangesAsync(cancellationToken);
     }
 
@@ -147,6 +148,7 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         Title: e.Title,
         ExternalRef: e.ExternalRef,
         VikunjaProject: e.VikunjaProject,
+        EnrichmentDescription: e.EnrichmentDescription,
         Attachment: e.Attachment is null
             ? null
             : new Attachment(e.Attachment.FileName, e.Attachment.ContentType, e.Attachment.SizeBytes, e.Attachment.RelativePath, e.Attachment.UploadedAt));
@@ -163,6 +165,7 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         FailureReason = c.FailureReason,
         ExternalRef = c.ExternalRef,
         VikunjaProject = c.VikunjaProject,
+        EnrichmentDescription = c.EnrichmentDescription,
         Attachment = c.Attachment is null ? null : new AttachmentEntity
         {
             FileName = c.Attachment.FileName,

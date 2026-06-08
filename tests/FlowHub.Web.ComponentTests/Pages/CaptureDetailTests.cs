@@ -50,6 +50,22 @@ public class CaptureDetailTests : TestContext
     }
 
     [Fact]
+    public void Render_WithEnrichment_ShowsEnrichmentBlock()
+    {
+        var id = Guid.NewGuid();
+        _captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(new Capture(id, ChannelKind.Web, "\"...\" — Marcus Aurelius", DateTimeOffset.UtcNow,
+                LifecycleStage.Unhandled, "Vikunja", FailureReason: "no integration registered",
+                Title: "Quote — Marcus Aurelius",
+                EnrichmentDescription: "\"You have power over your mind.\" — Marcus Aurelius\n\nAbout Marcus Aurelius: Roman emperor and Stoic philosopher."));
+
+        var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
+
+        cut.Markup.Should().Contain("Enrichment");
+        cut.Markup.Should().Contain("About Marcus Aurelius");
+    }
+
+    [Fact]
     public void Render_Orphan_ShowsRoutingFailedAlertAndRetryButton()
     {
         var id = Guid.NewGuid();

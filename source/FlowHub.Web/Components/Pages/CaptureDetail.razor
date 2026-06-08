@@ -79,6 +79,18 @@ else
             <MudText Typo="Typo.subtitle2" Class="mb-1">Content</MudText>
             <MudText Typo="Typo.body1" Class="mb-4" Style="white-space:pre-wrap;word-break:break-word;">@_capture.Content</MudText>
 
+            @* Enrichment — AI-generated context (e.g. a quote's author + a short bio) *@
+            @if (!string.IsNullOrWhiteSpace(_capture.EnrichmentDescription))
+            {
+                <MudText Typo="Typo.subtitle2" Class="mb-1">
+                    <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Small" Class="mr-1" />Enrichment
+                </MudText>
+                <MudPaper Elevation="0" Class="pa-3 mb-4"
+                          Style="background:var(--mud-palette-background-grey);white-space:pre-wrap;word-break:break-word;">
+                    @_capture.EnrichmentDescription
+                </MudPaper>
+            }
+
             @* Metadata *@
             <MudText Typo="Typo.subtitle2" Class="mb-1">Metadata</MudText>
             <MudStack Spacing="0" Class="mb-4">

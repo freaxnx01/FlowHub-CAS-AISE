@@ -78,7 +78,7 @@ public sealed class EfCaptureService : ICaptureService
     }
 
     public async Task MarkClassifiedAsync(
-        Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, CancellationToken cancellationToken = default)
+        Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, string? enrichmentDescription = null, CancellationToken cancellationToken = default)
     {
         var capture = await _repository.GetByIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException($"Capture {id} not found.");
@@ -89,6 +89,7 @@ public sealed class EfCaptureService : ICaptureService
                 MatchedSkill = matchedSkill,
                 Title = title ?? capture.Title,
                 VikunjaProject = vikunjaProject ?? capture.VikunjaProject,
+                EnrichmentDescription = enrichmentDescription ?? capture.EnrichmentDescription,
             },
             cancellationToken);
     }

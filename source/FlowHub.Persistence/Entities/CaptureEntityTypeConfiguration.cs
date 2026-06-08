@@ -17,6 +17,7 @@ internal sealed class CaptureEntityTypeConfiguration : IEntityTypeConfiguration<
         builder.Property(c => c.Title).HasMaxLength(512);
         builder.Property(c => c.ExternalRef).HasMaxLength(256);
         builder.Property(c => c.VikunjaProject).HasMaxLength(64);
+        builder.Property(c => c.EnrichmentDescription);
 
         builder.HasIndex(c => c.Stage).HasDatabaseName("IX_Captures_Stage");
         builder.HasIndex(c => c.CreatedAt).IsDescending().HasDatabaseName("IX_Captures_CreatedAt_DESC");

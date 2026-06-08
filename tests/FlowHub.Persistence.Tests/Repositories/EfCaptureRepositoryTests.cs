@@ -30,6 +30,26 @@ public sealed class EfCaptureRepositoryTests(PostgresFixture fixture)
     }
 
     [Fact]
+    public async Task UpdateAsync_PersistsEnrichmentDescription_AndReadsBack()
+    {
+        var db = await fixture.CreateFreshDbAsync();
+        var repo = new EfCaptureRepository(db);
+        var capture = NewRawCapture("\"Luck is what happens when preparation meets opportunity.\" — Seneca");
+        await repo.AddAsync(capture);
+
+        await repo.UpdateAsync(capture with
+        {
+            Stage = LifecycleStage.Classified,
+            MatchedSkill = "Vikunja",
+            VikunjaProject = "Quotes",
+            EnrichmentDescription = "About Seneca: Roman Stoic philosopher and statesman.",
+        });
+
+        var found = await repo.GetByIdAsync(capture.Id);
+        found!.EnrichmentDescription.Should().Be("About Seneca: Roman Stoic philosopher and statesman.");
+    }
+
+    [Fact]
     public async Task GetByIdAsync_UnknownId_ReturnsNull()
     {
         var db = await fixture.CreateFreshDbAsync();

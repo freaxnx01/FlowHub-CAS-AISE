@@ -57,6 +57,7 @@ public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated
             result.MatchedSkill,
             result.Title,
             project,
+            enrichment?.Description,
             ct);
 
         await context.Publish(new CaptureClassified(

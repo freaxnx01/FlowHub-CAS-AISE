@@ -38,7 +38,7 @@ public sealed partial class QuotesEnricher : IEnricher
         }
 
         var description = new StringBuilder();
-        description.Append("> \"").Append(quote.Trim('"', ' ', '\n')).Append('"');
+        description.Append('"').Append(quote.Trim('"', ' ', '\n')).Append('"');
         if (!string.IsNullOrWhiteSpace(author))
         {
             description.Append(" — ").Append(author);
@@ -50,7 +50,7 @@ public sealed partial class QuotesEnricher : IEnricher
             var bio = await FetchBioAsync(author!, cancellationToken);
             if (!string.IsNullOrWhiteSpace(bio))
             {
-                description.Append("**About ").Append(author).Append(":** ").Append(bio.Trim());
+                description.Append("About ").Append(author).Append(": ").Append(bio.Trim());
             }
         }
 

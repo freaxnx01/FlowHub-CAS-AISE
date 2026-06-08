@@ -13,13 +13,28 @@ using System.ClientModel;
 
 namespace FlowHub.AI;
 
-internal sealed class EmptyVikunjaProjectCatalog : IVikunjaProjectCatalog
+/// <summary>
+/// Fallback project catalog used when Vikunja isn't configured: exposes the fallback
+/// project plus every registered enricher's bucket name. This lets the classifier route
+/// e.g. a quote to "Quotes" and the dispatcher invoke the matching enricher even without
+/// a live Vikunja (the public demo relies on this). Ids are placeholders (-1) — only the
+/// names matter for enrichment dispatch; real ids come from the live Vikunja catalog.
+/// </summary>
+internal sealed class EnricherBucketCatalog : IVikunjaProjectCatalog
 {
-    private static readonly IReadOnlyDictionary<string, int> Empty =
-        new Dictionary<string, int>(StringComparer.Ordinal);
+    private readonly Task<IReadOnlyDictionary<string, int>> _buckets;
 
-    public Task<IReadOnlyDictionary<string, int>> GetAsync(CancellationToken cancellationToken) =>
-        Task.FromResult(Empty);
+    public EnricherBucketCatalog(IEnumerable<IEnricher> enrichers, string fallbackName)
+    {
+        var buckets = new Dictionary<string, int>(StringComparer.Ordinal) { [fallbackName] = 0 };
+        foreach (var enricher in enrichers)
+        {
+            buckets[enricher.BucketName] = -1;
+        }
+        _buckets = Task.FromResult<IReadOnlyDictionary<string, int>>(buckets);
+    }
+
+    public Task<IReadOnlyDictionary<string, int>> GetAsync(CancellationToken cancellationToken) => _buckets;
 }
 
 public static class AiServiceCollectionExtensions
@@ -53,7 +68,8 @@ public static class AiServiceCollectionExtensions
             var fallbackId = int.TryParse(section["FallbackProjectId"], out var id) ? id : 0;
             return new VikunjaFallback(fallbackName, fallbackId);
         });
-        services.TryAddSingleton<IVikunjaProjectCatalog, EmptyVikunjaProjectCatalog>();
+        services.TryAddSingleton<IVikunjaProjectCatalog>(sp =>
+            new EnricherBucketCatalog(sp.GetServices<IEnricher>(), sp.GetRequiredService<VikunjaFallback>().Name));
         services.AddSingleton<EnricherDispatcher>();
 
         var outcome = ResolveOutcome(configuration);
