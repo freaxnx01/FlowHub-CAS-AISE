@@ -26,6 +26,14 @@ The pipeline covers exactly two flows: (1) capture submit triggers an enrichment
 
 This is narrower than the four-flow table sketched in earlier drafts. Flow 3 (a dedicated routing event separate from enrichment output) was dropped because it adds an unnecessary extra hop without giving the consumer more information — routing happens inline at the tail of the enrichment consumer, which already has the classification result. Flow 4 (manual retry as an async re-publish) is handled by a synchronous REST endpoint that re-publishes `CaptureCreated` for a given Capture id; it does not need its own event type or its own flow designation. The result is a simple two-event, two-consumer pipeline that is easy to test exhaustively and easy to explain in the PVA write-up.
 
+> **As built (Block 5 update).** Slice B is the two-consumer core described here.
+> Later slices added two more consumers around the same two events plus a fault
+> observer, so `FlowHub.Web/Pipeline/` now registers **five** message handlers:
+> `CaptureEnrichmentConsumer`, `SkillRoutingConsumer` (Slice B), plus
+> `CaptureEmbeddingConsumer` (vector search, ADR 0006),
+> `CaptureNotificationConsumer` (optional ntfy.sh), and `LifecycleFaultObserver`
+> (maps `Fault<T>` to lifecycle state). The two-event vocabulary is unchanged.
+
 ### 2. Event vocabulary: `CaptureCreated` and `CaptureClassified` only
 
 The final event set for Slice B is exactly two records:

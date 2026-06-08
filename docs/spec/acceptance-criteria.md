@@ -8,7 +8,7 @@ This document is the single source of truth for "what counts as done" per featur
 
 - **AC-XX-N** — acceptance criterion N for UC-XX.
 - **Verified by** — concrete artifact: a test class, `make` target, runbook step, or Bruno collection. If a criterion is currently deferred (Block 2 stub state, future block), it is marked **(deferred)** with the block where it will be verified.
-- Non-functional acceptance criteria (NF-01 … NF-13) live in `docs/spec/nfa.md` and are not duplicated here.
+- Non-functional requirements live in `docs/spec/nfa.md` as the SMART-decomposed `NfA-*` catalogue (the successor to the `NF-01 … NF-13` quality table in `docs/spec/use-cases.md`; see the mapping note there). They are not duplicated here.
 
 ---
 

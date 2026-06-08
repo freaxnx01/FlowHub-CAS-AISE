@@ -15,6 +15,16 @@ each carries an unambiguous target and a stated way to verify it.
 | NfA-O1 | Observability | S · M · A · R · T |
 | NfA-P1..P2 | Privacy & Compliance | S · M · A · R · T |
 
+> **Relationship to the `NF-01..NF-13` table.** The `NF-*` list in
+> `docs/spec/use-cases.md` is the original Block-2 quality-attribute catalogue
+> (response time, availability, security, testability, …). This `NfA-*` document
+> is its SMART-decomposed successor and is **authoritative** where the two
+> overlap: `NfA-01` refines `NF-01`/`NF-09` (latency), `NfA-O1` refines `NF-01`
+> (observability), `NfA-D1..D3` cover deployment (`NF-02`), `NfA-P1` refines
+> `NF-08` (data privacy), and `NfA-P2` adds the AI-Act transparency requirement.
+> The `NF-*` numbers are retained only as stable references from existing
+> acceptance criteria and use cases.
+
 ## NfA-01: Query Latency
 
 **Specific:** All Capture list queries (`ICaptureService.ListAsync`) with a limit ≤ 50 must complete within 100ms at p95 under normal load.  
