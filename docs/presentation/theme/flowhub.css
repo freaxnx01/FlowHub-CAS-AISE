@@ -1,0 +1,176 @@
+/* @theme flowhub */
+
+/*
+ * FlowHub presentation theme for Marp.
+ * Palette mirrors docs/projektbeschreibung architecture diagram:
+ *   backend green #27AE60 · input blue #3498DB · AI yellow #F1C40F
+ *   REST red #E74C3C · persistence purple #8E44AD · homelab orange #E67E22
+ */
+
+@import 'default';
+
+:root {
+  --fh-ink: #1A2B40;
+  --fh-muted: #5D6D7E;
+  --fh-green: #1E8449;
+  --fh-green-bright: #27AE60;
+  --fh-blue: #2471A3;
+  --fh-yellow: #B7770D;
+  --fh-red: #C0392B;
+  --fh-purple: #6C3483;
+  --fh-orange: #A04000;
+  --fh-bg: #FFFFFF;
+  --fh-bg-soft: #F7F9FC;
+  --fh-rule: #D6DBDF;
+}
+
+section {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--fh-bg);
+  color: var(--fh-ink);
+  font-size: 26px;
+  line-height: 1.42;
+  padding: 56px 64px 64px 64px;
+}
+
+/* Accent rule under every content-slide heading */
+section h1,
+section h2 {
+  color: var(--fh-ink);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin: 0 0 0.5em 0;
+}
+
+section h1 { font-size: 1.5em; }
+section h2 {
+  font-size: 1.18em;
+  padding-bottom: 0.28em;
+  border-bottom: 3px solid var(--fh-green-bright);
+}
+
+section h3 {
+  color: var(--fh-green);
+  font-size: 1.0em;
+  font-weight: 600;
+  margin: 0.3em 0 0.2em 0;
+}
+
+strong { color: var(--fh-green); }
+em { color: var(--fh-muted); font-style: normal; }
+
+a { color: var(--fh-blue); text-decoration: none; }
+
+ul, ol { margin: 0.2em 0 0.2em 1.1em; }
+li { margin: 0.22em 0; }
+li::marker { color: var(--fh-green-bright); }
+
+code {
+  font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+  background: #EEF3F8;
+  color: #1A5276;
+  padding: 0.06em 0.34em;
+  border-radius: 4px;
+  font-size: 0.82em;
+}
+
+pre {
+  background: var(--fh-bg-soft);
+  border: 1px solid var(--fh-rule);
+  border-left: 4px solid var(--fh-green-bright);
+  border-radius: 8px;
+  padding: 0.7em 0.9em;
+  font-size: 0.8em;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 0.3em 0;
+  font-size: 0.86em;
+  width: 100%;
+}
+th {
+  background: var(--fh-green);
+  color: #fff;
+  text-align: left;
+  padding: 0.4em 0.7em;
+  font-weight: 600;
+}
+td {
+  border-bottom: 1px solid var(--fh-rule);
+  padding: 0.36em 0.7em;
+}
+tr:nth-child(even) td { background: var(--fh-bg-soft); }
+
+blockquote {
+  border-left: 4px solid var(--fh-blue);
+  margin: 0.4em 0;
+  padding: 0.2em 0 0.2em 0.9em;
+  color: var(--fh-muted);
+  font-style: italic;
+}
+
+/* Footer + pagination */
+section::after {
+  color: var(--fh-muted);
+  font-size: 0.5em;
+}
+section footer {
+  color: var(--fh-muted);
+  font-size: 0.52em;
+}
+
+/* ── Title / section-divider slide ───────────────────────────── */
+section.title,
+section.divider {
+  background: linear-gradient(135deg, #0E6655 0%, #1E8449 55%, #27AE60 100%);
+  color: #fff;
+  justify-content: center;
+}
+section.title h1,
+section.divider h1 {
+  color: #fff;
+  font-size: 2.1em;
+  border: none;
+  margin-bottom: 0.15em;
+}
+section.title h2,
+section.divider h2 {
+  color: #EAF7EF;
+  font-size: 1.0em;
+  font-weight: 400;
+  border: none;
+  padding: 0;
+}
+section.title p,
+section.title em,
+section.divider p { color: #D7EEDF; }
+section.title strong,
+section.divider strong,
+section.divider em { color: #fff; }
+section.title a { color: #EAF7EF; }
+
+/* ── Lead / takeaway slide ───────────────────────────────────── */
+section.lead {
+  justify-content: center;
+  text-align: center;
+}
+section.lead h1 {
+  font-size: 1.9em;
+  border: none;
+}
+section.lead h2 { border: none; color: var(--fh-green); }
+
+/* Two-column flex helper: wrap content in <div class="cols"> */
+.cols {
+  display: flex;
+  gap: 1.6em;
+  align-items: flex-start;
+}
+.cols > * { flex: 1; }
+
+/* Lone images (e.g. architecture diagram) centered */
+section img { display: block; margin-inline: auto; }
+
+/* Small / dense text utility */
+.small { font-size: 0.82em; color: var(--fh-muted); }

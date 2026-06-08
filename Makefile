@@ -18,7 +18,7 @@ SECRET_EXEC = bash -c 'set -a; [ -f .env ] && . ./.env; set +a; \
 	if command -v passbolt >/dev/null 2>&1; then exec passbolt exec -- "$$@"; \
 	else exec "$$@"; fi' --
 
-.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-install
+.PHONY: help run watch build test test-backend test-frontend test-e2e test-all test-ai test-beta test-watch playwright-install restore clean format db-up db-ping db-migrate migrate ai-ping ai-classify ai-embed smoke-prod smoke-down pdf pdf-projektbeschreibung pdf-install slides slides-pdf
 
 SOLUTION       := FlowHub.slnx
 WEB_PROJECT    := source/FlowHub.Web
@@ -28,6 +28,10 @@ PDF_TOOL_DIR   := tools/md-to-pdf
 PDF_RENDERER   := $(PDF_TOOL_DIR)/render.mjs
 PROJBESCHR_MD  := docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md
 PROJBESCHR_PDF := docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf
+SLIDES_DIR     := docs/presentation
+SLIDES_MD      := $(SLIDES_DIR)/flowhub-praesentation.md
+SLIDES_THEME   := $(SLIDES_DIR)/theme/flowhub.css
+MARP           := npx --yes @marp-team/marp-cli@latest
 TEXT           ?=
 FILE           ?=
 OUT            ?=
@@ -225,3 +229,11 @@ pdf: ## Render an arbitrary Markdown file to PDF. Usage: make pdf FILE=docs/foo.
 pdf-projektbeschreibung: ## Regenerate docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf from the matching .md
 	@if [ ! -d "$(PDF_TOOL_DIR)/node_modules" ]; then $(MAKE) pdf-install; fi
 	node $(PDF_RENDERER) $(PROJBESCHR_MD) $(PROJBESCHR_PDF) --title "FlowHub – Projektbeschreibung"
+
+slides: ## Render the CAS presentation to standalone HTML (docs/presentation/)
+	$(MARP) --html --theme-set $(SLIDES_THEME) --allow-local-files \
+		$(SLIDES_MD) -o $(SLIDES_DIR)/flowhub-praesentation.html
+
+slides-pdf: ## Render the CAS presentation to PDF with speaker notes (docs/presentation/)
+	$(MARP) --html --pdf --pdf-notes --theme-set $(SLIDES_THEME) --allow-local-files \
+		$(SLIDES_MD) -o $(SLIDES_DIR)/flowhub-praesentation.pdf
