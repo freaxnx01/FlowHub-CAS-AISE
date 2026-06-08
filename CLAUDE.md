@@ -151,16 +151,14 @@ The repo follows a flat **`source/FlowHub.<Capability>/`** layout, not the Modul
 │   │   │   └── Shared/                ← reusable cross-page components (LifecycleBadge, HealthDot)
 │   │   ├── Stubs/                     ← Bogus-backed stub services for Block 2
 │   │   └── Program.cs
-│   ├── FlowHub.AI/                    ← MEAI-backed classifier (Block 3 Slice C, ADR 0004)
-│   ├── FlowHub.Integrations/          ← (placeholder — kept for legacy split, see ADR pending)
-│   ├── FlowHub.Persistence/           ← EF Core SQLite + EfCaptureService (Beta MVP, 2026-05-04)
-│   ├── FlowHub.Skills/                ← Wallabag + Vikunja ISkillIntegration impls (Beta MVP, 2026-05-04)
-│   └── FlowHub.Telegram/              ← (placeholder — Telegram channel)
-├── tests/
-│   ├── FlowHub.Web.ComponentTests/    ← bUnit + xunit + FluentAssertions + NSubstitute
-│   ├── FlowHub.Core.Tests/            ← (placeholder)
-│   ├── FlowHub.Integrations.Tests/    ← (placeholder)
-│   └── FlowHub.Skills.Tests/          ← (placeholder)
+│   ├── FlowHub.Api/                   ← REST endpoint definitions (in-process library, composed into Web)
+│   ├── FlowHub.AI/                    ← MEAI-backed classifier + embeddings (Block 3 Slice C, ADR 0004)
+│   ├── FlowHub.Persistence/           ← EF Core + PostgreSQL + pgvector, 6 repositories (ADR 0005)
+│   └── FlowHub.Skills/                ← Wallabag + Vikunja ISkillIntegration impls
+│   (FlowHub.Telegram and a generic Integrations layer are planned — not yet scaffolded; adapters live in FlowHub.Skills)
+├── tests/                            ← Core.Tests, Api.IntegrationTests, AI.IntegrationTests,
+│                                       Persistence.Tests (Testcontainers), Skills.Tests/.ContractTests/.IntegrationTests,
+│                                       Web.ComponentTests (bUnit), Web.E2ETests (Playwright)
 ├── poc/
 │   ├── FlowHub.AI.Classification/     ← standalone POC, has its own .sln
 │   └── FlowHub-CAS-AISE.sln           ← POC-only solution (not the root sln)

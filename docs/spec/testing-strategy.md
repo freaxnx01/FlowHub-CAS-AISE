@@ -44,11 +44,31 @@ graph TD
 > | This section / Block 3 | 3 | `Category!=AI` (default suite) | 99 |
 > | Block 4 Nachbereitung (`docs/insights/block-4.md`) | 4 | `FullyQualifiedName!~E2ETests` (incl. AI + integration) | 223 (6 skipped) |
 > | Block 5 Nachbereitung (`docs/insights/block-5.md`) | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | 171 (0 skipped) |
+> | **Submission build (this doc)** | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | **253 (0 skipped)** |
 >
-> **Canonical figures at submission (Block 5):** **171** offline tests green
-> (the default CI suite) and **223** green when AI + live-service integration
-> tests are included (E2E excluded). The lower historical numbers are earlier
-> snapshots, retained in the per-block Nachbereitungen as a progress record.
+> **Canonical figure at submission:** **253 offline tests green, 0 failed, 0
+> skipped** (the default CI suite), and the suite additionally passes the AI +
+> live-service integration tests when their categories are enabled (E2E excluded).
+> The lower historical numbers are earlier per-block snapshots, retained in the
+> Nachbereitungen as a progress record.
+
+### Verified test run (rendered evidence)
+
+Output of `just test` (`dotnet test FlowHub.slnx --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E"`), run **2026-06-08 against commit `0d52c3c`**:
+
+| Test project | Passed | Failed | Skipped |
+|---|---:|---:|---:|
+| FlowHub.Core.Tests | 4 | 0 | 0 |
+| FlowHub.Skills.ContractTests | 17 | 0 | 0 |
+| FlowHub.Api.IntegrationTests | 17 | 0 | 0 |
+| FlowHub.Skills.Tests | 20 | 0 | 0 |
+| FlowHub.Web.ComponentTests (bUnit) | 160 | 0 | 0 |
+| FlowHub.Persistence.Tests (Testcontainers, real PostgreSQL) | 35 | 0 | 0 |
+| **Total** | **253** | **0** | **0** |
+
+`Passed! - Failed: 0, …` for every assembly; the persistence suite runs against a
+real PostgreSQL container via Testcontainers (not InMemory). AI- and E2E-tagged
+suites are trait-gated and excluded from this default run.
 
 ### What's implemented
 
