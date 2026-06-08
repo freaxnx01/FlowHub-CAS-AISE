@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  checks: write        # test-reporter publishes a Check run with the test list
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -31,7 +35,48 @@ jobs:
             --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E" \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
-            --logger "trx;LogFileName=results.trx"
+            --logger "trx"
+
+      # --- Reporting -----------------------------------------------------------
+      # The summary below renders on the run page (Actions → this run). It covers
+      # the default CI suite only: unit + bUnit component + non-live integration.
+      # Deliberately excluded (run on demand, see docs/spec/testing-strategy.md):
+      #   Category=E2E      → FlowHub.Web.E2ETests (Playwright; needs Chromium + server)
+      #   Category=AI       → FlowHub.AI.IntegrationTests (needs live LLM keys)
+      #   Category=BetaSmoke→ live skill-integration smoke tests
+
+      - name: Scope note
+        if: always()
+        run: |
+          {
+            echo "## FlowHub CI — test & coverage"
+            echo ""
+            echo "**Suite:** unit + bUnit component + non-live integration."
+            echo "**Excluded (on-demand):** E2E (Playwright), AI-live, BetaSmoke — see \`docs/spec/testing-strategy.md\`."
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Test report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: dotnet tests
+          path: "coverage/**/*.trx"
+          reporter: dotnet-trx
+          fail-on-error: false
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          reportgenerator \
+            -reports:"coverage/**/coverage.cobertura.xml" \
+            -targetdir:"coverage/report" \
+            -reporttypes:"MarkdownSummaryGithub;Html" || exit 0
+          if [ -f coverage/report/SummaryGithub.md ]; then
+            cat coverage/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -45,4 +90,4 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: "**/*.trx"
+          path: "coverage/**/*.trx"
