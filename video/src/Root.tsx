@@ -6,11 +6,13 @@ import {TechnicalVideo} from './TechnicalVideo';
 
 const FPS = 30;
 
-const sumSeconds = (o: Record<string, number>) =>
-  Object.values(o).reduce((a, b) => a + b, 0);
+// Frames for one scene — MUST match the `f` helper used inside the compositions
+// (Math.max(1, Math.round(sec * fps))) so the composition length equals the
+// sum of the Series.Sequence lengths exactly, even for fractional-second durations.
+const sceneFrames = (seconds: number) => Math.max(1, Math.round(seconds * FPS));
 
-const totalFrames = (o: Record<string, number>) =>
-  Math.max(1, Math.round(sumSeconds(o) * FPS));
+const totalFrames = (scenes: Record<string, number>) =>
+  Object.values(scenes).reduce((sum, seconds) => sum + sceneFrames(seconds), 0);
 
 export const RemotionRoot: React.FC = () => (
   <>
