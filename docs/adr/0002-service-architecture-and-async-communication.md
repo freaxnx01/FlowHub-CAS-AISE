@@ -52,6 +52,17 @@ FlowHub stays a single deployable process. Each capability remains its own .NET 
 
 Cross-capability communication is via **interfaces declared in `FlowHub.Core`**, implemented by the appropriate capability project, and resolved through the .NET DI container. No project references between sibling capabilities; the only allowed inbound dependency is on `FlowHub.Core`.
 
+> **As built (Block 5 update).** The capability list above is the Block-2 plan; the
+> shipped solution (`FlowHub.slnx`) contains **six** projects — `FlowHub.Core`,
+> `FlowHub.AI`, `FlowHub.Skills`, `FlowHub.Persistence`, `FlowHub.Api`, `FlowHub.Web`.
+> Two refinements: (1) the Wallabag and Vikunja outbound adapters landed in
+> **`FlowHub.Skills`** as `ISkillIntegration` implementations — the separately
+> sketched `FlowHub.Integrations` project was not needed and remains an empty
+> placeholder (not in the solution). (2) `FlowHub.Telegram` likewise remains a
+> placeholder — the implemented capture channels are the Web Quick-Capture field
+> and the REST API. Both placeholder folders carry a `README.md` stating this.
+> See `docs/spec/system-context.md` → "Current state (Block 5)".
+
 This satisfies the Moodle learning objectives at the **logical** level: clear service boundaries, ports and adapters, dependency inversion, and a documented reason for each boundary. It does **not** introduce the operational complexity (separate deployments, network calls, distributed tracing across processes, eventual consistency between data stores) that a physical microservice split would require.
 
 ### 2. Introduce an async message bus for the Capture-Enrichment and Skill-Routing pipelines

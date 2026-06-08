@@ -4,12 +4,18 @@ Index of all ADRs for the FlowHub project.
 
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| [0001](0001-frontend-render-mode-and-architecture.md) | Frontend Render Mode and Architecture | Accepted | 2026-02-15 |
-| [0002](0002-service-architecture-and-async-communication.md) | Service Architecture and Async Communication | Accepted | 2026-03-01 |
-| [0003](0003-async-pipeline.md) | Async Pipeline (MassTransit) | Accepted | 2026-04-10 |
-| [0004](0004-ai-integration-in-services.md) | AI Integration — Provider Abstraction | Accepted | 2026-04-15 |
-| [0005](0005-persistence.md) | Persistence — EF Core + PostgreSQL | Accepted | 2026-05-01 |
+| [0001](0001-frontend-render-mode-and-architecture.md) | Frontend Render Mode and Architecture | Accepted | 2026-04-09 |
+| [0002](0002-service-architecture-and-async-communication.md) | Service Architecture and Async Communication | Accepted | 2026-04-17 |
+| [0003](0003-async-pipeline.md) | Async Pipeline (MassTransit) | Accepted | 2026-05-02 |
+| [0004](0004-ai-integration-in-services.md) | AI Integration — Provider Abstraction | Accepted | 2026-05-03 |
+| [0005](0005-persistence.md) | Persistence — EF Core + PostgreSQL | Accepted | 2026-05-04 |
 | [0006](0006-vector-search.md) | Vector Search — pgvector + Mistral Embeddings | Accepted | 2026-05-07 |
+| [0007](0007-llm-hosting.md) | LLM Hosting | Accepted | 2026-05-24 |
+| [0008](0008-logging-policy.md) | Logging Policy | Accepted | 2026-05-24 |
+| [0009](0009-telemetry-pii-policy.md) | Telemetry & PII Policy | Accepted | 2026-05-24 |
+
+> Dates match each ADR's own header. ADRs 0001–0006 are inlined in the submission
+> bundle; 0007–0009 live in this directory in the repository.
 
 ## Why ADRs
 

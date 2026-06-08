@@ -279,7 +279,7 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 | NF-02 | **Availability** — FlowHub runs as a self-hosted service in the operator's homelab | 99% uptime during operator's active hours (not 24/7 SLA) | Docker healthcheck in Block 5 |
 | NF-03 | **Concurrency** — system supports a single concurrent operator | 1 concurrent SignalR circuit without degradation | Architecture (Interactive Server, no horizontal scaling needed) |
 | NF-04 | **Security** — all pages require authentication | 0 pages accessible without a valid auth session | `[Authorize]` on pages + DevAuthHandler in dev, OIDC in prod |
-| NF-05 | **Testability** — all UI components testable in isolation | 100% of page components renderable in bUnit without a running server | bUnit test suite (currently 31 tests) |
+| NF-05 | **Testability** — all UI components testable in isolation | 100% of page components renderable in bUnit without a running server | bUnit component suite (31 at Block 2; grown to the Block-5 totals in `docs/spec/testing-strategy.md`) |
 | NF-06 | **Maintainability** — code compiles with zero warnings | `TreatWarningsAsErrors=true` in `Directory.Build.props` | `just build` in CI |
 | NF-07 | **Portability** — runs on Linux (homelab Docker) and WSL2 (dev) | `just run` works on both environments | Manual verification |
 | NF-08 | **Data privacy** — no Capture content leaves the operator's infrastructure | 0 external API calls for data processing (AI classification runs locally via Ollama in future blocks) | Architecture review |

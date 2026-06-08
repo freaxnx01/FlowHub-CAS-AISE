@@ -26,6 +26,14 @@ The pipeline covers exactly two flows: (1) capture submit triggers an enrichment
 
 This is narrower than the four-flow table sketched in earlier drafts. Flow 3 (a dedicated routing event separate from enrichment output) was dropped because it adds an unnecessary extra hop without giving the consumer more information — routing happens inline at the tail of the enrichment consumer, which already has the classification result. Flow 4 (manual retry as an async re-publish) is handled by a synchronous REST endpoint that re-publishes `CaptureCreated` for a given Capture id; it does not need its own event type or its own flow designation. The result is a simple two-event, two-consumer pipeline that is easy to test exhaustively and easy to explain in the PVA write-up.
 
+> **As built (Block 5 update).** Slice B is the two-consumer core described here.
+> Later slices added two more consumers around the same two events plus a fault
+> observer, so `FlowHub.Web/Pipeline/` now registers **five** message handlers:
+> `CaptureEnrichmentConsumer`, `SkillRoutingConsumer` (Slice B), plus
+> `CaptureEmbeddingConsumer` (vector search, ADR 0006),
+> `CaptureNotificationConsumer` (optional ntfy.sh), and `LifecycleFaultObserver`
+> (maps `Fault<T>` to lifecycle state). The two-event vocabulary is unchanged.
+
 ### 2. Event vocabulary: `CaptureCreated` and `CaptureClassified` only
 
 The final event set for Slice B is exactly two records:
@@ -203,7 +211,7 @@ An outbox pattern guarantees that database writes and message publishes happen a
 
 This ADR and its implementation directly address four Bewertungskriterien dimensions:
 
-- **Entwurf: Lösungsansatz und Architektur beschrieben** (max 7 pts) — the ASCII architecture diagram in the spec and the state-machine diagram in this ADR cover both bildlich and textuell.
+- **Entwurf: Lösungsansatz und Architektur beschrieben** (max 7 pts) — the ASCII architecture diagram in the spec, plus the capture-lifecycle state machine and the pipeline sequence diagrams in `docs/design/perspectives.md` and `docs/design/sequences/`, cover both bildlich and textuell.
 - **Programmierung: Code lesbar, nach Layer, Modulen und Sub-Systemen strukturiert** (max 7 pts) — `IClassifier` + `ISkillIntegration` ports in `FlowHub.Core`, consumers in `FlowHub.Web/Pipeline/`, transport config isolated to `Program.cs`.
 - **KI / Sub-Systeme als unabhängige Container deploybar** (max 5 pts) — `docker-compose.yml` demonstrates the multi-container topology; Decision 9 explains why the code stays single-process during development.
 - **KI / Intelligente und flexible Services** (max 6 pts) — the pipeline itself (async enrichment, classification port, fault observer, retry policy) is the worked example of an intelligent, failure-tolerant service.

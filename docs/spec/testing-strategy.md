@@ -33,6 +33,23 @@ graph TD
 
 ## Current State (Block 3 — through Slice C)
 
+> **Reading the test counts across this submission.** Different documents quote
+> different totals because each is a **per-block, per-filter snapshot**, not a
+> contradiction. The suite grew block by block, and the number depends on which
+> `dotnet test` filter is applied:
+>
+> | Where | Block | Filter | Count |
+> |---|---|---|---|
+> | Block 1/2 Nachbereitung | 1–2 | bUnit components only | 31 |
+> | This section / Block 3 | 3 | `Category!=AI` (default suite) | 99 |
+> | Block 4 Nachbereitung (`docs/insights/block-4.md`) | 4 | `FullyQualifiedName!~E2ETests` (incl. AI + integration) | 223 (6 skipped) |
+> | Block 5 Nachbereitung (`docs/insights/block-5.md`) | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | 171 (0 skipped) |
+>
+> **Canonical figures at submission (Block 5):** **171** offline tests green
+> (the default CI suite) and **223** green when AI + live-service integration
+> tests are included (E2E excluded). The lower historical numbers are earlier
+> snapshots, retained in the per-block Nachbereitungen as a progress record.
+
 ### What's implemented
 
 - **99 default-suite tests** passing on `just test` (excluding `Category=AI`):
