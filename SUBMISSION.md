@@ -111,7 +111,7 @@ Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Pr
 
 - [Bewertungskriterien (Moodle-Rubric)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Organisation/Bewertungskriterien.md) — kanonische Quelle: 18 Items, 5 Buckets, max. 100 Punkte
 - Selbst-Check pro Block: jeweils im unteren Abschnitt der Block-Nachbereitung (siehe 3.4) als Checkliste mit Punktgewichtung
-- **N/A-Hinweis:** Das Quarkus-/Jakarta-EE-Programmierkriterium (max. 10 Pkt.) ist für FlowHub bewusst nicht anwendbar — der Stack ist .NET 10 / ASP.NET Core; Begründung in den Block-Nachbereitungen vermerkt.
+- **Quarkus-/Jakarta-EE-Kriterium (max. 10 Pkt.):** Die *Java-spezifischen* Ausprägungen (Quarkus-Runtime, CDI, GraalVM) sind beim .NET-10-/ASP.NET-Core-Stack nicht anwendbar. Die vom Kriterium ebenfalls adressierten **Konzepte moderner Applikationen** (DI, REST, ORM, Config, Health/Metrics, async & Messaging, Fehlertoleranz, native Container, Testbarkeit) sind jedoch vollständig im .NET-Äquivalent umgesetzt — siehe das Konzept-Mapping mit Nachweisen in [`docs/spec/modern-app-concepts.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/modern-app-concepts.md). Konservative Punktebasis: 90 (Kriterium ausgeklammert); das Mapping ist die Grundlage für eine etwaige Teilbewertung.
 
 ### 3.7 Knowledge Base (Hintergrund)
 

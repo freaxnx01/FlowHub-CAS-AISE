@@ -39,6 +39,7 @@ FILES=(
   "2|Non-functional requirements (SMART)|docs/spec/nfa.md"
   "2|Acceptance criteria|docs/spec/acceptance-criteria.md"
   "2|Testing strategy|docs/spec/testing-strategy.md"
+  "2|Modern application concepts (Quarkus/Jakarta-EE → .NET mapping)|docs/spec/modern-app-concepts.md"
   "2|Database model — entities|docs/design/db/entities.md"
   "2|Database model — ER diagram|docs/design/db/er.md"
 
