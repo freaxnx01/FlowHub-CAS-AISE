@@ -5,6 +5,7 @@ export const meta = {
   phases: [
     { title: 'Build', detail: 'regenerate SUBMISSION + bundle PDFs, extract text from the real PDFs' },
     { title: 'Examine', detail: '5 rubric-bucket examiners + 1 live-demo examiner, in parallel' },
+    { title: 'Architecture', detail: 'deep architecture lenses (focus=architecture only): ADRs, structure fidelity, behavior/interaction views, deployment topology, NFR alignment' },
     { title: 'Skeptic', detail: 'adversarial pass — challenge over-generous scores per bucket' },
     { title: 'Verdict', detail: 'aggregate to a grade sheet (/90), defense questions, ranked gaps' },
   ],
@@ -15,6 +16,11 @@ const stamp   = (args && args.stamp)  || 'latest'           // e.g. "2026-06-07T
 const dateStr = (args && args.date)   || 'unknown-date'     // e.g. "2026-06-07"
 const commit  = (args && args.commit) || 'unknown-commit'
 const demoUrl = (args && args.demoUrl) || 'https://demo.flowhub.freaxnx01.ch'
+// focus: 'balanced' (default) grades all buckets evenly; 'architecture' adds a
+// deep architecture-lens phase and tells the design/structure examiners to be
+// extra rigorous. Always still produces the full /90 grade sheet (comparable).
+const focus   = (args && args.focus)  || 'balanced'
+const archFocus = focus === 'architecture'
 
 const RUBRIC      = 'vault/Organisation/Bewertungskriterien.md'
 const WORK        = 'tools/build/examiner-sim'
@@ -169,6 +175,61 @@ const BUCKETS = [
   },
 ]
 
+// ── Architecture deep-dive lenses (focus === 'architecture' only) ─────────────
+const ARCH_SCHEMA = {
+  type: 'object',
+  required: ['lens', 'rating', 'strengths', 'weaknesses', 'risks', 'evidence', 'recommendations'],
+  properties: {
+    lens:            { type: 'string' },
+    rating:          { type: 'string', description: 'strong | adequate | weak — the examiner verdict for this lens' },
+    strengths:       { type: 'array', items: { type: 'string' } },
+    weaknesses:      { type: 'array', items: { type: 'string' } },
+    risks:           { type: 'array', items: { type: 'string' }, description: 'architectural risks an examiner would probe' },
+    evidence:        { type: 'array', items: { type: 'string' }, description: 'concrete citations: ADR id, diagram, source path, bundle page' },
+    recommendations: { type: 'array', items: { type: 'string' } },
+    rubricImpact:    { type: 'string', description: 'which rubric items this lens informs (Entwurf, Programmierung-structure, KI-Sub-Systeme)' },
+  },
+}
+const ARCH_LENSES = [
+  {
+    key: 'adr-quality',
+    title: 'ADR coherence & decision quality',
+    prompt: 'Read every ADR (docs/adr/0001..0006). For each: is the Context/Decision/Consequences/Alternatives structure complete, are the alternatives real and weighed, and — critically — is the decision actually reflected in the code and the rest of the docs (no drift)? Flag any ADR that is aspirational vs implemented. Assess the modular-monolith decision (ADR 0002) and the async-pipeline decision (ADR 0003) hardest.',
+    read: ['docs/adr', 'source/FlowHub.slnx', 'docker-compose.yml'],
+  },
+  {
+    key: 'structure-fidelity',
+    title: 'Documented architecture vs actual code structure',
+    prompt: 'Compare the documented architecture (C4 diagrams, hexagonal layering, modular monolith, the FlowHub.<Capability> split) against the ACTUAL source tree. Open FlowHub.slnx and the source/ projects. Verify: driving/driven ports live in FlowHub.Core, adapters in Persistence/Skills/AI, no cross-module project refs, DI registration per module. Call out placeholder/empty projects (e.g. FlowHub.Telegram, FlowHub.Integrations) that are advertised as layers but not implemented, and any layer-leakage (EF types in Core, etc.).',
+    read: ['source', 'source/FlowHub.Core', 'source/FlowHub.Persistence', 'CLAUDE.md'],
+  },
+  {
+    key: 'behavior-interaction',
+    title: 'Behavioral & interaction perspectives',
+    prompt: 'The Entwurf rubric demands Struktur AND Verhalten AND Interaktion. Structure is well covered; scrutinize the other two. Is there a rendered sequence diagram (Capture→Classify→Route), a state machine for the capture lifecycle (Raw→Classified→Routed/Unhandled/Orphan), and an activity/async view (ADR 0003 pipeline)? Distinguish prose/tables from actual rendered diagrams IN THE BUNDLE. Identify exactly what behavioral/interaction artifact is missing and what it would take to render it into the bundle.',
+    read: ['docs/adr/0003-async-pipeline.md', 'docs/projektbeschreibung', 'docs/design', 'docs/spec/use-cases.md'],
+  },
+  {
+    key: 'deployment-topology',
+    title: 'Deployment topology & sub-system independence',
+    prompt: 'Assess the runtime topology against "Sub-Systeme unabhängig als Container verteilt und betrieben". Read docker-compose.yml, the demo overlay, the Dockerfile, and the release CI. Which images are first-party and independently built/pushed/scaled vs which are attached backing services (postgres/rabbitmq/prometheus/grafana) vs which are the same codebase (web + migrations init-job)? Be precise about what genuine decomposition exists today, and what changing it to true microservices would cost — and whether that is even the right call given the deliberate modular-monolith decision. This is the lens where the submission is weakest; be exact.',
+    read: ['docker-compose.yml', 'demo', '.github/workflows', 'docs/adr/0002-service-architecture-and-async-communication.md'],
+  },
+  {
+    key: 'nfr-crosscutting',
+    title: 'NFR ↔ architecture alignment & cross-cutting concerns',
+    prompt: 'Do the architecture decisions actually satisfy the SMART non-functional requirements, and are cross-cutting concerns architected (not bolted on)? Check: observability (OpenTelemetry/Prometheus/Grafana, health endpoints), error contract (RFC 9457 ProblemDetails consistency), resilience/fallback (AiClassifier→KeywordClassifier, cost guards), config/secrets (12-factor, env vars), data residency / AI-transparency NFRs. Map each major NFR to the architectural mechanism that delivers it, and flag NFRs with no architectural backing.',
+    read: ['docs/spec/nfa.md', 'docs/adr/0004-ai-integration-in-services.md', 'source/FlowHub.AI', 'docs/ci-cd.md'],
+  },
+]
+const archPrompt = (L) => [
+  'You are a senior software architect acting as the CAS-AISE examiner, doing a DEEP architecture review of the FlowHub Projektarbeit. Your single lens: ' + L.title + '.',
+  '',
+  L.prompt,
+  '',
+  'Ground every claim in evidence. Primary source is the real rendered bundle text at ' + BUNDLE_TXT + ' (grep it), but for architecture you SHOULD also open the actual repo artifacts: ' + L.read.join(', ') + '. Distinguish what is documented from what is implemented from what is merely asserted. Be rigorous and specific — this is an architecture deep-dive, not a checklist. Return the structured finding.',
+].join('\n')
+
 // ════════════════════════════════════════════════════════════════════════════
 // Phase 0 — Build the real artifacts and extract their text
 // ════════════════════════════════════════════════════════════════════════════
@@ -199,9 +260,10 @@ const build = await agent(
 const effStamp  = (build && build.stamp)  || stamp
 const effDate   = (build && build.date)   || dateStr
 const effCommit = (build && build.commit) || commit
-const REPORT    = 'nachbereitung/examiner-sim/report-' + effStamp + '.md'
+const focusSuffix = archFocus ? '-architecture' : ''
+const REPORT    = 'nachbereitung/examiner-sim/report-' + effStamp + focusSuffix + '.md'
 
-log('Build: ' + (build && build.built ? 'PDFs rebuilt (' + build.bundlePages + 'p) @ ' + effCommit : 'BUILD ISSUE — see report'))
+log('Build: ' + (build && build.built ? 'PDFs rebuilt (' + build.bundlePages + 'p) @ ' + effCommit : 'BUILD ISSUE — see report') + ' [focus=' + focus + ']')
 
 // ════════════════════════════════════════════════════════════════════════════
 // Phase 1 — Examine (5 rubric buckets in a verify-pipeline) + live demo (parallel)
@@ -232,6 +294,12 @@ const demoPromise = agent(
   { label: 'examine:demo', phase: 'Examine', schema: DEMO_SCHEMA },
 )
 
+// Architecture deep-dive lenses run concurrently with the bucket pipeline,
+// only when focus === 'architecture'. They feed the verdict, not the /90 totals.
+const archPromise = archFocus
+  ? parallel(ARCH_LENSES.map((L) => () => agent(archPrompt(L), { label: 'arch:' + L.key, phase: 'Architecture', schema: ARCH_SCHEMA })))
+  : Promise.resolve([])
+
 const examinePrompt = (b) => [
   'You are a strict, fair CAS-AISE examiner grading the FlowHub Projektarbeit submission. You are responsible ONLY for the rubric bucket: "' + b.key + '" (max ' + b.max + ' points).',
   b.note ? ('NOTE: ' + b.note) : '',
@@ -243,6 +311,9 @@ const examinePrompt = (b) => [
   '  - Primary source: the extracted text of the real bundle PDF at ' + BUNDLE_TXT + ' (grep/Read it). This is the single PDF uploaded to Moodle; if content is absent from the bundle it effectively does not count, even if it exists elsewhere in the repo.',
   '  - You MAY also open the underlying repo files for depth/cross-check: ' + b.read.join(', ') + '.',
   '',
+  (archFocus && (b.key === 'Entwurf' || b.key === 'Programmierung' || b.key.startsWith('KI')))
+    ? 'ARCHITECTURE-FOCUS RUN: be extra rigorous on architectural substance. Separate documented-from-implemented; distinguish rendered diagrams from prose; verify the C4/hexagonal/modular-monolith claims against the actual source tree; do not award structure points for placeholder/empty projects. A dedicated architecture panel is also reviewing — your bucket scoring must be defensible against it.'
+    : '',
   'For each item: choose the single best-supported discrete level on its scale, justify it in the examiner voice, cite concrete evidence (section/heading/page in the bundle), and list what is missing to reach the next level. Do not invent evidence. Do not be a grade-inflator: award the top level only if the criterion is genuinely "vollständig bzw. korrekt". Sum the bucket. Return the structured result.',
 ].filter(Boolean).join('\n')
 
@@ -265,7 +336,9 @@ const graded = await pipeline(
 )
 
 const demo = await demoPromise
+const archFindings = (await archPromise).filter(Boolean)
 const buckets = graded.filter(Boolean)
+if (archFocus) log('Architecture lenses complete: ' + archFindings.length + '/' + ARCH_LENSES.length)
 
 // ════════════════════════════════════════════════════════════════════════════
 // Phase 2 — Verdict: aggregate into the grade sheet and write the report
@@ -285,6 +358,9 @@ const verdict = await agent(
     'Live demo examination:',
     JSON.stringify(demo, null, 2),
     '',
+    archFocus
+      ? 'ARCHITECTURE DEEP-DIVE findings (this is an architecture-focus run — weight these heavily and devote a dedicated report section to them):\n' + JSON.stringify(archFindings, null, 2)
+      : '',
     'Rules:',
     '- Max achievable is 90 (Quarkus/Jakarta-EE item excluded for the .NET stack — state this explicitly).',
     '- For each item, choose a FINAL awarded value: start from the first examiner, and where the skeptic raised a well-founded dispute, move toward the skeptic. Show both the first-pass and final value.',
@@ -292,13 +368,16 @@ const verdict = await agent(
     '- If the build step reported warnings or built=false, reflect that as real risk (a broken/incomplete bundle PDF is what the examiner would actually receive).',
     '',
     'Write a Markdown report to ' + REPORT + ' (mkdir -p its directory first) with these sections:',
-    '  1. Title + run metadata (date, commit, demo URL, bundle pages).',
+    '  1. Title (note focus=' + focus + ') + run metadata (date, commit, demo URL, bundle pages).',
     '  2. Overall result: FINAL score X / 90, plus a one-line grade band and a 3-4 sentence examiner summary.',
     '  3. Per-bucket table: bucket | first-pass | final | max.',
     '  4. Per-item detail table for every rubric item: item | scale | first-pass | final | justification | key evidence | gap-to-next-level.',
     '  5. Live demo walkthrough: what was submitted, how it was classified, rate-limit/embeddings/reset posture, screenshot links (' + SHOTS + '), and issues.',
-    '  6. Top gaps ranked by point-leverage (where the cheapest points are).',
-    '  7. Defense questions: the 8-12 sharpest questions a real examiner would ask in the oral defense, grouped by bucket.',
+    archFocus
+      ? '  5b. ARCHITECTURE DEEP-DIVE (the centerpiece of this run): one subsection per lens (ADR quality, structure fidelity, behavior/interaction, deployment topology, NFR alignment) with rating, key strengths, weaknesses, risks, evidence and recommendations. Then an "Architecture verdict" paragraph and a prioritized architecture-improvement roadmap.'
+      : '',
+    '  6. Top gaps ranked by point-leverage (where the cheapest points are).' + (archFocus ? ' Call out which are architectural.' : ''),
+    '  7. Defense questions: the 8-12 sharpest questions a real examiner would ask in the oral defense, grouped by bucket' + (archFocus ? ' — with an extra architecture-defense block (modular-monolith trade-off, behavioral views, sub-system decomposition, NFR backing).' : '.'),
     '  8. Skeptic disputes: a short table of where scores were challenged and the resolution.',
     '',
     'After writing, return the structured summary.',
@@ -332,14 +411,16 @@ const verdict = await agent(
 log('Verdict: ' + (verdict ? verdict.totalAwarded + '/' + verdict.max + ' — ' + verdict.band : 'no verdict produced'))
 
 return {
-  stamp,
-  date: dateStr,
-  commit,
-  report: verdict && verdict.reportPath,
+  focus,
+  stamp: effStamp,
+  date: effDate,
+  commit: effCommit,
+  report: (verdict && verdict.reportPath) || REPORT,
   score: verdict && (verdict.totalAwarded + '/' + verdict.max),
   band: verdict && verdict.band,
   perBucket: verdict && verdict.perBucket,
   topGaps: verdict && verdict.topGaps,
+  archLenses: archFindings.length,
   buildOk: build && build.built,
   demoReachable: demo && demo.reachable,
 }

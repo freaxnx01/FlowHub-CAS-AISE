@@ -15,27 +15,38 @@ You are explicitly authorized to call the **Workflow** tool for this command.
 
 Steps to perform:
 
-1. **Gather run metadata** (do this in the main session before launching):
-   - `date` — today's date, `YYYY-MM-DD`.
-   - `stamp` — a filesystem-safe stamp for the report filename, `YYYY-MM-DDTHHMM`
-     (derive from the date + current time; if unknown, use the date alone).
-   - `commit` — `git rev-parse --short HEAD`.
-   - `demoUrl` — default `https://demo.flowhub.freaxnx01.ch` unless the user passes
-     another URL as an argument.
-   - A quick reachability probe of the demo (`curl -s -o /dev/null -w "%{http_code}"
-     <demoUrl>/health/live`) is fine to confirm it is up; the demo agent will do the
-     full round-trip itself.
+1. **Parse the argument** (everything after `/examiner-sim`):
+   - `focus` — `architecture` if the argument contains "arch" (any casing), else
+     `balanced` (the default). Architecture mode adds a deep architecture-lens
+     phase (ADRs, structure-vs-code fidelity, behavior/interaction views,
+     deployment topology, NFR alignment) and makes the design examiners stricter.
+   - `demoUrl` — any `http(s)://…` token in the argument overrides the default
+     `https://demo.flowhub.freaxnx01.ch`.
+   - Examples: `/examiner-sim` · `/examiner-sim architecture` ·
+     `/examiner-sim arch https://staging.example`.
 
-2. **Launch the workflow**, passing the metadata as `args`:
+2. **Gather run metadata** (optional — the workflow derives these itself in-run):
+   `commit` (`git rev-parse --short HEAD`), today's `date`, a `stamp`
+   (`YYYY-MM-DDTHHMM`). A quick `curl …/health/live` probe confirms the demo is up.
+
+3. **Launch the workflow**, passing `focus` (and `demoUrl` if overridden) as `args`:
 
    ```
-   Workflow({ name: "examiner-sim", args: { date, stamp, commit, demoUrl } })
+   Workflow({ name: "examiner-sim", args: { focus, demoUrl } })
    ```
+
+   IMPORTANT — args propagation: if the launched run reports back `focus` that does
+   NOT match what was requested (the top-level launcher dropped `args`), relaunch
+   through the in-process wrapper instead, which passes args reliably:
+   write a one-off script that calls
+   `workflow({ scriptPath: ".claude/workflows/examiner-sim.js" }, { focus, demoUrl })`
+   and run that. (See `tools/build/examiner-sim-arch-run.js` for the pattern.)
 
    The workflow itself: rebuilds `SUBMISSION.pdf` + `SUBMISSION-bundle.pdf`,
    extracts the real PDF text, runs five rubric-bucket examiners plus a live-demo
-   examiner in parallel, applies an adversarial skeptic pass, then writes a dated
-   grade sheet to `nachbereitung/examiner-sim/report-<stamp>.md`.
+   examiner in parallel (plus the architecture lenses when `focus=architecture`),
+   applies an adversarial skeptic pass, then writes a dated grade sheet to
+   `nachbereitung/examiner-sim/report-<stamp>[-architecture].md`.
 
 3. **When the workflow completes**, surface to the user:
    - The final score `X / 90` and grade band.
