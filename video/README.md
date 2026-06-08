@@ -1,8 +1,10 @@
 # FlowHub Explainer Videos
 
-Two ~90s German explainer videos (end-user + technical) built with Remotion,
+Two short German explainer videos (end-user + technical) built with Remotion,
 narrated by local Piper TTS, with a background music bed. Isolated from the
-.NET solution — its own Node toolchain.
+.NET solution — its own Node toolchain. Final length is driven by the narration:
+the committed placeholder `durations.json` renders ~34s / ~37s; real `npm run tts`
+output sets the true per-scene timing.
 
 ## One-time setup
 
