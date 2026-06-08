@@ -1,6 +1,6 @@
 FROM alpine:3.20
 
-RUN apk add --no-cache postgresql-client bash tzdata ca-certificates curl
+RUN apk add --no-cache postgresql-client bash tzdata ca-certificates curl jq
 
 COPY reset.sh /reset.sh
 COPY seed.sql /seed.sql

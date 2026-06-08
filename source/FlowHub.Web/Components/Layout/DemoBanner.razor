@@ -2,6 +2,17 @@
 
 <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Square="true" Dense="true" Class="ma-0">
     @BannerText
+    @if (!string.IsNullOrWhiteSpace(SkillBoardUrl))
+    {
+        <MudLink Href="@SkillBoardUrl"
+                 Target="_blank"
+                 rel="noopener noreferrer"
+                 Color="Color.Inherit"
+                 Underline="Underline.Always"
+                 Class="ml-1">
+            View routed tasks in Vikunja ↗
+        </MudLink>
+    }
     @if (!string.IsNullOrWhiteSpace(RepoUrl))
     {
         <MudLink Href="@RepoUrl"

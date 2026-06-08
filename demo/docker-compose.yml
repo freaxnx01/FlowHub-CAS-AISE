@@ -28,10 +28,10 @@ services:
       Ai__OpenRouter__Model: ${Ai__OpenRouter__Model:-google/gemma-4-31b-it:free}
       Ai__Anthropic__ApiKey: ""
       Ai__Anthropic__Model: ""
-      # Skill integrations UNSET — captures stop at Classified (no external writes).
-      Skills__Vikunja__BaseUrl: ""
-      Skills__Vikunja__ApiToken: ""
-      Skills__Vikunja__DefaultProjectId: ""
+      # Vikunja is LIVE in the demo: Skills__Vikunja__{BaseUrl,ApiToken,FallbackProjectId}
+      # + Demo__Vikunja__ShareUrl are injected at runtime from /bootstrap/vikunja.env
+      # (written by flowhub.vikunja-bootstrap) via the entrypoint wrapper below — they
+      # are intentionally NOT set here. Wallabag stays UNSET (URL captures stop at Unhandled).
       Skills__Wallabag__BaseUrl: ""
       Skills__Wallabag__ApiToken: ""
       # OIDC unset → DemoAuthHandler kicks in.
@@ -40,12 +40,20 @@ services:
       Auth__OIDC__ClientSecret: ""
       # Demo banner shown in the UI (read by FlowHub.Web layout).
       Demo__Mode: "true"
-      Demo__BannerText: "Public demo — try the quick-capture box (top): paste a URL, type 'todo: buy milk', or a note like 'The Matrix is a great movie' to see it classified. Data resets every 15 min; external skill-writes + search are disabled."
+      Demo__BannerText: "Public demo — try the quick-capture box (top): type 'todo: buy milk' to watch it classified and routed to a live Vikunja board, or a note like 'The Matrix is a great movie' to see AI classification. Data resets every 15 min; embeddings + Wallabag are disabled."
       Demo__RepoUrl: "https://github.com/freaxnx01/FlowHub-CAS-AISE"
       # Demo-only operator notifications to ntfy.sh (set via .env; dormant if unset).
       Demo__Notify__Ntfy__BaseUrl: ${Demo__Notify__Ntfy__BaseUrl:-}
       Demo__Notify__Ntfy__Topic: ${Demo__Notify__Ntfy__Topic:-}
       Demo__Notify__Ntfy__AccessToken: ${Demo__Notify__Ntfy__AccessToken:-}
+    # Source the bootstrap-written Vikunja config (token + project id + share url),
+    # then hand off to the normal app entrypoint. No-op if the file is absent.
+    entrypoint: ["/bin/sh", "-c", "set -a; [ -f /bootstrap/vikunja.env ] && . /bootstrap/vikunja.env; set +a; exec dotnet FlowHub.Web.dll"]
+    volumes:
+      - vikunja-bootstrap:/bootstrap:ro
+    depends_on:
+      flowhub.vikunja-bootstrap:
+        condition: service_completed_successfully
     labels:
       # Traefik route: demo.flowhub.freaxnx01.ch -> :5070
       - "traefik.enable=true"
@@ -86,6 +94,11 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: ${RABBITMQ_USER:-flowhub}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-dev-secret}
+      # Read-only access to the bootstrap-written Vikunja creds so each cycle can
+      # clear the demo board's tasks (best-effort; skipped if the file is absent).
+      VIKUNJA_ENV_FILE: /bootstrap/vikunja.env
+    volumes:
+      - vikunja-bootstrap:/bootstrap:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -94,6 +107,72 @@ services:
       flowhub.migrations:
         condition: service_completed_successfully
     restart: unless-stopped
+
+  # Vikunja runs as uid 1000 but a fresh named volume is root-owned — chown it first.
+  flowhub.vikunja-init:
+    image: alpine:3.20
+    command: ["sh", "-c", "mkdir -p /db && chown -R 1000:1000 /db"]
+    volumes:
+      - vikunja-db:/db
+    restart: "no"
+
+  # Demo Vikunja — a real, self-contained task backend so "todo:" captures route
+  # somewhere visible. sqlite-backed; user/project/public-share provisioned once by
+  # flowhub.vikunja-bootstrap. Tasks are cleared each reset cycle (the account stays).
+  vikunja:
+    image: ${VIKUNJA_IMAGE:-vikunja/vikunja:0.24.6}
+    depends_on:
+      flowhub.vikunja-init:
+        condition: service_completed_successfully
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: ${VIKUNJA_PUBLIC_URL:-https://vikunja.demo.flowhub.freaxnx01.ch}
+      # Fixed secret so login tokens survive container restarts (else random each boot).
+      VIKUNJA_SERVICE_JWTSECRET: ${VIKUNJA_JWT_SECRET:-flowhub-demo-vikunja-jwt-secret}
+      VIKUNJA_SERVICE_ENABLEREGISTRATION: "true"
+      VIKUNJA_DATABASE_TYPE: sqlite
+      VIKUNJA_DATABASE_PATH: /db/vikunja.db
+    volumes:
+      # Named volume at the image's default /db (owned by uid 1000 → writable).
+      # Uploaded files use the image's default ephemeral path — not needed for the demo.
+      - vikunja-db:/db
+    labels:
+      # Generic labels (overridden for VPS-DE in demo/docker-compose.vps.yml).
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-vikunja.rule=Host(`vikunja.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-vikunja.entrypoints=websecure"
+      - "traefik.http.routers.flowhub-vikunja.tls=true"
+      - "traefik.http.routers.flowhub-vikunja.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.flowhub-vikunja.middlewares=flowhub-vikunja-ratelimit@docker"
+      - "traefik.http.services.flowhub-vikunja.loadbalancer.server.port=3456"
+      # Lenient rate-limit — a single SPA page-load fans out many API calls.
+      - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.burst=200"
+      - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.period=1m"
+      - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.sourcecriterion.ipstrategy.depth=1"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}"
+    networks:
+      - default
+      - traefik_public
+    restart: unless-stopped
+
+  # One-shot: provisions the demo user, "Inbox" project, a long-lived token, and a
+  # public read-only link-share; writes /bootstrap/vikunja.env for web + reset.
+  flowhub.vikunja-bootstrap:
+    build:
+      context: demo/vikunja
+    image: flowhub-vikunja-bootstrap:local
+    environment:
+      VIKUNJA_API_URL: http://vikunja:3456/api/v1
+      VIKUNJA_PUBLIC_URL: ${VIKUNJA_PUBLIC_URL:-https://vikunja.demo.flowhub.freaxnx01.ch}
+      VIKUNJA_DEMO_USER: ${VIKUNJA_DEMO_USER:-flowhub}
+      VIKUNJA_DEMO_PASSWORD: ${VIKUNJA_DEMO_PASSWORD:-flowhub-demo}
+      VIKUNJA_DEMO_PROJECT: ${VIKUNJA_DEMO_PROJECT:-Inbox}
+      BOOTSTRAP_OUT: /bootstrap/vikunja.env
+    volumes:
+      - vikunja-bootstrap:/bootstrap
+    depends_on:
+      - vikunja
+    restart: "no"
 
   # Suppress public port exposure for backing services + observability stack;
   # internal compose network access is enough for the demo.
@@ -110,3 +189,9 @@ networks:
   traefik_public:
     external: true
     name: ${TRAEFIK_NETWORK:-traefik_public}
+
+volumes:
+  # Vikunja sqlite DB (persists across restarts; tasks cleared via API each cycle).
+  vikunja-db:
+  # Bootstrap-written vikunja.env, shared web ⇄ bootstrap ⇄ reset.
+  vikunja-bootstrap:

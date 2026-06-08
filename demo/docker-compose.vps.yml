@@ -24,3 +24,17 @@ services:
       - "traefik.http.middlewares.flowhub-demo-headers.headers.browserxssfilter=true"
       - "traefik.http.middlewares.flowhub-demo-headers.headers.referrerpolicy=strict-origin-when-cross-origin"
       - "traefik.docker.network=web"
+
+  vikunja:
+    labels: !override
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-vikunja.rule=Host(`vikunja.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-vikunja.entrypoints=web-secure"
+      - "traefik.http.routers.flowhub-vikunja.tls=true"
+      - "traefik.http.routers.flowhub-vikunja.tls.certresolver=default"
+      - "traefik.http.routers.flowhub-vikunja.middlewares=flowhub-vikunja-ratelimit@docker"
+      - "traefik.http.services.flowhub-vikunja.loadbalancer.server.port=3456"
+      - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.burst=200"
+      - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.period=1m"
+      - "traefik.docker.network=web"

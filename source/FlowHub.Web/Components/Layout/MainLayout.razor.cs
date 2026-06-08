@@ -30,4 +30,6 @@ public partial class MainLayout : LayoutComponentBase
         ?? "Public demo — data resets every 15 minutes. Skill writes + embeddings disabled.";
 
     private string? DemoRepoUrl => Configuration["Demo:RepoUrl"];
+
+    private string? DemoSkillBoardUrl => Configuration["Demo:Vikunja:ShareUrl"];
 }
