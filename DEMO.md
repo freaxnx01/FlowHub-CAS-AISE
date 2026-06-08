@@ -4,7 +4,7 @@ A fully open, rate-limited, self-resetting FlowHub instance — designed so the 
 
 - **URL (live):** <https://demo.flowhub.freaxnx01.ch>
 - **Status:** **Live** on VPS-DE (IONOS) — valid Let's Encrypt cert, OpenRouter Gemma classification active, data resets every 15 min.
-- **Note:** the live demo tracks `main`, which includes enhancements made **after** the graded submission tag `v0.1.0` (e.g. citation enrichment, one-click example chips). The graded submission is the `v0.1.0` stand, not the live demo.
+- **Note:** the live demo tracks `main`, which includes enhancements made **after** the graded submission tag `v0.1.0` (e.g. citation enrichment, one-click example chips, live Vikunja routing). The graded submission is the `v0.1.0` stand, not the live demo.
 - **Full runbook:** [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md)
 
 ## Posture at a glance
@@ -18,7 +18,7 @@ A fully open, rate-limited, self-resetting FlowHub instance — designed so the 
 | AI provider | `google/gemma-4-31b-it:free` on OpenRouter, dedicated key with **$1/mo hard cap** |
 | AI fallback | Automatic — `KeywordClassifier` takes over when Gemma 429s or quota exhausts |
 | Embeddings | **Disabled** in demo profile — `/api/v1/captures/search` returns 503 ProblemDetails (transparent posture, not hidden) |
-| Skill writes | **Disabled** — captures stop at `Classified`; dashboard shows `MatchedSkill` but no external Vikunja/Wallabag write happens |
+| Skill writes | **Vikunja: live** — `todo:` captures route to a self-contained demo Vikunja and appear as tasks (auto-provisioned, public read-only link-share, tasks cleared each reset). **Wallabag: disabled** — URL captures stop at `Unhandled`. |
 | Observability | Prometheus + Grafana not exposed publicly — internal metrics only |
 
 ## Repo layout
@@ -26,11 +26,17 @@ A fully open, rate-limited, self-resetting FlowHub instance — designed so the 
 ```
 demo/
 ├── docker-compose.yml      ← overlay layered on root docker-compose.yml
+├── docker-compose.vps.yml  ← VPS-DE Traefik label alignment (web-secure/default/web)
 ├── .env.example            ← only Ai__OpenRouter__ApiKey is operator-supplied
-└── reset/
-    ├── Dockerfile          ← Alpine + postgresql-client + bash
-    ├── reset.sh            ← sleep-loop every RESET_INTERVAL_SECONDS (default 900s)
-    └── seed.sql            ← 6 fixture captures spanning every LifecycleStage
+├── reset/
+│   ├── Dockerfile          ← Alpine + postgresql-client + bash + curl + jq
+│   ├── reset.sh            ← sleep-loop every RESET_INTERVAL_SECONDS; truncates Captures,
+│   │                          reseeds fixtures, purges queues, clears demo Vikunja tasks
+│   └── seed.sql            ← fixture captures spanning every LifecycleStage
+└── vikunja/
+    ├── Dockerfile          ← Alpine + curl + jq one-shot
+    └── bootstrap.sh        ← provisions demo user / Inbox project / long-lived token /
+                               public read-only link-share → writes /bootstrap/vikunja.env
 
 source/FlowHub.Web/Components/Layout/MainLayout.razor
     └── reads Demo:Mode + Demo:BannerText → renders an info-filled MudAlert

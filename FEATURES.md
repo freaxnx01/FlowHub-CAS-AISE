@@ -80,10 +80,11 @@
 - 🧪 **Self-resetting public demo** overlay — Traefik-fronted, fully open (`DemoAuthHandler`)
 - ✅ **Per-IP rate limiting** (10/min, burst 20) + security headers
 - ✅ **15-min data reset** sidecar (truncate + reseed fixtures + purge queues)
-- 🧪 Embeddings + skill writes **disabled** in demo (transparent 503 / stops at `Unhandled`); keyword fallback only
+- 🧪 Embeddings + Wallabag writes **disabled** in demo (transparent 503 / URL captures stop at `Unhandled`)
+- 🆕 **Live Vikunja routing** — `todo:` captures actually land as tasks on a self-contained demo Vikunja, viewable via a public read-only link-share (auto-provisioned; tasks cleared each reset cycle) (post-`v0.1.0`)
 - 🆕 One-click **example chips** in quick-capture (submit → toast → auto-open Captures) (post-`v0.1.0`)
 - 🆕 **ntfy.sh capture notifications** (operator alerts; dormant until configured) (post-`v0.1.0`)
-- 🆕 Demo banner **"Source on GitHub"** link (post-`v0.1.0`)
+- 🆕 Demo banner **"Source on GitHub"** + **"View routed tasks in Vikunja"** links (post-`v0.1.0`)
 
 ---
 
