@@ -112,23 +112,37 @@ each carries an unambiguous target and a stated way to verify it.
 ## NfA-P1: Personendaten-Residenz
 
 **Category:** Privacy & Compliance
-**Statement:** Capture-Inhalte (Body, URL, Metadaten) MÜSSEN auf vom Betreiber selbst betriebener Infrastruktur verarbeitet und persistiert werden. Outbound-Calls an Drittsysteme sind ausschliesslich für explizite Skill-Targets (Vikunja, Wallabag) zulässig; LLM-Inferenz erfolgt per Default lokal via Ollama.
-**Measurable:**
-1. Statisch: `dotnet list package` zeigt keinen Cloud-LLM-Client als transitive Default-Dependency. Cloud-LLM-Provider sind hinter `EmbeddingsOptions.Provider != "Local"` opt-in.
-2. Dynamisch: integration test `OutboundCallAuditTests` verifiziert, dass im Default-Profil kein HTTP-Request an `*.openai.com`, `*.anthropic.com` oder `api.cohere.ai` erfolgt.
-3. Doku: `docs/design/data-flow.md` enthält ein Sequenzdiagramm mit Legende, das Capture-Pfad → Klassifikation → Skill-Routing zeigt und Homelab-Boundary markiert.
-**Achievable:** Standard-Konfiguration in `source/FlowHub.Web/appsettings.json` setzt `Embeddings:Provider=Local`; Cloud-Provider erfordern bewusste Environment-Variable `Embeddings__Provider=OpenAI` + `Embeddings__ApiKey`.
-**Relevant:** GDPR Art. 2(2)(c) Haushaltsausnahme + CH revDSG bleiben nur tragfähig, solange Capture-Inhalte das Homelab nicht verlassen. Cloud-Opt-in dokumentiert die bewusste Abkehr von diesem Default und zwingt zu separater DPA-Betrachtung.
-**Time-bound:** Verifiziert bis Ende Block 5 — Outbound-Audit-Test grün in CI, Data-Flow-Diagramm im Submission-PDF, ADR LLM-Hosting gemerged.
+> **Status (Block 5): ZIEL — noch nicht umgesetzt.** Diese NfA beschreibt den
+> angestrebten Zustand, nicht den Abgabestand. Aktuell läuft die Klassifikation
+> über OpenRouter und die Embeddings über Mistral (Cloud) — Capture-Inhalte
+> verlassen für die KI-Inferenz heute also das Homelab, entgegen dem Ziel unten.
+> Es gibt **keinen** lokalen Ollama-Adapter und **keinen** `OutboundCallAuditTests`
+> (siehe ADR 0007 „As built"). Die Kriterien unten sind die Abnahmedefinition für
+> die spätere Umsetzung.
+
+**Statement (Ziel):** Capture-Inhalte (Body, URL, Metadaten) sollen auf vom Betreiber selbst betriebener Infrastruktur verarbeitet und persistiert werden. Outbound-Calls an Drittsysteme nur für explizite Skill-Targets (Vikunja, Wallabag); LLM-Inferenz im Zielzustand lokal via Ollama (ADR 0007).
+**Measurable (Abnahmedefinition, offen):**
+1. Statisch: `dotnet list package` zeigt keinen Cloud-LLM-Client als transitive Default-Dependency. *(heute nicht erfüllt — Cloud-Provider sind aktiver Default)*
+2. Dynamisch: integration test `OutboundCallAuditTests` verifiziert, dass im Default-Profil kein HTTP-Request an Cloud-LLM-Endpunkte erfolgt. *(Test noch nicht implementiert)*
+3. Doku: `docs/design/data-flow.md` zeigt Capture-Pfad → Klassifikation → Skill-Routing mit Homelab-Boundary. *(vorhanden)*
+**Achievable:** Erfordert einen lokalen `Local`/Ollama-Provider-Adapter in `FlowHub.AI` plus `Embeddings:Provider=Local` als Default — beides noch zu bauen.
+**Relevant:** GDPR Art. 2(2)(c) Haushaltsausnahme + CH revDSG bleiben nur tragfähig, solange Capture-Inhalte das Homelab nicht verlassen.
+**Time-bound:** **Offen — nach der CAS-Abgabe.** Bis dahin als bewusste, dokumentierte Lücke geführt (Cloud-Inferenz im Demo/Default).
 
 ## NfA-P2: KI-Transparenz (AI Act Art. 50)
 
 **Category:** Privacy & Compliance
-**Statement:** Jeder Capture, dessen `MatchedSkill` durch eine LLM-gestützte Klassifikation gesetzt wurde, MUSS in der UI sichtbar als "AI-classified" gekennzeichnet sein und im Datensatz die Klassifikations-Provenienz tragen (`ClassificationSource`, `ClassifiedAt`, optional `ConfidenceScore`).
-**Measurable:**
-1. UI: bUnit-Test `LifecycleBadgeTests.AiClassified_ShowsAiBadge` bestätigt, dass `LifecycleBadge` für `ClassificationSource = "AI"` das KI-Badge rendert.
-2. Datenmodell: `Capture` hat Spalten `ClassificationSource` (enum: `None | Heuristic | AI | Manual`), `ClassifiedAt`, `ConfidenceScore`; EF-Migration committed.
-3. API: `GET /api/captures/{id}` gibt diese Felder in der Response zurück.
-**Achievable:** Bereits vorhandener `LifecycleBadge`-Component wird um einen AI-Zweig erweitert; `IClassifier`-Implementierung in `FlowHub.AI` setzt `ClassificationSource` beim Schreiben des Resultats.
-**Relevant:** EU AI Act Art. 50 verpflichtet Anbieter / Betreiber von KI-Systemen, Nutzer:innen erkennbar zu machen, dass sie mit KI-Output interagieren. Minimal-Risk-Einstufung von FlowHub ist nur tragfähig, wenn diese Transparenzpflicht aktiv umgesetzt ist.
-**Time-bound:** Verifiziert bis Ende Block 5 — bUnit-Test grün, Migration angewandt, UI-Screenshot im Submission-PDF.
+> **Status (Block 5): ZIEL — noch nicht umgesetzt.** Es gibt aktuell **keine**
+> `ClassificationSource`/`ClassifiedAt`/`ConfidenceScore`-Spalten, **keine**
+> EF-Migration, **kein** AI-Badge in der UI und **keinen** Test
+> `LifecycleBadgeTests.AiClassified_ShowsAiBadge`. Die Kriterien unten sind die
+> Abnahmedefinition für die spätere Umsetzung, nicht der Abgabestand.
+
+**Statement (Ziel):** Jeder Capture, dessen `MatchedSkill` durch eine LLM-gestützte Klassifikation gesetzt wurde, soll in der UI sichtbar als "AI-classified" gekennzeichnet sein und die Klassifikations-Provenienz tragen (`ClassificationSource`, `ClassifiedAt`, optional `ConfidenceScore`).
+**Measurable (Abnahmedefinition, offen):**
+1. UI: bUnit-Test `LifecycleBadgeTests.AiClassified_ShowsAiBadge` rendert das KI-Badge. *(Test noch nicht implementiert)*
+2. Datenmodell: `Capture` hat Spalten `ClassificationSource` (enum: `None | Heuristic | AI | Manual`), `ClassifiedAt`, `ConfidenceScore`; EF-Migration committed. *(noch nicht vorhanden)*
+3. API: `GET /api/v1/captures/{id}` gibt diese Felder zurück. *(noch nicht vorhanden)*
+**Achievable:** Der vorhandene `LifecycleBadge`-Component wird um einen AI-Zweig erweitert; die `IClassifier`-Implementierung in `FlowHub.AI` setzt `ClassificationSource` — beides noch zu bauen.
+**Relevant:** EU AI Act Art. 50 verpflichtet Betreiber von KI-Systemen, KI-Output erkennbar zu machen.
+**Time-bound:** **Offen — nach der CAS-Abgabe.** Bis dahin als bewusste, dokumentierte Lücke geführt.

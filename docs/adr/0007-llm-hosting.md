@@ -1,6 +1,6 @@
 # ADR 0007 — LLM-Hosting: Lokal (Ollama) vs. Cloud (Anthropic/OpenRouter)
 
-- **Status:** Accepted
+- **Status:** Accepted (target) — **not yet implemented as the default; see "As built" note**
 - **Date:** 2026-05-24
 - **Block:** Block 5 (Deployment) — Nachbereitung
 - **Decider:** freax
@@ -29,6 +29,16 @@ Hosting-Frage.
 ---
 
 ## Decision
+
+> **As built (Block 5).** This ADR records the *target* hosting policy; it is **not
+> the state shipped for the CAS submission**. The implemented provider abstraction
+> exposes `{ Anthropic, OpenRouter }` (cloud) — there is **no** `Local`/Ollama
+> adapter yet, and the public demo runs classification on OpenRouter (Gemma) and
+> embeddings on Mistral. So today capture content **does** leave the homelab for AI
+> inference, the opposite of the local-by-default goal below. Local Ollama hosting
+> and the matching `OutboundCallAuditTests` (see NfA-P1) are **planned, not
+> implemented**. The decisions below are the intended design, retained as the
+> roadmap; NfA-P1 has been relabelled to reflect this honestly.
 
 ### 1. Default-Provider = lokales Ollama (`Embeddings__Provider=Local`)
 

@@ -111,6 +111,18 @@ default.
 
 ### 3. No Repository pattern layer; `EfCaptureService` is the `ICaptureService` adapter
 
+> **As built (Block 4/5 — decision reversed).** This Slice-1 stance was **not**
+> carried through. The implemented persistence layer **does** use the repository
+> pattern: six repository ports live in `FlowHub.Core`
+> (`ICaptureRepository`, `IChannelRepository`, `ISkillRepository`,
+> `IIntegrationRepository`, `ITagRepository`, `ISkillRunRepository`) with six
+> `Ef*Repository` implementations in `FlowHub.Persistence/Repositories/`.
+> `EfCaptureService` composes `ICaptureRepository` rather than touching
+> `FlowHubDbContext` directly. The six-entity model that landed in Block 4 made
+> per-aggregate repositories worth the ceremony (focused querying, cleaner
+> testability, no `DbContext` leakage into services). Treat the reasoning below
+> as the original argument, superseded by this note.
+
 The Block 4 Moodle Auftrag mentions "Repositories" as one of the standard ORM
 patterns. FlowHub deliberately does NOT introduce a separate repository interface
 between `ICaptureService` and `DbContext`. Reasons:
