@@ -5,6 +5,13 @@
 **Submission deadline:** **2026-07-04 24:00** (Moodle upload of `SUBMISSION-bundle.pdf`)
 **Last Block PVA still ahead:** Block 5 — Deployment, **2026-06-20**
 
+> **Post-submission update (2026-06-08):** This freeze governs the **`v0.1.0`** submission stand (tag
+> `v0.1.0`), which remains the frozen, graded artifact. Product/demo work has since resumed on `main`
+> (now ahead of the tag) — citation enrichment, public-demo enhancements (example chips, auto-refresh,
+> banner "Source" link), and dormant ntfy notifications. These are **post-submission product work**, not
+> part of the graded scope. The "out of scope / backlog" lists below describe the v0.1.0 scope; what's
+> shipped since is tracked in `FEATURES.md` (🆕 markers).
+
 ---
 
 ## Why this file exists

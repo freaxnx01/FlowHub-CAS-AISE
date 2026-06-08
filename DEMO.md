@@ -4,6 +4,7 @@ A fully open, rate-limited, self-resetting FlowHub instance — designed so the 
 
 - **URL (live):** <https://demo.flowhub.freaxnx01.ch>
 - **Status:** **Live** on VPS-DE (IONOS) — valid Let's Encrypt cert, OpenRouter Gemma classification active, data resets every 15 min.
+- **Note:** the live demo tracks `main`, which includes enhancements made **after** the graded submission tag `v0.1.0` (e.g. citation enrichment, one-click example chips). The graded submission is the `v0.1.0` stand, not the live demo.
 - **Full runbook:** [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md)
 
 ## Posture at a glance

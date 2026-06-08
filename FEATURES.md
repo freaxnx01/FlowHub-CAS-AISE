@@ -5,7 +5,10 @@
 > to the right downstream tool.
 
 **Status legend:** ✅ shipped · 🔌 shipped, config-gated (needs real keys/endpoints) ·
-🧪 shipped but disabled in the public demo by design · 🗺️ planned / backlog (post-CAS)
+🧪 shipped but disabled in the public demo by design · 🆕 shipped *after* the `v0.1.0` submission · 🗺️ planned / backlog
+
+> **Scope note:** the graded CAS submission is the **`v0.1.0`** tag. Items marked **🆕** landed on `main`
+> *after* that tag as ongoing product/demo work — they are **not** part of the graded scope.
 
 ---
 
@@ -27,7 +30,8 @@
 - 🔌 **Vikunja integration** — push captures as tasks / list items
 - 🔌 **Wallabag integration** — push read-later articles
 - ✅ **Outbound data minimization** — skill adapters send only tag + URL, never the Capture body
-- 🗺️ Capture **Enrichment** (fetch author/ISBN/preview before routing); paperless-ngx (DMS); Obsidian
+- 🆕 Capture **Enrichment** — quote → author + AI-fetched bio, shown on the capture detail (post-`v0.1.0`)
+- 🗺️ Further enrichers (book ISBN, link preview); paperless-ngx (DMS); Obsidian
 
 ## Search & Retrieval
 - 🔌 **Semantic / vector search** — `GET /api/v1/captures/search?q=…` over pgvector embeddings (cosine)
@@ -77,11 +81,14 @@
 - ✅ **Per-IP rate limiting** (10/min, burst 20) + security headers
 - ✅ **15-min data reset** sidecar (truncate + reseed fixtures + purge queues)
 - 🧪 Embeddings + skill writes **disabled** in demo (transparent 503 / stops at `Unhandled`); keyword fallback only
+- 🆕 One-click **example chips** in quick-capture (submit → toast → auto-open Captures) (post-`v0.1.0`)
+- 🆕 **ntfy.sh capture notifications** (operator alerts; dormant until configured) (post-`v0.1.0`)
+- 🆕 Demo banner **"Source on GitHub"** link (post-`v0.1.0`)
 
 ---
 
 ## Backlog (post-CAS product)
-🗺️ Capture Enrichment · web-search tooling (Brave/Tavily) · additional AI providers
+🗺️ web-search tooling (Brave/Tavily) · additional AI providers
 (self-hosted Gemma, Apertus, HF router) · full paperless-ngx · Telegram / Signal / Email
 channels · multi-user / RBAC
 
