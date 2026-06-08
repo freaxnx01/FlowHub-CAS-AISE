@@ -273,6 +273,16 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
 
 ### 6.1 Überblick
 
+> **Hinweis — Konzept-/Zielarchitektur, nicht Abgabestand.** Das folgende
+> Übersichtsbild zeigt die *angestrebte* Gesamtarchitektur und enthält bewusst
+> auch noch **nicht implementierte** Bausteine (z. B. Ollama-LLM, Telegram-Kanal,
+> Redis). Die tatsächlich gebaute, als-built-Architektur ist der **Modular
+> Monolith** aus sechs Projekten mit MassTransit-Pipeline — maßgeblich sind dafür
+> die C4-/Hexagonal-Diagramme in `docs/design/perspectives.md`, das
+> ER-Diagramm in `docs/design/db/er.md` und die ADRs (insb. ADR 0002/0003/0005,
+> jeweils mit „As built"-Notiz). Siehe auch `docs/spec/system-context.md`
+> → „Current state (Block 5)".
+
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 980" font-family="Segoe UI, Arial, sans-serif">
   <defs>
     <!-- Arrow marker -->

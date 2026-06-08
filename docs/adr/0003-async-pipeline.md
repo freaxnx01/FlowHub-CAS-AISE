@@ -254,6 +254,15 @@ When Block 5 lands RabbitMQ, MassTransit routes exhausted-retry messages to `<co
 ### Block 4: Persistence + Outbox
 
 - **Outbox pattern** — once `FlowHub.Persistence` lands with EF Core, wire `MassTransit.EntityFrameworkOutbox` so that `SaveChanges` and `Publish(CaptureCreated)` are atomic. This eliminates the lost-message window described above.
+
+  > **As built (Block 5 — residual risk, still open).** The `EntityFrameworkOutbox`
+  > was **not** wired, even though RabbitMQ is now the live transport. The
+  > lost-message window therefore still exists: if the process crashes between
+  > persisting a Capture and publishing `CaptureCreated`, that Capture stays at
+  > `Raw` and is never enriched. Current mitigation: the synchronous **manual
+  > retry** endpoint re-publishes `CaptureCreated` for a given Capture id, and the
+  > dashboard surfaces stuck captures. Wiring the outbox is the correct fix and is
+  > carried as a known, documented residual risk rather than an asserted feature.
 - **Revisit `IBus` factory pattern** — with a Scoped `ICaptureService` implementation backed by EF Core, `IPublishEndpoint` can be injected directly (both are Scoped); the `IBus` workaround in Decision 8 can be removed.
 - **Idempotency receiver** — RabbitMQ delivers at-least-once. Once persistence exists, add a `MessageDataRepository`-backed idempotency filter so that redelivered messages are no-ops rather than double-writes. The consumers SHOULD (but currently don't) look up by `CaptureId` before mutating state — this is a correctness gap noted here for Block 4.
 - **`FailureReason` sanitization** — `MarkOrphanAsync` and `MarkUnhandledAsync` accept a `reason` string that in the fault observer comes directly from `ExceptionInfo.Message`. Before persisting this string in a production DB, truncate it to a safe length (e.g. 500 chars) and strip any content that might contain sensitive operator-internal information (stack paths, connection strings). The in-memory stub has no persistence so the risk is low in Slice B.
@@ -262,6 +271,14 @@ When Block 5 lands RabbitMQ, MassTransit routes exhausted-retry messages to `<co
 
 - **RabbitMQ deployment** — `docker-compose.yml` (committed in Slice B) becomes the runtime default. Add `docker-compose.override.yml` for local secret injection. The `Bus__Transport=RabbitMq` / `Bus__RabbitMq__Host=rabbitmq` env vars are already wired in `Program.cs` from Decision 9.
 - **Docker Compose topology** — `flowhub.web` + `flowhub.api` + `rabbitmq`. The two app containers share the same bus because they share the same RabbitMQ instance. Whether `flowhub.api` also publishes or only consumes is a Block-5 decision.
+
+> **As built (Block 5 update).** The separate `flowhub.api` container above was
+> **not** built. `FlowHub.Api` shipped as an in-process **class library** composed
+> into the `flowhub.web` host (it registers the REST endpoints), so the running
+> topology is `flowhub.web` + `flowhub.migrations` (init-job) + backing services
+> (`postgres`, `rabbitmq`, `prometheus`, `grafana`). Only `flowhub-web` is built
+> and pushed on release. This is consistent with the Modular-Monolith decision
+> (ADR 0002): the API is a logical sub-system, not a separately deployed process.
 - **OIDC** — the dev-only `DevAuthHandler` is replaced with a real OIDC provider. This is orthogonal to the pipeline but shares the same Block-5 milestone.
 - **Observability** — Prometheus alert on `capture-enrichment_error_error` and `skill-routing_error_error` queue depths (see RabbitMQ ops note above). Grafana board tracking `LifecycleStage` distribution over time (how many captures reach `Routed` vs stay at `Orphan` / `Unhandled`). The OpenTelemetry integration in `FlowHub.Web/Program.cs` already exports traces and metrics — MassTransit's `UseOpenTelemetry()` extension makes pipeline spans appear automatically.
 
