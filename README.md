@@ -15,6 +15,22 @@ Built as the project work for **CAS AI-Assisted Software Engineering (AISE)** at
 
 ---
 
+## Features
+
+- **Capture** — app-bar quick-capture, REST API (`POST /api/v1/captures`), and file upload; any text/URL/file becomes a *Capture*.
+- **AI classification** — LLM classifier (Anthropic / OpenRouter via Microsoft.Extensions.AI) with keyword + URL heuristics as a graceful fallback; produces tags + a title.
+- **Skill routing** — classified captures route to *Skills* → *Integrations* (Wallabag, Vikunja); outbound payloads carry tag + URL only.
+- **Async pipeline** — MassTransit + RabbitMQ consumers (classify, enrich, embed) with per-consumer retry + dead-lettering.
+- **Semantic search** — pgvector embeddings + `GET /api/v1/captures/search`.
+- **Web UI** — Blazor (MudBlazor, Interactive Server): Dashboard, Captures list/detail, New Capture, Skills, Integrations.
+- **Persistence** — PostgreSQL + EF Core 10; migrations run as a separate init container (12-Factor XII).
+- **Ops & security** — `/health/*`, `/metrics` (Prometheus) + Grafana, OpenTelemetry, Serilog → stdout; OIDC (Authentik) or dev/demo auth; AI-transparency posture (EU AI Act).
+- **Deployment** — multi-stage Docker, full Compose stack, GitHub Actions (CI + tagged release → GHCR).
+
+Full feature list — including **post-`v0.1.0`** product enhancements (citation enrichment, demo example chips, ntfy notifications): **[`FEATURES.md`](FEATURES.md)**.
+
+---
+
 ## For a CAS reviewer who just cloned the repo
 
 You probably don't need to run anything to grade this. The submission document and its links cover every rubric item. If you *want* to verify a claim live, the commands below are enough.
