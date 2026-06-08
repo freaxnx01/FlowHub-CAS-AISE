@@ -271,7 +271,14 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 
 ---
 
-## Non-Functional Requirements (SMART)
+## Non-Functional Requirements — Quality-Attribute Catalogue (Block 2)
+
+> This is the original Block-2 quality-attribute table (each entry has a
+> measurable target + verification, but **not** a full five-dimension SMART
+> decomposition). The SMART-decomposed requirements are maintained in
+> [`nfa.md`](nfa.md) (`NfA-*`), which supersedes this table and maps the `NF-*`
+> ids to it. The `NF-*` numbers are kept here only as stable references from
+> existing acceptance criteria and use cases.
 
 | ID | Requirement | Measurable target | Verified by |
 |---|---|---|---|
