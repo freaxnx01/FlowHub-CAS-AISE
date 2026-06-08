@@ -21,12 +21,15 @@ const demoUrl = (args && args.demoUrl) || 'https://demo.flowhub.freaxnx01.ch'
 // extra rigorous. Always still produces the full /90 grade sheet (comparable).
 const focus   = (args && args.focus)  || 'balanced'
 const archFocus = focus === 'architecture'
+// repoDir: the checkout to grade. Default '.' = the workflow's current cwd.
+// Pass an absolute path (e.g. another worktree) to grade a different branch.
+const REPO    = (args && args.repoDir) || '.'
 
-const RUBRIC      = 'vault/Organisation/Bewertungskriterien.md'
-const WORK        = 'tools/build/examiner-sim'
+const RUBRIC      = REPO + '/vault/Organisation/Bewertungskriterien.md'
+const WORK        = REPO + '/tools/build/examiner-sim'
 const BUNDLE_TXT  = WORK + '/bundle.txt'
 const SUB_TXT     = WORK + '/submission.txt'
-const SHOTS       = 'nachbereitung/examiner-sim/screenshots'
+const SHOTS       = REPO + '/nachbereitung/examiner-sim/screenshots'
 // REPORT path + effective metadata are resolved AFTER the build agent runs,
 // so they use the freshly-derived commit/stamp/date even when args don't propagate.
 
@@ -227,7 +230,7 @@ const archPrompt = (L) => [
   '',
   L.prompt,
   '',
-  'Ground every claim in evidence. Primary source is the real rendered bundle text at ' + BUNDLE_TXT + ' (grep it), but for architecture you SHOULD also open the actual repo artifacts: ' + L.read.join(', ') + '. Distinguish what is documented from what is implemented from what is merely asserted. Be rigorous and specific — this is an architecture deep-dive, not a checklist. Return the structured finding.',
+  'The repository checkout you are grading is at: ' + REPO + ' (cd there for shell tools; use absolute paths). Ground every claim in evidence. Primary source is the real rendered bundle text at ' + BUNDLE_TXT + ' (grep it), but for architecture you SHOULD also open the actual repo artifacts: ' + L.read.map((p) => REPO + '/' + p).join(', ') + '. Distinguish what is documented from what is implemented from what is merely asserted. Be rigorous and specific — this is an architecture deep-dive, not a checklist. Return the structured finding.',
 ].join('\n')
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -236,7 +239,9 @@ const archPrompt = (L) => [
 phase('Build')
 const build = await agent(
   [
-    'You are the build step of an examiner simulation. The examiner must grade the REAL rendered submission PDFs, not the markdown sources. Do this from the repo root:',
+    'You are the build step of an examiner simulation. The examiner must grade the REAL rendered submission PDFs, not the markdown sources.',
+    'FIRST: cd into the repository checkout you are grading: ' + REPO + '  (all steps below run there; the extracted-text and report paths are given as absolute paths).',
+    'Then, from that repo root:',
     '',
     '1. Regenerate the real submission PDFs (these call the project puppeteer renderer):',
     '   just pdf-submission',
@@ -261,7 +266,7 @@ const effStamp  = (build && build.stamp)  || stamp
 const effDate   = (build && build.date)   || dateStr
 const effCommit = (build && build.commit) || commit
 const focusSuffix = archFocus ? '-architecture' : ''
-const REPORT    = 'nachbereitung/examiner-sim/report-' + effStamp + focusSuffix + '.md'
+const REPORT    = REPO + '/nachbereitung/examiner-sim/report-' + effStamp + focusSuffix + '.md'
 
 log('Build: ' + (build && build.built ? 'PDFs rebuilt (' + build.bundlePages + 'p) @ ' + effCommit : 'BUILD ISSUE — see report') + ' [focus=' + focus + ']')
 
@@ -304,12 +309,13 @@ const examinePrompt = (b) => [
   'You are a strict, fair CAS-AISE examiner grading the FlowHub Projektarbeit submission. You are responsible ONLY for the rubric bucket: "' + b.key + '" (max ' + b.max + ' points).',
   b.note ? ('NOTE: ' + b.note) : '',
   '',
+  'The repository checkout you are grading is at: ' + REPO + ' — use these absolute paths (cd there for shell tools).',
   'The canonical rubric is ' + RUBRIC + ' — open it and use the EXACT scales. Your items in this bucket:',
   b.items.map((i) => '  - ' + i).join('\n'),
   '',
   'Grade against the REAL rendered submission, exactly as the examiner receives it:',
   '  - Primary source: the extracted text of the real bundle PDF at ' + BUNDLE_TXT + ' (grep/Read it). This is the single PDF uploaded to Moodle; if content is absent from the bundle it effectively does not count, even if it exists elsewhere in the repo.',
-  '  - You MAY also open the underlying repo files for depth/cross-check: ' + b.read.join(', ') + '.',
+  '  - You MAY also open the underlying repo files for depth/cross-check: ' + b.read.map((p) => REPO + '/' + p).join(', ') + '.',
   '',
   (archFocus && (b.key === 'Entwurf' || b.key === 'Programmierung' || b.key.startsWith('KI')))
     ? 'ARCHITECTURE-FOCUS RUN: be extra rigorous on architectural substance. Separate documented-from-implemented; distinguish rendered diagrams from prose; verify the C4/hexagonal/modular-monolith claims against the actual source tree; do not award structure points for placeholder/empty projects. A dedicated architecture panel is also reviewing — your bucket scoring must be defensible against it.'
