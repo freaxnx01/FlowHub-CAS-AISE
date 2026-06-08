@@ -1,0 +1,18 @@
+{
+  "users": {
+    "hook": 5,
+    "problem": 6,
+    "solution": 5,
+    "demo": 8,
+    "benefits": 7,
+    "close": 3
+  },
+  "technical": {
+    "hook": 6,
+    "architecture": 6,
+    "airouting": 8,
+    "integrations": 7,
+    "stack": 7,
+    "close": 3
+  }
+}
