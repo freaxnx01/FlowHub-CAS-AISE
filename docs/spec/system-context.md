@@ -53,12 +53,22 @@ graph TD
 | FlowHub.Skills → Integrations | HTTP REST / git | Each Skill writes to one or more downstream services via their APIs |
 | FlowHub.Web → Authentik | OIDC (HTTPS) | Auth code flow; tokens in cookie; SignalR circuit reads cookie |
 
-## Current state (Block 2)
+## Current state (Block 5 — submission)
 
-- **Implemented:** FlowHub.Web + FlowHub.Core (6 pages, 3 stub services, DevAuthHandler)
-- **Placeholder:** FlowHub.AI, FlowHub.Skills, FlowHub.Telegram, FlowHub.Integrations, FlowHub.Persistence (empty project folders)
-- **Not yet wired:** Authentik OIDC (dev bypass only), Ollama, all downstream integrations
-- **No REST API yet** — the API for non-UI consumers (Telegram, external automation) lands in Block 3
+The solution (`FlowHub.slnx`) contains six implemented projects; two folders remain
+intentional, not-yet-implemented placeholders.
+
+- **Implemented (in the solution, with code):**
+  - `FlowHub.Web` — Blazor Web App (Interactive Server) + the REST API host
+  - `FlowHub.Core` — domain types and driving/driven ports
+  - `FlowHub.Api` — REST endpoint contracts for non-UI consumers
+  - `FlowHub.AI` — LLM-backed classifier behind the `IClassifier` port (provider abstraction + keyword fallback)
+  - `FlowHub.Persistence` — EF Core + PostgreSQL repositories and migrations
+  - `FlowHub.Skills` — Wallabag and Vikunja `ISkillIntegration` adapters
+- **Placeholder (folder only, not in the solution, planned for a later iteration):**
+  `FlowHub.Telegram`, `FlowHub.Integrations` — each carries a `README.md` describing its planned role.
+- **Not yet wired:** Authentik OIDC (dev bypass only), Ollama-hosted inference (see ADR 0007), the Telegram channel.
+- **REST API:** available since Block 3 (`/api/v1/captures`, exercised live on the public demo).
 
 ## Deployment context (Block 5, future)
 
