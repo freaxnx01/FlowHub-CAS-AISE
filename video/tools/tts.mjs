@@ -50,7 +50,11 @@ function durationSeconds(wav) {
   ])
     .toString()
     .trim();
-  return Math.round(parseFloat(out) * 100) / 100;
+  const seconds = parseFloat(out);
+  if (!Number.isFinite(seconds)) {
+    throw new Error(`ffprobe returned no usable duration for ${wav}: "${out}"`);
+  }
+  return Math.round(seconds * 100) / 100;
 }
 
 const durations = {};
@@ -58,6 +62,9 @@ for (const {key, file} of SCRIPTS) {
   const scenes = parseScenes(readFileSync(file, 'utf8'));
   durations[key] = {};
   for (const scene of scenes) {
+    if (scene.id in durations[key]) {
+      throw new Error(`Duplicate scene id "${scene.id}" in ${file}`);
+    }
     const wav = join(outDir, `${key}-${scene.id}.wav`);
     console.log(`TTS ${key}-${scene.id}: ${scene.text.slice(0, 60)}...`);
     execFileSync(PIPER, ['--model', MODEL, '--output_file', wav], {
