@@ -66,7 +66,7 @@ Offizielle Moodle-Rubrik für die Projektarbeit. **Source of truth** für alle B
 - 7 — überwiegend bzw. mehrheitlich
 - 10 — vollständig bzw. korrekt
 
-> **FlowHub-Kontext:** Stack-Mismatch — FlowHub ist .NET 10 / ASP.NET Core / Blazor / EF Core. Dieses Kriterium wird **nicht aktiv verfolgt**. Die generischen "modernen Konzepte" (DI, Configuration, OpenAPI, async/await, Testbarkeit) sind über das Stack-äquivalente .NET-Ökosystem ohnehin abgedeckt.
+> **FlowHub-Kontext:** Freie Stackwahl (in der PVA explizit bestätigt; Quarkus/Jakarta EE sind im Moodle-Auftrag nur Referenz-Stack, Lernziele stack-neutral). FlowHub ist .NET 10 / ASP.NET Core / Blazor / EF Core. Das Kriterium wird daher **über die .NET-Äquivalente erfüllt, nicht ausgeklammert** — die adressierten modernen Konzepte (DI, deklaratives REST, ORM, Config, Health/Metrics, async & Messaging, Fehlertoleranz, Container, Testbarkeit) sind vollständig umgesetzt und im Code nachgewiesen; siehe **`docs/spec/modern-app-concepts.md`**. Angestrebte Stufe **7–10**. Die im Folgenden weiterhin genannte „90/90"-Basis ist die konservative Untergrenze für den Fall einer strikt JVM-gebundenen Auslegung.
 
 **Programmierung: Sind die Erkenntnisse aus der Programmierung dokumentiert**
 - 0 — nicht bzw. kaum
