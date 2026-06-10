@@ -33,7 +33,7 @@ services:
       # (written by flowhub.vikunja-bootstrap) via the entrypoint wrapper below — they
       # are intentionally NOT set here. Wallabag stays UNSET (URL captures stop at Unhandled).
       Skills__Wallabag__BaseUrl: ""
-      Skills__Wallabag__ApiToken: ""
+      Skills__Wallabag__ClientId: ""
       # OIDC unset → DemoAuthHandler kicks in.
       Auth__OIDC__Authority: ""
       Auth__OIDC__ClientId: ""

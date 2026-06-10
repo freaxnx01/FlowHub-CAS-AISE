@@ -26,17 +26,27 @@ public static class SkillsServiceCollectionExtensions
         var section = configuration.GetSection(WallabagOptions.SectionName);
         var options = section.Get<WallabagOptions>() ?? new WallabagOptions();
 
-        if (string.IsNullOrWhiteSpace(options.BaseUrl) || string.IsNullOrWhiteSpace(options.ApiToken))
+        string? reason = null;
+        if (string.IsNullOrWhiteSpace(options.BaseUrl)) { reason = "missing-base-url"; }
+        else if (string.IsNullOrWhiteSpace(options.ClientId)) { reason = "missing-client-id"; }
+        else if (string.IsNullOrWhiteSpace(options.Username)) { reason = "missing-username"; }
+
+        if (reason is not null)
         {
-            services.AddSingleton(new SkillsRegistrationOutcome("Wallabag", Registered: false,
-                Reason: string.IsNullOrWhiteSpace(options.BaseUrl) ? "missing-base-url" : "missing-api-token"));
+            services.AddSingleton(new SkillsRegistrationOutcome("Wallabag", Registered: false, Reason: reason));
             return;
         }
 
         services.Configure<WallabagOptions>(section);
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddHttpClient<WallabagTokenProvider>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl!);
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
         services.AddHttpClient<WallabagSkillIntegration>(client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(options.BaseUrl!);
             client.Timeout = TimeSpan.FromSeconds(10);
         });
         services.AddSingleton<ISkillIntegration>(sp => sp.GetRequiredService<WallabagSkillIntegration>());
