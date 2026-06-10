@@ -17,4 +17,5 @@ public sealed record Capture(
     string? ExternalRef = null,
     string? VikunjaProject = null,
     string? EnrichmentDescription = null,
-    Attachment? Attachment = null);
+    Attachment? Attachment = null,
+    FlowHub.Core.Classification.ClassifierTrace? ClassifierTrace = null);
