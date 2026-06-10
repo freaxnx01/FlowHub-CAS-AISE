@@ -13,5 +13,6 @@ public interface IAttachmentStorage
     Task DeleteAsync(string relativePath, CancellationToken cancellationToken = default);
 
     /// <summary>Opens the stored bytes for reading. Caller disposes the stream.</summary>
+    /// <exception cref="System.IO.FileNotFoundException">Thrown when relativePath does not exist.</exception>
     Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken = default);
 }
