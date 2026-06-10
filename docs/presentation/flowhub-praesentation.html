@@ -14,7 +14,7 @@
 <p><strong>Andreas Imboden</strong> · CAS AI-Assisted Software Engineering · FFHS FS26</p>
 <p><em>Das Projekt — und die Erfahrung, es mit KI zu bauen</em></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="2" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="2" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="das-problem-capture-without-friction">Das Problem: Capture without friction</h2>
 <p>Der digitale Alltag produziert ständig kleine Informationsschnipsel:<br />
 ein Film den man schauen will, ein Artikel zum Lesen, das Foto einer Quittung.</p>
@@ -26,7 +26,7 @@ ein Film den man schauen will, ein Artikel zum Lesen, das Foto einer Quittung.</
 <p>Der Nutzer will <em>festhalten</em>, ohne im Moment zu entscheiden, <strong>wohin</strong> es gehört.</p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="3" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="3" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="die-idee-ein-eingang-ki-macht-den-rest">Die Idee: ein Eingang, KI macht den Rest</h2>
 <div class="cols">
 <div>
@@ -46,7 +46,7 @@ FlowHub <strong>erkennt</strong> den Input, <strong>kategorisiert</strong> ihn u
 automatisch an den richtigen Self-Hosted-Service im eigenen Homelab.</p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="4" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="4" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="konkret-das-skill-system">Konkret: das Skill-System</h2>
 <p>Jeder Input wird einem <strong>Skill</strong> zugewiesen — Erkennung über Keywords,<br />
 URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
@@ -90,12 +90,40 @@ URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
 <p>Unklar? → Der Bot <strong>fragt mit 2–3 Optionen zurück</strong> (Confidence-Score).</p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="5" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="5" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
+<h2 id="wiederfinden-semantische-suche">Wiederfinden: semantische Suche</h2>
+<p>Nicht nur reinwerfen — auch <strong>per Bedeutung wiederfinden</strong>, nicht per Stichwort.</p>
+<table>
+<thead>
+<tr>
+<th>Schritt</th>
+<th>Was passiert</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Query „alles zu Docker&quot;</td>
+<td>→ Embedding (Mistral <code>mistral-embed</code>, 1024 Dim.)</td>
+</tr>
+<tr>
+<td>pgvector-Suche</td>
+<td>HNSW · Cosine-Distanz · Sub-ms bei &lt; 1 Mio. Zeilen</td>
+</tr>
+<tr>
+<td>Treffer</td>
+<td>inhaltlich ähnliche Captures — auch ohne exaktes Wort</td>
+</tr>
+</tbody>
+</table>
+<p><code>GET /api/v1/captures/search?q=…</code> · Provider per Config tauschbar (OpenAI-kompatibel) · ohne Key → sauberes <code>503</code></p>
+<footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="6" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="architektur">Architektur</h2>
 <p><img src="../projektbeschreibung/FlowHub_Architecture-v2.svg" alt="" style="height:520px;" /></p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="6" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="7" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="tech-stack">Tech-Stack</h2>
 <table>
 <thead>
@@ -138,12 +166,12 @@ URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
 <p><em>Inkrementell über 5 Blöcke gebaut: Konzept → UI → Services/KI → Persistenz → Deployment.</em></p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-class="divider" data-theme="flowhub" lang="C" class="divider" data-marpit-pagination="7" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--class:divider;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-class="divider" data-theme="flowhub" lang="C" class="divider" data-marpit-pagination="8" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--class:divider;--theme:flowhub;" data-marpit-pagination-total="14">
 <h1 id="teil-2-bauen-mit-ki">Teil 2: Bauen mit KI</h1>
 <h2 id="wie-war-es-wirklich">Wie war es wirklich?</h2>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="8" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="9" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="nicht-%E2%80%9Eprompt-rein-code-raus--eine-pipeline">Nicht „Prompt rein, Code raus&quot; — eine Pipeline</h2>
 <p>Jeder grössere Baustein lief durch denselben strukturierten Ablauf:</p>
 <p><strong>Brainstorm → Spec → Plan → Subagent-Implementierung → 2-stufiges Review</strong></p>
@@ -155,7 +183,7 @@ URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
 </ol>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="9" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="10" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="ki-anteil-in-zahlen-block-4-persistenz">KI-Anteil in Zahlen (Block 4: Persistenz)</h2>
 <table>
 <thead>
@@ -216,7 +244,7 @@ URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
 Der Mensch-Anteil ist klein — aber <strong>hochwertig</strong>.</p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="10" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="11" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="wo-die-ki-gl%C3%A4nzt">Wo die KI glänzt</h2>
 <h3 id="boilerplate">Boilerplate</h3>
 <p>7 strukturgleiche <code>IEntityTypeConfiguration&lt;T&gt;</code>-Klassen — komplett generiert.<br />
@@ -231,7 +259,7 @@ Von Hand zeitintensiv und fehleranfällig.</p>
 </blockquote>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="11" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="12" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="wo-die-ki-scheitert">Wo die KI scheitert</h2>
 <p>Genau dort, wo <strong>Domänenverständnis</strong> oder <strong>Performance-Gespür</strong> nötig ist:</p>
 <ul>
@@ -243,7 +271,7 @@ Von Hand zeitintensiv und fehleranfällig.</p>
 </ul>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="12" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-theme="flowhub" lang="C" data-marpit-pagination="13" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="der-smoke-test-moment">Der Smoke-Test-Moment</h2>
 <p>Die KI schrieb den ganzen Deployment-Stack. Dann lief <strong>ein</strong> Befehl:<br />
 <code>make smoke-prod</code> — End-to-End-Probe des laufenden Stacks.</p>
@@ -261,7 +289,7 @@ Von Hand zeitintensiv und fehleranfällig.</p>
 </blockquote>
 <footer>FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-class="lead" data-theme="flowhub" lang="C" class="lead" data-marpit-pagination="13" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--class:lead;--theme:flowhub;" data-marpit-pagination-total="13">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden" data-class="lead" data-theme="flowhub" lang="C" class="lead" data-marpit-pagination="14" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden;--class:lead;--theme:flowhub;" data-marpit-pagination-total="14">
 <h2 id="fazit">Fazit</h2>
 <p><strong>KI ist ein starker Accelerator für Infrastruktur-Code</strong> —<br />
 Boilerplate, Migrations, Tests entstehen in Minuten.</p>
@@ -288,48 +316,53 @@ wird einer. Und alles läuft self-hosted in meinem eigenen Homelab – kein Clou
 Read-Later-Dienst. Ein Filmtitel landet in meiner Vikunja-Watchlist. Beides läuft heute.
 Weitere Ziele wie Kanban oder ein Dokumentenmanagement sind über dieselbe
 Skill-Schnittstelle angelegt – das ist die Roadmap. Wenn die KI unsicher ist, fragt
-der Bot kurz nach – zwei, drei Optionen, ein Tap. Das ist der Confidence-Score in Aktion.&quot;</p></div><div class="bespoke-marp-note" data-index="4" tabindex="0"><p>[~50 s] Nicht jede Box erklären – den Fluss zeigen.
+der Bot kurz nach – zwei, drei Optionen, ein Tap. Das ist der Confidence-Score in Aktion.&quot;</p></div><div class="bespoke-marp-note" data-index="4" tabindex="0"><p>[~40 s] Die zweite Hälfte der Idee: Reinwerfen ist nichts wert, wenn man nichts
+wiederfindet. Die Suche geht über die Bedeutung, nicht über das exakte Wort:
+Die Anfrage wird in dasselbe Embedding übersetzt wie die Captures — Mistral,
+1024 Dimensionen — und pgvector findet per HNSW und Cosine-Distanz die inhaltlich
+nächsten Treffer, in Sub-Millisekunden. Der Provider ist per Config tauschbar
+(OpenAI-kompatibel); ohne API-Key liefert die API sauber ein 503 statt zu raten.</p></div><div class="bespoke-marp-note" data-index="5" tabindex="0"><p>[~50 s] Nicht jede Box erklären – den Fluss zeigen.
 &quot;Von oben nach unten: Telegram-Input kommt rein. Das Skill-System in der Mitte
 entscheidet – unterstützt vom AI-Layer, der über Microsoft.Extensions.AI ein lokales
 Ollama-Modell oder als Fallback die Anthropic-API anspricht. Typsichere REST-Clients
 schreiben dann ins Homelab. Persistenz unten: PostgreSQL plus Redis. Sauber getrennte
 Schichten – das war von Anfang an das Ziel: Komplexität durch Architektur beherrschen,
 nicht durch Featuremenge.&quot;
-Falls das SVG nicht rendert: Pfad in flowhub-praesentation.md auf das exportierte PNG zeigen.</p></div><div class="bespoke-marp-note" data-index="5" tabindex="0"><p>[~40 s] Stack schnell, nicht vorlesen. Highlights setzen.
+Falls das SVG nicht rendert: Pfad in flowhub-praesentation.md auf das exportierte PNG zeigen.</p></div><div class="bespoke-marp-note" data-index="6" tabindex="0"><p>[~40 s] Stack schnell, nicht vorlesen. Highlights setzen.
 &quot;Durchgehend .NET 10. Frontend Blazor – ich brauchte kein separates JS-Framework.
 KI über Microsoft.Extensions.AI, das abstrahiert den Provider weg: lokales Ollama oder
 Anthropic, umschaltbar per Config. Persistenz Postgres mit pgvector für semantische
-Suche. Alles in Docker Compose. Gebaut wurde das inkrementell – ein Block pro Thema.&quot;</p></div><div class="bespoke-marp-note" data-index="6" tabindex="0"><p>[~10 s] Übergang. Tempo wechseln.
+Suche. Alles in Docker Compose. Gebaut wurde das inkrementell – ein Block pro Thema.&quot;</p></div><div class="bespoke-marp-note" data-index="7" tabindex="0"><p>[~10 s] Übergang. Tempo wechseln.
 &quot;Soviel zum Produkt. Jetzt der Teil, um den es in diesem CAS eigentlich geht:
-Wie war es, das mit KI zu bauen?&quot;</p></div><div class="bespoke-marp-note" data-index="7" tabindex="0"><p>[~55 s] Das ist der wichtigste konzeptionelle Punkt der Präsentation.
+Wie war es, das mit KI zu bauen?&quot;</p></div><div class="bespoke-marp-note" data-index="8" tabindex="0"><p>[~55 s] Das ist der wichtigste konzeptionelle Punkt der Präsentation.
 &quot;Der grösste Lerneffekt: Gute KI-Entwicklung ist NICHT 'Prompt rein, Code raus'.
 Es ist eine Pipeline. Erst brainstorme ich das Design – die KI zwingt mich, jede
 Entscheidung als A/B/C-Wahl explizit zu treffen statt zu schwafeln. Dann ein
 schriftliches Spec, dann ein Plan in test-first-Reihenfolge. Erst dann implementiert
 ein Subagent – pro Aufgabe ein frischer Kontext. Und nichts geht in main ohne zwei
 Reviews: stimmt es mit dem Spec, und ist die Qualität gut. Diese Struktur hat die KI
-davon abgehalten, unkontrolliert in die falsche Richtung zu laufen.&quot;</p></div><div class="bespoke-marp-note" data-index="8" tabindex="0"><p>[~45 s] Die Zahl wirken lassen, dann sofort relativieren.
+davon abgehalten, unkontrolliert in die falsche Richtung zu laufen.&quot;</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>[~45 s] Die Zahl wirken lassen, dann sofort relativieren.
 &quot;In Zahlen: rund 89 Prozent des Persistenz-Codes kamen von der KI. Über das ganze
 Projekt 85 bis 95 Prozent. Klingt nach 'die KI hat's gemacht'. Aber – und das ist der
 Punkt der nächsten zwei Folien – die verbleibenden 10 bis 15 Prozent Mensch waren genau
-die, die über Erfolg oder Desaster entscheiden.&quot;</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>[~45 s] Positiv, konkret.
+die, die über Erfolg oder Desaster entscheiden.&quot;</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>[~45 s] Positiv, konkret.
 &quot;Wo die KI brilliert: alles Repetitive und gut Spezifizierte. Sieben fast identische
 EF-Core-Konfigurationsklassen – generiert in Sekunden, fehlerfrei. Migrations, typsichere
 REST-Clients, CI-Pipelines. Und Tests: 16 Integrationstests gegen eine echte Postgres-
-Datenbank, alle grün beim ersten Lauf. Das ist der Beschleuniger-Effekt.&quot;</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>[~55 s] Ehrlich und spezifisch – das überzeugt die Dozenten am meisten.
+Datenbank, alle grün beim ersten Lauf. Das ist der Beschleuniger-Effekt.&quot;</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>[~55 s] Ehrlich und spezifisch – das überzeugt die Dozenten am meisten.
 &quot;Und wo scheitert sie? Überall, wo Domänenwissen oder Performance-Gespür zählt. Die KI
 schrieb eine Datenbankabfrage mit dem klassischen N+1-Problem – fällt nur im Review auf.
 Sie setzte alle Fremdschlüssel auf CASCADE DELETE; dass ein Audit-Trail erhalten bleiben
 muss, ist eine Domänen-Entscheidung, die sie nicht treffen konnte. Sie nahm veraltete
 Paket-Versionen, weil ihre Trainingsdaten den neuen Releases hinterherhinken. Und sie
-will ständig mehr Features bauen – Scope-Disziplin musste ich liefern.&quot;</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>[~50 s] Die beste Geschichte des Decks. Mit etwas Spannung erzählen.
+will ständig mehr Features bauen – Scope-Disziplin musste ich liefern.&quot;</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>[~50 s] Die beste Geschichte des Decks. Mit etwas Spannung erzählen.
 &quot;Mein liebster Moment: Die KI hatte den kompletten Deployment-Stack geschrieben. Sah gut
 aus. Dann schrieb ich – auch mit KI – einen Smoke-Test, der den echten Stack hochfährt
 und durchprobt. Erster Lauf: fünf echte Bugs. Ein fehlendes File, das den Build sprengt.
 Ein Casing-Fehler, durch den die Embeddings still nichts taten. Ein Crash beim Start.
 Alles latent, alles hätte die Abgabe blockiert. Die Lektion: KI schreibt den Code, aber
 eine Prüfung – idealerweise auch KI-gestützt – muss finden, was die KI übersieht.
-Der Mensch bleibt im Loop, als Reviewer.&quot;</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>[~35 s] Klar landen, dann Q&amp;A öffnen.
+Der Mensch bleibt im Loop, als Reviewer.&quot;</p></div><div class="bespoke-marp-note" data-index="13" tabindex="0"><p>[~35 s] Klar landen, dann Q&amp;A öffnen.
 &quot;Mein Fazit in einem Satz: KI ist ein starker Beschleuniger für Infrastruktur-Code, aber
 sie braucht menschliche Führung bei allem, was Architektur und Domäne berührt. Die Rolle
 hat sich verschoben – weg vom Zeile-für-Zeile-Tippen, hin zu Entwerfen, Lenken und

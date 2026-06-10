@@ -115,6 +115,29 @@ der Bot kurz nach – zwei, drei Optionen, ein Tap. Das ist der Confidence-Score
 
 ---
 
+## Wiederfinden: semantische Suche
+
+Nicht nur reinwerfen — auch **per Bedeutung wiederfinden**, nicht per Stichwort.
+
+| Schritt | Was passiert |
+|---|---|
+| Query „alles zu Docker" | → Embedding (Mistral `mistral-embed`, 1024 Dim.) |
+| pgvector-Suche | HNSW · Cosine-Distanz · Sub-ms bei < 1 Mio. Zeilen |
+| Treffer | inhaltlich ähnliche Captures — auch ohne exaktes Wort |
+
+`GET /api/v1/captures/search?q=…` · Provider per Config tauschbar (OpenAI-kompatibel) · ohne Key → sauberes `503`
+
+<!--
+[~40 s] Die zweite Hälfte der Idee: Reinwerfen ist nichts wert, wenn man nichts
+wiederfindet. Die Suche geht über die Bedeutung, nicht über das exakte Wort:
+Die Anfrage wird in dasselbe Embedding übersetzt wie die Captures — Mistral,
+1024 Dimensionen — und pgvector findet per HNSW und Cosine-Distanz die inhaltlich
+nächsten Treffer, in Sub-Millisekunden. Der Provider ist per Config tauschbar
+(OpenAI-kompatibel); ohne API-Key liefert die API sauber ein 503 statt zu raten.
+-->
+
+---
+
 ## Architektur
 
 ![h:520](../projektbeschreibung/FlowHub_Architecture-v2.svg)
