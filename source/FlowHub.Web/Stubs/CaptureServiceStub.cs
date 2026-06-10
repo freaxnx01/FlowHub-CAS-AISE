@@ -151,7 +151,7 @@ public sealed class CaptureServiceStub : ICaptureService
         return capture;
     }
 
-    public Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, string? enrichmentDescription = null, CancellationToken cancellationToken = default) =>
+    public Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, string? enrichmentDescription = null, FlowHub.Core.Classification.ClassifierTrace? trace = null, CancellationToken cancellationToken = default) =>
         ReplaceCapture(id, c => c with
         {
             Stage = LifecycleStage.Classified,
@@ -159,6 +159,7 @@ public sealed class CaptureServiceStub : ICaptureService
             Title = title ?? c.Title,
             VikunjaProject = vikunjaProject ?? c.VikunjaProject,
             EnrichmentDescription = enrichmentDescription ?? c.EnrichmentDescription,
+            ClassifierTrace = trace ?? c.ClassifierTrace,
         });
 
     public Task MarkRoutedAsync(Guid id, CancellationToken cancellationToken = default) =>

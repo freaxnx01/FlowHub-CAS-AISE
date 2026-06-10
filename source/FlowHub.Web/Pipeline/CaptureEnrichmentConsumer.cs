@@ -69,6 +69,7 @@ public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated
             result.Title,
             project,
             enrichment?.Description,
+            result.Trace,
             ct);
 
         await context.Publish(new CaptureClassified(

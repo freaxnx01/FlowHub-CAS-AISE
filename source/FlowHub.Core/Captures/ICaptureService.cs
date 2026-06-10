@@ -23,7 +23,7 @@ public interface ICaptureService
         AttachmentInput? attachment,
         CancellationToken cancellationToken = default);
 
-    Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, string? enrichmentDescription = null, CancellationToken cancellationToken = default);
+    Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, string? enrichmentDescription = null, FlowHub.Core.Classification.ClassifierTrace? trace = null, CancellationToken cancellationToken = default);
 
     Task MarkRoutedAsync(Guid id, CancellationToken cancellationToken = default);
 
