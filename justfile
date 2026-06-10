@@ -674,19 +674,6 @@ video-render:
 video: video-tts video-render
     @echo "✓ videos rendered to {{video_dir}}/out/"
 
-# Copy the rendered MP4s + poster frames into docs/videos/ (embedded in the README)
-[group('video')]
-video-publish:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    mkdir -p docs/videos
-    cp {{video_dir}}/out/flowhub-users.en.mp4 {{video_dir}}/out/flowhub-technical.en.mp4 docs/videos/
-    for key in users technical; do
-      {{video_ffmpeg_dir}}/ffmpeg -hide_banner -loglevel error -y -ss 1 \
-        -i {{video_dir}}/out/flowhub-$key.en.mp4 -frames:v 1 docs/videos/flowhub-$key.poster.png
-    done
-    echo "✓ published docs/videos/ (mp4s + posters)"
-
 # Remove rendered MP4s and generated narration wavs
 [group('video')]
 video-clean:

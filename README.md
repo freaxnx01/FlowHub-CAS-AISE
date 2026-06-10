@@ -35,28 +35,13 @@ Full feature list — including **post-`v0.1.0`** product enhancements (citation
 
 Two short, code-generated explainer videos (English narration). Built with Remotion + a local Piper voice — fully reproducible via `just video`; see [`video/`](video/).
 
-<table>
-<tr>
-<td width="50%" valign="top">
+**For everyone — what FlowHub does** (~46s)
 
-**For everyone** — what FlowHub does (~46s)
+https://github.com/user-attachments/assets/7e80b3a2-4c0f-4e92-9228-9ca2ea031031
 
-<video src="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-users.en.mp4" poster="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-users.poster.png" controls width="100%"></video>
+**Technical — how it's built** (~48s)
 
-▶︎ [flowhub-users.en.mp4](docs/videos/flowhub-users.en.mp4)
-
-</td>
-<td width="50%" valign="top">
-
-**Technical** — how it's built (~48s)
-
-<video src="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-technical.en.mp4" poster="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-technical.poster.png" controls width="100%"></video>
-
-▶︎ [flowhub-technical.en.mp4](docs/videos/flowhub-technical.en.mp4)
-
-</td>
-</tr>
-</table>
+https://github.com/user-attachments/assets/c000f88a-d31f-4ef4-a5a8-3ad84d4f4828
 
 ---
 
