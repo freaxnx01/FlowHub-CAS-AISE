@@ -3,8 +3,10 @@
 Prep aid for the CAS-AISE oral defense (PVA), derived from the `examiner-sim`
 runs. **Not part of the submission bundle** — internal study sheet.
 
-- **Max achievable:** 90 (Quarkus/Jakarta-EE item N/A for .NET, consciously excluded).
-- **Representative grade (balanced lens):** ~81–83. **Architecture-skeptic floor:** 77.
+- **Max achievable:** 90 conservative floor; **toward /100** with the Quarkus/Jakarta-EE
+  item **claimed via .NET equivalents** (free stack choice confirmed in the PVA — see §C).
+- **Measured grade:** **86/90** on the architecture-skeptic lens (latest run), ~88 after the
+  verified-test-run pass; **balanced ~90**. Quarkus credit (~7) is additive toward /100.
 - **How to use:** for each likely question, a crisp answer + *where to point* in the
   repo/bundle. Own the known gaps honestly — examiners reward "I know exactly what's
   not done and why" over a defended overclaim.
@@ -66,9 +68,35 @@ has a `README.md` describing its role; the gap is private/implementation members
 It's on the post-submission list (see Gap-Fill §F.3), not hidden.
 
 **Q: Why are FlowHub.Telegram / FlowHub.Integrations shown as projects when empty?**
-A: They're **placeholders, not in `FlowHub.slnx`**, each with a README stating
-"planned / not implemented". The Wallabag/Vikunja adapters actually live in
-`FlowHub.Skills` (ADR 0002 has an "As built" note correcting the early plan).
+A: They aren't — the empty folders were **removed**; the source tree is exactly the
+six solution projects. A Telegram channel and a generic integrations layer are
+planned (not yet scaffolded). The Wallabag/Vikunja adapters live in `FlowHub.Skills`
+(ADR 0002 has an "As built" note correcting the early plan).
+
+**Q: This is the "Quarkus / Jakarta EE" criterion — you used .NET, so isn't it N/A / 0?**
+A: No — **free stack choice was explicitly confirmed in the PVA**, and the Moodle
+Auftrag names Quarkus/Jakarta EE only as the *reference* stack; the learning
+objectives are stack-neutral. The criterion measures **modern application
+concepts**, and *"here are the modern-app concepts realised in .NET"* — each proven
+in code (full table + evidence in `docs/spec/modern-app-concepts.md`):
+
+| Jakarta EE / Quarkus concept | FlowHub (.NET) — where to point |
+|---|---|
+| CDI dependency injection | built-in DI, per-module `*ServiceCollectionExtensions` |
+| JAX-RS / RESTEasy | Minimal API + RFC 9457 ProblemDetails (`FlowHub.Api/Endpoints`) |
+| Bean Validation | FluentValidation at the boundary |
+| JPA / Hibernate | EF Core + 6 repositories + `IEntityTypeConfiguration` (ADR 0005) |
+| MicroProfile Config | `IConfiguration` + Options + env vars (12-factor) |
+| MicroProfile Health / Metrics | Health Checks (`/health/live`) + OpenTelemetry/Prometheus (`/metrics`, live) |
+| Reactive (Mutiny) | `async`/`await` + `CancellationToken` throughout |
+| Reactive Messaging / Kafka | MassTransit pipeline, 5 consumers (ADR 0003) |
+| MicroProfile Fault Tolerance | per-consumer retry + deterministic classifier fallback (EventId 3010) |
+| Testcontainers | Testcontainers .NET vs real PostgreSQL (35 persistence tests) |
+
+Honest boundary: I do **not** claim the JVM-runtime specifics (CDI annotations,
+Quarkus build-time DI, real GraalVM native image — a lean Alpine container isn't
+AOT). Target level: **überwiegend–vollständig (7–10)**; /90 is the floor only if a
+grader rejects the (confirmed) stack freedom.
 
 ---
 
