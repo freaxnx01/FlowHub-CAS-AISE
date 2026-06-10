@@ -63,6 +63,15 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         entity.ExternalRef = capture.ExternalRef;
         entity.VikunjaProject = capture.VikunjaProject;
         entity.EnrichmentDescription = capture.EnrichmentDescription;
+        entity.ClassifierTrace = capture.ClassifierTrace is null ? null : new ClassifierTraceOwned
+        {
+            Kind = capture.ClassifierTrace.Kind.ToString(),
+            LatencyMs = capture.ClassifierTrace.LatencyMs,
+            Provider = capture.ClassifierTrace.Provider,
+            Model = capture.ClassifierTrace.Model,
+            PromptTokens = capture.ClassifierTrace.PromptTokens,
+            CompletionTokens = capture.ClassifierTrace.CompletionTokens,
+        };
         await _db.SaveChangesAsync(cancellationToken);
     }
 
@@ -151,7 +160,16 @@ internal sealed class EfCaptureRepository : ICaptureRepository
         EnrichmentDescription: e.EnrichmentDescription,
         Attachment: e.Attachment is null
             ? null
-            : new Attachment(e.Attachment.FileName, e.Attachment.ContentType, e.Attachment.SizeBytes, e.Attachment.RelativePath, e.Attachment.UploadedAt));
+            : new Attachment(e.Attachment.FileName, e.Attachment.ContentType, e.Attachment.SizeBytes, e.Attachment.RelativePath, e.Attachment.UploadedAt),
+        ClassifierTrace: e.ClassifierTrace is null
+            ? null
+            : new FlowHub.Core.Classification.ClassifierTrace(
+                Enum.Parse<FlowHub.Core.Classification.ClassifierKind>(e.ClassifierTrace.Kind),
+                e.ClassifierTrace.LatencyMs,
+                e.ClassifierTrace.Provider,
+                e.ClassifierTrace.Model,
+                e.ClassifierTrace.PromptTokens,
+                e.ClassifierTrace.CompletionTokens));
 
     private static CaptureEntity ToEntity(Capture c) => new()
     {
@@ -173,6 +191,15 @@ internal sealed class EfCaptureRepository : ICaptureRepository
             SizeBytes = c.Attachment.SizeBytes,
             RelativePath = c.Attachment.RelativePath,
             UploadedAt = c.Attachment.UploadedAt,
+        },
+        ClassifierTrace = c.ClassifierTrace is null ? null : new ClassifierTraceOwned
+        {
+            Kind = c.ClassifierTrace.Kind.ToString(),
+            LatencyMs = c.ClassifierTrace.LatencyMs,
+            Provider = c.ClassifierTrace.Provider,
+            Model = c.ClassifierTrace.Model,
+            PromptTokens = c.ClassifierTrace.PromptTokens,
+            CompletionTokens = c.ClassifierTrace.CompletionTokens,
         },
     };
 }

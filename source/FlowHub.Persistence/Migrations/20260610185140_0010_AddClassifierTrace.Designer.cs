@@ -3,6 +3,7 @@ using System;
 using FlowHub.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,9 +13,11 @@ using Pgvector;
 namespace FlowHub.Persistence.Migrations
 {
     [DbContext(typeof(FlowHubDbContext))]
-    partial class FlowHubDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260610185140_0010_AddClassifierTrace")]
+    partial class _0010_AddClassifierTrace
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,7 +236,7 @@ namespace FlowHub.Persistence.Migrations
                         },
                         new
                         {
-                            Name = "Zitate",
+                            Name = "Quotes",
                             RoutedToday = 0,
                             Status = "Degraded"
                         },

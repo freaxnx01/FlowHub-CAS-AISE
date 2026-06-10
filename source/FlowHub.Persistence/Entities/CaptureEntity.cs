@@ -23,4 +23,5 @@ internal sealed class CaptureEntity
     public ICollection<TagEntity> Tags { get; set; } = [];
     public Vector? Embedding { get; set; }
     public AttachmentEntity? Attachment { get; set; }
+    public ClassifierTraceOwned? ClassifierTrace { get; set; }
 }

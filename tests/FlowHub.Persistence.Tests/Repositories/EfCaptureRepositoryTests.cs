@@ -1,4 +1,5 @@
 using FlowHub.Core.Captures;
+using FlowHub.Core.Classification;
 using FlowHub.Persistence.Repositories;
 using FlowHub.Persistence.Tests.Fixtures;
 
@@ -199,5 +200,46 @@ public sealed class EfCaptureRepositoryTests(PostgresFixture fixture)
         updated!.Stage.Should().Be(LifecycleStage.Classified);
         updated.MatchedSkill.Should().Be("Wallabag");
         updated.Title.Should().Be("Some Title");
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PersistsAndReadsBack_ClassifierTrace()
+    {
+        var db = await fixture.CreateFreshDbAsync();
+        var repo = new EfCaptureRepository(db);
+        var capture = NewRawCapture("classify me");
+        await repo.AddAsync(capture);
+
+        var traced = capture with
+        {
+            Stage = LifecycleStage.Classified,
+            MatchedSkill = "Vikunja",
+            ClassifierTrace = new ClassifierTrace(ClassifierKind.Ai, 1234, "OpenRouter", "gemma:free", 100, 20),
+        };
+        await repo.UpdateAsync(traced, default);
+        var read = await repo.GetByIdAsync(capture.Id, default);
+
+        read!.ClassifierTrace.Should().NotBeNull();
+        read.ClassifierTrace!.Kind.Should().Be(ClassifierKind.Ai);
+        read.ClassifierTrace.LatencyMs.Should().Be(1234);
+        read.ClassifierTrace.Provider.Should().Be("OpenRouter");
+        read.ClassifierTrace.Model.Should().Be("gemma:free");
+        read.ClassifierTrace.PromptTokens.Should().Be(100);
+        read.ClassifierTrace.CompletionTokens.Should().Be(20);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_NullTrace_StaysNull()
+    {
+        var db = await fixture.CreateFreshDbAsync();
+        var repo = new EfCaptureRepository(db);
+        var capture = NewRawCapture("no trace");
+        await repo.AddAsync(capture);
+
+        await repo.UpdateAsync(
+            capture with { Stage = LifecycleStage.Classified, MatchedSkill = "Vikunja" }, default);
+        var read = await repo.GetByIdAsync(capture.Id, default);
+
+        read!.ClassifierTrace.Should().BeNull();
     }
 }
