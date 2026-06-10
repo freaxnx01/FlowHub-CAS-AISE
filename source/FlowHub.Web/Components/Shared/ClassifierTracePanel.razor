@@ -12,7 +12,7 @@ else
 {
     <MudPaper Elevation="0" Class="pa-3" Style="background:var(--mud-palette-background-grey);">
         <MudStack Spacing="1">
-            <MudChip T="string" Size="Size.Small"
+            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
                      Color="@(Trace.Kind == ClassifierKind.Ai ? Color.Primary : Color.Default)">
                 @(Trace.Kind == ClassifierKind.Ai ? "AI classifier" : "Keyword/URL fallback")
             </MudChip>
