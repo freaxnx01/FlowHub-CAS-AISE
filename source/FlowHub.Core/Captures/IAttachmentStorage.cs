@@ -11,4 +11,7 @@ public interface IAttachmentStorage
 
     /// <summary>Best-effort delete used to roll back a failed Capture save.</summary>
     Task DeleteAsync(string relativePath, CancellationToken cancellationToken = default);
+
+    /// <summary>Opens the stored bytes for reading. Caller disposes the stream.</summary>
+    Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken = default);
 }
