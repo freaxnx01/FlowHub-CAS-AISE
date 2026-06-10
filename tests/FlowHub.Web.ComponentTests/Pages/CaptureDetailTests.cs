@@ -115,4 +115,69 @@ public class CaptureDetailTests : TestContext
         cut.Markup.Should().Contain("Could not load capture");
         cut.Markup.Should().Contain("db offline");
     }
+
+    [Fact]
+    public void Render_TraceGateOn_ShowsClassificationTracePanel()
+    {
+        using var ctx = new TestContext();
+        ctx.Services.AddMudServices();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var captureService = Substitute.For<ICaptureService>();
+        var skillRegistry = Substitute.For<ISkillRegistry>();
+        var costEstimator = Substitute.For<IClassificationCostEstimator>();
+
+        ctx.Services.AddSingleton(captureService);
+        ctx.Services.AddSingleton(skillRegistry);
+        ctx.Services.AddSingleton(costEstimator);
+        ctx.Services.AddSingleton(Options.Create(new DemoTraceOptions { Enabled = true }));
+        ctx.RenderComponent<MudPopoverProvider>();
+
+        skillRegistry.GetHealthAsync(Arg.Any<CancellationToken>())
+            .Returns(new SkillHealth[] { new("Books", HealthStatus.Healthy, 10) });
+
+        var id = Guid.NewGuid();
+        var trace = new ClassifierTrace(ClassifierKind.Ai, 900, "OpenRouter", "gemma:free", 80, 12);
+        captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(new Capture(id, ChannelKind.Web, "AI classified capture", DateTimeOffset.UtcNow,
+                LifecycleStage.Classified, "Books", ClassifierTrace: trace));
+
+        costEstimator.Estimate(Arg.Any<string?>(), Arg.Any<int?>(), Arg.Any<int?>()).Returns((decimal?)0m);
+
+        var cut = ctx.RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
+
+        cut.Markup.Should().Contain("Classification trace");
+        cut.Markup.Should().Contain("OpenRouter");
+    }
+
+    [Fact]
+    public void Render_TraceGateOff_HidesClassificationTracePanel()
+    {
+        using var ctx = new TestContext();
+        ctx.Services.AddMudServices();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var captureService = Substitute.For<ICaptureService>();
+        var skillRegistry = Substitute.For<ISkillRegistry>();
+        var costEstimator = Substitute.For<IClassificationCostEstimator>();
+
+        ctx.Services.AddSingleton(captureService);
+        ctx.Services.AddSingleton(skillRegistry);
+        ctx.Services.AddSingleton(costEstimator);
+        ctx.Services.AddSingleton(Options.Create(new DemoTraceOptions { Enabled = false }));
+        ctx.RenderComponent<MudPopoverProvider>();
+
+        skillRegistry.GetHealthAsync(Arg.Any<CancellationToken>())
+            .Returns(new SkillHealth[] { new("Books", HealthStatus.Healthy, 10) });
+
+        var id = Guid.NewGuid();
+        var trace = new ClassifierTrace(ClassifierKind.Ai, 900, "OpenRouter", "gemma:free", 80, 12);
+        captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(new Capture(id, ChannelKind.Web, "AI classified capture", DateTimeOffset.UtcNow,
+                LifecycleStage.Classified, "Books", ClassifierTrace: trace));
+
+        var cut = ctx.RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
+
+        cut.Markup.Should().NotContain("Classification trace");
+    }
 }
