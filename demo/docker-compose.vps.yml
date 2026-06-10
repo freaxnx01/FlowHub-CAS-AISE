@@ -38,3 +38,23 @@ services:
       - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.burst=200"
       - "traefik.http.middlewares.flowhub-vikunja-ratelimit.ratelimit.period=1m"
       - "traefik.docker.network=web"
+
+  wallabag:
+    labels: !override
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-wallabag.rule=Host(`wallabag.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-wallabag.entrypoints=web-secure"
+      - "traefik.http.routers.flowhub-wallabag.tls=true"
+      - "traefik.http.routers.flowhub-wallabag.tls.certresolver=default"
+      - "traefik.http.services.flowhub-wallabag.loadbalancer.server.port=80"
+      - "traefik.docker.network=web"
+
+  paperless:
+    labels: !override
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-paperless.rule=Host(`paperless.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-paperless.entrypoints=web-secure"
+      - "traefik.http.routers.flowhub-paperless.tls=true"
+      - "traefik.http.routers.flowhub-paperless.tls.certresolver=default"
+      - "traefik.http.services.flowhub-paperless.loadbalancer.server.port=8000"
+      - "traefik.docker.network=web"
