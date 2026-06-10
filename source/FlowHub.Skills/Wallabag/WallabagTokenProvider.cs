@@ -12,7 +12,7 @@ namespace FlowHub.Skills.Wallabag;
 /// Mirrors <see cref="Vikunja.VikunjaProjectCatalog"/>'s single-flight + TimeProvider
 /// caching: a fast lock-free reuse path plus a double-checked refresh under a gate.
 /// </summary>
-public sealed class WallabagTokenProvider : IDisposable
+public sealed partial class WallabagTokenProvider : IDisposable
 {
     private static readonly TimeSpan ExpiryMargin = TimeSpan.FromSeconds(60);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -67,35 +67,47 @@ public sealed class WallabagTokenProvider : IDisposable
 
     private async Task<string> FetchTokenAsync(DateTimeOffset now, CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/oauth/v2/token")
+        try
         {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/oauth/v2/token")
             {
-                ["grant_type"] = "password",
-                ["client_id"] = _options.ClientId ?? string.Empty,
-                ["client_secret"] = _options.ClientSecret ?? string.Empty,
-                ["username"] = _options.Username ?? string.Empty,
-                ["password"] = _options.Password ?? string.Empty,
-            }),
-        };
+                Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["grant_type"] = "password",
+                    ["client_id"] = _options.ClientId ?? string.Empty,
+                    ["client_secret"] = _options.ClientSecret ?? string.Empty,
+                    ["username"] = _options.Username ?? string.Empty,
+                    ["password"] = _options.Password ?? string.Empty,
+                }),
+            };
 
-        using var response = await _http.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+            using var response = await _http.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
 
-        var grant = await response.Content.ReadFromJsonAsync<TokenGrant>(JsonOptions, cancellationToken)
-            ?? throw new InvalidOperationException("Wallabag token response body was empty.");
+            var grant = await response.Content.ReadFromJsonAsync<TokenGrant>(JsonOptions, cancellationToken)
+                ?? throw new InvalidOperationException("Wallabag token response body was empty.");
 
-        if (string.IsNullOrWhiteSpace(grant.AccessToken))
-        {
-            throw new InvalidOperationException("Wallabag token response did not include an 'access_token'.");
+            if (string.IsNullOrWhiteSpace(grant.AccessToken))
+            {
+                throw new InvalidOperationException("Wallabag token response did not include an 'access_token'.");
+            }
+
+            _token = grant.AccessToken;
+            _expiresAt = now + TimeSpan.FromSeconds(grant.ExpiresIn);
+            return _token;
         }
-
-        _token = grant.AccessToken;
-        _expiresAt = now + TimeSpan.FromSeconds(grant.ExpiresIn);
-        return _token;
+        catch (Exception ex)
+        {
+            LogTokenRefreshFailed(ex.GetType().Name);
+            throw;
+        }
     }
 
     public void Dispose() => _gate.Dispose();
+
+    [LoggerMessage(EventId = 3040, Level = LogLevel.Warning,
+        Message = "Wallabag token refresh failed (reason={Reason})")]
+    private partial void LogTokenRefreshFailed(string reason);
 
     private sealed record TokenGrant(
         [property: JsonPropertyName("access_token")] string? AccessToken,
