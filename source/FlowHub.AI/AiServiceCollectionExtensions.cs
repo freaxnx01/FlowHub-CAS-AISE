@@ -72,6 +72,12 @@ public static class AiServiceCollectionExtensions
             new EnricherBucketCatalog(sp.GetServices<IEnricher>(), sp.GetRequiredService<VikunjaFallback>().Name));
         services.AddSingleton<EnricherDispatcher>();
 
+        var pricingSection = configuration.GetSection(Pricing.ClassificationPricingOptions.SectionName);
+        services.Configure<Pricing.ClassificationPricingOptions>(
+            o => pricingSection.Bind(o));
+
+        services.AddSingleton<IClassificationCostEstimator, Pricing.ClassificationCostEstimator>();
+
         var outcome = ResolveOutcome(configuration);
         services.AddSingleton(outcome);
         services.AddHostedService<AiBootLogger>();
