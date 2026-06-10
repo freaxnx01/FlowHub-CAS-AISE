@@ -31,6 +31,17 @@ public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated
         var msg = context.Message;
         var ct = context.CancellationToken;
 
+        if (msg.HasAttachment)
+        {
+            await _captureService.MarkClassifiedAsync(msg.CaptureId, "Paperless", cancellationToken: ct);
+            await context.Publish(new CaptureClassified(
+                msg.CaptureId,
+                Tags: ["document"],
+                MatchedSkill: "Paperless",
+                ClassifiedAt: DateTimeOffset.UtcNow), ct);
+            return;
+        }
+
         var result = await _classifier.ClassifyAsync(msg.Content, ct);
 
         if (string.IsNullOrEmpty(result.MatchedSkill))

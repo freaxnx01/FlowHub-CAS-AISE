@@ -119,26 +119,36 @@ public sealed class CaptureServiceStub : ICaptureService
     public async Task<Capture> SubmitAsync(
         string? content, ChannelKind source, AttachmentInput? attachment, CancellationToken cancellationToken = default)
     {
-        var effectiveContent = attachment is null
-            ? (content ?? throw new ArgumentNullException(nameof(content)))
-            : Path.GetFileName(attachment.FileName);
-
-        var capture = await SubmitAsync(effectiveContent, source, cancellationToken);
-
         if (attachment is null)
         {
-            return capture;
+            return await SubmitAsync(content ?? throw new ArgumentNullException(nameof(content)), source, cancellationToken);
         }
 
-        return capture with
-        {
-            Attachment = new Attachment(
-                FileName: Path.GetFileName(attachment.FileName),
+        var fileName = Path.GetFileName(attachment.FileName);
+        var capture = new Capture(
+            Id: Guid.NewGuid(),
+            Source: source,
+            Content: fileName,
+            CreatedAt: DateTimeOffset.UtcNow,
+            Stage: LifecycleStage.Raw,
+            MatchedSkill: null,
+            Attachment: new Attachment(
+                FileName: fileName,
                 ContentType: attachment.ContentType,
                 SizeBytes: attachment.SizeBytes,
                 RelativePath: $"stub/{Guid.NewGuid():N}",
-                UploadedAt: DateTimeOffset.UtcNow),
-        };
+                UploadedAt: DateTimeOffset.UtcNow));
+
+        lock (_lock)
+        {
+            _captures.Add(capture);
+        }
+
+        await _publishEndpoint.Publish(
+            new CaptureCreated(capture.Id, capture.Content, capture.Source, capture.CreatedAt, HasAttachment: true),
+            cancellationToken);
+
+        return capture;
     }
 
     public Task MarkClassifiedAsync(Guid id, string matchedSkill, string? title = null, string? vikunjaProject = null, string? enrichmentDescription = null, CancellationToken cancellationToken = default) =>
