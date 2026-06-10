@@ -31,6 +31,35 @@ Full feature list — including **post-`v0.1.0`** product enhancements (citation
 
 ---
 
+## Explainer videos
+
+Two short, code-generated explainer videos (English narration). Built with Remotion + a local Piper voice — fully reproducible via `just video`; see [`video/`](video/).
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**For everyone** — what FlowHub does (~46s)
+
+<video src="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-users.en.mp4" poster="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-users.poster.png" controls width="100%"></video>
+
+▶︎ [flowhub-users.en.mp4](docs/videos/flowhub-users.en.mp4)
+
+</td>
+<td width="50%" valign="top">
+
+**Technical** — how it's built (~48s)
+
+<video src="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-technical.en.mp4" poster="https://github.com/freaxnx01/FlowHub-CAS-AISE/raw/main/docs/videos/flowhub-technical.poster.png" controls width="100%"></video>
+
+▶︎ [flowhub-technical.en.mp4](docs/videos/flowhub-technical.en.mp4)
+
+</td>
+</tr>
+</table>
+
+---
+
 ## For a CAS reviewer who just cloned the repo
 
 You probably don't need to run anything to grade this. The submission document and its links cover every rubric item. If you *want* to verify a claim live, the commands below are enough.

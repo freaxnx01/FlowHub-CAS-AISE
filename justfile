@@ -642,7 +642,7 @@ pdf-eigenstaendigkeitserklaerung:
 
 # ── Explainer videos (Remotion + Piper TTS) ──────────────────────────────────
 
-# Vendor Piper + German voice + static ffmpeg into video/tools/, then npm install (one-time)
+# Vendor Piper + English voice + emoji font + static ffmpeg into video/tools/, then npm install (one-time)
 [group('video')]
 video-setup:
     #!/usr/bin/env bash
@@ -650,7 +650,7 @@ video-setup:
     bash {{video_dir}}/tools/setup.sh
     cd {{video_dir}} && npm install --no-fund --no-audit
 
-# Synthesize German narration with Piper → public/audio/tts/*.wav + src/durations.json
+# Synthesize English narration with Piper → public/audio/tts/*.wav + src/durations.json
 [group('video')]
 video-tts:
     #!/usr/bin/env bash
@@ -673,6 +673,19 @@ video-render:
 [group('video')]
 video: video-tts video-render
     @echo "✓ videos rendered to {{video_dir}}/out/"
+
+# Copy the rendered MP4s + poster frames into docs/videos/ (embedded in the README)
+[group('video')]
+video-publish:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p docs/videos
+    cp {{video_dir}}/out/flowhub-users.en.mp4 {{video_dir}}/out/flowhub-technical.en.mp4 docs/videos/
+    for key in users technical; do
+      {{video_ffmpeg_dir}}/ffmpeg -hide_banner -loglevel error -y -ss 1 \
+        -i {{video_dir}}/out/flowhub-$key.en.mp4 -frames:v 1 docs/videos/flowhub-$key.poster.png
+    done
+    echo "✓ published docs/videos/ (mp4s + posters)"
 
 # Remove rendered MP4s and generated narration wavs
 [group('video')]
