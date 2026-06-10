@@ -94,20 +94,23 @@ URL-Muster und, wenn nötig, ein **lokales LLM**.
 
 | Input | Skill | landet in |
 |---|---|---|
-| heise.de-Artikel | ArticleSkill | **Wallabag** (read-later) |
-| „The Imitation Game", share.google/… | MovieSkill | **Vikunja** (Watchlist) |
-| jellyfin.org „ausprobieren" | HomelabSkill | **Wekan** (Kanban) |
-| Foto einer Quittung | DocumentSkill | **paperless-ngx** (DMS) |
-| nichts passt | GenericSkill | **Inbox** (PostgreSQL) |
+| heise.de-Artikel | ArticleSkill | **Wallabag** (read-later) ✅ |
+| „The Imitation Game", share.google/… | MovieSkill | **Vikunja** (Watchlist) ✅ |
+| nichts passt | GenericSkill | **Inbox** (PostgreSQL) ✅ |
+| jellyfin.org „ausprobieren" | HomelabSkill | **Wekan** (Kanban) · _geplant_ |
+| Foto einer Quittung | DocumentSkill | **paperless-ngx** (DMS) · _geplant_ |
+
+✅ heute live · _geplant_ = Roadmap (gleiche `ISkillIntegration`-Schnittstelle).
 
 Unklar? → Der Bot **fragt mit 2–3 Optionen zurück** (Confidence-Score).
 
 <!--
 [~55 s] Ein, zwei Zeilen der Tabelle vorlesen, nicht alle.
 "Ein paar Beispiele: Ein heise-Artikel geht automatisch nach Wallabag, meinem
-Read-Later-Dienst. Ein Filmtitel landet in meiner Vikunja-Watchlist. Ein Quittungsfoto
-geht ins Dokumentenmanagement. Wenn die KI unsicher ist, fragt der Bot kurz nach –
-zwei, drei Optionen, ein Tap. Das ist der Confidence-Score in Aktion."
+Read-Later-Dienst. Ein Filmtitel landet in meiner Vikunja-Watchlist. Beides läuft heute.
+Weitere Ziele wie Kanban oder ein Dokumentenmanagement sind über dieselbe
+Skill-Schnittstelle angelegt – das ist die Roadmap. Wenn die KI unsicher ist, fragt
+der Bot kurz nach – zwei, drei Optionen, ein Tap. Das ist der Confidence-Score in Aktion."
 -->
 
 ---

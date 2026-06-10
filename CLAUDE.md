@@ -254,6 +254,57 @@ Apply when a module has multiple infrastructure adapters or needs strong testabi
 
 ---
 
+## Skill System (Product Architecture)
+
+The "Skill System" is the product feature that routes every **Capture** to the
+right downstream service. It is hexagonal: a driving port classifies, an event
+hands off, and a driven port writes to the external service.
+
+### Flow
+
+```
+Capture submitted
+  → IClassifier.ClassifyAsync(content)          (FlowHub.Core.Classification driving port)
+      → ClassificationResult { MatchedSkill, Tags, Title?, VikunjaProject?, Entities? }
+  → CaptureClassified event (MassTransit)
+  → SkillRoutingConsumer                          (FlowHub.Web/Pipeline)
+      → ISkillIntegration where Name == MatchedSkill   (FlowHub.Core.Skills driven port)
+      → integration.HandleAsync(capture) → SkillResult
+```
+
+- **`IClassifier`** (driving port, `FlowHub.Core.Classification`). Two adapters:
+  `KeywordClassifier` (Slice B, keyword/URL rules) and `AiClassifier`
+  (Slice C, MEAI-backed — also fills `Title`, `Entities`, `VikunjaProject`; see ADR 0004).
+- **`ISkillIntegration`** (driven port, `FlowHub.Core.Skills`): `Name` +
+  `HandleAsync(Capture, ct) → SkillResult`. One implementation per destination,
+  each owns its HTTP/auth/tagging. **Wired today:** `Wallabag`, `Vikunja`
+  (matched by the integration's `Name` against `MatchedSkill`).
+- **`SkillRoutingConsumer`** is the dispatcher: looks up the integration by
+  exact `Name` match. No match → `MarkUnhandledAsync` (Capture stays in the
+  Inbox). A non-success / exhausted-retry result faults via MassTransit and the
+  `LifecycleFaultObserver` marks the Capture `Unhandled`.
+
+### Lifecycle states
+
+`Submitted → Classified → Routed → Completed`, with `Unhandled` as the terminal
+fallback when no integration matches or all retry attempts fail.
+
+### Adding a skill
+
+1. Implement `ISkillIntegration` in `FlowHub.Skills/<Service>/`, set `Name` to
+   the value the classifier emits as `MatchedSkill`.
+2. Register it in `SkillsServiceCollectionExtensions`.
+3. Teach the classifier (keyword rules and/or the AI prompt) to emit that
+   `MatchedSkill`.
+
+**Roadmap (not yet wired):** Wekan (Kanban), paperless-ngx (DMS),
+Obsidian/GitLab (knowledge). They share the same `ISkillIntegration` contract —
+the presentation deck and architecture SVG mark these as _geplant_. The
+confidence-score "ask back with 2–3 options" interaction is a planned Telegram
+channel behaviour and is **not** implemented in this repo.
+
+---
+
 ## UI Development Workflow (Mandatory Phase Order)
 
 **Never skip phases. Never write component code before wireframe approval.**
