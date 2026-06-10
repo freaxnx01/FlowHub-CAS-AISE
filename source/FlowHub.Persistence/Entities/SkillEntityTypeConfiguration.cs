@@ -19,7 +19,7 @@ internal sealed class SkillEntityTypeConfiguration : IEntityTypeConfiguration<Sk
             new SkillEntity { Name = "Books",     Status = "Healthy",  RoutedToday = 0 },
             new SkillEntity { Name = "Movies",    Status = "Healthy",  RoutedToday = 0 },
             new SkillEntity { Name = "Articles",  Status = "Healthy",  RoutedToday = 0 },
-            new SkillEntity { Name = "Quotes",    Status = "Degraded", RoutedToday = 0 },
+            new SkillEntity { Name = "Zitate",    Status = "Degraded", RoutedToday = 0 },
             new SkillEntity { Name = "Knowledge", Status = "Healthy",  RoutedToday = 0 },
             new SkillEntity { Name = "Belege",    Status = "Healthy",  RoutedToday = 0 });
     }

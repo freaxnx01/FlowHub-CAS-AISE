@@ -2,7 +2,7 @@ using Microsoft.Extensions.AI;
 
 namespace FlowHub.AI.Enrichers;
 
-internal static class QuotesEnricherPrompts
+internal static class ZitateEnricherPrompts
 {
     internal const string SystemPrompt =
         "You write a 2–3 sentence factual bio of a public figure for a personal knowledge tool. " +

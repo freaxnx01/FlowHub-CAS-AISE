@@ -41,7 +41,7 @@ public sealed class EfCaptureRepositoryTests(PostgresFixture fixture)
         {
             Stage = LifecycleStage.Classified,
             MatchedSkill = "Vikunja",
-            VikunjaProject = "Quotes",
+            VikunjaProject = "Zitate",
             EnrichmentDescription = "About Seneca: Roman Stoic philosopher and statesman.",
         });
 

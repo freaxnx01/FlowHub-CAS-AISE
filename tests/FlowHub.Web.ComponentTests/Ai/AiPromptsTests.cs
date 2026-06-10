@@ -6,7 +6,7 @@ namespace FlowHub.Web.ComponentTests.Ai;
 
 public sealed class AiPromptsTests
 {
-    private static readonly string[] DefaultBuckets = ["Inbox", "Quotes"];
+    private static readonly string[] DefaultBuckets = ["Inbox", "Zitate"];
 
     [Fact]
     public void BuildMessages_AnyContent_FirstMessageIsSystemPrompt()

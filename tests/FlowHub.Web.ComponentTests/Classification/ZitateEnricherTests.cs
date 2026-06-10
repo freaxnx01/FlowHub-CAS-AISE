@@ -9,7 +9,7 @@ using Xunit;
 
 namespace FlowHub.Web.ComponentTests.Classification;
 
-public class QuotesEnricherTests
+public class ZitateEnricherTests
 {
     private static Capture Sample() => new(
         Guid.NewGuid(), ChannelKind.Web,
@@ -17,7 +17,7 @@ public class QuotesEnricherTests
         DateTimeOffset.UtcNow, LifecycleStage.Raw, "Vikunja");
 
     private static ClassificationResult Classification(string? author) =>
-        new(["quote"], "Vikunja", "Gabriel on Unix and C", "Quotes",
+        new(["quote"], "Vikunja", "Gabriel on Unix and C", "Zitate",
             author is null ? null : new Dictionary<string, string>
             {
                 ["quote"] = "Unix and C are the ultimate computer viruses.",
@@ -32,7 +32,7 @@ public class QuotesEnricherTests
             .Returns(new ChatResponse(new ChatMessage(ChatRole.Assistant,
                 "American computer scientist known for work on Lisp.")));
 
-        var enricher = new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance);
+        var enricher = new ZitateEnricher(chat, NullLogger<ZitateEnricher>.Instance);
 
         var result = await enricher.EnrichAsync(Sample(), Classification("Richard Gabriel"), default);
 
@@ -45,7 +45,7 @@ public class QuotesEnricherTests
     public async Task EnrichAsync_NoAuthor_ReturnsQuoteOnlyDescription()
     {
         var chat = Substitute.For<IChatClient>();
-        var enricher = new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance);
+        var enricher = new ZitateEnricher(chat, NullLogger<ZitateEnricher>.Instance);
 
         var result = await enricher.EnrichAsync(Sample(), Classification(null), default);
 
@@ -62,7 +62,7 @@ public class QuotesEnricherTests
         chat.GetResponseAsync(Arg.Any<IEnumerable<ChatMessage>>(), Arg.Any<ChatOptions?>(), Arg.Any<CancellationToken>())
             .Returns(new ChatResponse(new ChatMessage(ChatRole.Assistant, "")));
 
-        var enricher = new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance);
+        var enricher = new ZitateEnricher(chat, NullLogger<ZitateEnricher>.Instance);
 
         var result = await enricher.EnrichAsync(Sample(), Classification("Unknown Person"), default);
 
@@ -70,11 +70,11 @@ public class QuotesEnricherTests
     }
 
     [Fact]
-    public async Task BucketName_IsQuotes()
+    public async Task BucketName_IsZitate()
     {
         var chat = Substitute.For<IChatClient>();
-        var enricher = new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance);
-        enricher.BucketName.Should().Be("Quotes");
+        var enricher = new ZitateEnricher(chat, NullLogger<ZitateEnricher>.Instance);
+        enricher.BucketName.Should().Be("Zitate");
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class QuotesEnricherTests
             .Returns(new ChatResponse(new ChatMessage(ChatRole.Assistant, "bio")));
 
         var longAuthor = new string('x', 500);
-        var enricher = new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance);
+        var enricher = new ZitateEnricher(chat, NullLogger<ZitateEnricher>.Instance);
 
         await enricher.EnrichAsync(Sample(), Classification(longAuthor), default);
 

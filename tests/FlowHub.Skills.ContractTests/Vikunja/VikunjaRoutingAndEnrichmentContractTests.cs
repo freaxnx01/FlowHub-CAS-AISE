@@ -17,7 +17,7 @@ namespace FlowHub.Skills.ContractTests.Vikunja;
 public sealed class VikunjaRoutingAndEnrichmentContractTests : IClassFixture<WireMockServerFixture>, IDisposable
 {
     private const int InboxId = 1;
-    private const int QuotesId = 7;
+    private const int ZitateId = 7;
     private const string ApiToken = "test-token";
 
     private readonly WireMockServerFixture _wire;
@@ -71,7 +71,7 @@ public sealed class VikunjaRoutingAndEnrichmentContractTests : IClassFixture<Wir
             .RespondWith(Response.Create()
                 .WithStatusCode(200)
                 .WithHeader("Content-Type", "application/json")
-                .WithBody("""[{"id":1,"title":"Inbox"},{"id":7,"title":"Quotes"},{"id":12,"title":"Movies"}]"""));
+                .WithBody("""[{"id":1,"title":"Inbox"},{"id":7,"title":"Zitate"},{"id":12,"title":"Movies"}]"""));
     }
 
     private static Capture QuoteCapture(string? enrichmentDescription = null) =>
@@ -83,7 +83,7 @@ public sealed class VikunjaRoutingAndEnrichmentContractTests : IClassFixture<Wir
             Stage: LifecycleStage.Classified,
             MatchedSkill: "Vikunja",
             Title: "Gabriel on Unix and C",
-            VikunjaProject: "Quotes",
+            VikunjaProject: "Zitate",
             EnrichmentDescription: enrichmentDescription);
 
     [Fact]
@@ -92,7 +92,7 @@ public sealed class VikunjaRoutingAndEnrichmentContractTests : IClassFixture<Wir
         StubCatalog();
         _wire.Server
             .Given(Request.Create()
-                .WithPath($"/api/v1/projects/{QuotesId}/tasks")
+                .WithPath($"/api/v1/projects/{ZitateId}/tasks")
                 .UsingPut())
             .RespondWith(Response.Create()
                 .WithStatusCode(200)
@@ -107,7 +107,7 @@ public sealed class VikunjaRoutingAndEnrichmentContractTests : IClassFixture<Wir
             .Where(e => e.RequestMessage.Method == "PUT")
             .ToList();
         puts.Should().ContainSingle();
-        puts[0].RequestMessage.AbsolutePath.Should().Be($"/api/v1/projects/{QuotesId}/tasks");
+        puts[0].RequestMessage.AbsolutePath.Should().Be($"/api/v1/projects/{ZitateId}/tasks");
         puts[0].RequestMessage.AbsolutePath.Should().NotContain($"/projects/{InboxId}/");
     }
 
@@ -118,7 +118,7 @@ public sealed class VikunjaRoutingAndEnrichmentContractTests : IClassFixture<Wir
         const string bio = "**About Richard Gabriel:** American computer scientist; co-author of the 'Worse is Better' essay.";
         _wire.Server
             .Given(Request.Create()
-                .WithPath($"/api/v1/projects/{QuotesId}/tasks")
+                .WithPath($"/api/v1/projects/{ZitateId}/tasks")
                 .UsingPut())
             .RespondWith(Response.Create()
                 .WithStatusCode(200)
@@ -163,7 +163,7 @@ public sealed class VikunjaRoutingAndEnrichmentContractTests : IClassFixture<Wir
         StubCatalog();
         _wire.Server
             .Given(Request.Create()
-                .WithPath($"/api/v1/projects/{QuotesId}/tasks")
+                .WithPath($"/api/v1/projects/{ZitateId}/tasks")
                 .UsingPut())
             .RespondWith(Response.Create()
                 .WithStatusCode(200)

@@ -8,10 +8,10 @@ namespace FlowHub.Skills.IntegrationTests;
 /// <summary>
 /// Live integration tests for the per-Vikunja-project routing introduced in PR #18.
 /// Hits a real Vikunja instance via Skills__Vikunja__* env vars and verifies:
-///   1. the canonical routing buckets (Inbox, Quotes, Movies, Ausflugziele) are
+///   1. the canonical routing buckets (Inbox, Zitate, Movies, Ausflugziele) are
 ///      present in the live catalog — fails loudly if a bucket is missing so the
 ///      operator knows to create it before the production routing pipeline runs;
-///   2. an end-to-end Quotes route lands a task in the correct project, resolved
+///   2. an end-to-end Zitate route lands a task in the correct project, resolved
 ///      live via the catalog (no stub).
 ///
 /// Run via `make test-services` (alias `test-beta`). Skipped without env vars.
@@ -19,7 +19,7 @@ namespace FlowHub.Skills.IntegrationTests;
 [Trait("Category", "BetaSmoke")]
 public sealed class VikunjaCatalogLiveTests
 {
-    private static readonly string[] CanonicalBuckets = ["Inbox", "Quotes", "Movies", "Ausflugziele"];
+    private static readonly string[] CanonicalBuckets = ["Inbox", "Zitate", "Movies", "Ausflugziele"];
 
     private static (VikunjaOptions options, HttpClient catalogHttp, HttpClient skillHttp, VikunjaProjectCatalog catalog) Build()
     {
@@ -80,18 +80,18 @@ public sealed class VikunjaCatalogLiveTests
     }
 
     [SkippableFact]
-    public async Task HandleAsync_LiveVikunja_RoutesQuoteCaptureToQuotesProject()
+    public async Task HandleAsync_LiveVikunja_RoutesQuoteCaptureToZitateProject()
     {
         var (options, catalogHttp, skillHttp, catalog) = Build();
         using var _h1 = catalogHttp;
         using var _h2 = skillHttp;
         using var _c = catalog;
 
-        // Pre-flight: skip cleanly if the Quotes bucket isn't provisioned yet —
+        // Pre-flight: skip cleanly if the Zitate bucket isn't provisioned yet —
         // the catalog presence test above is the canonical signal for missing buckets.
         var map = await catalog.GetAsync(default);
-        Skip.If(!map.ContainsKey("Quotes"),
-            "Live Vikunja instance has no 'Quotes' project — see Catalog_LiveVikunja_ContainsCanonicalRoutingBuckets.");
+        Skip.If(!map.ContainsKey("Zitate"),
+            "Live Vikunja instance has no 'Zitate' project — see Catalog_LiveVikunja_ContainsCanonicalRoutingBuckets.");
 
         var sut = new VikunjaSkillIntegration(
             skillHttp,
@@ -108,7 +108,7 @@ public sealed class VikunjaCatalogLiveTests
             Stage: LifecycleStage.Classified,
             MatchedSkill: "Vikunja",
             Title: $"Gabriel on Unix and C — smoke {stamp}",
-            VikunjaProject: "Quotes",
+            VikunjaProject: "Zitate",
             EnrichmentDescription:
                 "> \"Unix and C are the ultimate computer viruses.\" — Richard Gabriel\n\n" +
                 "**About Richard Gabriel:** American computer scientist; author of the 'Worse is Better' essay. (smoke-test bio)");

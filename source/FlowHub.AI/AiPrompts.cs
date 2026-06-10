@@ -31,7 +31,7 @@ internal static class AiPrompts
             - title: a 3–8 word title summarising the snippet (omit only if the snippet
                      is itself shorter than 8 words)
             - entities: optional structured fields the project may use, e.g.
-                Quotes → {"quote": "...", "author": "..."}
+                Zitate → {"quote": "...", "author": "..."}
                 Movies → {"title": "...", "year": "..."}
               Omit if nothing applies.
 

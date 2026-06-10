@@ -46,9 +46,9 @@ public class LifecycleBadgeTests : TestContext
     {
         var cut = RenderComponent<LifecycleBadge>(parameters => parameters
             .Add(p => p.Stage, LifecycleStage.Classified)
-            .Add(p => p.VikunjaProject, "Quotes"));
+            .Add(p => p.VikunjaProject, "Zitate"));
 
-        cut.Markup.Should().Contain("→ Quotes");
+        cut.Markup.Should().Contain("→ Zitate");
     }
 
     [Fact]

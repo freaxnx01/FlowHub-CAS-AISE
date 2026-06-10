@@ -21,12 +21,12 @@ public class ClassifyAndEnrichPipelineTests
         new(new ChatMessage(ChatRole.Assistant, text));
 
     [Fact]
-    public async Task RichardGabrielQuote_RoutesToQuotesAndProducesBio()
+    public async Task RichardGabrielQuote_RoutesToZitateAndProducesBio()
     {
-        // Catalog with both Inbox and Quotes
+        // Catalog with both Inbox and Zitate
         var catalog = Substitute.For<IVikunjaProjectCatalog>();
         catalog.GetAsync(Arg.Any<CancellationToken>())
-            .Returns(new Dictionary<string, int> { ["Inbox"] = 1, ["Quotes"] = 7 });
+            .Returns(new Dictionary<string, int> { ["Inbox"] = 1, ["Zitate"] = 7 });
 
         // Same chat client handles both calls.
         // Call 1: classifier — JSON payload conforming to AiClassificationResponse.
@@ -42,7 +42,7 @@ public class ClassifyAndEnrichPipelineTests
                     tags = new[] { "quote", "computing" },
                     matched_skill = "Vikunja",
                     title = "Gabriel on Unix and C",
-                    project = "Quotes",
+                    project = "Zitate",
                     entities = new Dictionary<string, string>
                     {
                         ["quote"] = "Unix and C are the ultimate computer viruses.",
@@ -56,7 +56,7 @@ public class ClassifyAndEnrichPipelineTests
             NullLogger<AiClassifier>.Instance, new ChatOptions(), catalog);
 
         var dispatcher = new EnricherDispatcher(
-            new IEnricher[] { new QuotesEnricher(chat, NullLogger<QuotesEnricher>.Instance) },
+            new IEnricher[] { new ZitateEnricher(chat, NullLogger<ZitateEnricher>.Instance) },
             catalog,
             new VikunjaFallback("Inbox", 1),
             NullLogger<EnricherDispatcher>.Instance);
@@ -68,7 +68,7 @@ public class ClassifyAndEnrichPipelineTests
         var result = await classifier.ClassifyAsync(capture.Content, default);
         var (project, enrichment) = await dispatcher.DispatchAsync(capture, result, default);
 
-        project.Should().Be("Quotes");
+        project.Should().Be("Zitate");
         enrichment.Should().NotBeNull();
         enrichment!.Description.Should().Contain("Unix and C")
                                           .And.Contain("Richard Gabriel")

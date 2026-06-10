@@ -6,18 +6,18 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowHub.AI.Enrichers;
 
-public sealed partial class QuotesEnricher : IEnricher
+public sealed partial class ZitateEnricher : IEnricher
 {
     private readonly IChatClient _chat;
-    private readonly ILogger<QuotesEnricher> _log;
+    private readonly ILogger<ZitateEnricher> _log;
 
-    public QuotesEnricher(IChatClient chat, ILogger<QuotesEnricher> log)
+    public ZitateEnricher(IChatClient chat, ILogger<ZitateEnricher> log)
     {
         _chat = chat;
         _log = log;
     }
 
-    public string BucketName => "Quotes";
+    public string BucketName => "Zitate";
 
     private const int MaxAuthorLength = 120;
 
@@ -62,7 +62,7 @@ public sealed partial class QuotesEnricher : IEnricher
         try
         {
             var response = await _chat.GetResponseAsync(
-                QuotesEnricherPrompts.BuildMessages(author),
+                ZitateEnricherPrompts.BuildMessages(author),
                 new ChatOptions { MaxOutputTokens = 200, Temperature = 0.2f },
                 cancellationToken);
             return response.Messages.LastOrDefault()?.Text;
@@ -79,6 +79,6 @@ public sealed partial class QuotesEnricher : IEnricher
     }
 
     [LoggerMessage(EventId = 3031, Level = LogLevel.Warning,
-        Message = "QuotesEnricher bio fetch failed for author='{Author}' (reason={Reason})")]
+        Message = "ZitateEnricher bio fetch failed for author='{Author}' (reason={Reason})")]
     private partial void LogBioFetchFailed(string author, string reason);
 }

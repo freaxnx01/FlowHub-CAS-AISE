@@ -76,7 +76,7 @@ public class SmokeTests : TestContext
 
         cut.Markup.Should().Contain("Books");
         cut.Markup.Should().Contain("Movies");
-        cut.Markup.Should().Contain("Quotes");
+        cut.Markup.Should().Contain("Zitate");
     }
 
     [Fact]
@@ -227,7 +227,7 @@ public class SmokeTests : TestContext
         cut.Markup.Should().Contain("Books");
         cut.Markup.Should().Contain("Movies");
         cut.Markup.Should().Contain("Articles");
-        cut.Markup.Should().Contain("Quotes");
+        cut.Markup.Should().Contain("Zitate");
         cut.Markup.Should().Contain("Knowledge");
         cut.Markup.Should().Contain("Belege");
     }

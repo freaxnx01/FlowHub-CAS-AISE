@@ -15,7 +15,7 @@ namespace FlowHub.Web.Stubs;
 public sealed class CaptureServiceStub : ICaptureService
 {
     private static readonly string[] SkillNames =
-        ["Movies", "Articles", "Books", "Quotes", "Knowledge", "Homelab", "Belege"];
+        ["Movies", "Articles", "Books", "Zitate", "Knowledge", "Homelab", "Belege"];
 
     private static readonly string[] SampleContent =
     [

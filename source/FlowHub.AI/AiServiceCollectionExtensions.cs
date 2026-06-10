@@ -16,7 +16,7 @@ namespace FlowHub.AI;
 /// <summary>
 /// Fallback project catalog used when Vikunja isn't configured: exposes the fallback
 /// project plus every registered enricher's bucket name. This lets the classifier route
-/// e.g. a quote to "Quotes" and the dispatcher invoke the matching enricher even without
+/// e.g. a quote to "Zitate" and the dispatcher invoke the matching enricher even without
 /// a live Vikunja (the public demo relies on this). Ids are placeholders (-1) — only the
 /// names matter for enrichment dispatch; real ids come from the live Vikunja catalog.
 /// </summary>
@@ -82,8 +82,8 @@ public static class AiServiceCollectionExtensions
             return services;
         }
 
-        // QuotesEnricher needs IChatClient — only register when AI is configured.
-        services.AddSingleton<IEnricher, QuotesEnricher>();
+        // ZitateEnricher needs IChatClient — only register when AI is configured.
+        services.AddSingleton<IEnricher, ZitateEnricher>();
 
         var apiKey = configuration[$"Ai:{outcome.Provider}:ApiKey"]!;
         var model = outcome.Model!;

@@ -18,13 +18,13 @@ public class EnricherBucketCatalogTests
     [Fact]
     public async Task Catalog_ExposesFallback_AndRegisteredEnricherBuckets()
     {
-        // This is what lets the public demo route a quote to "Quotes" and run the
-        // QuotesEnricher without a live Vikunja catalog.
-        var catalog = new EnricherBucketCatalog(new IEnricher[] { new FakeEnricher("Quotes") }, "Inbox");
+        // This is what lets the public demo route a quote to "Zitate" and run the
+        // ZitateEnricher without a live Vikunja catalog.
+        var catalog = new EnricherBucketCatalog(new IEnricher[] { new FakeEnricher("Zitate") }, "Inbox");
 
         var buckets = await catalog.GetAsync(CancellationToken.None);
 
         buckets.Keys.Should().Contain("Inbox");
-        buckets.Keys.Should().Contain("Quotes");
+        buckets.Keys.Should().Contain("Zitate");
     }
 }

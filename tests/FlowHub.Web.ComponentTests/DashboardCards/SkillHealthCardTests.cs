@@ -35,14 +35,14 @@ public class SkillHealthCardTests : TestContext
         {
             new("Books",  HealthStatus.Healthy,  42),
             new("Movies", HealthStatus.Healthy,   8),
-            new("Quotes", HealthStatus.Degraded,  2),
+            new("Zitate", HealthStatus.Degraded,  2),
         };
 
         var cut = RenderComponent<SkillHealthCard>(p => p.Add(c => c.Skills, skills));
 
         cut.Markup.Should().Contain("Books");
         cut.Markup.Should().Contain("Movies");
-        cut.Markup.Should().Contain("Quotes");
+        cut.Markup.Should().Contain("Zitate");
         cut.Markup.Should().Contain("degraded");
     }
 }
