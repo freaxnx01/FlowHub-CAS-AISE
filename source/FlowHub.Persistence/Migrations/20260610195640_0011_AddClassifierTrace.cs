@@ -5,7 +5,7 @@
 namespace FlowHub.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class _0010_AddClassifierTrace : Migration
+    public partial class _0011_AddClassifierTrace : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -13,8 +13,8 @@ using Pgvector;
 namespace FlowHub.Persistence.Migrations
 {
     [DbContext(typeof(FlowHubDbContext))]
-    [Migration("20260610185140_0010_AddClassifierTrace")]
-    partial class _0010_AddClassifierTrace
+    [Migration("20260610195640_0011_AddClassifierTrace")]
+    partial class _0011_AddClassifierTrace
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -236,7 +236,7 @@ namespace FlowHub.Persistence.Migrations
                         },
                         new
                         {
-                            Name = "Quotes",
+                            Name = "Zitate",
                             RoutedToday = 0,
                             Status = "Degraded"
                         },
