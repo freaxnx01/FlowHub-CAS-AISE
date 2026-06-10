@@ -1,4 +1,5 @@
 using FlowHub.Core.Skills;
+using FlowHub.Skills.Paperless;
 using FlowHub.Skills.Vikunja;
 using FlowHub.Skills.Wallabag;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,7 @@ public static class SkillsServiceCollectionExtensions
 
         AddWallabag(services, configuration);
         AddVikunja(services, configuration);
+        AddPaperless(services, configuration);
 
         return services;
     }
@@ -72,5 +74,27 @@ public static class SkillsServiceCollectionExtensions
         services.AddSingleton<IVikunjaProjectCatalog>(sp => sp.GetRequiredService<VikunjaProjectCatalog>());
         services.AddSingleton<ISkillIntegration>(sp => sp.GetRequiredService<VikunjaSkillIntegration>());
         services.AddSingleton(new SkillsRegistrationOutcome("Vikunja", Registered: true, Reason: "configured"));
+    }
+
+    private static void AddPaperless(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(PaperlessOptions.SectionName);
+        var options = section.Get<PaperlessOptions>() ?? new PaperlessOptions();
+
+        if (string.IsNullOrWhiteSpace(options.BaseUrl) || string.IsNullOrWhiteSpace(options.ApiToken))
+        {
+            services.AddSingleton(new SkillsRegistrationOutcome("Paperless", Registered: false,
+                Reason: string.IsNullOrWhiteSpace(options.BaseUrl) ? "missing-base-url" : "missing-api-token"));
+            return;
+        }
+
+        services.Configure<PaperlessOptions>(section);
+        services.AddHttpClient<PaperlessSkillIntegration>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddSingleton<ISkillIntegration>(sp => sp.GetRequiredService<PaperlessSkillIntegration>());
+        services.AddSingleton(new SkillsRegistrationOutcome("Paperless", Registered: true, Reason: "configured"));
     }
 }

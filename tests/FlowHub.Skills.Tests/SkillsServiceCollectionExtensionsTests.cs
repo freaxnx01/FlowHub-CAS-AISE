@@ -1,3 +1,4 @@
+using FlowHub.Core.Captures;
 using FlowHub.Core.Skills;
 using FlowHub.Skills;
 using FlowHub.Skills.Wallabag;
@@ -117,5 +118,31 @@ public sealed class SkillsServiceCollectionExtensionsTests
 
         var integrations = sp.GetServices<ISkillIntegration>().Select(i => i.Name).ToList();
         integrations.Should().BeEquivalentTo(new[] { "Wallabag", "Vikunja" });
+    }
+
+    [Fact]
+    public void AddFlowHubSkills_WithPaperlessConfigured_RegistersPaperlessIntegration()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Skills:Paperless:BaseUrl"] = "https://paperless.example.com",
+            ["Skills:Paperless:ApiToken"] = "tok",
+        }).Build();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IAttachmentStorage>(Substitute.For<IAttachmentStorage>());
+        services.AddFlowHubSkills(configuration);
+
+        using var sp = services.BuildServiceProvider();
+        sp.GetServices<ISkillIntegration>().Should().Contain(i => i.Name == "Paperless");
+    }
+
+    [Fact]
+    public void AddFlowHubSkills_WithoutPaperlessConfig_DoesNotRegisterPaperless()
+    {
+        var sp = Build(new Dictionary<string, string?>());
+
+        sp.GetServices<ISkillIntegration>().Should().NotContain(i => i.Name == "Paperless");
     }
 }
