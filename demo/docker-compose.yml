@@ -39,7 +39,7 @@ services:
       Auth__OIDC__ClientSecret: ""
       # Demo banner shown in the UI (read by FlowHub.Web layout).
       Demo__Mode: "true"
-      Demo__BannerText: "Public demo — try the quick-capture box (top): type 'todo: buy milk' to watch it classified and routed to a live Vikunja board, or a note like 'The Matrix is a great movie' to see AI classification. Data resets every 15 min; embeddings + Wallabag are disabled."
+      Demo__BannerText: "Public demo — quick-capture (top bar): 'todo: buy milk' routes to a live Vikunja board; paste a URL to save it to Wallabag (read-later); or upload a PDF/image at /captures/new to file it in paperless-ngx. A note like 'The Matrix is a great movie' shows AI classification. Data resets every 15 min; embeddings are disabled."
       Demo__RepoUrl: "https://github.com/freaxnx01/FlowHub-CAS-AISE"
       # Demo-only operator notifications to ntfy.sh (set via .env; dormant if unset).
       Demo__Notify__Ntfy__BaseUrl: ${Demo__Notify__Ntfy__BaseUrl:-}
