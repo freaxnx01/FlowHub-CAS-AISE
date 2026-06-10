@@ -37,6 +37,19 @@ jobs:
             --results-directory ./coverage \
             --logger "trx"
 
+      - name: Drop empty test results
+        if: always()
+        # Projects whose tests are all category-gated out of CI (AI / BetaSmoke / E2E)
+        # still emit a 0-result .trx → a noisy "No tests found" row in the report.
+        # Remove those so the report lists only suites that actually ran.
+        run: |
+          find coverage -name '*.trx' | while read -r f; do
+            if grep -q 'total="0"' "$f"; then
+              echo "removing empty result file: $f"
+              rm -f "$f"
+            fi
+          done
+
       # --- Reporting -----------------------------------------------------------
       # The summary below renders on the run page (Actions → this run). It covers
       # the default CI suite only: unit + bUnit component + non-live integration.

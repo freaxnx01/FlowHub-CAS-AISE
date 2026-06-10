@@ -92,12 +92,13 @@ else if (_filtered!.Count == 0)
 }
 else
 {
-    <MudText Typo="Typo.body2" Color="Color.Default" Class="mb-2">Results: @_filtered.Count</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Default" Class="mb-2">Results: @_filtered.Count · click a row to open its detail</MudText>
     <MudDataGrid T="Capture"
                  Items="@_filtered"
                  Dense="true"
                  Hover="true"
                  RowClick="OnRowClick"
+                 RowStyle="cursor: pointer;"
                  RowsPerPage="10"
                  SortMode="SortMode.Single">
         <Columns>
@@ -129,6 +130,12 @@ else
                     <MudText Typo="Typo.body2">@(context.Item.MatchedSkill ?? "—")</MudText>
                 </CellTemplate>
             </PropertyColumn>
+            @* Drill-in affordance — signals the row opens a detail view on click. *@
+            <TemplateColumn Title="" Sortable="false">
+                <CellTemplate>
+                    <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" Color="Color.Default" />
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
         <PagerContent>
             <MudDataGridPager T="Capture" PageSizeOptions="@(new[] { 10, 25, 50 })" />
