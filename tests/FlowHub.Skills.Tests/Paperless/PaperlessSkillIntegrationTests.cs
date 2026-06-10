@@ -45,6 +45,8 @@ public sealed class PaperlessSkillIntegrationTests
 
         mock.Expect(HttpMethod.Post, "https://paperless.example.com/api/documents/post_document/")
             .WithHeaders("Authorization", "Token tok")
+            .WithPartialContent("name=document")
+            .WithPartialContent("name=title")
             .Respond("application/json", "\"d9b8...uuid\"");
 
         var capture = DocCapture(new Attachment("scan.pdf", "application/pdf", 3, "2026/06/abc.pdf", DateTimeOffset.UtcNow));

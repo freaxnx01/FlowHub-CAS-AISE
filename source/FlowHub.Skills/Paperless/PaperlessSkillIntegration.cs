@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace FlowHub.Skills.Paperless;
 
-public sealed class PaperlessSkillIntegration : ISkillIntegration
+public sealed partial class PaperlessSkillIntegration : ISkillIntegration
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -40,9 +40,9 @@ public sealed class PaperlessSkillIntegration : ISkillIntegration
         }
 
         var attachment = capture.Attachment;
-        await using var bytes = await _storage.OpenReadAsync(attachment.RelativePath, cancellationToken);
+        var bytes = await _storage.OpenReadAsync(attachment.RelativePath, cancellationToken);
 
-        using var content = new MultipartFormDataContent();
+        var content = new MultipartFormDataContent();
         var fileContent = new StreamContent(bytes);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(attachment.ContentType);
         content.Add(fileContent, "document", attachment.FileName);
