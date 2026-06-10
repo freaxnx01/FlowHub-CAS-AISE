@@ -10,11 +10,11 @@ const root = join(here, '..');
 const PIPER = process.env.PIPER_BIN || 'piper';
 const MODEL =
   process.env.PIPER_MODEL ||
-  join(root, 'tools', 'voices', 'de_DE-thorsten-medium.onnx');
+  join(root, 'tools', 'voices', 'en_US-amy-medium.onnx');
 
 const SCRIPTS = [
-  {key: 'users', file: join(root, 'scripts', 'flowhub-users.de.md')},
-  {key: 'technical', file: join(root, 'scripts', 'flowhub-technical.de.md')},
+  {key: 'users', file: join(root, 'scripts', 'flowhub-users.en.md')},
+  {key: 'technical', file: join(root, 'scripts', 'flowhub-technical.en.md')},
 ];
 
 const outDir = join(root, 'public', 'audio', 'tts');

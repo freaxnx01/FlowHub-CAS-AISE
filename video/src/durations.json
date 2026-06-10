@@ -1,18 +1,18 @@
 {
   "users": {
-    "hook": 5,
-    "problem": 6,
-    "solution": 5,
-    "demo": 8,
-    "benefits": 7,
-    "close": 3
+    "hook": 9.25,
+    "problem": 9.15,
+    "solution": 8.05,
+    "demo": 8.85,
+    "benefits": 8.76,
+    "close": 2.6
   },
   "technical": {
-    "hook": 6,
-    "architecture": 6,
-    "airouting": 8,
-    "integrations": 7,
-    "stack": 7,
-    "close": 3
+    "hook": 7.62,
+    "architecture": 8.57,
+    "airouting": 10.51,
+    "integrations": 8.79,
+    "stack": 8.51,
+    "close": 3.42
   }
 }

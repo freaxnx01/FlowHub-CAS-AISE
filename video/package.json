@@ -7,8 +7,8 @@
     "dev": "remotion studio src/index.ts",
     "tts": "node tools/tts.mjs",
     "typecheck": "tsc --noEmit",
-    "render:users": "remotion render src/index.ts flowhub-users out/flowhub-users.de.mp4",
-    "render:technical": "remotion render src/index.ts flowhub-technical out/flowhub-technical.de.mp4"
+    "render:users": "remotion render src/index.ts flowhub-users out/flowhub-users.en.mp4",
+    "render:technical": "remotion render src/index.ts flowhub-technical out/flowhub-technical.en.mp4"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.0",

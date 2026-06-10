@@ -2,3 +2,6 @@ node_modules/
 out/
 public/audio/tts/
 tools/voices/
+tools/piper/
+tools/ffmpeg/
+tools/fonts/
