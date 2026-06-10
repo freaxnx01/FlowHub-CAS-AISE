@@ -15,19 +15,22 @@ internal sealed partial class AiClassifier : IClassifier
     private readonly ILogger<AiClassifier> _log;
     private readonly ChatOptions _options;
     private readonly IVikunjaProjectCatalog _catalog;
+    private readonly AiModelInfo _modelInfo;
 
     public AiClassifier(
         IChatClient chat,
         IClassifier keyword,
         ILogger<AiClassifier> log,
         ChatOptions options,
-        IVikunjaProjectCatalog catalog)
+        IVikunjaProjectCatalog catalog,
+        AiModelInfo modelInfo)
     {
         _chat = chat;
         _keyword = keyword;
         _log = log;
         _options = options;
         _catalog = catalog;
+        _modelInfo = modelInfo;
     }
 
     public async Task<ClassificationResult> ClassifyAsync(string content, CancellationToken cancellationToken)
@@ -63,7 +66,16 @@ internal sealed partial class AiClassifier : IClassifier
                 ? payload.Entities
                 : null;
 
-            return new ClassificationResult(payload.Tags, payload.MatchedSkill, payload.Title, project, entities);
+            sw.Stop();
+            var trace = new ClassifierTrace(
+                ClassifierKind.Ai,
+                (int)sw.ElapsedMilliseconds,
+                _modelInfo.Provider,
+                _modelInfo.Model,
+                (int?)response.Usage?.InputTokenCount,
+                (int?)response.Usage?.OutputTokenCount);
+
+            return new ClassificationResult(payload.Tags, payload.MatchedSkill, payload.Title, project, entities, trace);
         }
         catch (Exception ex)
         {

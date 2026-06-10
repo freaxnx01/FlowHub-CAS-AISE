@@ -98,12 +98,15 @@ public static class AiServiceCollectionExtensions
                     configure: null)
                 .Build());
 
+        services.AddSingleton(new AiModelInfo(outcome.Provider!.Value.ToString(), model));
+
         services.AddSingleton(sp => new AiClassifier(
             sp.GetRequiredService<IChatClient>(),
             sp.GetRequiredService<KeywordClassifier>(),
             sp.GetRequiredService<ILogger<AiClassifier>>(),
             new ChatOptions { MaxOutputTokens = maxTokens, Temperature = 0.2f },
-            sp.GetRequiredService<IVikunjaProjectCatalog>()));
+            sp.GetRequiredService<IVikunjaProjectCatalog>(),
+            sp.GetRequiredService<AiModelInfo>()));
         services.AddSingleton<IClassifier>(sp => sp.GetRequiredService<AiClassifier>());
 
         return services;

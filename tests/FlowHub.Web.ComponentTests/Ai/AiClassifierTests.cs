@@ -25,7 +25,8 @@ public sealed class AiClassifierTests
             .Returns(new Dictionary<string, int> { ["Inbox"] = 1, ["Zitate"] = 7 });
     }
 
-    private AiClassifier Sut() => new(_chat, _keyword, _log, _opts, _catalog);
+    private AiClassifier Sut() =>
+        new(_chat, _keyword, _log, _opts, _catalog, new AiModelInfo("OpenRouter", "test-model"));
 
     private static ChatResponse JsonResponse(object payload) =>
         new(new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(payload)));

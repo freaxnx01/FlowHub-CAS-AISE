@@ -53,7 +53,8 @@ public class ClassifyAndEnrichPipelineTests
 
         var keyword = new KeywordClassifier();
         var classifier = new AiClassifier(chat, keyword,
-            NullLogger<AiClassifier>.Instance, new ChatOptions(), catalog);
+            NullLogger<AiClassifier>.Instance, new ChatOptions(), catalog,
+            new AiModelInfo("OpenRouter", "test-model"));
 
         var dispatcher = new EnricherDispatcher(
             new IEnricher[] { new ZitateEnricher(chat, NullLogger<ZitateEnricher>.Instance) },
