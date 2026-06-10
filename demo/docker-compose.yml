@@ -45,6 +45,8 @@ services:
       Demo__Notify__Ntfy__BaseUrl: ${Demo__Notify__Ntfy__BaseUrl:-}
       Demo__Notify__Ntfy__Topic: ${Demo__Notify__Ntfy__Topic:-}
       Demo__Notify__Ntfy__AccessToken: ${Demo__Notify__Ntfy__AccessToken:-}
+      # Classification trace panel — on for the public demo (transparency).
+      Demo__Trace__Enabled: "true"
     # Source the bootstrap-written skill config (Vikunja token+project+share url,
     # Wallabag client+creds, Paperless token), then hand off to the normal app
     # entrypoint. Each file is a no-op if absent.
