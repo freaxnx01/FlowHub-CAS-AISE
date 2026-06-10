@@ -98,9 +98,12 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: ${RABBITMQ_USER:-flowhub}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-dev-secret}
-      # Read-only access to the bootstrap-written Vikunja creds so each cycle can
-      # clear the demo board's tasks (best-effort; skipped if the file is absent).
+      # Read-only access to the bootstrap-written creds so each cycle can
+      # clear the demo board's tasks, Wallabag entries, and paperless documents
+      # (all best-effort; each skipped if the file is absent).
       VIKUNJA_ENV_FILE: /bootstrap/vikunja.env
+      WALLABAG_ENV_FILE: /bootstrap/wallabag.env
+      PAPERLESS_ENV_FILE: /bootstrap/paperless.env
     volumes:
       - vikunja-bootstrap:/bootstrap:ro
     depends_on:
