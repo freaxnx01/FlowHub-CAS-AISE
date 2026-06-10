@@ -32,4 +32,10 @@ public partial class MainLayout : LayoutComponentBase
     private string? DemoRepoUrl => Configuration["Demo:RepoUrl"];
 
     private string? DemoSkillBoardUrl => Configuration["Demo:Vikunja:ShareUrl"];
+
+    private string? DemoWallabagUrl => Configuration["Demo:Wallabag:Url"];
+
+    private string? DemoPaperlessUrl => Configuration["Demo:Paperless:Url"];
+
+    private string? DemoServiceLogin => Configuration["Demo:ServiceLogin"];
 }

@@ -38,7 +38,12 @@
     <MudMainContent>
         @if (DemoMode)
         {
-            <DemoBanner BannerText="@DemoBannerText" RepoUrl="@DemoRepoUrl" SkillBoardUrl="@DemoSkillBoardUrl" />
+            <DemoBanner BannerText="@DemoBannerText"
+                        RepoUrl="@DemoRepoUrl"
+                        SkillBoardUrl="@DemoSkillBoardUrl"
+                        WallabagUrl="@DemoWallabagUrl"
+                        PaperlessUrl="@DemoPaperlessUrl"
+                        ServiceLogin="@DemoServiceLogin" />
         }
         <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
             @Body

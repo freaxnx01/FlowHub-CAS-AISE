@@ -13,6 +13,32 @@
             View routed tasks in Vikunja ↗
         </MudLink>
     }
+    @if (!string.IsNullOrWhiteSpace(WallabagUrl))
+    {
+        <MudLink Href="@WallabagUrl"
+                 Target="_blank"
+                 rel="noopener noreferrer"
+                 Color="Color.Inherit"
+                 Underline="Underline.Always"
+                 Class="ml-1">
+            Open Wallabag ↗
+        </MudLink>
+    }
+    @if (!string.IsNullOrWhiteSpace(PaperlessUrl))
+    {
+        <MudLink Href="@PaperlessUrl"
+                 Target="_blank"
+                 rel="noopener noreferrer"
+                 Color="Color.Inherit"
+                 Underline="Underline.Always"
+                 Class="ml-1">
+            Open paperless-ngx ↗
+        </MudLink>
+    }
+    @if (HasLoginGatedServiceLink && !string.IsNullOrWhiteSpace(ServiceLogin))
+    {
+        <span class="ml-1" style="opacity:0.85;">(Wallabag/paperless login: @ServiceLogin)</span>
+    }
     @if (!string.IsNullOrWhiteSpace(RepoUrl))
     {
         <MudLink Href="@RepoUrl"

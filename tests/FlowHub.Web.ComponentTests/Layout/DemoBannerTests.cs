@@ -55,4 +55,52 @@ public class DemoBannerTests : TestContext
 
         cut.Markup.Should().NotContain("View routed tasks in Vikunja");
     }
+
+    [Fact]
+    public void WithWallabagUrl_RendersClickableWallabagLink_OpeningNewTab()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.WallabagUrl, "https://wallabag.demo.flowhub.freaxnx01.ch"));
+
+        var link = cut.Find("a[href='https://wallabag.demo.flowhub.freaxnx01.ch']");
+        link.GetAttribute("target").Should().Be("_blank");
+        link.TextContent.Should().Contain("Wallabag");
+    }
+
+    [Fact]
+    public void WithPaperlessUrl_RendersClickablePaperlessLink_OpeningNewTab()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.PaperlessUrl, "https://paperless.demo.flowhub.freaxnx01.ch"));
+
+        var link = cut.Find("a[href='https://paperless.demo.flowhub.freaxnx01.ch']");
+        link.GetAttribute("target").Should().Be("_blank");
+        link.TextContent.Should().Contain("paperless");
+    }
+
+    [Fact]
+    public void WithServiceLogin_AndAServiceLink_RendersLoginHint()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.WallabagUrl, "https://wallabag.demo.flowhub.freaxnx01.ch")
+            .Add(c => c.ServiceLogin, "flowhub / flowhub-demo"));
+
+        cut.Markup.Should().Contain("flowhub / flowhub-demo");
+    }
+
+    [Fact]
+    public void WithoutWallabagOrPaperlessUrls_RendersNeitherLink()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.ServiceLogin, "flowhub / flowhub-demo"));
+
+        cut.Markup.Should().NotContain("Wallabag");
+        cut.Markup.Should().NotContain("paperless");
+        // Login hint only shows when a login-gated service link is present.
+        cut.Markup.Should().NotContain("flowhub / flowhub-demo");
+    }
 }
