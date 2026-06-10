@@ -66,7 +66,7 @@ public sealed class EfCaptureService : ICaptureService
         {
             var saved = await _repository.AddAsync(capture, cancellationToken);
             await _publishEndpoint.Publish(
-                new CaptureCreated(saved.Id, saved.Content, saved.Source, saved.CreatedAt),
+                new CaptureCreated(saved.Id, saved.Content, saved.Source, saved.CreatedAt, HasAttachment: true),
                 cancellationToken);
             return saved;
         }
