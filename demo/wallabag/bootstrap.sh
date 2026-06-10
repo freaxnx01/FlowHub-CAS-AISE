@@ -5,9 +5,10 @@
 # The FlowHub Wallabag skill performs the password grant itself at runtime (tokens
 # expire hourly), so only credentials are stored here — not a token.
 #
-# NOTE: the OAuth client (WALLABAG_CLIENT_ID/SECRET) is created once via the Wallabag
-# console (`wallabag:client:create`) at the compose layer — see demo/docker-compose.yml.
-# This script only consumes the resulting credentials.
+# NOTE: the OAuth client (WALLABAG_CLIENT_ID/SECRET) is created once by the
+# flowhub.wallabag-client init (which runs before this service) and written to
+# /bootstrap/wallabag-client.env — see demo/docker-compose.yml. This script sources
+# that file to obtain the credentials, then only verifies + records them.
 
 set -euo pipefail
 
@@ -17,9 +18,15 @@ log() { echo "[$(ts)] wallabag-bootstrap: $*"; }
 API="${WALLABAG_API_URL:-http://wallabag:80}"
 USER="${WALLABAG_DEMO_USER:-flowhub}"
 PASS="${WALLABAG_DEMO_PASSWORD:-flowhub-demo}"
-CLIENT_ID="${WALLABAG_CLIENT_ID:?WALLABAG_CLIENT_ID required}"
-CLIENT_SECRET="${WALLABAG_CLIENT_SECRET:?WALLABAG_CLIENT_SECRET required}"
 OUT="${BOOTSTRAP_OUT:-/bootstrap/wallabag.env}"
+
+# OAuth client credentials are provisioned by flowhub.wallabag-client.
+CLIENT_ENV="${WALLABAG_CLIENT_ENV:-/bootstrap/wallabag-client.env}"
+if [ -f "${CLIENT_ENV}" ]; then
+  set -a; . "${CLIENT_ENV}"; set +a
+fi
+CLIENT_ID="${WALLABAG_CLIENT_ID:?WALLABAG_CLIENT_ID required (from ${CLIENT_ENV})}"
+CLIENT_SECRET="${WALLABAG_CLIENT_SECRET:?WALLABAG_CLIENT_SECRET required (from ${CLIENT_ENV})}"
 
 log "waiting for ${API}/api/info ..."
 ready=""

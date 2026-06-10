@@ -28,12 +28,11 @@ services:
       Ai__OpenRouter__Model: ${Ai__OpenRouter__Model:-google/gemma-4-31b-it:free}
       Ai__Anthropic__ApiKey: ""
       Ai__Anthropic__Model: ""
-      # Vikunja is LIVE in the demo: Skills__Vikunja__{BaseUrl,ApiToken,FallbackProjectId}
-      # + Demo__Vikunja__ShareUrl are injected at runtime from /bootstrap/vikunja.env
-      # (written by flowhub.vikunja-bootstrap) via the entrypoint wrapper below — they
-      # are intentionally NOT set here. Wallabag stays UNSET (URL captures stop at Unhandled).
-      Skills__Wallabag__BaseUrl: ""
-      Skills__Wallabag__ClientId: ""
+      # Vikunja, Wallabag and Paperless are all LIVE in the demo. Their runtime config
+      # (Skills__Vikunja__*, Skills__Wallabag__*, Skills__Paperless__* + Demo__Vikunja__ShareUrl)
+      # is injected at startup from the bootstrap-written /bootstrap/*.env files (see the
+      # entrypoint wrapper below) — written by the *-bootstrap sidecars — so they are
+      # intentionally NOT set here.
       # OIDC unset → DemoAuthHandler kicks in.
       Auth__OIDC__Authority: ""
       Auth__OIDC__ClientId: ""
@@ -46,13 +45,18 @@ services:
       Demo__Notify__Ntfy__BaseUrl: ${Demo__Notify__Ntfy__BaseUrl:-}
       Demo__Notify__Ntfy__Topic: ${Demo__Notify__Ntfy__Topic:-}
       Demo__Notify__Ntfy__AccessToken: ${Demo__Notify__Ntfy__AccessToken:-}
-    # Source the bootstrap-written Vikunja config (token + project id + share url),
-    # then hand off to the normal app entrypoint. No-op if the file is absent.
-    entrypoint: ["/bin/sh", "-c", "set -a; [ -f /bootstrap/vikunja.env ] && . /bootstrap/vikunja.env; set +a; exec dotnet FlowHub.Web.dll"]
+    # Source the bootstrap-written skill config (Vikunja token+project+share url,
+    # Wallabag client+creds, Paperless token), then hand off to the normal app
+    # entrypoint. Each file is a no-op if absent.
+    entrypoint: ["/bin/sh", "-c", "set -a; for f in /bootstrap/vikunja.env /bootstrap/wallabag.env /bootstrap/paperless.env; do [ -f \"$$f\" ] && . \"$$f\"; done; set +a; exec dotnet FlowHub.Web.dll"]
     volumes:
       - vikunja-bootstrap:/bootstrap:ro
     depends_on:
       flowhub.vikunja-bootstrap:
+        condition: service_completed_successfully
+      flowhub.wallabag-bootstrap:
+        condition: service_completed_successfully
+      flowhub.paperless-bootstrap:
         condition: service_completed_successfully
     labels:
       # Traefik route: demo.flowhub.freaxnx01.ch -> :5070
@@ -174,6 +178,192 @@ services:
       - vikunja
     restart: "no"
 
+  # ---------------------------------------------------------------------------
+  # Wallabag (read-later) — LIVE in the demo so URL captures are saved upstream.
+  # sqlite-backed, single demo user + one OAuth client provisioned once by
+  # flowhub.wallabag-client. The FlowHub Wallabag skill does the password grant
+  # itself at runtime (hourly tokens), so only credentials flow through.
+  # ---------------------------------------------------------------------------
+  wallabag:
+    image: ${WALLABAG_IMAGE:-wallabag/wallabag:2.6.10}
+    environment:
+      SYMFONY__ENV__DATABASE_DRIVER: pdo_sqlite
+      SYMFONY__ENV__DOMAIN_NAME: ${WALLABAG_PUBLIC_URL:-https://wallabag.demo.flowhub.freaxnx01.ch}
+      SYMFONY__ENV__FOSUSER_REGISTRATION: "false"
+    volumes:
+      # sqlite DB + parameters live under /var/www/wallabag/data (the image's
+      # default data path); shared with flowhub.wallabag-client which writes the
+      # demo user + OAuth client into the same sqlite file.
+      - wallabag-data:/var/www/wallabag/data
+    labels:
+      # Generic labels (overridden for VPS-DE in demo/docker-compose.vps.yml).
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-wallabag.rule=Host(`wallabag.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-wallabag.entrypoints=websecure"
+      - "traefik.http.routers.flowhub-wallabag.tls=true"
+      - "traefik.http.routers.flowhub-wallabag.tls.certresolver=letsencrypt"
+      - "traefik.http.services.flowhub-wallabag.loadbalancer.server.port=80"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}"
+    networks:
+      - default
+      - traefik_public
+    restart: unless-stopped
+
+  # One-shot: idempotently provision the demo Wallabag user + a single API OAuth
+  # client, then write /bootstrap/wallabag-client.env (consumed by the bootstrap).
+  #
+  # EMPIRICALLY VERIFIED on this host against wallabag/wallabag:2.6.10 (sqlite):
+  #   * There is NO `wallabag:client:create` command in 2.6.10.
+  #   * `fos:oauth-server:create-client` is broken for Wallabag — its Client
+  #     entity requires a User and the FOS command passes none (ArgumentCountError).
+  #   * Working path: ensure the user via the FOS user-manager, then `new Client($user)`
+  #     + persist via the kernel. getPublicId() yields `<id>_<randomId>`; getSecret()
+  #     the secret. A password grant against /oauth/v2/token then returns HTTP 200.
+  # The init shares wallabag-data (same sqlite file as the service) and runs the
+  # provisioner as user `nobody` (the install owner). It is idempotent: it reuses
+  # an existing user/client so credentials stay stable across restarts.
+  flowhub.wallabag-client:
+    image: ${WALLABAG_IMAGE:-wallabag/wallabag:2.6.10}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        DB=/var/www/wallabag/data/db/wallabag.sqlite
+        echo "wallabag-client: waiting for wallabag to install the sqlite DB ..."
+        for _ in $$(seq 1 120); do [ -s "$$DB" ] && break; sleep 3; done
+        [ -s "$$DB" ] || { echo "ERROR: wallabag sqlite DB never appeared"; exit 1; }
+        # parameters.yml is generated by the wallabag entrypoint on first boot;
+        # wait for it too so the kernel can boot.
+        for _ in $$(seq 1 60); do [ -f /var/www/wallabag/app/config/parameters.yml ] && break; sleep 2; done
+        cat > /tmp/provision.php <<'PHP'
+        <?php
+        // Idempotently ensure a Wallabag demo user + one API OAuth client exist,
+        // and print WALLABAG_CLIENT_ID / WALLABAG_CLIENT_SECRET for the bootstrap.
+        require '/var/www/wallabag/vendor/autoload.php';
+        $$kernel = new AppKernel('prod', false);
+        $$kernel->boot();
+        $$c = $$kernel->getContainer();
+        $$em = $$c->get('doctrine')->getManager();
+        $$username = getenv('WB_USER') ?: 'flowhub';
+        $$password = getenv('WB_PASSWORD') ?: 'flowhub-demo';
+        $$email    = getenv('WB_EMAIL') ?: ($$username . '@flowhub.demo');
+        $$userManager = $$c->get('fos_user.user_manager');
+        $$user = $$userManager->findUserByUsername($$username);
+        if (!$$user) {
+            $$user = $$userManager->createUser();
+            $$user->setUsername($$username);
+            $$user->setEmail($$email);
+            $$user->setPlainPassword($$password);
+            $$user->setEnabled(true);
+            $$userManager->updateUser($$user);
+        }
+        $$repo = $$em->getRepository(\Wallabag\ApiBundle\Entity\Client::class);
+        $$client = null;
+        foreach ($$repo->findAll() as $$existing) {
+            if ($$existing->getUser() && $$existing->getUser()->getId() === $$user->getId()) { $$client = $$existing; break; }
+        }
+        if (!$$client) {
+            $$client = new \Wallabag\ApiBundle\Entity\Client($$user);
+            $$client->setName('FlowHub demo client');
+            $$client->setAllowedGrantTypes(['password','refresh_token','token']);
+            $$em->persist($$client);
+            $$em->flush();
+        }
+        echo "WALLABAG_CLIENT_ID=".$$client->getPublicId()."\n";
+        echo "WALLABAG_CLIENT_SECRET=".$$client->getSecret()."\n";
+        PHP
+        chown nobody: /tmp/provision.php
+        echo "wallabag-client: provisioning user + OAuth client ..."
+        OUT=$$(cd /var/www/wallabag && su -c "WB_USER='$${WALLABAG_DEMO_USER:-flowhub}' WB_PASSWORD='$${WALLABAG_DEMO_PASSWORD:-flowhub-demo}' php /tmp/provision.php" -s /bin/sh nobody)
+        echo "$$OUT" | grep -E '^WALLABAG_CLIENT_(ID|SECRET)=' > /bootstrap/wallabag-client.env
+        [ -s /bootstrap/wallabag-client.env ] || { echo "ERROR: client provisioning produced no credentials"; echo "$$OUT"; exit 1; }
+        echo "wallabag-client: wrote /bootstrap/wallabag-client.env"
+    environment:
+      WALLABAG_DEMO_USER: ${WALLABAG_DEMO_USER:-flowhub}
+      WALLABAG_DEMO_PASSWORD: ${WALLABAG_DEMO_PASSWORD:-flowhub-demo}
+    volumes:
+      - wallabag-data:/var/www/wallabag/data
+      - vikunja-bootstrap:/bootstrap
+    depends_on:
+      - wallabag
+    restart: "no"
+
+  # One-shot: waits for the Wallabag API, sources the client creds written by
+  # flowhub.wallabag-client, verifies the password grant, writes /bootstrap/wallabag.env.
+  flowhub.wallabag-bootstrap:
+    build:
+      context: demo/wallabag
+    image: flowhub-wallabag-bootstrap:local
+    environment:
+      WALLABAG_API_URL: http://wallabag:80
+      WALLABAG_DEMO_USER: ${WALLABAG_DEMO_USER:-flowhub}
+      WALLABAG_DEMO_PASSWORD: ${WALLABAG_DEMO_PASSWORD:-flowhub-demo}
+      BOOTSTRAP_OUT: /bootstrap/wallabag.env
+    volumes:
+      - vikunja-bootstrap:/bootstrap
+    depends_on:
+      wallabag:
+        condition: service_started
+      flowhub.wallabag-client:
+        condition: service_completed_successfully
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # paperless-ngx (document archive) — LIVE in the demo so pdf/png/jpeg captures
+  # are archived + OCR'd. sqlite-backed; Redis is a hard requirement of paperless.
+  # No Tika/Gotenberg: the demo only accepts pdf/png/jpeg and paperless OCRs those.
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports: !reset []
+
+  paperless:
+    image: ${PAPERLESS_IMAGE:-ghcr.io/paperless-ngx/paperless-ngx:2.13}
+    depends_on:
+      - redis
+    environment:
+      PAPERLESS_REDIS: redis://redis:6379
+      PAPERLESS_DBENGINE: sqlite
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-flowhub}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:-flowhub-demo}
+      PAPERLESS_URL: ${PAPERLESS_PUBLIC_URL:-https://paperless.demo.flowhub.freaxnx01.ch}
+      PAPERLESS_TIME_ZONE: Europe/Zurich
+      PAPERLESS_OCR_LANGUAGE: eng+deu
+    volumes:
+      - paperless-data:/usr/src/paperless/data
+      - paperless-media:/usr/src/paperless/media
+    labels:
+      # Generic labels (overridden for VPS-DE in demo/docker-compose.vps.yml).
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-paperless.rule=Host(`paperless.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-paperless.entrypoints=websecure"
+      - "traefik.http.routers.flowhub-paperless.tls=true"
+      - "traefik.http.routers.flowhub-paperless.tls.certresolver=letsencrypt"
+      - "traefik.http.services.flowhub-paperless.loadbalancer.server.port=8000"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}"
+    networks:
+      - default
+      - traefik_public
+    restart: unless-stopped
+
+  # One-shot: waits for the paperless API, obtains an API token for the auto-created
+  # admin, writes /bootstrap/paperless.env (sourced by flowhub.web).
+  flowhub.paperless-bootstrap:
+    build:
+      context: demo/paperless
+    image: flowhub-paperless-bootstrap:local
+    environment:
+      PAPERLESS_API_URL: http://paperless:8000
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-flowhub}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:-flowhub-demo}
+      BOOTSTRAP_OUT: /bootstrap/paperless.env
+    volumes:
+      - vikunja-bootstrap:/bootstrap
+    depends_on:
+      - paperless
+    restart: "no"
+
   # Suppress public port exposure for backing services + observability stack;
   # internal compose network access is enough for the demo.
   postgres:
@@ -193,5 +383,10 @@ networks:
 volumes:
   # Vikunja sqlite DB (persists across restarts; tasks cleared via API each cycle).
   vikunja-db:
-  # Bootstrap-written vikunja.env, shared web ⇄ bootstrap ⇄ reset.
+  # Bootstrap-written *.env files (vikunja/wallabag/paperless), shared web ⇄ bootstrap ⇄ reset.
   vikunja-bootstrap:
+  # Wallabag sqlite DB + parameters.yml (persists demo user + OAuth client).
+  wallabag-data:
+  # paperless-ngx data (sqlite DB, index) and archived media.
+  paperless-data:
+  paperless-media:
