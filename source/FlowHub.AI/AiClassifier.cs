@@ -67,6 +67,7 @@ internal sealed partial class AiClassifier : IClassifier
                 : null;
 
             sw.Stop();
+            // Latency (ms) and token counts fit int for any real classify call; casts are intentional.
             var trace = new ClassifierTrace(
                 ClassifierKind.Ai,
                 (int)sw.ElapsedMilliseconds,

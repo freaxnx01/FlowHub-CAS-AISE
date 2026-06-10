@@ -96,5 +96,9 @@ public class AiClassifierTraceTests
 
         result.Trace.Should().NotBeNull();
         result.Trace!.Kind.Should().Be(ClassifierKind.Keyword);
+        result.Trace.Provider.Should().BeNull();
+        result.Trace.Model.Should().BeNull();
+        result.Trace.PromptTokens.Should().BeNull();
+        result.Trace.CompletionTokens.Should().BeNull();
     }
 }
