@@ -1,8 +1,11 @@
+using FlowHub.Core.Classification;
 using FlowHub.Web.Components.Pages;
+using FlowHub.Web.Demo;
 using FlowHub.Web.Stubs;
 using CapturesPage = FlowHub.Web.Components.Pages.Captures;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MudBlazor;
 using MudBlazor.Services;
 
@@ -32,6 +35,8 @@ public class SmokeTests : TestContext
         policy.AllowedContentTypes.Returns(new[] { "application/pdf" });
         policy.AcceptAttribute.Returns("application/pdf");
         Services.AddSingleton(policy);
+        Services.AddSingleton(Substitute.For<IClassificationCostEstimator>());
+        Services.AddSingleton(Options.Create(new DemoTraceOptions()));
         RenderComponent<MudPopoverProvider>();
     }
 

@@ -17,6 +17,17 @@ public partial class CaptureDetail : ComponentBase
 
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
+    [Inject] private Microsoft.Extensions.Options.IOptions<FlowHub.Web.Demo.DemoTraceOptions> TraceOptions { get; set; } = default!;
+
+    [Inject] private FlowHub.Core.Classification.IClassificationCostEstimator CostEstimator { get; set; } = default!;
+
+    private bool ShowTrace => TraceOptions.Value.Enabled;
+
+    private decimal? TraceCostUsd =>
+        _capture?.ClassifierTrace is { } trace
+            ? CostEstimator.Estimate(trace.Model, trace.PromptTokens, trace.CompletionTokens)
+            : null;
+
     private Capture? _capture;
     private IReadOnlyList<SkillHealth>? _skills;
     private bool _isLoading = true;

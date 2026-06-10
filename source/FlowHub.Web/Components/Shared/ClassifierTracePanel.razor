@@ -1,0 +1,40 @@
+@namespace FlowHub.Web.Components.Shared
+@using FlowHub.Core.Classification
+
+@if (Trace is null)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">
+        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+        Routed without LLM classification (e.g. file upload).
+    </MudText>
+}
+else
+{
+    <MudPaper Elevation="0" Class="pa-3" Style="background:var(--mud-palette-background-grey);">
+        <MudStack Spacing="1">
+            <MudChip T="string" Size="Size.Small"
+                     Color="@(Trace.Kind == ClassifierKind.Ai ? Color.Primary : Color.Default)">
+                @(Trace.Kind == ClassifierKind.Ai ? "AI classifier" : "Keyword/URL fallback")
+            </MudChip>
+            @if (Trace.Kind == ClassifierKind.Ai)
+            {
+                <MudText Typo="Typo.body2"><strong>Provider/Model:</strong> @Trace.Provider / @Trace.Model</MudText>
+                <MudText Typo="Typo.body2"><strong>Tokens:</strong> @Trace.PromptTokens prompt + @Trace.CompletionTokens completion</MudText>
+                <MudText Typo="Typo.body2"><strong>Est. cost:</strong> @FormatCost(EstimatedCostUsd)</MudText>
+            }
+            <MudText Typo="Typo.body2"><strong>Latency:</strong> @Trace.LatencyMs ms</MudText>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public ClassifierTrace? Trace { get; set; }
+    [Parameter] public decimal? EstimatedCostUsd { get; set; }
+
+    private static string FormatCost(decimal? cost) => cost switch
+    {
+        null => "—",
+        0m => "free",
+        _ => $"${cost.Value:0.0000}",
+    };
+}

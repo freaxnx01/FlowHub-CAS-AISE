@@ -1,5 +1,8 @@
+using FlowHub.Core.Classification;
 using FlowHub.Web.Components.Pages;
+using FlowHub.Web.Demo;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MudBlazor;
 using MudBlazor.Services;
 
@@ -9,6 +12,7 @@ public class CaptureDetailTests : TestContext
 {
     private readonly ICaptureService _captureService = Substitute.For<ICaptureService>();
     private readonly ISkillRegistry _skillRegistry = Substitute.For<ISkillRegistry>();
+    private readonly IClassificationCostEstimator _costEstimator = Substitute.For<IClassificationCostEstimator>();
 
     public CaptureDetailTests()
     {
@@ -16,6 +20,8 @@ public class CaptureDetailTests : TestContext
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddSingleton(_captureService);
         Services.AddSingleton(_skillRegistry);
+        Services.AddSingleton(_costEstimator);
+        Services.AddSingleton(Options.Create(new DemoTraceOptions()));
         RenderComponent<MudPopoverProvider>();
 
         _skillRegistry.GetHealthAsync(Arg.Any<CancellationToken>())
