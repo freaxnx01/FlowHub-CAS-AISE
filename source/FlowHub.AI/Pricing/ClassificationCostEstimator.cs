@@ -6,6 +6,8 @@ namespace FlowHub.AI.Pricing;
 public sealed class ClassificationCostEstimator : IClassificationCostEstimator
 {
     // Built-in: the public demo's free model. All other models are priced via config.
+    // MUST stay in sync with the demo's Ai__OpenRouter__Model default in
+    // demo/docker-compose.yml — if they diverge, the demo cost shows "—" instead of "free".
     private const string FreeDemoModel = "google/gemma-4-31b-it:free";
 
     private readonly Dictionary<string, ModelPrice> _prices;
