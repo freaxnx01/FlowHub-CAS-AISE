@@ -30,14 +30,14 @@ export const UserVideo: React.FC = () => {
       />
       <Series>
         <Series.Sequence durationInFrames={f(d.hook)}>
-          <Scene audio="audio/tts/users-hook.wav" durationInFrames={f(d.hook)}>
-            <TitleCard title="FlowHub" subtitle="Notiz hier, Link da, To-do irgendwo…" />
+          <Scene audio="audio/tts/users-hook.wav" durationInFrames={f(d.hook)} bg={theme.colors.logoBg}>
+            <TitleCard title="FlowHub" subtitle="A note here, a link there, a to-do somewhere…" />
           </Scene>
         </Series.Sequence>
 
         <Series.Sequence durationInFrames={f(d.problem)}>
           <Scene audio="audio/tts/users-problem.wav" durationInFrames={f(d.problem)}>
-            <WorkflowDiagram steps={['Notiz', 'kopieren', 'App A', 'App B', 'App C']} />
+            <WorkflowDiagram steps={['Note', 'copy', 'App A', 'App B', 'App C']} />
           </Scene>
         </Series.Sequence>
 
@@ -45,35 +45,35 @@ export const UserVideo: React.FC = () => {
           <Scene audio="audio/tts/users-solution.wav" durationInFrames={f(d.solution)}>
             <FeatureSlide
               icon="📥"
-              headline="Ein Posteingang für alles"
-              sub="Reinwerfen — FlowHub erledigt den Rest"
+              headline="One inbox for everything"
+              sub="Drop it in — FlowHub does the rest"
             />
           </Scene>
         </Series.Sequence>
 
         <Series.Sequence durationInFrames={f(d.demo)}>
           <Scene audio="audio/tts/users-demo.wav" durationInFrames={f(d.demo)}>
-            <WorkflowDiagram steps={['„Inception"', '🎬', 'Filmliste']} />
+            <WorkflowDiagram steps={['"Inception"', '🎬', 'Movie list']} />
           </Scene>
         </Series.Sequence>
 
         <Series.Sequence durationInFrames={f(d.benefits)}>
           <Scene audio="audio/tts/users-benefits.wav" durationInFrames={f(d.benefits)}>
             <BenefitList
-              title="Was du davon hast"
+              title="What you get"
               items={[
-                {icon: '⏱️', label: 'Zeit gespart'},
-                {icon: '🚫', label: 'Kein Copy-Paste mehr'},
-                {icon: '🎯', label: 'Alles am richtigen Ort'},
-                {icon: '🔒', label: 'Selbst gehostet & privat'},
+                {icon: '⏱️', label: 'Time saved'},
+                {icon: '🚫', label: 'No more copy-paste'},
+                {icon: '🎯', label: 'Everything in its place'},
+                {icon: '🔒', label: 'Self-hosted & private'},
               ]}
             />
           </Scene>
         </Series.Sequence>
 
         <Series.Sequence durationInFrames={f(d.close)}>
-          <Scene audio="audio/tts/users-close.wav" durationInFrames={f(d.close)}>
-            <TitleCard title="FlowHub" subtitle="Dein intelligenter Posteingang" />
+          <Scene audio="audio/tts/users-close.wav" durationInFrames={f(d.close)} bg={theme.colors.logoBg}>
+            <TitleCard title="FlowHub" subtitle="Your smart inbox" />
           </Scene>
         </Series.Sequence>
       </Series>

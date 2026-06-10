@@ -1,7 +1,10 @@
 import React from 'react';
-import {spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {Img, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {theme} from '../theme';
 
+// Brand title card: the FlowHub logo. The logo PNG has a baked-in navy
+// background (theme.colors.logoBg), so render it on a scene whose bg is logoBg
+// to avoid a visible rectangle. `title` is kept as the image alt text.
 export const TitleCard: React.FC<{title: string; subtitle?: string}> = ({
   title,
   subtitle,
@@ -11,18 +14,13 @@ export const TitleCard: React.FC<{title: string; subtitle?: string}> = ({
   const scale = spring({frame, fps, config: {damping: 200}});
   return (
     <div style={{textAlign: 'center', transform: `scale(${scale})`}}>
-      <div
-        style={{
-          fontSize: 140,
-          fontWeight: 800,
-          fontFamily: theme.fonts.heading,
-          color: theme.colors.primary,
-        }}
-      >
-        {title}
-      </div>
+      <Img
+        src={staticFile('flowhub-logo.png')}
+        alt={title}
+        style={{width: 680, height: 'auto', display: 'block', margin: '0 auto'}}
+      />
       {subtitle && (
-        <div style={{fontSize: 48, color: theme.colors.textMuted, marginTop: 24}}>
+        <div style={{fontSize: 48, color: theme.colors.textMuted, marginTop: 44}}>
           {subtitle}
         </div>
       )}

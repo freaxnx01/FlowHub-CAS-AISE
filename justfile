@@ -25,7 +25,7 @@ projbeschr_pdf     := "docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.p
 
 video_dir          := "video"
 video_piper        := justfile_directory() / "video/tools/piper/piper"
-video_model        := justfile_directory() / "video/tools/voices/de_DE-thorsten-medium.onnx"
+video_model        := justfile_directory() / "video/tools/voices/en_US-amy-medium.onnx"
 video_ffmpeg_dir   := justfile_directory() / "video/tools/ffmpeg"
 
 compose            := "docker compose"
@@ -655,7 +655,7 @@ video-setup:
 video-tts:
     #!/usr/bin/env bash
     set -euo pipefail
-    if [ ! -x "{{video_piper}}" ] || [ ! -x "{{video_ffmpeg_dir}}/ffprobe" ] || [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
+    if [ ! -x "{{video_piper}}" ] || [ ! -x "{{video_ffmpeg_dir}}/ffprobe" ] || [ ! -s "{{video_model}}" ] || [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
     cd {{video_dir}}
     PATH="{{video_ffmpeg_dir}}:$PATH" PIPER_BIN="{{video_piper}}" PIPER_MODEL="{{video_model}}" npm run tts
 
