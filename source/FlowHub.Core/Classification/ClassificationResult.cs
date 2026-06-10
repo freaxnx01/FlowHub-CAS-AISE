@@ -12,4 +12,5 @@ public sealed record ClassificationResult(
     string MatchedSkill,
     string? Title = null,
     string? VikunjaProject = null,
-    IReadOnlyDictionary<string, string>? Entities = null);
+    IReadOnlyDictionary<string, string>? Entities = null,
+    ClassifierTrace? Trace = null);
