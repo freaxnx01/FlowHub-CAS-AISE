@@ -117,6 +117,36 @@ Three vendor classes — commercial native (Anthropic), commercial aggregator (O
 
 ---
 
+## `USER.md` — human's personal context for skill generation
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** Skills today are generated without any durable model of *who the user is*. A `USER.md` at the repo root would hold the human's personal context so newly generated skills can be tailored to their background, stack, and life — instead of being generic.
+
+### Proposed shape
+
+A short, hand-curated Markdown file capturing stable personal facts, e.g.:
+
+- **Role:** Software Engineer
+- **Tech stack:** .NET / C#
+- **Hobbies:** Homelab, …
+- **Family:** children, …
+
+### How it's used
+
+`USER.md` is **read as context when generating new Skills**, so the generator can:
+
+- Pick examples and defaults that match the user's stack (.NET/C# over, say, Python).
+- Propose skills that fit the user's actual life (homelab automation, family logistics) rather than generic templates.
+- Skip onboarding questions whose answers already live in `USER.md`.
+
+### Open questions
+
+- Location & format — repo root `USER.md` vs. a vault note vs. `.ai/` config.
+- Overlap with the existing memory store (`memory/MEMORY.md`) — `USER.md` is hand-curated and skill-generation-facing; memory is auto-accumulated session context. Decide whether they cross-reference or stay separate.
+- Privacy — keep personal/family details out of anything that ships in the CAS submission bundle.
+
+---
+
 ## References
 
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)
