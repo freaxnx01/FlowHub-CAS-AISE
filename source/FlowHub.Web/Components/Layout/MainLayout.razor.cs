@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
+using MudBlazor;
 
 namespace FlowHub.Web.Components.Layout;
 
@@ -9,6 +10,21 @@ public partial class MainLayout : LayoutComponentBase
 
     private bool _drawerOpen;
     private bool _circuitReady;
+
+    // The app bar hosts the Quick-Capture field and the demo "Try:" chips, all of
+    // which use Color.Inherit. Against MudBlazor's default near-white light-mode
+    // app bar, the orange logo, the outlined text field's border, and the chips all
+    // wash out. Pinning the light-mode app bar to the dark-mode tone gives them the
+    // same legible contrast they already have in dark mode; the rest of the page
+    // keeps the default light palette.
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            AppbarBackground = "#1a1a27",
+            AppbarText = "#ffffffeb",
+        },
+    };
 
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 
