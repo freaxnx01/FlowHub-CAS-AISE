@@ -37,11 +37,19 @@ done
 [ -n "${ready}" ] || { log "ERROR: wallabag did not become ready"; exit 1; }
 log "wallabag is up"
 
-# Verify the credentials yield a token (fail fast if the client/user is wrong).
-code=$(curl -sS -o /tmp/tok.json -w '%{http_code}' -X POST "${API}/oauth/v2/token" \
-  -d "grant_type=password&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&username=${USER}&password=${PASS}" || true)
+# Verify the credentials yield a token. Retry: Wallabag can briefly 500 on the
+# OAuth endpoint while warming up or during a concurrent redeploy, and a single
+# transient failure must not hard-block web startup (this service gates it).
+code=000
+for attempt in $(seq 1 8); do
+  code=$(curl -sS -o /tmp/tok.json -w '%{http_code}' -X POST "${API}/oauth/v2/token" \
+    -d "grant_type=password&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&username=${USER}&password=${PASS}" || true)
+  [ "${code}" = "200" ] && break
+  log "token grant attempt ${attempt} returned HTTP ${code}; retrying ..."
+  sleep 3
+done
 if [ "${code}" != "200" ]; then
-  log "ERROR: token grant failed (HTTP ${code}) — check WALLABAG_CLIENT_* + demo user"; cat /tmp/tok.json; exit 1
+  log "ERROR: token grant failed (HTTP ${code}) after retries — check WALLABAG_CLIENT_* + demo user"; cat /tmp/tok.json; exit 1
 fi
 log "verified password grant"
 
