@@ -48,7 +48,8 @@ services:
       # Classification trace panel — on for the public demo (transparency).
       Demo__Trace__Enabled: "true"
       # Quick-access links to the live downstream services, shown in the demo banner.
-      # Vikunja uses a public read-only share (injected from /bootstrap/vikunja.env);
+      # Vikunja uses a public link-share (injected from /bootstrap/vikunja.env) —
+      # the Inbox board is writable so visitors can tick todos, Zitate is read-only;
       # Wallabag + paperless sit behind login, so the shared demo login is shown too.
       Demo__Wallabag__Url: ${WALLABAG_PUBLIC_URL:-https://wallabag.demo.flowhub.freaxnx01.ch}
       Demo__Paperless__Url: ${PAPERLESS_PUBLIC_URL:-https://paperless.demo.flowhub.freaxnx01.ch}
