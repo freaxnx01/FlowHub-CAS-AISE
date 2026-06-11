@@ -13,7 +13,7 @@ A fully open, rate-limited, self-resetting FlowHub instance at <https://demo.flo
 | Data lifetime | All Captures + Tags + SkillRuns truncated every 15 minutes by `flowhub.demo-reset` sidecar; small fixture set reseeded |
 | AI provider | OpenRouter `google/gemma-4-31b-it:free` only. KeywordClassifier auto-fallback on 429/error. `KeywordClassifier` is also the demo's safety net if the daily quota runs out. |
 | Embeddings | **Disabled** — `Embeddings__ApiKey` unset → `AiEmbeddingService` is null → consumer no-ops → `Captures.Embedding` stays NULL. `GET /api/v1/captures/search` returns 503 ProblemDetails with an explanatory body (transparent about what's wired vs not). |
-| Skill integrations | **Vikunja: live** — a self-contained demo Vikunja (sqlite) is provisioned at deploy; `Skills__Vikunja__*` are injected at runtime from the bootstrap env file, so `todo:` captures route to real tasks visible via a public read-only link-share. **Wallabag: disabled** — `Skills__Wallabag__*` unset → URL captures stop at `Unhandled`. See "Demo Vikunja" below. |
+| Skill integrations | **Vikunja: live** — a self-contained demo Vikunja (sqlite) is provisioned at deploy; `Skills__Vikunja__*` are injected at runtime from the bootstrap env file, so `todo:` captures route to real tasks on a public **writable** link-share (visitors can tick tasks done; wiped every reset). **Wallabag: disabled** — `Skills__Wallabag__*` unset → URL captures stop at `Unhandled`. See "Demo Vikunja" below. |
 | Observability | Prometheus + Grafana **not exposed publicly** — only `flowhub.web` + `postgres` + `rabbitmq` + `flowhub.demo-reset` go through the demo compose overlay. Operator metrics still scrapable via the VPS internal network. |
 
 ## Topology
@@ -58,7 +58,7 @@ A fully open, rate-limited, self-resetting FlowHub instance at <https://demo.flo
 - `demo/docker-compose.vps.yml` — VPS-DE Traefik label alignment (entrypoint `web-secure`, certresolver `default`, network `web`) for both `flowhub.web` and `vikunja`.
 - `demo/.env.example` — demo-only env vars; **no real Skills__*, no Embeddings**.
 - `demo/reset/Dockerfile` + `demo/reset/reset.sh` — Alpine image with `postgresql-client` + `bash` + `curl` + `jq`. Sleep-loop runs `reset.sh` every 900 s. Script TRUNCATEs `Captures` (CASCADE removes Tags + SkillRuns), reseeds the fixture set, purges RabbitMQ queues, and clears the demo Vikunja project's tasks (best-effort, using the bootstrap-written creds).
-- `demo/vikunja/Dockerfile` + `demo/vikunja/bootstrap.sh` — Alpine + `curl` + `jq` one-shot. Provisions the demo user, an `Inbox` project, a long-lived token, and a public read-only link-share; writes `/bootstrap/vikunja.env` (shared volume) consumed by `flowhub.web` and the reset sidecar.
+- `demo/vikunja/Dockerfile` + `demo/vikunja/bootstrap.sh` — Alpine + `curl` + `jq` one-shot. Provisions the demo user, an `Inbox` project, a long-lived token, and public link-shares — the Inbox board writable (`right=1`) so visitors can tick todos, the Zitate board read-only (`right=0`); writes `/bootstrap/vikunja.env` (shared volume) consumed by `flowhub.web` and the reset sidecar.
 
 ## Deploy
 
@@ -77,7 +77,7 @@ docker compose -f docker-compose.yml -f demo/docker-compose.yml -f demo/docker-c
 
 Cloudflare DNS entries (via `homelab-service-routing` skill) — `A` records to the VPS-DE public IPv4, not proxied (Traefik terminates TLS):
 - `demo.flowhub.freaxnx01.ch` — the FlowHub demo
-- `vikunja.demo.flowhub.freaxnx01.ch` — the demo Vikunja board (public read-only share)
+- `vikunja.demo.flowhub.freaxnx01.ch` — the demo Vikunja board (public writable share for todos; resets every 15 min)
 
 ## OpenRouter key hygiene
 
@@ -114,7 +114,7 @@ vikunja                sqlite-backed unified image (vikunja/vikunja, port 3456),
                        internal + on the Traefik network as vikunja.demo.flowhub.freaxnx01.ch
         ▼
 flowhub.vikunja-bootstrap   register demo user → login (long token) → ensure "Inbox"
-  (one-shot)                project → ensure public read-only link-share → write
+  (one-shot)                project → ensure public link-shares (Inbox writable, Zitate read-only) → write
                             /bootstrap/vikunja.env (shared volume)
         ▼
 flowhub.web            entrypoint sources /bootstrap/vikunja.env, so Skills__Vikunja__*
@@ -134,7 +134,7 @@ Notes:
 - **Share hash** is stable while the `vikunja-db` volume persists; if the volume is wiped the
   bootstrap mints a new share and the banner link auto-updates from the regenerated env file.
 - **Registration stays enabled** (the bootstrap needs it, idempotently). The demo Vikunja holds
-  no real data and resets, so this is acceptable; the public sees only the read-only share.
+  no real data and resets, so this is acceptable; the public reaches it only through the scoped link-shares.
 - **Env knobs** (all defaulted, override in `.env`): `VIKUNJA_IMAGE`, `VIKUNJA_PUBLIC_URL`,
   `VIKUNJA_JWT_SECRET`, `VIKUNJA_DEMO_USER`, `VIKUNJA_DEMO_PASSWORD`, `VIKUNJA_DEMO_PROJECT`.
 

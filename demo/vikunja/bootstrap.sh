@@ -67,14 +67,24 @@ ensure_project() {
   echo "${pid}"
 }
 
-# Helper: ensure a public, read-only link-share (right=0 read, sharing_type=1 no
-# password) on a project; echoes the share hash.
+# Helper: ensure a public link-share (sharing_type=1, no password) on a project at
+# the requested right level (0 read, 1 read+write); echoes the share hash. If a
+# share already exists at a different right level — e.g. minted read-only by an
+# earlier bootstrap on a persisted /bootstrap volume — it is deleted and recreated
+# so the change actually lands on already-provisioned demos.
 ensure_share() {
-  local pid="$1" h
-  h=$(curl -fsS "${API}/projects/${pid}/shares" -H "${AUTH}" | jq -r '(.[0].hash // empty)')
+  local pid="$1" want="${2:-0}" resp h cur sid
+  resp=$(curl -fsS "${API}/projects/${pid}/shares" -H "${AUTH}")
+  h=$(echo "${resp}" | jq -r '(.[0].hash // empty)')
+  cur=$(echo "${resp}" | jq -r '(.[0].right // empty)')
+  sid=$(echo "${resp}" | jq -r '(.[0].id // empty)')
+  if [ -n "${h}" ] && [ -n "${cur}" ] && [ "${cur}" != "${want}" ] && [ -n "${sid}" ]; then
+    curl -fsS -X DELETE "${API}/projects/${pid}/shares/${sid}" -H "${AUTH}" >/dev/null 2>&1 || true
+    h=""
+  fi
   if [ -z "${h}" ]; then
     h=$(curl -fsS -X PUT "${API}/projects/${pid}/shares" -H "${AUTH}" -H 'Content-Type: application/json' \
-      -d '{"right":0,"sharing_type":1}' | jq -r '.hash // empty')
+      -d "{\"right\":${want},\"sharing_type\":1}" | jq -r '.hash // empty')
   fi
   echo "${h}"
 }
@@ -82,7 +92,11 @@ ensure_share() {
 # 4. Inbox — the fallback project that "todo:" + uncategorised Vikunja captures land in.
 PID=$(ensure_project "${PROJECT_TITLE}")
 [ -n "${PID}" ] && [ "${PID}" != "null" ] || { log "ERROR: could not resolve Inbox project id"; exit 1; }
-HASH=$(ensure_share "${PID}")
+# right=1 (read+write): the Inbox board is a live todo list, so demo visitors can
+# tick tasks done. Tasks are wiped every reset cycle, so write access can't
+# accumulate damage. The Zitate board below stays read-only (right=0) — quotes
+# aren't tasks and there's nothing to interact with.
+HASH=$(ensure_share "${PID}" 1)
 [ -n "${HASH}" ] || { log "ERROR: could not resolve Inbox share hash"; exit 1; }
 SHARE_URL="${PUBLIC_URL%/}/share/${HASH}/auth"
 log "Inbox project id=${PID}"
