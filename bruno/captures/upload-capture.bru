@@ -1,0 +1,30 @@
+meta {
+  name: Upload Capture
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/captures/upload
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(./sample.pdf)
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  POST /api/v1/captures/upload — submits a Capture with a file attachment (multipart/form-data).
+  Form field: `file` (required). Allowed content types: application/pdf, image/png, image/jpeg.
+  Max size: UploadOptions.MaxBytes (2 MiB default). Source is recorded as Api.
+  Returns 201 Created with Location: /api/v1/captures/{id} and the Capture (incl. its Attachment),
+  or 400 ValidationProblem (missing/empty file, oversize, or disallowed content type).
+  Attachment captures bypass the LLM classifier and route to the Paperless skill (has-attachment rule).
+  Auth: DemoAuthHandler auto-signs requests when Auth__OIDC__Authority is unset (dev default).
+  Note: point `@file(...)` at a real local PDF/PNG/JPEG before sending.
+}
