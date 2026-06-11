@@ -360,6 +360,12 @@ services:
       PAPERLESS_URL: ${PAPERLESS_PUBLIC_URL:-https://paperless.demo.flowhub.freaxnx01.ch}
       PAPERLESS_TIME_ZONE: Europe/Zurich
       PAPERLESS_OCR_LANGUAGE: eng+deu
+      # Pin worker/thread counts. On a constrained/shared container paperless'
+      # auto-detection can compute 0 OCR workers, which fails every PDF/image
+      # consume with "ValueError: max_workers must be greater than 0".
+      PAPERLESS_TASK_WORKERS: "1"
+      PAPERLESS_THREADS_PER_WORKER: "1"
+      PAPERLESS_WEBSERVER_WORKERS: "1"
     volumes:
       - paperless-data:/usr/src/paperless/data
       - paperless-media:/usr/src/paperless/media
