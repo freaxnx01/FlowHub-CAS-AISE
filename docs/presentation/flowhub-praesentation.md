@@ -2,7 +2,7 @@
 marp: true
 theme: flowhub
 paginate: true
-footer: 'FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden'
+footer: 'FlowHub · CAS AI-Assisted Software Engineering'
 math: false
 ---
 
@@ -218,6 +218,66 @@ davon abgehalten, unkontrolliert in die falsche Richtung zu laufen."
 
 ---
 
+## Werkzeuge: `ai-instructions` + eigene Skills
+
+Nicht ad-hoc geprompted, sondern über **wiederverwendbare Werkzeuge** gesteuert.
+
+**`ai-instructions`** (eigenes Repo) — Konventionen als feste Regeln, nicht als Prompt:
+
+- `base` (stack-agnostisch) **+ Stack-Overlay `dotnet-blazor`** → daraus leitet sich `CLAUDE.md` ab
+- z. B. **Semantic Versioning** · **Conventional Commits** · **12-Factor** · **TDD** — *Tests werden nie nachträglich angepasst, nur damit Code grün wird*
+
+**Eigene CAS-AISE-Skills** (Claude-Code-Slash-Commands):
+
+- `/ui-brainstorm · /ui-flow · /ui-build · /ui-review` — der 4-Phasen-UI-Workflow
+- `/flowhub-capture · -triage · -issue` — das Produkt selbst bedienen
+- `examiner-sim` · `cas-aise-grade-self-check` — Selbstbewertung gegen die Moodle-Rubrik
+
+<!--
+[~45 s] Der Meta-Punkt: Steuerung statt Zuruf.
+"Damit die KI nicht jedes Mal bei null anfängt, habe ich zwei Dinge gebaut. Erstens ein
+eigenes ai-instructions-Repo: ein stack-agnostischer Kern plus ein .NET-Blazor-Overlay –
+Tech-Stack, Clean-Code, TDD, 12-Factor als feste Regeln, aus denen sich das CLAUDE.md des
+Projekts ableitet. Zweitens eigene Skills als Slash-Commands: der vierstufige UI-Workflow,
+Commands zum Bedienen des Produkts, und ein Skill, der das Projekt gegen die Moodle-Rubrik
+selbst bewertet. Die KI bekommt also Werkzeuge, keine Zurufe."
+-->
+
+---
+
+## Beispiel: der UI-Workflow
+
+`/ui-brainstorm` → **ASCII-Wireframe** → `/ui-flow` → **Mermaid-Flow** → `/ui-build` → `/ui-review`
+Gate pro Phase — nichts wird gebaut, bevor Wireframe **und** Flow freigegeben sind.
+
+**Phase 1 — Wireframe** (`New Capture`):
+
+```
+┌─ FlowHub ─────────────────────┐
+│  New Capture                  │
+│  ┌─ Content * ─────────────┐  │
+│  │ URL / Zitat / Text…     │  │
+│  └─────────────────────────┘  │
+│  Skill: [ — KI entscheidet ▾ ]│
+│        [Abbrechen] [Speichern] │
+└───────────────────────────────┘
+```
+
+**Phase 2 — Mermaid-Flow** → echtes `docs/design/new-capture/flow.md`
+
+![bg right:40% h:300](assets/ui-flow-example.svg)
+
+<!--
+[~45 s] Konkret zeigen, nicht abstrakt behaupten.
+"Ein Beispiel für die UI: vier Phasen, jede mit einem Gate. Phase 1 zwingt mich, das
+Layout erst als ASCII-Wireframe zu klären – links zu sehen. Phase 2 macht den
+Zustandsfluss explizit, als Mermaid-Diagramm – rechts. Beides muss freigegeben sein,
+bevor in Phase 3 überhaupt eine Zeile Blazor entsteht. So baut die KI nicht am Ziel
+vorbei, und ich denke das UI durch, bevor Code existiert."
+-->
+
+---
+
 ## KI-Anteil in Zahlen (Block 4: Persistenz)
 
 | Artefakt | Zeilen | KI-generiert | Mensch | KI % |
@@ -338,4 +398,26 @@ FK-Strategie, Performance, Scope, aktuelle Versionen.
 sie braucht menschliche Führung bei allem, was Architektur und Domäne berührt. Die Rolle
 hat sich verschoben – weg vom Zeile-für-Zeile-Tippen, hin zu Entwerfen, Lenken und
 Reviewen. Der Mensch bleibt Architekt und Reviewer. Danke – ich freue mich auf eure Fragen."
+-->
+
+---
+
+<!-- _paginate: false -->
+
+## Anhang · Abkürzungen
+
+| Abk. | Bedeutung | Abk. | Bedeutung |
+|---|---|---|---|
+| KI / AI | Künstliche Intelligenz | MEAI | Microsoft.Extensions.AI |
+| SSR | Server-Side Rendering | LLM | Large Language Model |
+| EF Core | Entity Framework Core (ORM) | pgvector | Postgres-Vektor-Erweiterung |
+| HNSW | Approx.-Nearest-Neighbour-Index | ANN | Approximate Nearest Neighbour |
+| DI | Dependency Injection | TDD | Test-Driven Development |
+| RFC 9457 | HTTP Problem Details | ADR | Architecture Decision Record |
+| MVP | Minimum Viable Product | LTS | Long-Term Support |
+| DMS | Dokumentenmanagement-System | OIDC | OpenID Connect (geplant) |
+| FK | Foreign Key (Fremdschlüssel) | N+1 | N+1-Query-Problem |
+
+<!--
+[Backup] Nur bei Nachfragen zeigen — Akronyme aus dem Deck.
 -->
