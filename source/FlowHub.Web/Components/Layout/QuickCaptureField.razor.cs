@@ -31,7 +31,7 @@ public partial class QuickCaptureField : ComponentBase
     private static readonly (string Label, string Content)[] Examples =
     [
         ("🎬 The Matrix is a great movie", "The Matrix is a great movie"),
-        ("📜 a famous quote", "\"You have power over your mind — not outside events.\" — Marcus Aurelius"),
+        ("📜 ein Zitat", "\"Die Entwicklung des papierlosen Büros ist genau so weit wie die Entwicklung des papierlosen Klos.\" — Heinrich von Pierer, Siemens-Chef"),
         ("✅ todo: buy milk", "todo: buy milk"),
         ("🔗 example URL", "https://en.wikipedia.org/wiki/Personal_knowledge_management"),
     ];
