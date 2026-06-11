@@ -1,6 +1,10 @@
 // Shape of video/public/demo/manifest.json — the contract between
 // tools/capture-demo.mjs (writer) and src/DemoWalkthrough.tsx (reader).
 
+// The capture script only emits `intro` (home shot), `capture`, and `service`.
+// `outro` is reserved: the composition synthesizes the closing logo card, so
+// there is no `outro` shot today — it stays in the vocabulary for a future
+// closing screenshot.
 export const SECTIONS = ['intro', 'capture', 'service', 'outro'];
 export const KINDS = ['context', 'result', 'action'];
 

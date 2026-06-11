@@ -218,8 +218,13 @@ async function run() {
   };
   const {ok, errors} = validateManifest(manifest);
   if (!ok) throw new Error('manifest invalid:\n' + errors.join('\n'));
-  if (shots.length < 1 + CHIPS.length) {
-    throw new Error(`too few shots captured: ${shots.length}`);
+  // Gross-failure floor: home + at least the chip + list shot for every sample.
+  // A full run yields ~25 (home + 4 chips × 4 + services); this catches a run
+  // where classification/navigation broke for most samples rather than passing
+  // a near-empty capture silently. Services are adaptive, so they're not required.
+  const minShots = 1 + CHIPS.length * 2;
+  if (shots.length < minShots) {
+    throw new Error(`too few shots captured: ${shots.length} (expected >= ${minShots})`);
   }
   writeFileSync(join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   console.log(`captured ${shots.length} shots → ${outDir}`);
