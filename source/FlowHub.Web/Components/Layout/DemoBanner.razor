@@ -17,6 +17,12 @@
                            Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit"
                            StartIcon="@Icons.Material.Filled.Checklist">Vikunja</MudButton>
             }
+            @if (!string.IsNullOrWhiteSpace(ZitateBoardUrl))
+            {
+                <MudButton Href="@ZitateBoardUrl" Target="_blank" rel="noopener noreferrer"
+                           Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.FormatQuote">Zitate</MudButton>
+            }
             @if (!string.IsNullOrWhiteSpace(WallabagUrl))
             {
                 <MudButton Href="@WallabagUrl" Target="_blank" rel="noopener noreferrer"

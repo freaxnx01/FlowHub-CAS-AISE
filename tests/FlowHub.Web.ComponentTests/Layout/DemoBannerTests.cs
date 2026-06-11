@@ -57,6 +57,18 @@ public class DemoBannerTests : TestContext
     }
 
     [Fact]
+    public void WithZitateBoardUrl_RendersClickableZitateLink_OpeningNewTab()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.ZitateBoardUrl, "https://vikunja.demo.flowhub.freaxnx01.ch/share/zit123/auth"));
+
+        var link = cut.Find("a[href='https://vikunja.demo.flowhub.freaxnx01.ch/share/zit123/auth']");
+        link.GetAttribute("target").Should().Be("_blank");
+        link.TextContent.Should().Contain("Zitate");
+    }
+
+    [Fact]
     public void WithWallabagUrl_RendersClickableWallabagLink_OpeningNewTab()
     {
         var cut = RenderComponent<DemoBanner>(p => p

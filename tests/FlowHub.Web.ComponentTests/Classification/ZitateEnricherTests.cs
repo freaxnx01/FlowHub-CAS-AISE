@@ -95,6 +95,9 @@ public class ZitateEnricherTests
 
         capturedMessages.Should().NotBeNull();
         var userMessage = capturedMessages!.Single(m => m.Role == ChatRole.User).Text;
-        userMessage.Length.Should().BeLessThanOrEqualTo(120);
+        // The (untrusted) author is capped at 120 chars before being sent to the
+        // bio LLM — the message also carries the quote, so assert on the author run.
+        userMessage.Should().Contain(new string('x', 120));
+        userMessage.Should().NotContain(new string('x', 121));
     }
 }

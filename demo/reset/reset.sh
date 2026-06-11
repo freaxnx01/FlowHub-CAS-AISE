@@ -45,13 +45,17 @@ if [ -f "${VIKUNJA_ENV}" ]; then
   . "${VIKUNJA_ENV}"
   if [ -n "${VIKUNJA_API_URL:-}" ] && [ -n "${VIKUNJA_TOKEN:-}" ] && [ -n "${VIKUNJA_PROJECT_ID:-}" ]; then
     auth="Authorization: Bearer ${VIKUNJA_TOKEN}"
-    ids=$(curl -fsS "${VIKUNJA_API_URL}/projects/${VIKUNJA_PROJECT_ID}/tasks" -H "${auth}" 2>/dev/null \
-      | jq -r 'if type=="array" then .[].id else empty end' 2>/dev/null || true)
-    count=0
-    for id in ${ids}; do
-      curl -fsS -X DELETE "${VIKUNJA_API_URL}/tasks/${id}" -H "${auth}" >/dev/null 2>&1 && count=$((count + 1)) || true
+    # Clear both demo boards: Inbox (todos) and Zitate (quotes).
+    for pid in ${VIKUNJA_PROJECT_ID} ${VIKUNJA_ZITATE_PROJECT_ID:-}; do
+      [ -n "${pid}" ] || continue
+      ids=$(curl -fsS "${VIKUNJA_API_URL}/projects/${pid}/tasks" -H "${auth}" 2>/dev/null \
+        | jq -r 'if type=="array" then .[].id else empty end' 2>/dev/null || true)
+      count=0
+      for id in ${ids}; do
+        curl -fsS -X DELETE "${VIKUNJA_API_URL}/tasks/${id}" -H "${auth}" >/dev/null 2>&1 && count=$((count + 1)) || true
+      done
+      echo "[$(ts)] demo-reset: cleared ${count} Vikunja task(s) from project ${pid}"
     done
-    echo "[$(ts)] demo-reset: cleared ${count} Vikunja task(s) from project ${VIKUNJA_PROJECT_ID}"
   else
     echo "[$(ts)] demo-reset: Vikunja env incomplete — skipping task cleanup"
   fi

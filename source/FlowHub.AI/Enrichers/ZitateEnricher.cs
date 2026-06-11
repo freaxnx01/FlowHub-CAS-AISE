@@ -47,7 +47,7 @@ public sealed partial class ZitateEnricher : IEnricher
 
         if (!string.IsNullOrWhiteSpace(author))
         {
-            var bio = await FetchBioAsync(author!, cancellationToken);
+            var bio = await FetchBioAsync(author!, quote, cancellationToken);
             if (!string.IsNullOrWhiteSpace(bio))
             {
                 description.Append("About ").Append(author).Append(": ").Append(bio.Trim());
@@ -57,13 +57,13 @@ public sealed partial class ZitateEnricher : IEnricher
         return new EnrichmentResult(description.ToString().TrimEnd());
     }
 
-    private async Task<string?> FetchBioAsync(string author, CancellationToken cancellationToken)
+    private async Task<string?> FetchBioAsync(string author, string quote, CancellationToken cancellationToken)
     {
         try
         {
             var response = await _chat.GetResponseAsync(
-                ZitateEnricherPrompts.BuildMessages(author),
-                new ChatOptions { MaxOutputTokens = 200, Temperature = 0.2f },
+                ZitateEnricherPrompts.BuildMessages(author, quote),
+                new ChatOptions { MaxOutputTokens = 280, Temperature = 0.2f },
                 cancellationToken);
             return response.Messages.LastOrDefault()?.Text;
         }

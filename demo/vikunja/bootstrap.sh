@@ -55,29 +55,47 @@ TOKEN=$(jq -r '.token // empty' /tmp/login.json)
 AUTH="Authorization: Bearer ${TOKEN}"
 log "logged in"
 
-# 4. Ensure the project exists (reuse by title, else create).
-PID=$(curl -fsS "${API}/projects" -H "${AUTH}" \
-  | jq -r --arg t "${PROJECT_TITLE}" 'map(select(.title==$t)) | (.[0].id // empty)')
-if [ -z "${PID}" ]; then
-  PID=$(curl -fsS -X PUT "${API}/projects" -H "${AUTH}" -H 'Content-Type: application/json' \
-    -d "{\"title\":\"${PROJECT_TITLE}\"}" | jq -r '.id')
-  log "created project '${PROJECT_TITLE}' (id=${PID})"
-else
-  log "reusing project '${PROJECT_TITLE}' (id=${PID})"
-fi
-[ -n "${PID}" ] && [ "${PID}" != "null" ] || { log "ERROR: could not resolve project id"; exit 1; }
+# Helper: ensure a project exists by title (reuse, else create); echoes its id.
+ensure_project() {
+  local title="$1" pid
+  pid=$(curl -fsS "${API}/projects" -H "${AUTH}" \
+    | jq -r --arg t "${title}" 'map(select(.title==$t)) | (.[0].id // empty)')
+  if [ -z "${pid}" ]; then
+    pid=$(curl -fsS -X PUT "${API}/projects" -H "${AUTH}" -H 'Content-Type: application/json' \
+      -d "{\"title\":\"${title}\"}" | jq -r '.id')
+  fi
+  echo "${pid}"
+}
 
-# 5. Ensure a public, read-only link-share (right=0 read, sharing_type=1 no password).
-HASH=$(curl -fsS "${API}/projects/${PID}/shares" -H "${AUTH}" | jq -r '(.[0].hash // empty)')
-if [ -z "${HASH}" ]; then
-  HASH=$(curl -fsS -X PUT "${API}/projects/${PID}/shares" -H "${AUTH}" -H 'Content-Type: application/json' \
-    -d '{"right":0,"sharing_type":1}' | jq -r '.hash // empty')
-  log "created public read-only link-share"
-else
-  log "reusing existing link-share"
-fi
-[ -n "${HASH}" ] || { log "ERROR: could not resolve share hash"; exit 1; }
+# Helper: ensure a public, read-only link-share (right=0 read, sharing_type=1 no
+# password) on a project; echoes the share hash.
+ensure_share() {
+  local pid="$1" h
+  h=$(curl -fsS "${API}/projects/${pid}/shares" -H "${AUTH}" | jq -r '(.[0].hash // empty)')
+  if [ -z "${h}" ]; then
+    h=$(curl -fsS -X PUT "${API}/projects/${pid}/shares" -H "${AUTH}" -H 'Content-Type: application/json' \
+      -d '{"right":0,"sharing_type":1}' | jq -r '.hash // empty')
+  fi
+  echo "${h}"
+}
+
+# 4. Inbox — the fallback project that "todo:" + uncategorised Vikunja captures land in.
+PID=$(ensure_project "${PROJECT_TITLE}")
+[ -n "${PID}" ] && [ "${PID}" != "null" ] || { log "ERROR: could not resolve Inbox project id"; exit 1; }
+HASH=$(ensure_share "${PID}")
+[ -n "${HASH}" ] || { log "ERROR: could not resolve Inbox share hash"; exit 1; }
 SHARE_URL="${PUBLIC_URL%/}/share/${HASH}/auth"
+log "Inbox project id=${PID}"
+
+# 5. Zitate — quote captures route here (project name matches the ZitateEnricher
+#    bucket), so the classifier picks 'Zitate' and the enricher adds author/context.
+ZITATE_TITLE="${VIKUNJA_ZITATE_PROJECT:-Zitate}"
+ZID=$(ensure_project "${ZITATE_TITLE}")
+[ -n "${ZID}" ] && [ "${ZID}" != "null" ] || { log "ERROR: could not resolve Zitate project id"; exit 1; }
+ZHASH=$(ensure_share "${ZID}")
+[ -n "${ZHASH}" ] || { log "ERROR: could not resolve Zitate share hash"; exit 1; }
+ZITATE_SHARE_URL="${PUBLIC_URL%/}/share/${ZHASH}/auth"
+log "Zitate project id=${ZID}"
 
 # 6. Write the env file consumed by flowhub.web (skill activation) and the reset sidecar.
 #    BaseUrl is the host root — FlowHub appends /api/v1/projects/{id}/tasks itself.
@@ -89,9 +107,11 @@ Skills__Vikunja__ApiToken=${TOKEN}
 Skills__Vikunja__FallbackProject=${PROJECT_TITLE}
 Skills__Vikunja__FallbackProjectId=${PID}
 Demo__Vikunja__ShareUrl=${SHARE_URL}
+Demo__Vikunja__ZitateShareUrl=${ZITATE_SHARE_URL}
 VIKUNJA_API_URL=${API}
 VIKUNJA_PROJECT_ID=${PID}
+VIKUNJA_ZITATE_PROJECT_ID=${ZID}
 VIKUNJA_TOKEN=${TOKEN}
 EOF
-log "wrote ${OUT} (project=${PID}, share=${SHARE_URL})"
+log "wrote ${OUT} (inbox=${PID}, zitate=${ZID})"
 log "done"

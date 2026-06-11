@@ -20,6 +20,9 @@ public partial class DemoBanner : ComponentBase
 
     [Parameter] public string? SkillBoardUrl { get; set; }
 
+    /// <summary>Public share of the Vikunja 'Zitate' board, where quote captures land.</summary>
+    [Parameter] public string? ZitateBoardUrl { get; set; }
+
     [Parameter] public string? WallabagUrl { get; set; }
 
     [Parameter] public string? PaperlessUrl { get; set; }
@@ -31,5 +34,7 @@ public partial class DemoBanner : ComponentBase
         !string.IsNullOrWhiteSpace(WallabagUrl) || !string.IsNullOrWhiteSpace(PaperlessUrl);
 
     private bool HasAnyServiceLink =>
-        !string.IsNullOrWhiteSpace(SkillBoardUrl) || HasLoginGatedServiceLink;
+        !string.IsNullOrWhiteSpace(SkillBoardUrl)
+        || !string.IsNullOrWhiteSpace(ZitateBoardUrl)
+        || HasLoginGatedServiceLink;
 }
