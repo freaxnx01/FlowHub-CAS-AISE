@@ -29,4 +29,7 @@ public partial class DemoBanner : ComponentBase
 
     private bool HasLoginGatedServiceLink =>
         !string.IsNullOrWhiteSpace(WallabagUrl) || !string.IsNullOrWhiteSpace(PaperlessUrl);
+
+    private bool HasAnyServiceLink =>
+        !string.IsNullOrWhiteSpace(SkillBoardUrl) || HasLoginGatedServiceLink;
 }

@@ -1,53 +1,49 @@
 @namespace FlowHub.Web.Components.Layout
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Filled" Square="true" Dense="true" Class="ma-0">
-    @BannerText
-    @if (!string.IsNullOrWhiteSpace(SkillBoardUrl))
-    {
-        <MudLink Href="@SkillBoardUrl"
-                 Target="_blank"
-                 rel="noopener noreferrer"
-                 Color="Color.Inherit"
-                 Underline="Underline.Always"
-                 Class="ml-1">
-            View routed tasks in Vikunja ↗
-        </MudLink>
-    }
-    @if (!string.IsNullOrWhiteSpace(WallabagUrl))
-    {
-        <MudLink Href="@WallabagUrl"
-                 Target="_blank"
-                 rel="noopener noreferrer"
-                 Color="Color.Inherit"
-                 Underline="Underline.Always"
-                 Class="ml-1">
-            Open Wallabag ↗
-        </MudLink>
-    }
-    @if (!string.IsNullOrWhiteSpace(PaperlessUrl))
-    {
-        <MudLink Href="@PaperlessUrl"
-                 Target="_blank"
-                 rel="noopener noreferrer"
-                 Color="Color.Inherit"
-                 Underline="Underline.Always"
-                 Class="ml-1">
-            Open paperless-ngx ↗
-        </MudLink>
-    }
-    @if (HasLoginGatedServiceLink && !string.IsNullOrWhiteSpace(ServiceLogin))
-    {
-        <span class="ml-1" style="opacity:0.85;">(Wallabag/paperless login: @ServiceLogin)</span>
-    }
-    @if (!string.IsNullOrWhiteSpace(RepoUrl))
-    {
-        <MudLink Href="@RepoUrl"
-                 Target="_blank"
-                 rel="noopener noreferrer"
-                 Color="Color.Inherit"
-                 Underline="Underline.Always"
-                 Class="ml-1">
-            Source on GitHub
-        </MudLink>
-    }
+<MudAlert Severity="Severity.Info" Variant="Variant.Filled" Square="true" Dense="true" Class="ma-0 py-2">
+    <MudStack Spacing="1">
+        @* Description *@
+        <MudText Typo="Typo.body2">@BannerText</MudText>
+
+        @* Actions — service quick-links + source, visually separated from the prose *@
+        <MudStack Row="true" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap" Spacing="1">
+            @if (HasAnyServiceLink)
+            {
+                <MudText Typo="Typo.caption" Class="mr-1" Style="opacity:0.85;">Live services:</MudText>
+            }
+            @if (!string.IsNullOrWhiteSpace(SkillBoardUrl))
+            {
+                <MudButton Href="@SkillBoardUrl" Target="_blank" rel="noopener noreferrer"
+                           Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.Checklist">Vikunja</MudButton>
+            }
+            @if (!string.IsNullOrWhiteSpace(WallabagUrl))
+            {
+                <MudButton Href="@WallabagUrl" Target="_blank" rel="noopener noreferrer"
+                           Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.Bookmark">Wallabag</MudButton>
+            }
+            @if (!string.IsNullOrWhiteSpace(PaperlessUrl))
+            {
+                <MudButton Href="@PaperlessUrl" Target="_blank" rel="noopener noreferrer"
+                           Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.Description">paperless-ngx</MudButton>
+            }
+            @if (HasLoginGatedServiceLink && !string.IsNullOrWhiteSpace(ServiceLogin))
+            {
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Inherit"
+                         Icon="@Icons.Material.Filled.Lock" Class="ml-1"
+                         title="Demo login for Wallabag and paperless-ngx">@ServiceLogin</MudChip>
+            }
+
+            <MudSpacer />
+
+            @if (!string.IsNullOrWhiteSpace(RepoUrl))
+            {
+                <MudButton Href="@RepoUrl" Target="_blank" rel="noopener noreferrer"
+                           Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit"
+                           StartIcon="@Icons.Custom.Brands.GitHub">Source</MudButton>
+            }
+        </MudStack>
+    </MudStack>
 </MudAlert>

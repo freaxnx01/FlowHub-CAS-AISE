@@ -23,7 +23,7 @@ public class DemoBannerTests : TestContext
         cut.Markup.Should().Contain("Public demo — try it");
         var link = cut.Find("a[href='https://github.com/freaxnx01/FlowHub-CAS-AISE']");
         link.GetAttribute("target").Should().Be("_blank");
-        link.TextContent.Should().Contain("Source on GitHub");
+        link.TextContent.Should().Contain("Source");
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class DemoBannerTests : TestContext
 
         var link = cut.Find("a[href='https://vikunja.demo.flowhub.freaxnx01.ch/share/abc123/auth']");
         link.GetAttribute("target").Should().Be("_blank");
-        link.TextContent.Should().Contain("View routed tasks in Vikunja");
+        link.TextContent.Should().Contain("Vikunja");
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class DemoBannerTests : TestContext
             .Add(c => c.BannerText, "Public demo")
             .Add(c => c.RepoUrl, "https://github.com/freaxnx01/FlowHub-CAS-AISE"));
 
-        cut.Markup.Should().NotContain("View routed tasks in Vikunja");
+        cut.Markup.Should().NotContain("Vikunja");
     }
 
     [Fact]
