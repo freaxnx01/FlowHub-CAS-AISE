@@ -198,3 +198,10 @@ CAS-AISE project work — see repository owner.
 ## Agent conventions
 
 This repository was developed with heavy AI-assisted engineering. Agent conventions, skills, and the mandatory UI workflow are documented in [`CLAUDE.md`](CLAUDE.md); AI usage per block is in [`docs/ai-usage.md`](docs/ai-usage.md); personal lessons learned in [`vault/Projektarbeit/Learnings.md`](vault/Projektarbeit/Learnings.md).
+
+## Related repositories
+
+Part of the same AI-assisted engineering toolchain:
+
+- [`freaxnx01/ai-instructions`](https://github.com/freaxnx01/ai-instructions) — reusable AI-agent instruction templates (base conventions + per-stack overlays) that this repo's [`CLAUDE.md`](CLAUDE.md), Copilot instructions, and `.ai/` skills are synced from (via the `sync-ai-instructions` skill).
+- [`freaxnx01/agent-pipeline`](https://github.com/freaxnx01/agent-pipeline) — reusable GitHub Actions workflow for autonomous issue → implementation that this repo delegates to via [`.github/workflows/claude.yml`](.github/workflows/claude.yml) (see [`docs/CLAUDE-PIPELINE.md`](docs/CLAUDE-PIPELINE.md)).
