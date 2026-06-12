@@ -101,7 +101,7 @@ public sealed class WallabagContractTests : IClassFixture<WireMockServerFixture>
         var act = () => _sut.HandleAsync(capture, CancellationToken.None);
 
         (await act.Should().ThrowAsync<InvalidOperationException>())
-            .WithMessage("*not a valid absolute url*");
+            .WithMessage("*no http(s) url*");
         _wire.Server.LogEntries.Should().BeEmpty();
     }
 
@@ -113,7 +113,7 @@ public sealed class WallabagContractTests : IClassFixture<WireMockServerFixture>
         var act = () => _sut.HandleAsync(capture, CancellationToken.None);
 
         (await act.Should().ThrowAsync<InvalidOperationException>())
-            .WithMessage("*not a valid absolute url*");
+            .WithMessage("*no http(s) url*");
         _wire.Server.LogEntries.Should().BeEmpty();
     }
 
