@@ -153,6 +153,26 @@ Suche. Alles in Docker Compose. Gebaut wurde das inkrementell – ein Block pro 
 
 ---
 
+## Betrieb: beobachten & selbst heilen
+
+| Was | Wie |
+|---|---|
+| Metriken | OpenTelemetry → **Prometheus** (`/metrics`) → **Grafana** |
+| Health | `/health/live` · In-App-Integration-Health (Vikunja/Wallabag/Paperless) |
+| Demo-Status | öffentliche **Uptime-Kuma**-Statusseite (`status.demo.flowhub…`) — prüft auch LLM-Erreichbarkeit |
+| Self-Healing | Container-`restart`-Policies + Healthchecks · KeywordClassifier-Fallback bei LLM-Ausfall |
+
+*Block-5-Lernziel „Systeme überwachen und optimieren" — von der App bis zur Demo.*
+
+<!--
+[~30 s] Monitoring ist nicht nachträglich angeklebt: Metriken via OpenTelemetry,
+Prometheus + Grafana im Stack. Die öffentliche Demo hat eine Uptime-Kuma-Statusseite,
+die auch die LLM-Erreichbarkeit prüft. Fällt das LLM aus, greift der KeywordClassifier —
+die App bleibt funktionsfähig. Container heilen sich per restart-Policy selbst.
+-->
+
+---
+
 <!-- _class: divider -->
 <!-- _paginate: true -->
 
