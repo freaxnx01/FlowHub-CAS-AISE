@@ -33,7 +33,7 @@ Snapshot am Ende der Block-1-Phase (~2026-03-21) gegen die offizielle Moodle-Rub
 
 > **Sektion nachträglich ergänzt (2026-05-17)** — damit das Pattern aus Block 3 / 4 / 5 auch in Block 1 / 2 vorhanden ist.
 
-> Quarkus/Jakarta-EE-Item ist für FlowHub (.NET-Stack) **nicht relevant** — bewusst ausgeklammert.
+> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 

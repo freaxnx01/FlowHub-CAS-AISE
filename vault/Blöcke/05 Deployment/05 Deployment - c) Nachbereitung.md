@@ -41,7 +41,7 @@ In der letzten Nachbearbeitungsphase geht es nun darum, die Lösung zu container
 
 ⚠️ **Hier zählt's:** Alle 18 Items aus [[Bewertungskriterien]] müssen Abgabe-fähig sein. Punkte in Klammern = Max-Score.
 
-> Quarkus/Jakarta-EE-Item ist für FlowHub (.NET) **nicht relevant** — bewusst ausgeklammert.
+> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 

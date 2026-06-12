@@ -1,23 +1,25 @@
-# Moderne Applikationskonzepte — Quarkus / Jakarta-EE-Kriterium im .NET-Mapping
+# Moderne Applikationskonzepte — Nachweis im .NET-Framework
 
-> **Bezug:** Bewertungskriterium *„Wurden die Konzepte von Quarkus, Jakarta EE und
-> modernen Java-Applikationen berücksichtigt"* (max. 10 Pkt., Skala 0 / 3 / 7 / 10).
+> **Bezug:** Bewertungskriterium *„Wurden die Konzepte des gewählten Frameworks und
+> moderner Applikationsentwicklung sachgerecht eingesetzt (z. B. Dependency
+> Injection, REST-Schnittstellen, Konfiguration, Fehlerbehandlung)"* (max. 10 Pkt.,
+> Skala 0 / 3 / 7 / 10). *(Rubrik-Update Juni 2026 — vorher Quarkus-/Jakarta-EE-spezifisch.)*
 
 ## Einordnung
 
-FlowHub ist in **.NET 10 / ASP.NET Core** umgesetzt. Die **freie Wahl des
-Technologie-Stacks wurde in der PVA explizit bestätigt** (Projektbeschreibung v4,
-§„Risiken/Stack" — _„In der PVA explizit bestätigt: freie Wahl des
-Technologie-Stacks"_; ADR 0001). Der Moodle-Auftrag nennt **Quarkus / Jakarta EE
-nur als Referenz-Stack** — die Lernziele sind stack-neutral formuliert.
+Das Kriterium ist **framework-neutral**: das **gewählte Framework** ist hier
+.NET 10 / ASP.NET Core (Stack-Entscheid: ADR 0001; freie Stackwahl in der PVA
+bestätigt). Es ist damit **direkt erfüllt** — die ausdrücklich genannten Konzepte
+(Dependency Injection, REST-Schnittstellen, Konfiguration, Fehlerbehandlung) sowie
+die weiteren Konzepte moderner Enterprise-Applikationen (ORM-Abstraktion,
+Health-/Metrics-Observability, asynchrone & ereignisbasierte Kommunikation,
+Resilienz, schlanke Container, Testbarkeit) sind in FlowHub vorhanden und im Code
+nachgewiesen.
 
-Dieses Kriterium wird deshalb **nicht ausgeklammert, sondern über die
-.NET-Äquivalente erfüllt**. Es misst die **Konzepte moderner Enterprise-
-Applikationen** (DI, deklaratives REST, ORM-Abstraktion, externalisierte
-Konfiguration, Health-/Metrics-Observability, asynchrone & ereignisbasierte
-Kommunikation, Resilienz, schlanke Container, Testbarkeit). Jedes dieser Konzepte
-ist in FlowHub vorhanden und im Code nachgewiesen — die folgende Tabelle bildet es
-auf das FlowHub-Äquivalent ab.
+Die folgende Tabelle weist jedes Konzept an konkreten Stellen nach. Die linke
+Spalte nennt zusätzlich die jeweilige Jakarta-EE-/Quarkus-Entsprechung — nicht weil
+sie behauptet würde, sondern als gängige Bezeichnung des Konzepts (Referenz-Stack
+des Moduls).
 
 Ehrlich abgegrenzt: die rein **Java-/Quarkus-runtime-spezifischen** Mechanismen
 (CDI-Annotationen, Quarkus-Build-time-DI, echtes GraalVM-Native-Image) werden
@@ -45,16 +47,14 @@ gegenstandslos.
 
 ## Selbsteinschätzung
 
-- **Konzepte moderner Applikationen** (DI, deklaratives REST, ORM-Abstraktion,
-  externalisierte Konfiguration, Health/Metrics, asynchrone & ereignisbasierte
-  Kommunikation, Fehlertoleranz, schlanke Container, Testbarkeit): **vollständig
-  und im Code nachgewiesen** (Tabelle oben). Bei freier, in der PVA bestätigter
-  Stackwahl ist das Kriterium über diese .NET-Äquivalente **erfüllt** —
-  angestrebte Stufe **„überwiegend"–„vollständig" (7–10)**.
-- **Rein Java-/Quarkus-runtime-spezifische** Mechanismen (CDI-Annotationen,
-  Quarkus-Build-time-DI, echtes GraalVM-Native-Image): bewusst nicht verwendet —
-  bei einem Nicht-JVM-Stack gegenstandslos, daher kein Abzug am Konzept-Nachweis.
+Das Kriterium ist framework-neutral und für FlowHub **direkt erfüllt**. Die vier
+ausdrücklich genannten Konzepte sind belegt: **Dependency Injection**,
+**REST-Schnittstellen**, **Konfiguration**, **Fehlerbehandlung** — ebenso die
+weiteren Konzepte moderner Applikationsentwicklung (ORM, Health/Metrics, async &
+Messaging, Resilienz, Container, Testbarkeit). Angestrebte Stufe: **„vollständig /
+korrekt" (10)**.
 
-> Selbst wenn ein Prüfer das Kriterium entgegen der PVA-bestätigten Stackfreiheit
-> strikt JVM-gebunden auslegen würde, blieben die übrigen **90 Punkte** davon
-> unberührt — diese Bewertung ist die konservative Untergrenze, nicht das Ziel.
+Ehrlich abgegrenzt bleibt nur, dass FlowHub **kein echtes GraalVM-Native-Image/AOT**
+nutzt (schlanker Alpine-Container statt Native Image) — ein einzelnes
+Runtime-Detail, kein Konzept-Defizit. Es gibt **kein ausgeklammertes Item mehr**;
+alle **100 Punkte** sind erreichbar.
