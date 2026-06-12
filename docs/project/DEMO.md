@@ -5,7 +5,7 @@ A fully open, rate-limited, self-resetting FlowHub instance — designed so the 
 - **URL (live):** <https://demo.flowhub.freaxnx01.ch>
 - **Status:** **Live** on VPS-DE (IONOS) — valid Let's Encrypt cert, OpenRouter Gemma classification active, data resets every 15 min.
 - **Note:** the live demo tracks `main`, which includes enhancements made **after** the graded submission tag `v0.1.0` (e.g. citation enrichment, one-click example chips, live Vikunja routing). The graded submission is the `v0.1.0` stand, not the live demo.
-- **Full runbook:** [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md)
+- **Full runbook:** [`docs/runbooks/public-demo.md`](../runbooks/public-demo.md)
 
 ## Posture at a glance
 
@@ -99,7 +99,7 @@ The overlay forces `Embeddings__*`, `Skills__Vikunja__*`, `Skills__Wallabag__*`,
 | Inappropriate user content visible | At most 15 min lifetime; force-reset with the same exec command |
 | Take demo offline | `docker compose -f docker-compose.yml -f demo/docker-compose.yml down` |
 
-Full incident playbook + topology diagram: [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md).
+Full incident playbook + topology diagram: [`docs/runbooks/public-demo.md`](../runbooks/public-demo.md).
 
 ## Cost ceiling
 

@@ -66,17 +66,17 @@ the finish-line checklist.
 
 ## 🚫 OUT OF SCOPE — deferred to the FlowHub product backlog
 
-These are **product features**, not rubric gaps. They wait until after 2026-07-04. Source: `ROADMAP.md`
-+ `TODO.md`.
+These are **product features**, not rubric gaps. They wait until after 2026-07-04. Source: `docs/project/ROADMAP.md`
++ `docs/project/TODO.md`.
 
 - **Capture Enrichment** (post-classification data fetch; `IEnricher`, `CaptureEnriched` event,
-  enrichment table) — `ROADMAP.md`.
+  enrichment table) — `docs/project/ROADMAP.md`.
 - **Web-search tooling** (Brave/Tavily `AIFunction`, provider-hosted search, `:online` variants) —
-  `ROADMAP.md`.
+  `docs/project/ROADMAP.md`.
 - **Additional AI providers** (Gemma, Apertus/Swiss-sovereign, Hugging Face router; `BaseUrl`
-  refactor) — `ROADMAP.md`.
+  refactor) — `docs/project/ROADMAP.md`.
 - **paperless-ngx integration** beyond the upload *prep* already shipped.
-- **Open manual-test TODOs** that aren't required for a submission claim — `TODO.md`
+- **Open manual-test TODOs** that aren't required for a submission claim — `docs/project/TODO.md`
   (semantic-search manual walkthrough, paperless-ngx test).
 
 > Building any of the above before submission = breaking the freeze. Don't.

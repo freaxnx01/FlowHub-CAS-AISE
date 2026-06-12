@@ -117,6 +117,115 @@ Three vendor classes — commercial native (Anthropic), commercial aggregator (O
 
 ---
 
+## `USER.md` — human's personal context for skill generation
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** Skills today are generated without any durable model of *who the user is*. A `USER.md` at the repo root would hold the human's personal context so newly generated skills can be tailored to their background, stack, and life — instead of being generic.
+
+### Proposed shape
+
+A short, hand-curated Markdown file capturing stable personal facts, e.g.:
+
+- **Role:** Software Engineer
+- **Tech stack:** .NET / C#
+- **Hobbies:** Homelab, …
+- **Family:** children, …
+
+### How it's used
+
+`USER.md` is **read as context when generating new Skills**, so the generator can:
+
+- Pick examples and defaults that match the user's stack (.NET/C# over, say, Python).
+- Propose skills that fit the user's actual life (homelab automation, family logistics) rather than generic templates.
+- Skip onboarding questions whose answers already live in `USER.md`.
+
+### Open questions
+
+- Location & format — repo root `USER.md` vs. a vault note vs. `.ai/` config.
+- Overlap with the existing memory store (`memory/MEMORY.md`) — `USER.md` is hand-curated and skill-generation-facing; memory is auto-accumulated session context. Decide whether they cross-reference or stay separate.
+- Privacy — keep personal/family details out of anything that ships in the CAS submission bundle.
+
+---
+
+## Marketplace for Skills
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** Skills (`ISkillIntegration` adapters like Wallabag and Vikunja) are hard-wired into the app today — adding a new target service means writing code, registering DI, and shipping a release. A marketplace would let a Skill be **discovered, installed, and configured at runtime** without touching the core, turning FlowHub from a fixed set of integrations into an extensible platform.
+
+### Proposed shape
+
+1. **Skill manifest** — each Skill ships a descriptor (name, icon, capabilities, required config keys, the Capture types it handles) so it can be listed and configured without code knowledge.
+2. **Registry** — a catalogue the app reads from. Start with a curated in-repo list; later a remote index (community-contributed Skills) with versioning + checksums.
+3. **Install/enable flow in the UI** — browse available Skills, supply the per-Skill secrets (endpoints, tokens), enable/disable per user. Reuses the existing `Skills__*` config surface.
+4. **Isolation & trust** — sandbox third-party Skills (out-of-process or capability-scoped) so a bad Skill can't read unrelated Captures or exfiltrate other Skills' credentials.
+
+### Open questions
+
+- Distribution unit — in-process plugin assemblies vs. out-of-process services (MCP-style) the app talks to over a contract.
+- Trust model — signing, review, and what a Skill is allowed to touch; how secrets are scoped per Skill.
+- Overlap with the CC-skills layer (`flowhub-capture`, `flowhub-triage`, …) — decide whether the marketplace covers integration adapters only, or also the agent-facing skills.
+- Monetisation / licensing if community Skills are ever sold (ties into the post-CAS product spinout).
+
+---
+
+## Speech-to-Text for Captures (voice notes)
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** Captures today are text or URLs. A voice message — e.g. a Telegram voice note or a Messenger audio clip — can't be captured. Speech-to-text would transcribe an incoming audio message into a Capture's body so it flows through the normal classification + routing pipeline like any other Capture.
+
+### Proposed shape
+
+1. **Channel accepts audio** — the capture channel (Telegram first, other messengers later) detects an audio/voice payload instead of text.
+2. **Transcribe** — run the audio through an STT engine; the transcript becomes the Capture body.
+3. **Normal pipeline** — the transcript is classified, tagged, and routed exactly like a typed Capture; optionally keep a reference to the original audio.
+
+### Open questions
+
+- STT engine — local (`whisper.cpp` / faster-whisper) for €0 + privacy vs. a hosted API for accuracy/latency.
+- Language detection (DE/EN mix) and whether to store or discard the original audio.
+- Cost + size limits on inbound audio per channel.
+
+---
+
+## Forge Routing — Skill decides "idea" vs. "issue"
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** A Capture like *"flowhub: Add i18n"* references a software project. Today `flowhub-issue` always creates an issue. But not every such Capture is actionable — some are vague ideas that belong on a backlog, not in a forge tracker. The Skill should **decide intent** and route accordingly.
+
+### Proposed shape
+
+1. **Intent classification** — the FlowHub Skill judges whether the Capture is an actionable task or a loose idea.
+2. **Actionable + repo identifiable** → create a forge issue (reuses the existing `flowhub-issue` repo-resolution across forges).
+3. **Vague idea** → append to an ideas/backlog target (e.g. the project's `ROADMAP.md` or a Vikunja "Ideen" list) instead of opening an issue.
+
+### Open questions
+
+- Where ideas land — repo `ROADMAP.md`, a dedicated vault note, or a Vikunja project — and how the user confirms/overrides the decision.
+- Confidence threshold before auto-creating an issue vs. asking the user first.
+- Builds on the existing `flowhub-issue` skill (forge detection + repo resolution).
+
+---
+
+## "Now Playing on SRF 3" Skill (radio track lookup)
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** You hear a great track on SRF 3 and want to remember it — but by the time you reach for your phone the song is over and you never caught the title. A Skill that fetches the **currently playing track** turns a fleeting moment into a Capture: artist + title, captured and routed to a music list with one trigger.
+
+### Proposed shape
+
+1. **Data source** — SRF 3's now-playing / "Musikliste" feed (artist, title, airtime).
+2. **Trigger** — a Capture like *"srf3 now playing"* (or a quick-action button) fires the Skill instead of routing the text literally.
+3. **Fetch + capture** — the Skill resolves the current track and creates a Capture (`<artist> – <title>`), routed to a music target (e.g. a Vikunja "Musik" list, or later a playlist service).
+
+### Open questions
+
+- Data source — does SRF expose an official/stable now-playing API, or must the playlist page be scraped? (rate limits + ToS).
+- Target — where captured songs land (Vikunja list, ListenBrainz/Spotify playlist, plain Capture).
+- "Now" vs. "last N tracks" — a small history makes it forgiving if you trigger slightly late.
+- Generalise to other stations (SRF 1/2, other radios) → a natural fit for the [Marketplace for Skills](#marketplace-for-skills) idea above.
+
+---
+
 ## References
 
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)

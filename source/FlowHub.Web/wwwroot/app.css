@@ -1,0 +1,47 @@
+/* ===========================================================================
+   Quick-Capture controls on the app bar.
+
+   The app bar is pinned to the dark palette tone in BOTH light and dark mode
+   (see MainLayout._theme). MudBlazor still styles the Quick-Capture text field
+   and the demo "Try:" chips from the ACTIVE palette, so in light mode they paint
+   dark-on-dark and are barely readable. Because the bar is always dark, force its
+   interactive contents to a light-on-dark treatment unconditionally — in dark
+   mode these rules simply match the palette, so they are effectively no-ops.
+
+   Scope is .mud-appbar only: the (bright blue) demo banner lives in the main
+   content area and is deliberately left untouched.
+   =========================================================================== */
+
+/* Quick-Capture text field — light text, clearly visible placeholder + outline.
+   Note: in MudBlazor the .mud-input-root class sits on the <input> itself. */
+.mud-appbar input.mud-input-root {
+    color: #fff;
+}
+
+.mud-appbar input.mud-input-root::placeholder {
+    color: rgba(255, 255, 255, 0.78) !important;
+    opacity: 1 !important;
+}
+
+.mud-appbar .mud-input-outlined-border {
+    border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.mud-appbar .mud-input.mud-focused .mud-input-outlined-border {
+    border-color: #fff !important;
+}
+
+/* "Try:" caption */
+.mud-appbar .mud-typography-caption {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* "Try:" example chips — readable white label on a subtle translucent pill */
+.mud-appbar .mud-chip.mud-chip-text.mud-chip-color-inherit {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.mud-appbar .mud-chip.mud-chip-text.mud-chip-color-inherit:hover {
+    background-color: rgba(255, 255, 255, 0.26);
+}
