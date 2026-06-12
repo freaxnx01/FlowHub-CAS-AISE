@@ -7,6 +7,14 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowHub.Web.Pipeline;
 
+/// <summary>
+/// First stage of the async pipeline (ADR 0003): consumes <c>CaptureCreated</c>,
+/// runs the capture through <c>IClassifier</c> (AI with deterministic keyword
+/// fallback), and either advances it to <c>Classified</c> — publishing
+/// <c>CaptureClassified</c> for the routing stage — or marks it <c>Orphan</c> when
+/// no skill matches. Retries per the consumer's MassTransit policy; on exhaustion
+/// the fault surfaces to <see cref="LifecycleFaultObserver"/>.
+/// </summary>
 public sealed partial class CaptureEnrichmentConsumer : IConsumer<CaptureCreated>
 {
     private readonly IClassifier _classifier;

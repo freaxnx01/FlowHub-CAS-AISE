@@ -6,6 +6,13 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowHub.AI;
 
+/// <summary>
+/// LLM-backed <see cref="IClassifier"/> (ADR 0004). Sends the capture to the
+/// configured chat model, parses the schema-validated response, and re-validates
+/// the matched skill against an allow-list. Any model error, timeout, or invalid
+/// response degrades deterministically to the keyword classifier (logged under a
+/// dedicated EventId), so a capture is always classified.
+/// </summary>
 internal sealed partial class AiClassifier : IClassifier
 {
     private static readonly string[] AllowedSkills = ["Wallabag", "Vikunja", ""];
