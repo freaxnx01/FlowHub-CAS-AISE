@@ -9,6 +9,7 @@
                        OnFilesChanged="OnFileSelected">
             <ActivatorContent>
                 <MudIconButton Icon="@Icons.Material.Filled.AttachFile"
+                               Color="Color.Inherit"
                                aria-label="Attach file"
                                Disabled="_isSubmitting" />
             </ActivatorContent>
@@ -40,6 +41,7 @@
         }
 
         <MudIconButton Icon="@(_isSubmitting ? Icons.Material.Filled.HourglassTop : Icons.Material.Filled.KeyboardReturn)"
+                       Color="Color.Inherit"
                        aria-label="Submit capture"
                        OnClick="SubmitAsync"
                        Disabled="_isSubmitting || (_stagedFile is not null && _fileError is not null)" />
