@@ -137,4 +137,26 @@ public class DemoBannerTests : TestContext
 
         cut.Markup.Should().NotContain("Walkthrough");
     }
+
+    [Fact]
+    public void WithStatusPageUrl_RendersClickableStatusLink_OpeningNewTab()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.StatusPageUrl, "https://status.demo.flowhub.freaxnx01.ch/status/flowhub-demo"));
+
+        var link = cut.Find("a[href='https://status.demo.flowhub.freaxnx01.ch/status/flowhub-demo']");
+        link.GetAttribute("target").Should().Be("_blank");
+        link.TextContent.Should().Contain("Status");
+    }
+
+    [Fact]
+    public void WithoutStatusPageUrl_RendersNoStatusLink()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.RepoUrl, "https://github.com/freaxnx01/FlowHub-CAS-AISE"));
+
+        cut.Markup.Should().NotContain("Status");
+    }
 }
