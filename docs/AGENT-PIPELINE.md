@@ -1,6 +1,6 @@
-# Claude Pipeline
+# Agent Pipeline
 
-This repo delegates autonomous issue implementation to the [`freaxnx01/claude-pipeline`](https://github.com/freaxnx01/claude-pipeline) reusable workflow. The local entry point is `.github/workflows/claude.yml`, which forwards work to `claude-implement.yml` in the pipeline repo.
+This repo delegates autonomous issue implementation to the [`freaxnx01/agent-pipeline`](https://github.com/freaxnx01/agent-pipeline) reusable workflow. The local entry point is `.github/workflows/claude.yml`, which forwards work to `claude-implement.yml` in the pipeline repo.
 
 ## What `.github/workflows/claude.yml` does
 
@@ -20,4 +20,4 @@ Reruns are dispatched via `gh workflow run` with an incremented `attempt` input.
 
 ## Pinned reusable workflow ref
 
-The workflow currently calls `freaxnx01/claude-pipeline/.github/workflows/claude-implement.yml@main`. Pinning to `@main` is intentional while the pipeline iterates; this should move to a tagged release ref once the pipeline stabilises.
+The workflow currently calls `freaxnx01/agent-pipeline/.github/workflows/claude-implement.yml@main`. Pinning to `@main` is intentional while the pipeline iterates; this should move to a tagged release ref once the pipeline stabilises.
