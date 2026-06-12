@@ -30,7 +30,7 @@ In der letzten Nachbearbeitungsphase geht es nun darum, die Lösung zu container
 
 > **FlowHub-Stack-Mapping (.NET + GitHub statt Quarkus + GitLab):**
 > - Containerisierung → Multi-Stage Dockerfile (Build: `mcr.microsoft.com/dotnet/sdk:10.0-alpine`, Runtime: `mcr.microsoft.com/dotnet/aspnet:10.0-alpine`, non-root, siehe `CLAUDE.md` § Docker)
-> - CI/CD → **GitHub Actions** (Repo liegt auf `github.com/freaxnx01/FlowHub-CAS-AISE`); GitLab-Agent-Plattform/-Runner als Lerninhalt zur Kenntnis, Implementierung in GitHub
+> - CI/CD → **GitHub Actions** + GitHub-Runner (Repo liegt auf `github.com/freaxnx01/FlowHub-CAS-AISE`). Das Lernziel nennt GitHub *oder* die GitLab-Agent-Plattform als (alternative) CI/CD-Hosts — FlowHub ist GitHub-gehostet, daher GitHub. Deployment-Automatisierung: CI (build/test) + Release-Workflow (Image-Build & Push nach GHCR auf `v*`-Tags); der eigentliche Rollout ist ein dokumentierter `docker compose`-Runbook-Schritt (Image-Publishing = Automatisierungsgrenze). Details: `docs/ci-cd.md`.
 > - Monitoring/Observability → **OpenTelemetry** (Traces, Metrics, Logs) + Prometheus + Grafana (`/metrics` Endpoint ist im Health-Plan); strukturiertes Logging mit Serilog → stdout (12-Factor XI)
 > - KI-gestützte Apps "mit Quarkus" → mit `Microsoft.Extensions.AI` / Semantic Kernel; KI-Suche via Vector-DB-Provider (z.B. pgvector auf bestehender PostgreSQL aus Block 4)
 > - Kubernetes → Manifests / Helm-Chart (oder lediglich Docker-Compose, falls K8s-Aufwand sprengt — dann begründen)
