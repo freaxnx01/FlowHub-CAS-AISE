@@ -169,6 +169,7 @@ A self-hosted **Uptime Kuma** (`louislam/uptime-kuma`) ships in the demo overlay
    | Monitor | Type | Target | Notes |
    |---|---|---|---|
    | FlowHub app | HTTP(s) – keyword | `https://demo.flowhub.freaxnx01.ch/health/live` | expect `Healthy` |
+   | FlowHub metrics | HTTP(s) – keyword | `https://demo.flowhub.freaxnx01.ch/metrics` | expect `dotnet` — a runtime metric, present on every scrape; confirms the OTel→Prometheus pipeline is alive end-to-end, not just that the app responds |
    | LLM reachability | HTTP(s) | `https://openrouter.ai/api/v1/models` | provider up? (a down LLM is graceful-degradation, not an app outage) |
    | Vikunja | HTTP(s) | `https://vikunja.demo.flowhub.freaxnx01.ch` | skill target |
    | Wallabag | HTTP(s) | `https://wallabag.demo.flowhub.freaxnx01.ch` | skill target |
