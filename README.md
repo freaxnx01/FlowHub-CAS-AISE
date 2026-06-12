@@ -51,7 +51,7 @@ You probably don't need to run anything to grade this. The submission document a
 
 ### Option A — see it running, zero install
 
-Open <https://demo.flowhub.freaxnx01.ch>. The demo is intentionally open (no login) and resets every 15 min. What it shows — and what's intentionally disabled in the demo (embeddings, external skill writes) — is documented in [`DEMO.md`](DEMO.md) and [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md).
+Open <https://demo.flowhub.freaxnx01.ch>. The demo is intentionally open (no login) and resets every 15 min. What it shows — and what's intentionally disabled in the demo (embeddings, external skill writes) — is documented in [`docs/project/DEMO.md`](docs/project/DEMO.md) and [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md).
 
 ### Option B — local stack via Docker
 
@@ -100,13 +100,14 @@ docs/                   ← architecture, specs, runbooks, insights
   spec/                 ← use-cases, NfA (SMART), acceptance criteria, DB model, testing strategy
   insights/             ← per-block lessons learned (Block 1–5)
   runbooks/             ← acceptance, demo, OIDC setup, test services
+  project/              ← roadmap, next steps, todos, demo + submission notes
   ai-usage.md           ← consolidated AI tool usage (rubric item, 12 pts)
 vault/                  ← Obsidian vault — CAS coursework and project notes
   Projektarbeit/        ← idea, dev notes, glossary, learnings
   Blöcke/01..05/        ← per-block Vorbereitung / PVA / Nachbereitung
   Organisation/         ← Bewertungskriterien (Moodle rubric)
 SUBMISSION.md           ← the Moodle submission document (rendered to PDF)
-submission-notes.md     ← operator notes: how the submission PDF is produced
+docs/project/submission-notes.md  ← operator notes: how the submission PDF is produced
 ```
 
 ## justfile cheat sheet

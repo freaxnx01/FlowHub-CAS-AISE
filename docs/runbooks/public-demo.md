@@ -166,4 +166,4 @@ Cloudflare DNS for the Vikunja host (added via `homelab-service-routing`): `A` r
 - `docker-compose.yml` (production stack reused by overlay)
 - `homelab-service-routing` skill (Cloudflare DNS workflow)
 - `docs/runbooks/test-services.md` (sibling environment — internal test, not public)
-- ROADMAP.md "Additional AI Providers" (future swap to self-hosted Gemma if quota becomes painful)
+- docs/project/ROADMAP.md "Additional AI Providers" (future swap to self-hosted Gemma if quota becomes painful)
