@@ -206,6 +206,26 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 
 ---
 
+## "Now Playing on SRF 3" Skill (radio track lookup)
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** You hear a great track on SRF 3 and want to remember it — but by the time you reach for your phone the song is over and you never caught the title. A Skill that fetches the **currently playing track** turns a fleeting moment into a Capture: artist + title, captured and routed to a music list with one trigger.
+
+### Proposed shape
+
+1. **Data source** — SRF 3's now-playing / "Musikliste" feed (artist, title, airtime).
+2. **Trigger** — a Capture like *"srf3 now playing"* (or a quick-action button) fires the Skill instead of routing the text literally.
+3. **Fetch + capture** — the Skill resolves the current track and creates a Capture (`<artist> – <title>`), routed to a music target (e.g. a Vikunja "Musik" list, or later a playlist service).
+
+### Open questions
+
+- Data source — does SRF expose an official/stable now-playing API, or must the playlist page be scraped? (rate limits + ToS).
+- Target — where captured songs land (Vikunja list, ListenBrainz/Spotify playlist, plain Capture).
+- "Now" vs. "last N tracks" — a small history makes it forgiving if you trigger slightly late.
+- Generalise to other stations (SRF 1/2, other radios) → a natural fit for the [Marketplace for Skills](#marketplace-for-skills) idea above.
+
+---
+
 ## References
 
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)

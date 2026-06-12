@@ -1,0 +1,240 @@
+{
+  "capturedAt": "2026-06-11T19:16:17Z",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "shots": [
+    {
+      "id": "home",
+      "file": "demo/home.png",
+      "section": "intro",
+      "kind": "context",
+      "caption": "The public demo — drop a sample in"
+    },
+    {
+      "id": "cap-movie-chip",
+      "file": "demo/cap-movie-chip.png",
+      "section": "capture",
+      "kind": "action",
+      "caption": "Sample: a movie tip",
+      "sample": "movie",
+      "cursor": {
+        "x": 862,
+        "y": 58,
+        "click": true
+      }
+    },
+    {
+      "id": "cap-movie-list",
+      "file": "demo/cap-movie-list.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a movie tip",
+      "sample": "movie"
+    },
+    {
+      "id": "cap-movie-classified",
+      "file": "demo/cap-movie-classified.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a movie tip — classified",
+      "sample": "movie"
+    },
+    {
+      "id": "cap-movie-detail",
+      "file": "demo/cap-movie-detail.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a movie tip — detail",
+      "sample": "movie"
+    },
+    {
+      "id": "cap-zitat-chip",
+      "file": "demo/cap-zitat-chip.png",
+      "section": "capture",
+      "kind": "action",
+      "caption": "Sample: a quote",
+      "sample": "zitat",
+      "cursor": {
+        "x": 1016,
+        "y": 58,
+        "click": true
+      }
+    },
+    {
+      "id": "cap-zitat-list",
+      "file": "demo/cap-zitat-list.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a quote",
+      "sample": "zitat"
+    },
+    {
+      "id": "cap-zitat-classified",
+      "file": "demo/cap-zitat-classified.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a quote — classified",
+      "sample": "zitat"
+    },
+    {
+      "id": "cap-zitat-detail",
+      "file": "demo/cap-zitat-detail.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a quote — detail",
+      "sample": "zitat"
+    },
+    {
+      "id": "cap-todo-chip",
+      "file": "demo/cap-todo-chip.png",
+      "section": "capture",
+      "kind": "action",
+      "caption": "Sample: a to-do",
+      "sample": "todo",
+      "cursor": {
+        "x": 1131,
+        "y": 58,
+        "click": true
+      }
+    },
+    {
+      "id": "cap-todo-list",
+      "file": "demo/cap-todo-list.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a to-do",
+      "sample": "todo"
+    },
+    {
+      "id": "cap-todo-classified",
+      "file": "demo/cap-todo-classified.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a to-do — classified",
+      "sample": "todo"
+    },
+    {
+      "id": "cap-todo-detail",
+      "file": "demo/cap-todo-detail.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a to-do — detail",
+      "sample": "todo"
+    },
+    {
+      "id": "cap-url-chip",
+      "file": "demo/cap-url-chip.png",
+      "section": "capture",
+      "kind": "action",
+      "caption": "Sample: a link",
+      "sample": "url",
+      "cursor": {
+        "x": 1261,
+        "y": 58,
+        "click": true
+      }
+    },
+    {
+      "id": "cap-url-list",
+      "file": "demo/cap-url-list.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a link",
+      "sample": "url"
+    },
+    {
+      "id": "cap-url-classified",
+      "file": "demo/cap-url-classified.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a link — classified",
+      "sample": "url"
+    },
+    {
+      "id": "cap-url-detail",
+      "file": "demo/cap-url-detail.png",
+      "section": "capture",
+      "kind": "result",
+      "caption": "Sample: a link — detail",
+      "sample": "url"
+    },
+    {
+      "id": "svc-vikunja-link",
+      "file": "demo/svc-vikunja-link.png",
+      "section": "service",
+      "kind": "action",
+      "caption": "Lands in Vikunja",
+      "cursor": {
+        "x": 243,
+        "y": 141,
+        "click": true
+      }
+    },
+    {
+      "id": "svc-vikunja",
+      "file": "demo/svc-vikunja.png",
+      "section": "service",
+      "kind": "result",
+      "caption": "Lands in Vikunja"
+    },
+    {
+      "id": "svc-zitate-link",
+      "file": "demo/svc-zitate-link.png",
+      "section": "service",
+      "kind": "action",
+      "caption": "Lands in Vikunja · Zitate",
+      "cursor": {
+        "x": 333,
+        "y": 141,
+        "click": true
+      }
+    },
+    {
+      "id": "svc-zitate",
+      "file": "demo/svc-zitate.png",
+      "section": "service",
+      "kind": "result",
+      "caption": "Lands in Vikunja · Zitate"
+    },
+    {
+      "id": "svc-wallabag-link",
+      "file": "demo/svc-wallabag-link.png",
+      "section": "service",
+      "kind": "action",
+      "caption": "Lands in Wallabag",
+      "cursor": {
+        "x": 432,
+        "y": 141,
+        "click": true
+      }
+    },
+    {
+      "id": "svc-wallabag",
+      "file": "demo/svc-wallabag.png",
+      "section": "service",
+      "kind": "result",
+      "caption": "Lands in Wallabag"
+    },
+    {
+      "id": "svc-paperless-ngx-link",
+      "file": "demo/svc-paperless-ngx-link.png",
+      "section": "service",
+      "kind": "action",
+      "caption": "Lands in paperless-ngx",
+      "cursor": {
+        "x": 563,
+        "y": 141,
+        "click": true
+      }
+    },
+    {
+      "id": "svc-paperless-ngx",
+      "file": "demo/svc-paperless-ngx.png",
+      "section": "service",
+      "kind": "result",
+      "caption": "Lands in paperless-ngx"
+    }
+  ]
+}

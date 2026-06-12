@@ -102,5 +102,13 @@ else
   echo "✓ Noto Color Emoji already active in $user_fonts"
 fi
 
+# ── Playwright Chromium (for the demo-walkthrough capture script) ─────────────
+if [[ -d "$here/../node_modules/playwright" ]]; then
+  echo "↓ ensuring Playwright Chromium is installed ..."
+  (cd "$here/.." && npx --yes playwright install chromium) >/dev/null 2>&1 \
+    && echo "✓ Playwright Chromium ready" \
+    || echo "⚠ Playwright Chromium install failed — run 'npx playwright install chromium' in video/ manually"
+fi
+
 echo
 echo "Done. Generate the videos with:  just video"
