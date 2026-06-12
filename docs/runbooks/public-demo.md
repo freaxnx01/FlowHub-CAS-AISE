@@ -14,7 +14,7 @@ A fully open, rate-limited, self-resetting FlowHub instance at <https://demo.flo
 | AI provider | OpenRouter `google/gemma-4-31b-it:free` only. KeywordClassifier auto-fallback on 429/error. `KeywordClassifier` is also the demo's safety net if the daily quota runs out. |
 | Embeddings | **Disabled** — `Embeddings__ApiKey` unset → `AiEmbeddingService` is null → consumer no-ops → `Captures.Embedding` stays NULL. `GET /api/v1/captures/search` returns 503 ProblemDetails with an explanatory body (transparent about what's wired vs not). |
 | Skill integrations | **Vikunja: live** — a self-contained demo Vikunja (sqlite) is provisioned at deploy; `Skills__Vikunja__*` are injected at runtime from the bootstrap env file, so `todo:` captures route to real tasks on a public **writable** link-share (visitors can tick tasks done; wiped every reset). **Wallabag: disabled** — `Skills__Wallabag__*` unset → URL captures stop at `Unhandled`. See "Demo Vikunja" below. |
-| Observability | Prometheus + Grafana **not exposed publicly** — only `flowhub.web` + `postgres` + `rabbitmq` + `flowhub.demo-reset` go through the demo compose overlay. Operator metrics still scrapable via the VPS internal network. |
+| Observability | Prometheus + Grafana **not exposed publicly** — operator metrics stay scrapable via the VPS internal network. A lightweight **Uptime Kuma** instance *is* exposed (`status.demo.flowhub.freaxnx01.ch`) as the public-facing uptime monitor + status page — see [§ Uptime monitoring](#uptime-monitoring). |
 
 ## Topology
 
@@ -153,6 +153,30 @@ Cloudflare DNS for the Vikunja host (added via `homelab-service-routing`): `A` r
 | Dashboard is empty mid-cycle | Reset just ran. Wait < 15 min; fixture seed will appear on the next reset, or trigger an immediate reset via `docker compose exec flowhub.demo-reset /reset.sh`. |
 | Inappropriate user content visible | At most 15 min lifetime. To purge immediately: `docker compose exec flowhub.demo-reset /reset.sh`. |
 | Need to take the demo offline | `docker compose -f docker-compose.yml -f demo/docker-compose.yml down`. Cloudflare DNS can stay; visitors get 522 Origin Unreachable. |
+| Status page / a monitor shows down | Open `status.demo.flowhub.freaxnx01.ch`. App down → check `flowhub.web` logs + `restart` policy. LLM monitor down → OpenRouter outage/quota; demo keeps serving via KeywordClassifier (expected degradation, not an outage). |
+
+## Uptime monitoring
+
+A self-hosted **Uptime Kuma** (`louislam/uptime-kuma`) ships in the demo overlay as the public-facing monitor for the Block 5 *Monitoring & Observability* learning objective. The internal Prometheus/Grafana stack covers deep metrics; Kuma covers **black-box reachability + a public status page** that needs no login to view.
+
+**DNS (one-time):** add `status.demo.flowhub.freaxnx01.ch` → VPS-DE public IP (Cloudflare, proxied) via the `homelab-service-routing` skill, same as the other demo subdomains.
+
+**First-boot setup** (Kuma stores monitors in its own SQLite volume `uptime-kuma-data`, configured via the UI — not declaratively):
+
+1. Open `https://status.demo.flowhub.freaxnx01.ch`, create the admin account.
+2. Add these monitors:
+
+   | Monitor | Type | Target | Notes |
+   |---|---|---|---|
+   | FlowHub app | HTTP(s) – keyword | `https://demo.flowhub.freaxnx01.ch/health/live` | expect `Healthy` |
+   | LLM reachability | HTTP(s) | `https://openrouter.ai/api/v1/models` | provider up? (a down LLM is graceful-degradation, not an app outage) |
+   | Vikunja | HTTP(s) | `https://vikunja.demo.flowhub.freaxnx01.ch` | skill target |
+   | Wallabag | HTTP(s) | `https://wallabag.demo.flowhub.freaxnx01.ch` | skill target |
+   | Paperless | HTTP(s) | `https://paperless.demo.flowhub.freaxnx01.ch` | skill target |
+
+3. Create a **public status page** bundling these monitors — link it from the demo banner / submission as the live monitoring artifact.
+
+> The LLM monitor pings the provider directly because FlowHub has no dedicated LLM health endpoint yet; adding an AI `IHealthCheck` (so the provider also surfaces in `/health`) is a tracked follow-up.
 
 ## Out of scope
 

@@ -413,6 +413,29 @@ services:
   grafana:
     ports: !reset []
 
+  # Uptime Kuma — lightweight, externally-reachable monitoring for the public demo.
+  # The full Prometheus/Grafana stack stays internal (ports reset above); Kuma adds a
+  # public status page that probes the demo's health endpoints, the skill-target
+  # services, and the LLM provider. Monitors are configured on first boot —
+  # see docs/runbooks/public-demo.md § Uptime monitoring.
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    volumes:
+      - uptime-kuma-data:/app/data
+    labels:
+      # Generic labels (overridden for VPS-DE in demo/docker-compose.vps.yml).
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-status.rule=Host(`status.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-status.entrypoints=websecure"
+      - "traefik.http.routers.flowhub-status.tls=true"
+      - "traefik.http.routers.flowhub-status.tls.certresolver=letsencrypt"
+      - "traefik.http.services.flowhub-status.loadbalancer.server.port=3001"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}"
+    networks:
+      - default
+      - traefik_public
+    restart: unless-stopped
+
 networks:
   traefik_public:
     external: true
@@ -428,3 +451,5 @@ volumes:
   # paperless-ngx data (sqlite DB, index) and archived media.
   paperless-data:
   paperless-media:
+  # Uptime Kuma config + monitor history (SQLite). Persists monitors across restarts.
+  uptime-kuma-data:
