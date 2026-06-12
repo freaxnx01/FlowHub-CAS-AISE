@@ -147,6 +147,27 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 
 ---
 
+## Marketplace for Skills
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** Skills (`ISkillIntegration` adapters like Wallabag and Vikunja) are hard-wired into the app today — adding a new target service means writing code, registering DI, and shipping a release. A marketplace would let a Skill be **discovered, installed, and configured at runtime** without touching the core, turning FlowHub from a fixed set of integrations into an extensible platform.
+
+### Proposed shape
+
+1. **Skill manifest** — each Skill ships a descriptor (name, icon, capabilities, required config keys, the Capture types it handles) so it can be listed and configured without code knowledge.
+2. **Registry** — a catalogue the app reads from. Start with a curated in-repo list; later a remote index (community-contributed Skills) with versioning + checksums.
+3. **Install/enable flow in the UI** — browse available Skills, supply the per-Skill secrets (endpoints, tokens), enable/disable per user. Reuses the existing `Skills__*` config surface.
+4. **Isolation & trust** — sandbox third-party Skills (out-of-process or capability-scoped) so a bad Skill can't read unrelated Captures or exfiltrate other Skills' credentials.
+
+### Open questions
+
+- Distribution unit — in-process plugin assemblies vs. out-of-process services (MCP-style) the app talks to over a contract.
+- Trust model — signing, review, and what a Skill is allowed to touch; how secrets are scoped per Skill.
+- Overlap with the CC-skills layer (`flowhub-capture`, `flowhub-triage`, …) — decide whether the marketplace covers integration adapters only, or also the agent-facing skills.
+- Monetisation / licensing if community Skills are ever sold (ties into the post-CAS product spinout).
+
+---
+
 ## References
 
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)
