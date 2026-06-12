@@ -41,6 +41,7 @@ services:
       Demo__Mode: "true"
       Demo__BannerText: "Public demo — type a capture (top bar) and AI routes it to a live tool: a todo to Vikunja, a URL to Wallabag, or a PDF/image upload (at /captures/new) to paperless-ngx. Open any capture to see its AI classification trace — model, timing, tokens, cost. Data resets every 15 min; semantic search is off."
       Demo__RepoUrl: "https://github.com/freaxnx01/FlowHub-CAS-AISE"
+      Demo__WalkthroughUrl: "https://github.com/freaxnx01/FlowHub-CAS-AISE#explainer-videos"
       # Demo-only operator notifications to ntfy.sh (set via .env; dormant if unset).
       Demo__Notify__Ntfy__BaseUrl: ${Demo__Notify__Ntfy__BaseUrl:-}
       Demo__Notify__Ntfy__Topic: ${Demo__Notify__Ntfy__Topic:-}

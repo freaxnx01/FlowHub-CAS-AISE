@@ -18,6 +18,9 @@ public partial class DemoBanner : ComponentBase
 
     [Parameter] public string? RepoUrl { get; set; }
 
+    /// <summary>Link to the explainer-videos section (incl. the demo walkthrough video).</summary>
+    [Parameter] public string? WalkthroughUrl { get; set; }
+
     [Parameter] public string? SkillBoardUrl { get; set; }
 
     /// <summary>Public share of the Vikunja 'Zitate' board, where quote captures land.</summary>

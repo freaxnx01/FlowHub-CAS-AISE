@@ -44,6 +44,12 @@
 
             <MudSpacer />
 
+            @if (!string.IsNullOrWhiteSpace(WalkthroughUrl))
+            {
+                <MudButton Href="@WalkthroughUrl" Target="_blank" rel="noopener noreferrer"
+                           Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.PlayCircle">Walkthrough</MudButton>
+            }
             @if (!string.IsNullOrWhiteSpace(RepoUrl))
             {
                 <MudButton Href="@RepoUrl" Target="_blank" rel="noopener noreferrer"

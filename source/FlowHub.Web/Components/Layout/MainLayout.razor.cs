@@ -47,6 +47,8 @@ public partial class MainLayout : LayoutComponentBase
 
     private string? DemoRepoUrl => Configuration["Demo:RepoUrl"];
 
+    private string? DemoWalkthroughUrl => Configuration["Demo:WalkthroughUrl"];
+
     private string? DemoSkillBoardUrl => Configuration["Demo:Vikunja:ShareUrl"];
 
     private string? DemoZitateBoardUrl => Configuration["Demo:Vikunja:ZitateShareUrl"];

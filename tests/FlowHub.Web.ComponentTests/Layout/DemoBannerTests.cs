@@ -115,4 +115,26 @@ public class DemoBannerTests : TestContext
         // Login hint only shows when a login-gated service link is present.
         cut.Markup.Should().NotContain("flowhub / flowhub-demo");
     }
+
+    [Fact]
+    public void WithWalkthroughUrl_RendersClickableWalkthroughLink_OpeningNewTab()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.WalkthroughUrl, "https://github.com/freaxnx01/FlowHub-CAS-AISE#explainer-videos"));
+
+        var link = cut.Find("a[href='https://github.com/freaxnx01/FlowHub-CAS-AISE#explainer-videos']");
+        link.GetAttribute("target").Should().Be("_blank");
+        link.TextContent.Should().Contain("Walkthrough");
+    }
+
+    [Fact]
+    public void WithoutWalkthroughUrl_RendersNoWalkthroughLink()
+    {
+        var cut = RenderComponent<DemoBanner>(p => p
+            .Add(c => c.BannerText, "Public demo")
+            .Add(c => c.RepoUrl, "https://github.com/freaxnx01/FlowHub-CAS-AISE"));
+
+        cut.Markup.Should().NotContain("Walkthrough");
+    }
 }
