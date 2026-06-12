@@ -44,6 +44,12 @@ https://github.com/user-attachments/assets/7e80b3a2-4c0f-4e92-9228-9ca2ea031031
 
 https://github.com/user-attachments/assets/c000f88a-d31f-4ef4-a5a8-3ad84d4f4828
 
+**See it in action — using the live demo** (~70s, no narration)
+
+Screenshot walkthrough of the [public demo](https://demo.flowhub.freaxnx01.ch): each sample captured → AI-classified → landing in its service (Vikunja / Zitate / Wallabag / paperless), with an animated cursor. Built via `just video-capture` + `just video-demo`.
+
+https://github.com/user-attachments/assets/cbae8407-9689-4347-a902-50328df8785b
+
 ---
 
 ## For a CAS reviewer who just cloned the repo

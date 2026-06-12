@@ -73,3 +73,18 @@ npm run render:technical    # → out/flowhub-technical.en.mp4
 ```
 
 Run `npm run tts` before a final render so narration audio exists.
+
+## Demo walkthrough video
+
+A third, **silent** composition (`demo-walkthrough`) screenshots the live VPS demo
+and stitches it into a captioned walkthrough with an animated cursor.
+
+```bash
+just video-capture   # drive the live demo → video/public/demo/*.png + manifest.json
+just video-demo      # render → video/out/flowhub-demo.en.mp4
+```
+
+`video-capture` needs network access to the live demo; the screenshots + `manifest.json`
+it writes are committed so `video-demo` renders offline. Pure logic
+(`src/demoManifest.mjs`, `src/demoTimeline.mjs`, `tools/demoCaptions.mjs`) is unit-tested
+with `npm test`.

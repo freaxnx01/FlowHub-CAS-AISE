@@ -669,6 +669,24 @@ video-render:
     PATH="{{video_ffmpeg_dir}}:$PATH" npm run render:users
     PATH="{{video_ffmpeg_dir}}:$PATH" npm run render:technical
 
+# Capture the live VPS demo into video/public/demo/ (screenshots + manifest)
+[group('video')]
+video-capture:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
+    cd {{video_dir}}
+    CAPTURED_AT="$(date -u +%FT%TZ)" npm run capture:demo
+
+# Render the demo-walkthrough video → video/out/flowhub-demo.en.mp4
+[group('video')]
+video-demo:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
+    cd {{video_dir}}
+    PATH="{{video_ffmpeg_dir}}:$PATH" npm run render:demo
+
 # Full pipeline: setup if needed → narration → render both videos
 [group('video')]
 video: video-tts video-render

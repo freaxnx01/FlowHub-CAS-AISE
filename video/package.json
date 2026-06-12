@@ -7,6 +7,9 @@
     "dev": "remotion studio src/index.ts",
     "tts": "node tools/tts.mjs",
     "typecheck": "tsc --noEmit",
+    "test": "node --test 'tools/__tests__/**/*.test.mjs'",
+    "capture:demo": "node tools/capture-demo.mjs",
+    "render:demo": "remotion render src/index.ts demo-walkthrough out/flowhub-demo.en.mp4",
     "render:users": "remotion render src/index.ts flowhub-users out/flowhub-users.en.mp4",
     "render:technical": "remotion render src/index.ts flowhub-technical out/flowhub-technical.en.mp4"
   },
@@ -19,6 +22,7 @@
   "devDependencies": {
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "playwright": "^1.48.0",
     "typescript": "^5.5.0"
   }
 }

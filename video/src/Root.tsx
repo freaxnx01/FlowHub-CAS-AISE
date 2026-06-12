@@ -3,6 +3,7 @@ import {Composition} from 'remotion';
 import durations from './durations.json';
 import {UserVideo} from './UserVideo';
 import {TechnicalVideo} from './TechnicalVideo';
+import {DemoWalkthrough, demoDurationInFrames} from './DemoWalkthrough';
 
 const FPS = 30;
 
@@ -28,6 +29,14 @@ export const RemotionRoot: React.FC = () => (
       id="flowhub-technical"
       component={TechnicalVideo}
       durationInFrames={totalFrames(durations.technical as Record<string, number>)}
+      fps={FPS}
+      width={1920}
+      height={1080}
+    />
+    <Composition
+      id="demo-walkthrough"
+      component={DemoWalkthrough}
+      durationInFrames={demoDurationInFrames(FPS)}
       fps={FPS}
       width={1920}
       height={1080}
