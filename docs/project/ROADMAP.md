@@ -168,6 +168,44 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 
 ---
 
+## Speech-to-Text for Captures (voice notes)
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** Captures today are text or URLs. A voice message — e.g. a Telegram voice note or a Messenger audio clip — can't be captured. Speech-to-text would transcribe an incoming audio message into a Capture's body so it flows through the normal classification + routing pipeline like any other Capture.
+
+### Proposed shape
+
+1. **Channel accepts audio** — the capture channel (Telegram first, other messengers later) detects an audio/voice payload instead of text.
+2. **Transcribe** — run the audio through an STT engine; the transcript becomes the Capture body.
+3. **Normal pipeline** — the transcript is classified, tagged, and routed exactly like a typed Capture; optionally keep a reference to the original audio.
+
+### Open questions
+
+- STT engine — local (`whisper.cpp` / faster-whisper) for €0 + privacy vs. a hosted API for accuracy/latency.
+- Language detection (DE/EN mix) and whether to store or discard the original audio.
+- Cost + size limits on inbound audio per channel.
+
+---
+
+## Forge Routing — Skill decides "idea" vs. "issue"
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** A Capture like *"flowhub: Add i18n"* references a software project. Today `flowhub-issue` always creates an issue. But not every such Capture is actionable — some are vague ideas that belong on a backlog, not in a forge tracker. The Skill should **decide intent** and route accordingly.
+
+### Proposed shape
+
+1. **Intent classification** — the FlowHub Skill judges whether the Capture is an actionable task or a loose idea.
+2. **Actionable + repo identifiable** → create a forge issue (reuses the existing `flowhub-issue` repo-resolution across forges).
+3. **Vague idea** → append to an ideas/backlog target (e.g. the project's `ROADMAP.md` or a Vikunja "Ideen" list) instead of opening an issue.
+
+### Open questions
+
+- Where ideas land — repo `ROADMAP.md`, a dedicated vault note, or a Vikunja project — and how the user confirms/overrides the decision.
+- Confidence threshold before auto-creating an issue vs. asking the user first.
+- Builds on the existing `flowhub-issue` skill (forge detection + repo resolution).
+
+---
+
 ## References
 
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)

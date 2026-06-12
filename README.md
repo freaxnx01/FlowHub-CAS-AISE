@@ -12,6 +12,7 @@ Built as the project work for **CAS AI-Assisted Software Engineering (AISE)** at
 - **Submission document:** [`SUBMISSION.md`](SUBMISSION.md) (the PDF rendered from it is the Moodle deliverable)
 - **Architecture:** [`docs/adr/`](docs/adr/) (six ADRs) · [`docs/architektur/FlowHub_Arc42_v1_1.pdf`](docs/architektur/FlowHub_Arc42_v1_1.pdf) · [`docs/projektbeschreibung/`](docs/projektbeschreibung/)
 - **AI usage:** [`docs/ai-usage.md`](docs/ai-usage.md) · personal Lessons Learned in [`vault/Projektarbeit/Learnings.md`](vault/Projektarbeit/Learnings.md)
+- **Roadmap:** [`docs/project/ROADMAP.md`](docs/project/ROADMAP.md) — forward-looking ideas not yet scheduled into a Block
 
 ---
 
