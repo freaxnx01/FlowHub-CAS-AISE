@@ -7,7 +7,7 @@ export const meta = {
     { title: 'Examine', detail: '5 rubric-bucket examiners + 1 live-demo examiner, in parallel' },
     { title: 'Architecture', detail: 'deep architecture lenses (focus=architecture only): ADRs, structure fidelity, behavior/interaction views, deployment topology, NFR alignment' },
     { title: 'Skeptic', detail: 'adversarial pass — challenge over-generous scores per bucket' },
-    { title: 'Verdict', detail: 'aggregate to a grade sheet (/90), defense questions, ranked gaps' },
+    { title: 'Verdict', detail: 'aggregate to a grade sheet (/100), defense questions, ranked gaps' },
   ],
 }
 
@@ -18,7 +18,7 @@ const commit  = (args && args.commit) || 'unknown-commit'
 const demoUrl = (args && args.demoUrl) || 'https://demo.flowhub.freaxnx01.ch'
 // focus: 'balanced' (default) grades all buckets evenly; 'architecture' adds a
 // deep architecture-lens phase and tells the design/structure examiners to be
-// extra rigorous. Always still produces the full /90 grade sheet (comparable).
+// extra rigorous. Always still produces the full /100 grade sheet (comparable).
 const focus   = (args && args.focus)  || 'balanced'
 const archFocus = focus === 'architecture'
 // repoDir: the checkout to grade. Default '.' = the workflow's current cwd.
@@ -126,7 +126,7 @@ const BUILD_SCHEMA = {
 }
 
 // ── Rubric buckets (mirrors vault/Organisation/Bewertungskriterien.md) ────────
-// Quarkus/Jakarta-EE item (max 10) is N/A for the .NET stack and excluded → /90.
+// Rubric update June 2026: framework-concepts item is framework-neutral and in scope → /100.
 const BUCKETS = [
   {
     key: 'Spezifikation', max: 15,
@@ -147,14 +147,15 @@ const BUCKETS = [
     read: ['docs/adr', 'docs/architektur', 'docs/projektbeschreibung', 'docs/design/db/entities.md', 'docs/design/db/er.md'],
   },
   {
-    key: 'Programmierung', max: 12,
-    note: 'The Quarkus/Jakarta-EE item (max 10) is consciously excluded (stack-mismatch, .NET). Effective max = 7 + 3 + 2 = 12.',
+    key: 'Programmierung', max: 22,
+    note: 'Rubric update (June 2026): the framework-concepts item is now framework-NEUTRAL (was Quarkus/Jakarta-EE) and fully in scope for .NET — no exclusion; total is /100.',
     items: [
-      '"Ist der Code lesbar, dokumentiert und nach Layer, Modulen und Sub-Systemen strukturiert" (0/1/4/7)',
+      '"Ist der Code lesbar, dokumentiert und nach Schichten und Modulen mit klaren Verantwortlichkeiten strukturiert" (0/1/4/7)',
+      '"Wurden die Konzepte des gewählten Frameworks und moderner Applikationsentwicklung sachgerecht eingesetzt (z. B. Dependency Injection, REST-Schnittstellen, Konfiguration, Fehlerbehandlung)" (0/3/7/10) — framework-neutral; grade the .NET stack (ASP.NET Core) on its own terms, evidence in docs/spec/modern-app-concepts.md + source/',
       '"Sind die Erkenntnisse aus der Programmierung dokumentiert" (0/1/2/3)',
       '"Ist der Source-Code in einem Git-Repository verfügbar" (0/2)',
     ],
-    read: ['source', 'docs/insights', 'docs/ci-cd.md', 'README.md', 'CLAUDE.md'],
+    read: ['source', 'docs/spec/modern-app-concepts.md', 'docs/insights', 'docs/ci-cd.md', 'README.md', 'CLAUDE.md'],
   },
   {
     key: 'Validierung', max: 16,
@@ -171,7 +172,7 @@ const BUCKETS = [
     items: [
       '"Wurden KI-unterstützende Werkzeuge verwendet und deren Nutzung beschrieben" (0/1/7/12)',
       '"Wurden mit Hilfe der KI intelligente und flexible Services gebaut" (0/2/6)',
-      '"Wurde die Lösung in verschiedene Sub-Systeme aufgeteilt, die unabhängig voneinander als Container verteilt und betrieben werden können" (0/1/3/5)',
+      '"Ist die Lösung in klar abgegrenzte Module bzw. Sub-Systeme strukturiert (modularer Monolith ODER verteilte Services) und als Container lauffähig betrieben" (0/1/3/5) — rubric update June 2026: a modular monolith run as a container now explicitly qualifies for full marks; do NOT require independently-deployable per-subsystem containers',
       '"Sind die Erfahrungen während der Projektarbeit mit KI-unterstützenden Werkzeugen als Fazit reflektiert" (0/1/4/7)',
     ],
     read: ['docs/ai-usage.md', 'vault/Projektarbeit/Learnings.md', 'docs/insights', 'docker-compose.yml', 'demo', 'source/FlowHub.AI', '.ai', '.claude'],
@@ -300,7 +301,7 @@ const demoPromise = agent(
 )
 
 // Architecture deep-dive lenses run concurrently with the bucket pipeline,
-// only when focus === 'architecture'. They feed the verdict, not the /90 totals.
+// only when focus === 'architecture'. They feed the verdict, not the /100 totals.
 const archPromise = archFocus
   ? parallel(ARCH_LENSES.map((L) => () => agent(archPrompt(L), { label: 'arch:' + L.key, phase: 'Architecture', schema: ARCH_SCHEMA })))
   : Promise.resolve([])
@@ -368,14 +369,14 @@ const verdict = await agent(
       ? 'ARCHITECTURE DEEP-DIVE findings (this is an architecture-focus run — weight these heavily and devote a dedicated report section to them):\n' + JSON.stringify(archFindings, null, 2)
       : '',
     'Rules:',
-    '- Max achievable is 90 (Quarkus/Jakarta-EE item excluded for the .NET stack — state this explicitly).',
+    '- Max achievable is 100 (rubric update June 2026: the framework-concepts item is framework-neutral and fully in scope for .NET; no item is excluded — state this explicitly).',
     '- For each item, choose a FINAL awarded value: start from the first examiner, and where the skeptic raised a well-founded dispute, move toward the skeptic. Show both the first-pass and final value.',
     '- Fold the live-demo findings into the KI/Sub-Systeme bucket items ("intelligente und flexible Services" and "Container/Sub-Systeme") — the working live demo is first-hand evidence.',
     '- If the build step reported warnings or built=false, reflect that as real risk (a broken/incomplete bundle PDF is what the examiner would actually receive).',
     '',
     'Write a Markdown report to ' + REPORT + ' (mkdir -p its directory first) with these sections:',
     '  1. Title (note focus=' + focus + ') + run metadata (date, commit, demo URL, bundle pages).',
-    '  2. Overall result: FINAL score X / 90, plus a one-line grade band and a 3-4 sentence examiner summary.',
+    '  2. Overall result: FINAL score X / 100, plus a one-line grade band and a 3-4 sentence examiner summary.',
     '  3. Per-bucket table: bucket | first-pass | final | max.',
     '  4. Per-item detail table for every rubric item: item | scale | first-pass | final | justification | key evidence | gap-to-next-level.',
     '  5. Live demo walkthrough: what was submitted, how it was classified, rate-limit/embeddings/reset posture, screenshot links (' + SHOTS + '), and issues.',
