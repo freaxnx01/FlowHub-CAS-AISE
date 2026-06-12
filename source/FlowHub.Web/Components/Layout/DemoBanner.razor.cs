@@ -21,6 +21,9 @@ public partial class DemoBanner : ComponentBase
     /// <summary>Link to the explainer-videos section (incl. the demo walkthrough video).</summary>
     [Parameter] public string? WalkthroughUrl { get; set; }
 
+    /// <summary>Public Uptime Kuma status page for the demo (health + uptime monitors).</summary>
+    [Parameter] public string? StatusPageUrl { get; set; }
+
     [Parameter] public string? SkillBoardUrl { get; set; }
 
     /// <summary>Public share of the Vikunja 'Zitate' board, where quote captures land.</summary>
