@@ -1,6 +1,6 @@
 name: claude
 
-# Consumer stub for the freaxnx01/claude-pipeline reusable workflow.
+# Consumer stub for the freaxnx01/agent-pipeline reusable workflow.
 #
 # Two triggers:
 #   - issues:labeled with `ai-implement`     → first run on a fresh task
@@ -38,7 +38,7 @@ permissions:
 jobs:
   claude:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'ai-implement' }}
-    uses: freaxnx01/claude-pipeline/.github/workflows/claude-implement.yml@main
+    uses: freaxnx01/agent-pipeline/.github/workflows/claude-implement.yml@main
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     with:

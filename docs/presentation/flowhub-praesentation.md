@@ -2,14 +2,15 @@
 marp: true
 theme: flowhub
 paginate: true
-footer: 'FlowHub · CAS AI-Assisted Software Engineering · Andreas Imboden'
+footer: 'FlowHub · CAS AI-Assisted Software Engineering'
 math: false
 ---
 
 <!--
 Sprechnotizen stehen in HTML-Kommentaren wie diesem und erscheinen im
 Marp-Presenter-View (P drücken) bzw. im PDF-Notes-Export – nicht auf der Folie.
-Zielzeit: ~9 Minuten. Richtwert pro Folie steht oben in der Notiz.
+Zielzeit: ~5–6 Minuten — Stichworte sprechen, Notizen NICHT vorlesen.
+Fokus liegt auf Teil 2 (Erfahrung · Harness · Learnings).
 -->
 
 <!-- _class: title -->
@@ -25,36 +26,16 @@ Zielzeit: ~9 Minuten. Richtwert pro Folie steht oben in der Notiz.
 *Das Projekt — und die Erfahrung, es mit KI zu bauen*
 
 <!--
-[~20 s] Begrüssung.
-"FlowHub – mein CAS-Projekt. Ich zeige euch in den nächsten Minuten zwei Dinge:
-erstens WAS ich gebaut habe, zweitens – und das ist der interessantere Teil –
-WIE es war, das fast vollständig mit KI zu bauen."
+[~15 s] Begrüssung.
+"FlowHub – mein CAS-Projekt. Kurz das WAS, dann ausführlich das interessantere WIE:
+wie war es, das fast vollständig mit KI zu bauen?"
 -->
 
 ---
 
-## Das Problem: Capture without friction
+## Das Problem — und die Idee
 
-Der digitale Alltag produziert ständig kleine Informationsschnipsel:
-ein Film den man schauen will, ein Artikel zum Lesen, das Foto einer Quittung.
-
-**Heute landen sie überall — oder werden vergessen:**
-
-> Idee → Welche App? → App öffnen → Kategorisieren → Ablegen
-> **= 5+ Schritte, Kontextwechsel, oft vergessen**
-
-Der Nutzer will *festhalten*, ohne im Moment zu entscheiden, **wohin** es gehört.
-
-<!--
-[~50 s] Das Problem konkret machen.
-"Jeder kennt das: schnell etwas merken wollen, aber dann – welche App? Notizen?
-Lesezeichen? Task-Liste? Bis man sich entschieden hat, ist der Gedanke weg.
-Das Kernbedürfnis: capture without friction. Erfassen ohne Reibung."
--->
-
----
-
-## Die Idee: ein Eingang, KI macht den Rest
+Der digitale Alltag produziert ständig Schnipsel: ein Film, ein Artikel, das Foto einer Quittung.
 
 <div class="cols">
 <div>
@@ -62,27 +43,26 @@ Das Kernbedürfnis: capture without friction. Erfassen ohne Reibung."
 ### Heute
 Idee → welche App? → öffnen →
 kategorisieren → ablegen
-**5+ Schritte**
+**5+ Schritte — oft vergessen**
 
 </div>
 <div>
 
 ### Mit FlowHub
 Idee → **Telegram** → fertig
-**1 Schritt — KI übernimmt**
+**1 Schritt — die KI übernimmt**
 
 </div>
 </div>
 
-Ein **Telegram-Bot** als einziger Eingang.
-FlowHub **erkennt** den Input, **kategorisiert** ihn und **routet** ihn
-automatisch an den richtigen Self-Hosted-Service im eigenen Homelab.
+Ein **Telegram-Bot** als einziger Eingang: FlowHub **erkennt** den Input, **kategorisiert** ihn und **routet** ihn automatisch an den richtigen Self-Hosted-Service.
 
 <!--
-[~45 s] Die Lösung in einem Satz.
-"FlowHub dreht das um. Ein einziger Eingang – ein Telegram-Bot. Ich schicke etwas
-hin, die KI erkennt was es ist und legt es am richtigen Ort ab. Aus fünf Schritten
-wird einer. Und alles läuft self-hosted in meinem eigenen Homelab – kein Cloud-SaaS."
+[~45 s] Problem + Lösung in einem.
+"Jeder kennt das: schnell etwas merken wollen – aber welche App? Bis man entschieden hat,
+ist der Gedanke weg. FlowHub dreht das um: ein einziger Eingang, ein Telegram-Bot. Ich
+schicke etwas hin, die KI erkennt was es ist und legt es am richtigen Ort ab. Aus fünf
+Schritten wird einer – und alles läuft self-hosted im eigenen Homelab, kein Cloud-SaaS."
 -->
 
 ---
@@ -90,41 +70,50 @@ wird einer. Und alles läuft self-hosted in meinem eigenen Homelab – kein Clou
 ## Konkret: das Skill-System
 
 Jeder Input wird einem **Skill** zugewiesen — Erkennung über Keywords,
-URL-Muster und, wenn nötig, ein **lokales LLM**.
+URL-Muster und, wenn nötig, ein **LLM**.
 
 | Input | Skill | landet in |
 |---|---|---|
-| heise.de-Artikel | ArticleSkill | **Wallabag** (read-later) |
-| „The Imitation Game", share.google/… | MovieSkill | **Vikunja** (Watchlist) |
-| jellyfin.org „ausprobieren" | HomelabSkill | **Wekan** (Kanban) |
-| Foto einer Quittung | DocumentSkill | **paperless-ngx** (DMS) |
-| nichts passt | GenericSkill | **Inbox** (PostgreSQL) |
+| heise.de-Artikel | ArticleSkill | **Wallabag** (read-later) ✅ |
+| „The Imitation Game", share.google/… | MovieSkill | **Vikunja** (Watchlist) ✅ |
+| nichts passt | GenericSkill | **Inbox** (PostgreSQL) ✅ |
+| jellyfin.org „ausprobieren" | HomelabSkill | **Wekan** (Kanban) · _geplant_ |
+| Foto einer Quittung | DocumentSkill | **paperless-ngx** (DMS) · _geplant_ |
+
+✅ heute live · _geplant_ = Roadmap (gleiche `ISkillIntegration`-Schnittstelle).
 
 Unklar? → Der Bot **fragt mit 2–3 Optionen zurück** (Confidence-Score).
 
 <!--
-[~55 s] Ein, zwei Zeilen der Tabelle vorlesen, nicht alle.
-"Ein paar Beispiele: Ein heise-Artikel geht automatisch nach Wallabag, meinem
-Read-Later-Dienst. Ein Filmtitel landet in meiner Vikunja-Watchlist. Ein Quittungsfoto
-geht ins Dokumentenmanagement. Wenn die KI unsicher ist, fragt der Bot kurz nach –
-zwei, drei Optionen, ein Tap. Das ist der Confidence-Score in Aktion."
+[~45 s] Ein, zwei Zeilen vorlesen, nicht alle.
+"Ein heise-Artikel geht nach Wallabag, ein Filmtitel in die Vikunja-Watchlist – beides
+läuft heute. Kanban und Dokumentenmanagement sind über dieselbe Skill-Schnittstelle
+angelegt, das ist die Roadmap. Ist die KI unsicher, fragt der Bot kurz nach – das ist
+der Confidence-Score in Aktion."
 -->
 
 ---
 
-## Architektur
+## Wiederfinden: semantische Suche
 
-![h:520](../projektbeschreibung/FlowHub_Architecture-v2.svg)
+Nicht nur reinwerfen — auch **per Bedeutung wiederfinden**, nicht per Stichwort.
+
+| Schritt | Was passiert |
+|---|---|
+| Query „alles zu Docker" | → Embedding (Mistral `mistral-embed`, 1024 Dim.) |
+| pgvector-Suche | HNSW · Cosine-Distanz · Sub-ms bei < 1 Mio. Zeilen |
+| Treffer | inhaltlich ähnliche Captures — auch ohne exaktes Wort |
+
+**HNSW** = approximativer **Nächste-Nachbarn-Index** (sub-linear schnell) · **Cosine-Distanz** = inhaltliche Ähnlichkeit über den **Winkel zwischen den Vektoren**
+
+`GET /api/v1/captures/search?q=…` · Provider per Config tauschbar (OpenAI-kompatibel) · ohne Key → sauberes `503`
 
 <!--
-[~50 s] Nicht jede Box erklären – den Fluss zeigen.
-"Von oben nach unten: Telegram-Input kommt rein. Das Skill-System in der Mitte
-entscheidet – unterstützt vom AI-Layer, der über Microsoft.Extensions.AI ein lokales
-Ollama-Modell oder als Fallback die Anthropic-API anspricht. Typsichere REST-Clients
-schreiben dann ins Homelab. Persistenz unten: PostgreSQL plus Redis. Sauber getrennte
-Schichten – das war von Anfang an das Ziel: Komplexität durch Architektur beherrschen,
-nicht durch Featuremenge."
-Falls das SVG nicht rendert: Pfad in flowhub-praesentation.md auf das exportierte PNG zeigen.
+[~35 s] Die zweite Hälfte der Idee: Reinwerfen ist nichts wert ohne Wiederfinden.
+Die Suche geht über die Bedeutung, nicht das exakte Wort: Anfrage wird in dasselbe
+Embedding übersetzt wie die Captures – Mistral, 1024 Dimensionen – und pgvector findet
+per Cosine-Distanz die inhaltlich nächsten Treffer in Sub-Millisekunden. Provider per
+Config tauschbar; ohne Key liefert die API sauber ein 503 statt zu raten.
 -->
 
 ---
@@ -133,22 +122,20 @@ Falls das SVG nicht rendert: Pfad in flowhub-praesentation.md auf das exportiert
 
 | Schicht | Technologie |
 |---|---|
-| Backend | **.NET 10** / C# / ASP.NET Core (LTS, Nov 2025) |
+| Backend | **.NET 10** / C# / ASP.NET Core (LTS) |
 | Web-UI | **Blazor SSR** — .NET-native, kein JS-Framework |
-| KI-Integration | **Microsoft.Extensions.AI** + Ollama (lokal) / Anthropic (Fallback) |
+| KI-Integration | **Microsoft.Extensions.AI** + Ollama (lokal) / Anthropic · OpenRouter (Fallback) |
 | Pipeline | **MassTransit** — In-Memory (dev) / RabbitMQ (prod) |
-| Persistenz | **PostgreSQL 17** + **pgvector** (semantische Suche) · EF Core 10 |
-| REST-Clients | **Refit** — typsicher, deklarativ |
+| Persistenz | **PostgreSQL 17** + **pgvector** · EF Core 10 |
 | Deployment | **Docker Compose** — 6 Services, Migrations als Init-Container |
 
 *Inkrementell über 5 Blöcke gebaut: Konzept → UI → Services/KI → Persistenz → Deployment.*
 
 <!--
-[~40 s] Stack schnell, nicht vorlesen. Highlights setzen.
-"Durchgehend .NET 10. Frontend Blazor – ich brauchte kein separates JS-Framework.
-KI über Microsoft.Extensions.AI, das abstrahiert den Provider weg: lokales Ollama oder
-Anthropic, umschaltbar per Config. Persistenz Postgres mit pgvector für semantische
-Suche. Alles in Docker Compose. Gebaut wurde das inkrementell – ein Block pro Thema."
+[~30 s] Stack schnell, nicht vorlesen. Highlights setzen.
+"Durchgehend .NET 10, Frontend Blazor – kein separates JS-Framework. KI über
+Microsoft.Extensions.AI, Provider per Config umschaltbar. Persistenz Postgres mit
+pgvector. Alles in Docker Compose, inkrementell über fünf Blöcke gebaut."
 -->
 
 ---
@@ -178,121 +165,194 @@ die App bleibt funktionsfähig. Container heilen sich per restart-Policy selbst.
 
 # Teil 2: Bauen mit KI
 
-## Wie war es wirklich?
+## Erfahrung · Harness · Learnings
 
 <!--
 [~10 s] Übergang. Tempo wechseln.
-"Soviel zum Produkt. Jetzt der Teil, um den es in diesem CAS eigentlich geht:
-Wie war es, das mit KI zu bauen?"
+"Soviel zum Produkt. Jetzt der Teil, um den es im CAS eigentlich geht: Wie war es, das
+mit KI zu bauen? Werkzeuge, Disziplin und die Learnings."
 -->
 
 ---
 
-## Nicht „Prompt rein, Code raus" — eine Pipeline
+## Der Harness — Überblick
+
+Die KI wurde nicht ad-hoc geprompted, sondern über eine **Werkzeugkette** gesteuert:
+
+| Ebene | Werkzeug |
+|---|---|
+| **Agent** | Claude Code (interaktiv) · Codex / Copilot ergänzend |
+| **Konventionen** | **`ai-instructions`** (base + `dotnet-blazor`) → `CLAUDE.md` |
+| **Workflows** | **eigene Skills**: `/ui-*`, `/flowhub-*`, `/commit`, `/push` |
+| **Methode** | **Brainstorm → Spec → Plan → Subagent → Review** |
+| **Automatisierung** | **`agent-pipeline`** (Issue→PR) · **`examiner-sim`** (Grading) |
+| **Disziplin** | **Context-Hygiene**: Logs-via-File · `/clear`-Schnitte |
+
+<!--
+[~30 s] Landkarte für Teil 2, nicht vorlesen.
+"Der ganze Harness auf einen Blick – von oben: der Agent, die Konventionen, eigene
+Workflows als Skills, die Arbeitsmethode, zwei Automatisierungen, und unten die Disziplin,
+die alles zusammenhält. Die nächsten Folien gehen die wichtigsten durch."
+-->
+
+---
+
+## Nicht „Prompt rein, Code raus" — eine **Pipeline**
 
 Jeder grössere Baustein lief durch denselben strukturierten Ablauf:
 
 **Brainstorm → Spec → Plan → Subagent-Implementierung → 2-stufiges Review**
 
-1. **Brainstorming-Skill** — Design als A/B/C-Entscheidungen (z. B. 13 Entscheide für die Async-Pipeline), jede mit Begründung festgehalten
-2. **Spec + Plan** — schriftliches Design, dann TDD-geordneter Aufgabenplan
-3. **Subagenten** — pro Task ein frischer Implementierer (Test-First)
-4. **Review ×2** — Spec-Konformität, dann Code-Qualität — *bevor* etwas in `main` geht
+1. **Brainstorming** — Design als **A/B/C-Entscheidungen** (z. B. 13 Entscheide für die Async-Pipeline), jede mit Begründung
+2. **Spec + Plan** — schriftliches Design, dann **TDD-geordneter** Aufgabenplan
+3. **Subagenten** — pro Task ein **frischer Kontext** (Test-First)
+4. **Review ×2** — Spec-Konformität, dann Code-Qualität — *bevor* etwas in **`main`** geht
 
 <!--
-[~55 s] Das ist der wichtigste konzeptionelle Punkt der Präsentation.
-"Der grösste Lerneffekt: Gute KI-Entwicklung ist NICHT 'Prompt rein, Code raus'.
-Es ist eine Pipeline. Erst brainstorme ich das Design – die KI zwingt mich, jede
-Entscheidung als A/B/C-Wahl explizit zu treffen statt zu schwafeln. Dann ein
-schriftliches Spec, dann ein Plan in test-first-Reihenfolge. Erst dann implementiert
-ein Subagent – pro Aufgabe ein frischer Kontext. Und nichts geht in main ohne zwei
-Reviews: stimmt es mit dem Spec, und ist die Qualität gut. Diese Struktur hat die KI
-davon abgehalten, unkontrolliert in die falsche Richtung zu laufen."
+[~45 s] Der wichtigste konzeptionelle Punkt.
+"Der grösste Lerneffekt: Gute KI-Entwicklung ist NICHT 'Prompt rein, Code raus' – es ist
+eine Pipeline. Erst Design als A/B/C-Entscheidungen, dann Spec, dann ein Plan in
+test-first-Reihenfolge. Erst dann implementiert ein Subagent mit frischem Kontext. Und
+nichts geht in main ohne zwei Reviews. Diese Struktur hält die KI auf Kurs."
 -->
 
 ---
 
-## KI-Anteil in Zahlen (Block 4: Persistenz)
+## Werkzeuge: **`ai-instructions`** + eigene **Skills**
 
-| Artefakt | Zeilen | KI-generiert | Mensch | KI % |
-|---|--:|--:|--:|--:|
-| Entity-Klassen + Configs (14) | ~250 | ~225 | ~25 | 90 % |
-| Repository-Implementierungen (6) | ~350 | ~315 | ~35 | 90 % |
-| Integrationstests (16) | ~230 | ~210 | ~20 | 91 % |
-| Docker Compose | ~50 | ~40 | ~10 | 80 % |
-| … Services · Filter · Refactor | ~130 | ~112 | ~18 | 86 % |
-| **Gesamt** | **~1010** | **~902** | **~108** | **~89 %** |
+**`ai-instructions`** (eigenes Repo) — Konventionen als **feste Regeln**, nicht als Prompt:
 
-Über alle Blöcke: **~85–95 % des Codes KI-generiert.**
-Der Mensch-Anteil ist klein — aber **hochwertig**.
+- `base` (stack-agnostisch) **+ Stack-Overlay `dotnet-blazor`** → daraus leitet sich `CLAUDE.md` ab
+- z. B. **Coding Guidelines** (Clean Code) · **SemVer** · **Conventional Commits** · **12-Factor** · **TDD** — *Tests werden nie nachträglich angepasst, nur damit Code grün wird*
+
+**Eigene CAS-AISE-Skills** (Claude-Code-Slash-Commands):
+
+- `/ui-brainstorm · /ui-flow · /ui-build · /ui-review` — der **4-Phasen-UI-Workflow**
+- `/flowhub-capture · -triage · -issue` — das Produkt selbst bedienen
+- `examiner-sim` · `cas-aise-grade-self-check` — **Selbstbewertung** gegen die Moodle-Rubrik
 
 <!--
-[~45 s] Die Zahl wirken lassen, dann sofort relativieren.
-"In Zahlen: rund 89 Prozent des Persistenz-Codes kamen von der KI. Über das ganze
-Projekt 85 bis 95 Prozent. Klingt nach 'die KI hat's gemacht'. Aber – und das ist der
-Punkt der nächsten zwei Folien – die verbleibenden 10 bis 15 Prozent Mensch waren genau
-die, die über Erfolg oder Desaster entscheiden."
+[~40 s] Steuerung statt Zuruf.
+"Damit die KI nicht bei null anfängt: ein eigenes ai-instructions-Repo – stack-agnostischer
+Kern plus .NET-Blazor-Overlay mit Coding Guidelines, SemVer, Conventional Commits, TDD als
+festen Regeln, aus denen sich das CLAUDE.md ableitet. Plus eigene Skills als Slash-Commands:
+der UI-Workflow, Commands fürs Produkt, und ein Skill zur Selbstbewertung gegen die Rubrik."
 -->
 
 ---
 
-## Wo die KI glänzt
+## Beispiel: der **UI-Workflow**
 
-### Boilerplate
-7 strukturgleiche `IEntityTypeConfiguration<T>`-Klassen — komplett generiert.
-Von Hand zeitintensiv und fehleranfällig.
+`/ui-brainstorm` → **ASCII-Wireframe** → `/ui-flow` → **Mermaid-Flow** → `/ui-build` → `/ui-review`
+**Gate pro Phase** — nichts wird gebaut, bevor Wireframe **und** Flow freigegeben sind.
 
-### Migrations & Infrastruktur
-EF-Core-Migrations, Refit-Interfaces, GitHub-Actions-YAML — Muster auf Anhieb korrekt.
+**Phase 1 — Wireframe** (`New Capture`):
 
-### Tests
-16 Integrationstests gegen echtes PostgreSQL (Testcontainers) —
-**alle grün beim ersten Durchlauf.** Konsistente Arrange/Act/Assert-Struktur.
+```
+┌─ FlowHub ─────────────────────┐
+│  New Capture                  │
+│  ┌─ Content * ─────────────┐  │
+│  │ URL / Zitat / Text…     │  │
+│  └─────────────────────────┘  │
+│  Skill: [ — KI entscheidet ▾ ]│
+│        [Abbrechen] [Speichern] │
+└───────────────────────────────┘
+```
 
-> KI als **Accelerator**: was repetitiv und gut spezifiziert ist, entsteht in Minuten.
+**Phase 2 — Mermaid-Flow** → echtes `docs/design/new-capture/flow.md`
+
+![bg right:40% h:300](assets/ui-flow-example.svg)
 
 <!--
-[~45 s] Positiv, konkret.
-"Wo die KI brilliert: alles Repetitive und gut Spezifizierte. Sieben fast identische
-EF-Core-Konfigurationsklassen – generiert in Sekunden, fehlerfrei. Migrations, typsichere
-REST-Clients, CI-Pipelines. Und Tests: 16 Integrationstests gegen eine echte Postgres-
-Datenbank, alle grün beim ersten Lauf. Das ist der Beschleuniger-Effekt."
+[~40 s] Konkret zeigen, nicht abstrakt behaupten.
+"Vier Phasen, jede mit einem Gate. Phase 1 zwingt mich, das Layout erst als ASCII-Wireframe
+zu klären – links. Phase 2 macht den Zustandsfluss explizit als Mermaid-Diagramm – rechts.
+Beides muss freigegeben sein, bevor eine Zeile Blazor entsteht. So baut die KI nicht am
+Ziel vorbei, und ich denke das UI durch, bevor Code existiert."
 -->
 
 ---
 
-## Wo die KI scheitert
+## Context-Hygiene — das **unterschätzte Thema**
 
-Genau dort, wo **Domänenverständnis** oder **Performance-Gespür** nötig ist:
+Der Kontext ist das **knappste Gut**. Zwei Disziplinen brachten am meisten:
 
-- **N+1-Blindheit** — `ListAsync` ohne `.Include(c => c.Tags)`. Kein implizites Performance-Bewusstsein für Navigation Properties.
-- **CASCADE überall** — alle Fremdschlüssel auf `CASCADE DELETE`. Die Unterscheidung *owned* vs. *referenced* (Soft-FK für Audit-Trail) war eine **menschliche Domänen-Entscheidung**.
-- **Feldlängen** — `varchar(128)` statt `(64)`. KI weicht ohne expliziten Spec-Verweis auf „sichere" Defaults aus.
-- **Veraltete Paket-Versionen** — Plan pinnte Npgsql 9; real war 10 nötig. **Trainingsdaten hinken neuen Releases hinterher.**
-- **Feature-Drift** — KI schlägt ständig mehr Features vor; bewusste MVP-Eingrenzung war nötig.
+**1 · Logs via File** — grösster Token-Fresser waren Console-, Test- und Build-Streams.
+Statt alles in den Chat: in eine **Datei** schreiben, gezielt mit `Read offset/limit` oder
+`grep` holen. → **~5–10× weniger Tokens** pro Debug-Session.
+
+**2 · `/clear`-Schnitte** — Spec → `/clear` → Plan → `/clear` → Implement.
+Jede Phase hinterlässt ein **Artefakt auf Disk**; der Dialog-Ballast wird verworfen.
+
+> Was zwischen Phasen weiterleben muss, gehört in eine **Datei** — nicht in den Chat.
 
 <!--
-[~55 s] Ehrlich und spezifisch – das überzeugt die Dozenten am meisten.
-"Und wo scheitert sie? Überall, wo Domänenwissen oder Performance-Gespür zählt. Die KI
-schrieb eine Datenbankabfrage mit dem klassischen N+1-Problem – fällt nur im Review auf.
-Sie setzte alle Fremdschlüssel auf CASCADE DELETE; dass ein Audit-Trail erhalten bleiben
-muss, ist eine Domänen-Entscheidung, die sie nicht treffen konnte. Sie nahm veraltete
-Paket-Versionen, weil ihre Trainingsdaten den neuen Releases hinterherhinken. Und sie
-will ständig mehr Features bauen – Scope-Disziplin musste ich liefern."
+[~45 s] Das praktischste Learning – ruhig betonen.
+"Das am meisten unterschätzte Thema: Context-Management. Grösster Token-Fresser war
+Log-Output. Lösung: erst in eine Datei, dann gezielt nur relevante Zeilen lesen – fünf-
+bis zehnmal weniger Tokens pro Debug-Session. Zweitens: zwischen Spec, Plan und
+Implementierung ein hartes /clear. Jede Phase hinterlässt ein Artefakt auf der Disk.
+Faustregel: Was weiterleben muss, gehört in eine Datei – nicht in den Chat."
 -->
 
 ---
 
-## Der Smoke-Test-Moment
+## Automatisierung — **KI prüft KI**
+
+**`agent-pipeline`** (GitHub Actions) — **autonome Issue-Implementierung**:
+Issue mit `ai-implement` labeln → **Branch + Draft-PR**, mit Retry-Policy.
+
+**`examiner-sim`** (Multi-Agent-Workflow) — baut die Abgabe-PDFs, **benotet** sie
+gegen die **Moodle-Rubrik** mit einem Agenten-Panel und übt die Live-Demo.
+
+> Der Mensch schreibt nicht mehr jede Zeile — er definiert die **Leitplanken**
+> und lässt **KI-gestützte Prüfungen** finden, was die KI übersieht.
+
+<!--
+[~35 s] Die Meta-Ebene: KI prüft KI.
+"Zwei Automatisierungen: eine Pipeline, die ein gelabeltes Issue autonom implementiert und
+einen Draft-PR öffnet; und ein examiner-sim, der die Abgabe-PDFs baut, gegen die
+Moodle-Rubrik benotet und die Demo durchspielt. Der Mensch definiert die Leitplanken;
+KI-gestützte Prüfungen finden, was die KI selbst übersieht."
+-->
+
+---
+
+## Wo die KI **glänzt** — und wo **nicht**
+
+Über alle Blöcke: **~85–95 % des Codes KI-generiert**.
+
+### Glänzt — **repetitiv & gut spezifiziert**
+7 `IEntityTypeConfiguration<T>`, EF-Migrations, Refit-Interfaces, CI-YAML;
+**16 Integrationstests** gegen echtes PostgreSQL — **alle grün beim ersten Lauf**.
+
+### Scheitert — wo **Domäne & Performance** zählen
+- **N+1-Blindheit** — `ListAsync` ohne `.Include`
+- **CASCADE überall** — Löschen kaskadiert blind (Eltern weg → alle Kinder weg). Was *erhalten* bleiben muss (z. B. Audit-Trail), ist eine **menschliche Entscheidung**
+- **Veraltete Versionen** — Trainingsdaten hinken neuen Releases hinterher
+- **Feature-Drift** — Scope-Disziplin muss vom **Menschen** kommen
+
+<!--
+[~45 s] Ehrlich und konkret – überzeugt die Dozenten.
+"89 Prozent KI-Anteil in der Persistenz, projektweit 85 bis 95. Wo sie glänzt: alles
+Repetitive und gut Spezifizierte – Konfigurationsklassen, Migrations, 16 Integrationstests
+gegen echtes Postgres, alle grün beim ersten Lauf. Wo sie scheitert: N+1-Abfragen, blind
+gesetzte CASCADE-Löschungen, veraltete Versionen, ständiger Feature-Drang. Diese 10 bis 15
+Prozent Mensch entscheiden über Erfolg oder Desaster."
+-->
+
+---
+
+## Der **Smoke-Test-Moment**
 
 Die KI schrieb den ganzen Deployment-Stack. Dann lief **ein** Befehl:
 `make smoke-prod` — End-to-End-Probe des laufenden Stacks.
 
 **An einem Nachmittag fand er 5 reale, latente Bugs:**
 
-- `.editorconfig` nicht ins Build-Image kopiert → Build bricht mit `TreatWarningsAsErrors` ab
+- `.editorconfig` fehlt im Build-Image → Build bricht mit `TreatWarningsAsErrors` ab
 - Compose-Env-Casing `${EMBEDDINGS__APIKEY}` ≠ `Embeddings__ApiKey` → Embeddings still no-op
-- Leerstring-Modellname triggert `AssertNotNullOrEmpty` → Crash beim Start
+- Leerstring-Modellname → `AssertNotNullOrEmpty`-Crash beim Start
 - Mistral lehnt das `dimensions`-Feld ab → 422
 - Passbolt-Refs vom Makefile überschattet → KI-Call erreichte nie den Provider
 
@@ -300,14 +360,11 @@ Die KI schrieb den ganzen Deployment-Stack. Dann lief **ein** Befehl:
 > **Der Mensch bleibt im Loop — als Reviewer.**
 
 <!--
-[~50 s] Die beste Geschichte des Decks. Mit etwas Spannung erzählen.
-"Mein liebster Moment: Die KI hatte den kompletten Deployment-Stack geschrieben. Sah gut
-aus. Dann schrieb ich – auch mit KI – einen Smoke-Test, der den echten Stack hochfährt
-und durchprobt. Erster Lauf: fünf echte Bugs. Ein fehlendes File, das den Build sprengt.
-Ein Casing-Fehler, durch den die Embeddings still nichts taten. Ein Crash beim Start.
-Alles latent, alles hätte die Abgabe blockiert. Die Lektion: KI schreibt den Code, aber
-eine Prüfung – idealerweise auch KI-gestützt – muss finden, was die KI übersieht.
-Der Mensch bleibt im Loop, als Reviewer."
+[~45 s] Die beste Geschichte – mit etwas Spannung.
+"Mein liebster Moment: Die KI hatte den kompletten Deployment-Stack geschrieben, sah gut
+aus. Dann ein – auch KI-geschriebener – Smoke-Test, der den echten Stack hochfährt. Erster
+Lauf: fünf latente Bugs, alle hätten die Abgabe blockiert. Lektion: KI schreibt den Code,
+aber eine – idealerweise KI-gestützte – Prüfung muss finden, was die KI übersieht."
 -->
 
 ---
@@ -322,14 +379,37 @@ Boilerplate, Migrations, Tests entstehen in Minuten.
 **Sie braucht menschliche Führung bei Architektur & Domäne** —
 FK-Strategie, Performance, Scope, aktuelle Versionen.
 
-### Der Mensch bleibt Architekt und Reviewer.
+### Der Mensch bleibt **Architekt und Reviewer**.
 
 <span class="small">Code & Doku: github.com/freaxnx01/FlowHub-CAS-AISE · Danke — Fragen?</span>
 
 <!--
-[~35 s] Klar landen, dann Q&A öffnen.
-"Mein Fazit in einem Satz: KI ist ein starker Beschleuniger für Infrastruktur-Code, aber
-sie braucht menschliche Führung bei allem, was Architektur und Domäne berührt. Die Rolle
-hat sich verschoben – weg vom Zeile-für-Zeile-Tippen, hin zu Entwerfen, Lenken und
-Reviewen. Der Mensch bleibt Architekt und Reviewer. Danke – ich freue mich auf eure Fragen."
+[~30 s] Klar landen, Q&A öffnen.
+"Mein Fazit: KI ist ein starker Beschleuniger für Infrastruktur-Code, braucht aber
+menschliche Führung bei allem, was Architektur und Domäne berührt. Die Rolle hat sich
+verschoben – vom Tippen zum Entwerfen, Lenken, Reviewen. Der Mensch bleibt Architekt und
+Reviewer. Danke – Fragen?"
+-->
+
+---
+
+<!-- _paginate: false -->
+
+## Anhang · Abkürzungen
+
+| Abk. | Bedeutung | Abk. | Bedeutung |
+|---|---|---|---|
+| KI / AI | Künstliche Intelligenz | MEAI | Microsoft.Extensions.AI |
+| SSR | Server-Side Rendering | LLM | Large Language Model |
+| EF Core | Entity Framework Core (ORM) | pgvector | Postgres-Vektor-Erweiterung |
+| HNSW | Approx.-Nearest-Neighbour-Index | ANN | Approximate Nearest Neighbour |
+| DI | Dependency Injection | TDD | Test-Driven Development |
+| RFC 9457 | HTTP Problem Details | ADR | Architecture Decision Record |
+| MVP | Minimum Viable Product | LTS | Long-Term Support |
+| DMS | Dokumentenmanagement-System | OIDC | OpenID Connect (geplant) |
+| FK | Foreign Key (Fremdschlüssel) | N+1 | N+1-Query-Problem |
+| 12-Factor | 12-Factor-App (Cloud-native-Prinzipien) | CI | Continuous Integration |
+
+<!--
+[Backup] Nur bei Nachfragen zeigen — Akronyme aus dem Deck.
 -->
