@@ -18,7 +18,7 @@ semantic search. See ADR 0004 (AI integration) and ADR 0006 (vector search).
   DI wiring; the active provider is selected by configuration (one env var swap).
 - `AiPrompts.cs`, `AiClassificationResponse.cs` — prompt templates and the
   schema-bound response contract.
-- `Enrichers/` — pluggable content enrichers (e.g. `QuotesEnricher`),
+- `Enrichers/` — pluggable content enrichers (e.g. `ZitateEnricher`),
   dispatched by `EnricherDispatcher`.
 - `AiBootLogger.cs`, `AiRegistrationOutcome.cs` — startup diagnostics describing
   which AI capabilities are active.

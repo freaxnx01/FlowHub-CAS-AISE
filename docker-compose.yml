@@ -38,6 +38,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
   flowhub.migrations:
     build:
@@ -65,6 +66,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -78,6 +80,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
@@ -87,6 +90,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=7d'
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
@@ -97,6 +101,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./docs/monitoring/grafana:/var/lib/grafana/dashboards:ro
+    restart: unless-stopped
 
 volumes:
   postgres_data:

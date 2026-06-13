@@ -1,7 +1,7 @@
 ---
 tags:
   - claude-updated
-updated: 2026-05-17
+updated: 2026-06-13
 ---
 
 # Block 2 — Frontend · Nachbereitung
@@ -9,6 +9,15 @@ updated: 2026-05-17
 **Phase budget:** 26 h
 **PVA war:** 2026-03-21
 **Nächste PVA:** 2026-04-25
+
+## Lernziel
+
+- Ich bin in der Lage, verschiedene Technologien und Frameworks für die Entwicklung von Web-Apps einzusetzen.
+- Ich kann die Konzepte von SSR und CSR erklären und anwenden.
+- Ich bin in der Lage, Quarkus für Web-Formulare zu nutzen.
+- Ich bin in der Lage, Unit-Tests zu generieren und Services zu testen.
+
+> **Stack-Mapping (.NET statt Quarkus):** „Quarkus für Web-Formulare" → **Blazor SSR** (.NET-natives Server-Rendering; MudBlazor-Formulare mit Validierung, `MudForm` + `MudTextField`/`MudSelect`). Quarkus ist im Moodle-Auftrag nur Beispiel-Stack — die Lernziele (SSR/CSR, Web-Frameworks, Unit-Tests) sind stack-neutral und mit Blazor erfüllt.
 
 ## Auftrag (Moodle)
 
@@ -29,7 +38,7 @@ Snapshot am Ende der Block-2-Phase (~2026-04-25) gegen die offizielle Moodle-Rub
 
 > **Sektion nachträglich ergänzt (2026-05-17)** — damit das Pattern aus Block 3 / 4 / 5 auch in Block 1 / 2 vorhanden ist.
 
-> Quarkus/Jakarta-EE-Item ist für FlowHub (.NET-Stack) **nicht relevant** — bewusst ausgeklammert.
+> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 

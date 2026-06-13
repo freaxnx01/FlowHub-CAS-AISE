@@ -16,7 +16,7 @@ namespace FlowHub.AI;
 /// <summary>
 /// Fallback project catalog used when Vikunja isn't configured: exposes the fallback
 /// project plus every registered enricher's bucket name. This lets the classifier route
-/// e.g. a quote to "Quotes" and the dispatcher invoke the matching enricher even without
+/// e.g. a quote to "Zitate" and the dispatcher invoke the matching enricher even without
 /// a live Vikunja (the public demo relies on this). Ids are placeholders (-1) — only the
 /// names matter for enrichment dispatch; real ids come from the live Vikunja catalog.
 /// </summary>
@@ -72,6 +72,12 @@ public static class AiServiceCollectionExtensions
             new EnricherBucketCatalog(sp.GetServices<IEnricher>(), sp.GetRequiredService<VikunjaFallback>().Name));
         services.AddSingleton<EnricherDispatcher>();
 
+        var pricingSection = configuration.GetSection(Pricing.ClassificationPricingOptions.SectionName);
+        services.Configure<Pricing.ClassificationPricingOptions>(
+            o => pricingSection.Bind(o));
+
+        services.AddSingleton<IClassificationCostEstimator, Pricing.ClassificationCostEstimator>();
+
         var outcome = ResolveOutcome(configuration);
         services.AddSingleton(outcome);
         services.AddHostedService<AiBootLogger>();
@@ -82,8 +88,8 @@ public static class AiServiceCollectionExtensions
             return services;
         }
 
-        // QuotesEnricher needs IChatClient — only register when AI is configured.
-        services.AddSingleton<IEnricher, QuotesEnricher>();
+        // ZitateEnricher needs IChatClient — only register when AI is configured.
+        services.AddSingleton<IEnricher, ZitateEnricher>();
 
         var apiKey = configuration[$"Ai:{outcome.Provider}:ApiKey"]!;
         var model = outcome.Model!;
@@ -98,12 +104,15 @@ public static class AiServiceCollectionExtensions
                     configure: null)
                 .Build());
 
+        services.AddSingleton(new AiModelInfo(outcome.Provider!.Value.ToString(), model));
+
         services.AddSingleton(sp => new AiClassifier(
             sp.GetRequiredService<IChatClient>(),
             sp.GetRequiredService<KeywordClassifier>(),
             sp.GetRequiredService<ILogger<AiClassifier>>(),
             new ChatOptions { MaxOutputTokens = maxTokens, Temperature = 0.2f },
-            sp.GetRequiredService<IVikunjaProjectCatalog>()));
+            sp.GetRequiredService<IVikunjaProjectCatalog>(),
+            sp.GetRequiredService<AiModelInfo>()));
         services.AddSingleton<IClassifier>(sp => sp.GetRequiredService<AiClassifier>());
 
         return services;

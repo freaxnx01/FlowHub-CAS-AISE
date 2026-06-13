@@ -36,5 +36,16 @@ internal sealed class CaptureEntityTypeConfiguration : IEntityTypeConfiguration<
             a.Property(x => x.UploadedAt).HasColumnName("Attachment_UploadedAt");
         });
         builder.Navigation(c => c.Attachment).IsRequired(false);
+
+        builder.OwnsOne(c => c.ClassifierTrace, t =>
+        {
+            t.Property(x => x.Kind).HasColumnName("ClassifierTrace_Kind").HasMaxLength(16);
+            t.Property(x => x.LatencyMs).HasColumnName("ClassifierTrace_LatencyMs");
+            t.Property(x => x.Provider).HasColumnName("ClassifierTrace_Provider").HasMaxLength(32);
+            t.Property(x => x.Model).HasColumnName("ClassifierTrace_Model").HasMaxLength(128);
+            t.Property(x => x.PromptTokens).HasColumnName("ClassifierTrace_PromptTokens");
+            t.Property(x => x.CompletionTokens).HasColumnName("ClassifierTrace_CompletionTokens");
+        });
+        builder.Navigation(c => c.ClassifierTrace).IsRequired(false);
     }
 }

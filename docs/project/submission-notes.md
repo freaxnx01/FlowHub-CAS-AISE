@@ -79,7 +79,7 @@ Walk this list top-to-bottom. Each step is gated by the previous.
 
 ### B — End-to-end acceptance (T-3 to T-1 days)
 
-- [ ] Run [`docs/runbooks/v0.1.0-final-acceptance.md`](docs/runbooks/v0.1.0-final-acceptance.md) on a clean host — all 7 steps pass
+- [ ] Run [`docs/runbooks/v0.1.0-final-acceptance.md`](../runbooks/v0.1.0-final-acceptance.md) on a clean host — all 7 steps pass
 - [ ] Public demo at `https://demo.flowhub.freaxnx01.ch` reachable, classification + keyword fallback both verified
 - [ ] OpenRouter spend dashboard shows the demo key well below the $1 cap
 

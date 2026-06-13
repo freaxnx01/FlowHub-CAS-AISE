@@ -43,6 +43,21 @@ public class FilesystemAttachmentStorageTests : IDisposable
         await sut.Invoking(s => s.DeleteAsync("2026/01/missing.pdf")).Should().NotThrowAsync();
     }
 
+    [Fact]
+    public async Task OpenReadAsync_ReturnsBytesPreviouslySaved()
+    {
+        var sut = NewSut();
+        var bytes = new byte[] { 1, 2, 3, 4 };
+        using var input = new MemoryStream(bytes);
+        var relative = await sut.SaveAsync(input, "x.pdf", "application/pdf");
+
+        await using var read = await sut.OpenReadAsync(relative);
+        using var buffer = new MemoryStream();
+        await read.CopyToAsync(buffer);
+
+        buffer.ToArray().Should().Equal(bytes);
+    }
+
     private FilesystemAttachmentStorage NewSut()
     {
         var env = Substitute.For<IHostEnvironment>();

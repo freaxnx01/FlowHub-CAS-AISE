@@ -3,8 +3,13 @@
 Prep aid for the CAS-AISE oral defense (PVA), derived from the `examiner-sim`
 runs. **Not part of the submission bundle** — internal study sheet.
 
-- **Max achievable:** 90 (Quarkus/Jakarta-EE item N/A for .NET, consciously excluded).
-- **Representative grade (balanced lens):** ~81–83. **Architecture-skeptic floor:** 77.
+- **Max achievable: 100** — the **rubric was updated (June 2026)**: the programming
+  "framework concepts" item is now **framework-neutral** (no longer Quarkus/Java), so
+  .NET earns it directly, and the Sub-System item now **explicitly accepts a modular
+  monolith run as a container**. No item is excluded — the old "/90" framing is gone.
+- **Measured grade:** **86/90** on the old architecture-skeptic lens (~88 after the
+  verified-test-run pass; balanced ~90). On the new /100 rubric, add the framework item
+  (~10) and the now-winnable Sub-System point → low-to-mid **90s/100**.
 - **How to use:** for each likely question, a crisp answer + *where to point* in the
   repo/bundle. Own the known gaps honestly — examiners reward "I know exactly what's
   not done and why" over a defended overclaim.
@@ -66,9 +71,29 @@ has a `README.md` describing its role; the gap is private/implementation members
 It's on the post-submission list (see Gap-Fill §F.3), not hidden.
 
 **Q: Why are FlowHub.Telegram / FlowHub.Integrations shown as projects when empty?**
-A: They're **placeholders, not in `FlowHub.slnx`**, each with a README stating
-"planned / not implemented". The Wallabag/Vikunja adapters actually live in
-`FlowHub.Skills` (ADR 0002 has an "As built" note correcting the early plan).
+A: They aren't — the empty folders were **removed**; the source tree is exactly the
+six solution projects. A Telegram channel and a generic integrations layer are
+planned (not yet scaffolded). The Wallabag/Vikunja adapters live in `FlowHub.Skills`
+(ADR 0002 has an "As built" note correcting the early plan).
+
+**Q: The "Konzepte des gewählten Frameworks" criterion (DI, REST, Konfiguration, Fehlerbehandlung) — how does .NET deliver it?**
+A: The criterion is **framework-neutral** (the June-2026 rubric replaced the old
+Quarkus/Jakarta-EE wording). The chosen framework is **.NET 10 / ASP.NET Core**, and
+the four named concepts are all in code — *"here's each one, where to point"* (full
+evidence: `docs/spec/modern-app-concepts.md`):
+
+| Named concept | FlowHub (.NET) — where to point |
+|---|---|
+| **Dependency Injection** | built-in DI, per-module `*ServiceCollectionExtensions`; Core stays infra-free |
+| **REST-Schnittstellen** | Minimal API + RFC 9457 ProblemDetails (`FlowHub.Api/Endpoints`) |
+| **Konfiguration** | `IConfiguration` + Options + env vars (12-factor, no secrets in code) |
+| **Fehlerbehandlung** | ProblemDetails everywhere + MassTransit retry + deterministic fallback (EventId 3010) |
+
+…plus the broader modern-app concepts (ORM via EF Core + 6 repositories; async
+throughout; MassTransit messaging, 5 consumers; Testcontainers vs real PostgreSQL;
+OpenTelemetry/Prometheus). **Target: vollständig/korrekt (10)** — no stack caveat
+needed; the criterion no longer names Java/Quarkus. (Only honest non-claim: no real
+GraalVM native image — a lean Alpine container isn't AOT.)
 
 ---
 
@@ -90,14 +115,17 @@ fail real PG — so persistence is tested against the real engine.
 
 ## E. KI, Sub-Systeme & Reflexion
 
-**Q: Defend the single-process Modular Monolith against "Sub-Systeme unabhängig als Container."**
-A: ADR 0002 — a conscious decision for a single-operator tool: logical service
-boundaries (ports/adapters, no cross-module refs, per-module DI) without the
-operational cost of distribution. The runtime topology is `flowhub.web` +
-`flowhub.migrations` (init-job) + backing services. Honest: only one first-party
-**app** container today. It's **reversible** — the MassTransit transport already
-swaps in-memory↔RabbitMQ, so splitting a consumer into its own process is a
-configuration + host change, not a rewrite. (See Gap-Fill §F.5.)
+**Q: Sub-Systeme / Container — is a modular monolith enough?**
+A: **Yes — the June-2026 rubric explicitly accepts it**: *"klar abgegrenzte Module
+bzw. Sub-Systeme (modularer Monolith oder verteilte Services) und als Container
+lauffähig betrieben."* FlowHub is exactly that: six clearly-bounded modules
+(`Core/Api/AI/Persistence/Skills/Web`) with clean responsibilities, no cross-module
+refs, per-module DI (ADR 0002) — **and it runs as a container stack** (Docker
+Compose: web + migrations init-job + postgres/rabbitmq/prometheus/grafana, live on
+the demo). So this is **vollständig/korrekt (5)**, not a gap. If pushed on
+distribution: the MassTransit transport already swaps in-memory↔RabbitMQ, so a
+later split into independent processes is a config+host change, not a rewrite —
+but the rubric doesn't require it.
 
 **Q: ADR 0003 / p.56 show a `flowhub.api` container — show it in compose.**
 A: It wasn't built — `FlowHub.Api` is an **in-process class library** composed into
@@ -129,22 +157,24 @@ record the shift with concrete incidents (e.g. dual-provider EF trap, N+1 `.Incl
 
 ## F. Remaining gaps & how to fill them
 
-Ordered by leverage. Items 1–4 are still **submission-legal** (raise the rubric
-score; doc/quality work) — items 5–8 are real features that the `SCOPE-FREEZE`
-defers to **after** the Moodle upload (2026-07-04).
+**Done — earlier doc passes (shipped):** NF-table relabel, as-built §6.1 + rendered
+diagrams, XML-doc on the Core ports, removed the empty Integrations/Telegram folders,
+verified-test-run embedded (253/0/0). These already landed.
 
-| # | Gap | Bucket → effect | How to fill | Effort | Allowed now? |
-|---|---|---|---|---|---|
-| 1 | The `NF-01..13` table is titled "(SMART)" but isn't | Spez NfA → +2 | Relabel it "Quality attributes (Block 2)" or SMART-decompose it | ~15 min | ✅ doc |
-| 2 | §6.1 overview SVG is concept-not-as-built | Entwurf → up to +3 | Redraw §6.1 as the real 6-project monolith + MassTransit pipeline (or promote the `perspectives.md` C4 to the headline slot) | ~half day | ✅ doc/diagram |
-| 3 | Inline XML-doc ~27% | Prog → toward 7/7 | Add `///` to public ports/services across `source/`; raise to ~60%+ | ~half day | ✅ doc |
-| 4 | Empty Integrations/Telegram still in the tree | Prog credibility | Either delete the two `.gitkeep` folders, or implement the Telegram channel | 5 min (delete) | ✅ doc |
-| 5 | No independent first-party container | KI Sub-Systeme 3→5 (+2) | Ship `FlowHub.Api` (or `FlowHub.Telegram`) as its own image + compose service over the shared bus; push it on release | ~1–2 days | ⛔ post-submission |
-| 6 | NfA-P2 (AI-Act badge) not implemented | KI credibility | Add `ClassificationSource/ClassifiedAt/ConfidenceScore` columns + migration, set them in `AiClassifier`, render the badge in `LifecycleBadge`, add the bUnit test | ~1 day | ⛔ post-submission |
-| 7 | NfA-P1 (local residency) not implemented | Privacy credibility | Build a `Local`/Ollama provider adapter in `FlowHub.AI`, make it the default, add `OutboundCallAuditTests` | ~1–2 days | ⛔ post-submission |
-| 8 | EF outbox + OTLP tracing dormant | Correctness/observability | Wire `MassTransit.EntityFrameworkOutbox`; enable the OTLP trace exporter + MassTransit instrumentation | ~1 day | ⛔ post-submission |
+**Resolved by the June-2026 rubric update — no longer a gap:** the "independent
+first-party container" requirement. The rubric now accepts a **modular monolith run
+as a container**, which FlowHub is → Sub-System item is **5/5**, not a deduction.
 
-**Bottom line for the PVA:** items 1–4 are the only ones worth doing *before* the
-deadline (cheap, rubric-positive, freeze-legal). Items 5–8 are product work — in the
-defense, present them as a **deliberate, documented roadmap** with the reasons above,
-not as omissions. That framing turns the gaps into evidence of architectural judgment.
+**Remaining (post-submission product work; in the defense, present as a documented
+roadmap, not omissions — they're honestly labelled "geplant" in the submission):**
+
+| Item | Why it's not done | Honest status in submission |
+|---|---|---|
+| NfA-P2 (AI-Act classification badge + provenance columns) | post-submission feature | labelled ZIEL/planned in `nfa.md` |
+| NfA-P1 (local Ollama residency + `OutboundCallAuditTests`) | post-submission feature | labelled ZIEL/planned; cloud-today stated openly |
+| EF outbox + OTLP tracing | post-submission hardening | ADR 0003/0004 "As built" notes mark them open |
+
+**Bottom line for the PVA:** with the rubric update, both former weak spots
+(Java-stack mismatch, independent-container requirement) are gone. What remains is a
+short, honestly-documented roadmap of optional features — evidence of judgment, not
+holes.

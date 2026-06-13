@@ -1,6 +1,9 @@
 using FlowHub.Core.Captures;
+using FlowHub.Core.Classification;
 using FlowHub.Core.Health;
+using FlowHub.Web.Demo;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Options;
 using MudBlazor;
 
 namespace FlowHub.Web.Components.Pages;
@@ -16,6 +19,17 @@ public partial class CaptureDetail : ComponentBase
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    [Inject] private IOptions<DemoTraceOptions> TraceOptions { get; set; } = default!;
+
+    [Inject] private IClassificationCostEstimator CostEstimator { get; set; } = default!;
+
+    private bool ShowTrace => TraceOptions.Value.Enabled;
+
+    private decimal? TraceCostUsd =>
+        _capture?.ClassifierTrace is { } trace
+            ? CostEstimator.Estimate(trace.Model, trace.PromptTokens, trace.CompletionTokens)
+            : null;
 
     private Capture? _capture;
     private IReadOnlyList<SkillHealth>? _skills;

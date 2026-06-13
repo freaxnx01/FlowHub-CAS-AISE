@@ -116,6 +116,12 @@ builder.Services.AddFlowHubEmbeddings(builder.Configuration);
 // AddFlowHubAi: silent fallback if Skills:<X>:BaseUrl or :ApiToken is missing.
 builder.Services.AddFlowHubSkills(builder.Configuration);
 
+// Classification trace panel — always registered (defaults to Enabled=false) so the capture
+// detail page can always resolve IOptions<DemoTraceOptions>; set Demo:Trace:Enabled=true on the
+// public demo to surface the reasoning panel transparently.
+builder.Services.Configure<FlowHub.Web.Demo.DemoTraceOptions>(
+    builder.Configuration.GetSection(FlowHub.Web.Demo.DemoTraceOptions.SectionName));
+
 // Demo-only operator notifications → ntfy.sh. Dormant unless Demo:Notify:Ntfy:BaseUrl + Topic
 // are set, so the normal app / agent-dev trial never call out. ntfy → Telegram is bridged at
 // the ntfy layer, keeping FlowHub transport-agnostic.

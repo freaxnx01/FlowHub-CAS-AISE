@@ -1,8 +1,11 @@
+using FlowHub.Core.Classification;
 using FlowHub.Web.Components.Pages;
+using FlowHub.Web.Demo;
 using FlowHub.Web.Stubs;
 using CapturesPage = FlowHub.Web.Components.Pages.Captures;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MudBlazor;
 using MudBlazor.Services;
 
@@ -32,6 +35,8 @@ public class SmokeTests : TestContext
         policy.AllowedContentTypes.Returns(new[] { "application/pdf" });
         policy.AcceptAttribute.Returns("application/pdf");
         Services.AddSingleton(policy);
+        Services.AddSingleton(Substitute.For<IClassificationCostEstimator>());
+        Services.AddSingleton(Options.Create(new DemoTraceOptions()));
         RenderComponent<MudPopoverProvider>();
     }
 
@@ -76,7 +81,7 @@ public class SmokeTests : TestContext
 
         cut.Markup.Should().Contain("Books");
         cut.Markup.Should().Contain("Movies");
-        cut.Markup.Should().Contain("Quotes");
+        cut.Markup.Should().Contain("Zitate");
     }
 
     [Fact]
@@ -227,7 +232,7 @@ public class SmokeTests : TestContext
         cut.Markup.Should().Contain("Books");
         cut.Markup.Should().Contain("Movies");
         cut.Markup.Should().Contain("Articles");
-        cut.Markup.Should().Contain("Quotes");
+        cut.Markup.Should().Contain("Zitate");
         cut.Markup.Should().Contain("Knowledge");
         cut.Markup.Should().Contain("Belege");
     }

@@ -23,6 +23,12 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 COPY --from=build /app/publish ./
 
+# Attachment uploads are written under the content root (App_Data/uploads — see
+# UploadOptions.StoragePath). Create it writable by the non-root runtime user;
+# without this, file captures (REST POST /api/v1/captures/upload and the Blazor
+# /captures/new page) fail with UnauthorizedAccessException. Ephemeral by design.
+RUN mkdir -p /app/App_Data/uploads && chown -R appuser:appgroup /app/App_Data
+
 USER appuser
 
 EXPOSE 5070

@@ -9,18 +9,19 @@ public sealed class KeywordClassifier : IClassifier
     public Task<ClassificationResult> ClassifyAsync(string content, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(content);
+        var sw = System.Diagnostics.Stopwatch.StartNew();
 
-        if (LooksLikeUrl(content))
+        var result =
+            LooksLikeUrl(content) ? new ClassificationResult(["link"], "Wallabag")
+            : ContainsTodoKeyword(content) ? new ClassificationResult(["task"], "Vikunja")
+            : new ClassificationResult(["unsorted"], string.Empty);
+
+        sw.Stop();
+        var traced = result with
         {
-            return Task.FromResult(new ClassificationResult(["link"], "Wallabag"));
-        }
-
-        if (ContainsTodoKeyword(content))
-        {
-            return Task.FromResult(new ClassificationResult(["task"], "Vikunja"));
-        }
-
-        return Task.FromResult(new ClassificationResult(["unsorted"], string.Empty));
+            Trace = new ClassifierTrace(ClassifierKind.Keyword, (int)sw.ElapsedMilliseconds),
+        };
+        return Task.FromResult(traced);
     }
 
     private static bool LooksLikeUrl(string content) =>

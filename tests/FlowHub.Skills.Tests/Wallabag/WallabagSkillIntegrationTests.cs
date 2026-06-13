@@ -15,12 +15,29 @@ public sealed class WallabagSkillIntegrationTests
         options ??= new WallabagOptions
         {
             BaseUrl = "https://wallabag.example.com",
-            ApiToken = "test-token",
+            ClientId = "client-id",
+            ClientSecret = "client-secret",
+            Username = "user",
+            Password = "pass",
         };
         var mock = new MockHttpMessageHandler();
         var http = mock.ToHttpClient();
         http.BaseAddress = new Uri(options.BaseUrl!);
-        return (new WallabagSkillIntegration(http, Options.Create(options), NullLogger<WallabagSkillIntegration>.Instance), mock);
+
+        // The token provider gets its OWN handler so the entries-handler's ordered
+        // Expect()/VerifyNoOutstandingExpectation() queue never sees the grant POST.
+        var tokenMock = new MockHttpMessageHandler();
+        tokenMock.When(HttpMethod.Post, "*/oauth/v2/token")
+            .Respond("application/json", """{"access_token":"test-token","expires_in":3600,"token_type":"bearer","refresh_token":"r"}""");
+        var tokenHttp = tokenMock.ToHttpClient();
+        tokenHttp.BaseAddress = new Uri(options.BaseUrl!);
+        var tokenProvider = new WallabagTokenProvider(
+            tokenHttp,
+            Options.Create(options),
+            TimeProvider.System,
+            NullLogger<WallabagTokenProvider>.Instance);
+
+        return (new WallabagSkillIntegration(http, tokenProvider, NullLogger<WallabagSkillIntegration>.Instance), mock);
     }
 
     private static Capture UrlCapture(string url) => new(

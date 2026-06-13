@@ -109,6 +109,15 @@ else
                 }
             </MudStack>
 
+            @* Classification trace — gated behind Demo:Trace:Enabled *@
+            @if (ShowTrace)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mb-1 mt-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Insights" Size="Size.Small" Class="mr-1" />Classification trace
+                </MudText>
+                <ClassifierTracePanel Trace="@_capture.ClassifierTrace" EstimatedCostUsd="@TraceCostUsd" />
+            }
+
             @* Actions — only for Orphan / Unhandled *@
             @if (_capture.Stage is LifecycleStage.Orphan or LifecycleStage.Unhandled)
             {

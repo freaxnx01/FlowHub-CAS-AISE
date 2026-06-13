@@ -22,10 +22,11 @@ public sealed class AiClassifierTests
     public AiClassifierTests()
     {
         _catalog.GetAsync(Arg.Any<CancellationToken>())
-            .Returns(new Dictionary<string, int> { ["Inbox"] = 1, ["Quotes"] = 7 });
+            .Returns(new Dictionary<string, int> { ["Inbox"] = 1, ["Zitate"] = 7 });
     }
 
-    private AiClassifier Sut() => new(_chat, _keyword, _log, _opts, _catalog);
+    private AiClassifier Sut() =>
+        new(_chat, _keyword, _log, _opts, _catalog, new AiModelInfo("OpenRouter", "test-model"));
 
     private static ChatResponse JsonResponse(object payload) =>
         new(new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(payload)));
@@ -187,7 +188,7 @@ public sealed class AiClassifierTests
                  tags = new[] { "quote", "computing" },
                  matched_skill = "Vikunja",
                  title = "Gabriel on Unix and C",
-                 project = "Quotes",
+                 project = "Zitate",
                  entities = new Dictionary<string, string>
                  {
                      ["quote"] = "Unix and C are the ultimate computer viruses.",
@@ -198,7 +199,7 @@ public sealed class AiClassifierTests
         var result = await Sut().ClassifyAsync("\"Unix and C…\" — Richard Gabriel", default);
 
         result.MatchedSkill.Should().Be("Vikunja");
-        result.VikunjaProject.Should().Be("Quotes");
+        result.VikunjaProject.Should().Be("Zitate");
         result.Entities.Should().NotBeNull();
         result.Entities!["author"].Should().Be("Richard Gabriel");
     }

@@ -1,3 +1,4 @@
+using FlowHub.Core.Captures;
 using FlowHub.Core.Skills;
 using FlowHub.Skills;
 using FlowHub.Skills.Wallabag;
@@ -34,7 +35,10 @@ public sealed class SkillsServiceCollectionExtensionsTests
         var sp = Build(new Dictionary<string, string?>
         {
             ["Skills:Wallabag:BaseUrl"] = "https://wallabag.example.com",
-            ["Skills:Wallabag:ApiToken"] = "tok",
+            ["Skills:Wallabag:ClientId"] = "client-id",
+            ["Skills:Wallabag:ClientSecret"] = "client-secret",
+            ["Skills:Wallabag:Username"] = "user",
+            ["Skills:Wallabag:Password"] = "pass",
         });
 
         var integrations = sp.GetServices<ISkillIntegration>().ToList();
@@ -45,7 +49,7 @@ public sealed class SkillsServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddFlowHubSkills_WallabagBaseUrlOnly_DoesNotRegisterAndReportsMissingToken()
+    public void AddFlowHubSkills_WallabagBaseUrlWithoutClientId_DoesNotRegisterAndReportsMissingClientId()
     {
         var sp = Build(new Dictionary<string, string?>
         {
@@ -55,15 +59,31 @@ public sealed class SkillsServiceCollectionExtensionsTests
         sp.GetServices<ISkillIntegration>().Should().BeEmpty();
         sp.GetServices<SkillsRegistrationOutcome>()
             .Single(o => o.Skill == "Wallabag")
-            .Reason.Should().Be("missing-api-token");
+            .Reason.Should().Be("missing-client-id");
     }
 
     [Fact]
-    public void AddFlowHubSkills_WallabagTokenOnly_DoesNotRegisterAndReportsMissingBaseUrl()
+    public void AddFlowHubSkills_WallabagWithoutUsername_DoesNotRegisterAndReportsMissingUsername()
     {
         var sp = Build(new Dictionary<string, string?>
         {
-            ["Skills:Wallabag:ApiToken"] = "tok",
+            ["Skills:Wallabag:BaseUrl"] = "https://wallabag.example.com",
+            ["Skills:Wallabag:ClientId"] = "client-id",
+        });
+
+        sp.GetServices<ISkillIntegration>().Should().BeEmpty();
+        sp.GetServices<SkillsRegistrationOutcome>()
+            .Single(o => o.Skill == "Wallabag")
+            .Reason.Should().Be("missing-username");
+    }
+
+    [Fact]
+    public void AddFlowHubSkills_WallabagWithoutBaseUrl_DoesNotRegisterAndReportsMissingBaseUrl()
+    {
+        var sp = Build(new Dictionary<string, string?>
+        {
+            ["Skills:Wallabag:ClientId"] = "client-id",
+            ["Skills:Wallabag:Username"] = "user",
         });
 
         sp.GetServices<ISkillIntegration>().Should().BeEmpty();
@@ -109,7 +129,10 @@ public sealed class SkillsServiceCollectionExtensionsTests
         var sp = Build(new Dictionary<string, string?>
         {
             ["Skills:Wallabag:BaseUrl"] = "https://wallabag.example.com",
-            ["Skills:Wallabag:ApiToken"] = "wal-tok",
+            ["Skills:Wallabag:ClientId"] = "client-id",
+            ["Skills:Wallabag:ClientSecret"] = "client-secret",
+            ["Skills:Wallabag:Username"] = "user",
+            ["Skills:Wallabag:Password"] = "pass",
             ["Skills:Vikunja:BaseUrl"] = "https://vikunja.example.com",
             ["Skills:Vikunja:ApiToken"] = "vik-tok",
             ["Skills:Vikunja:FallbackProjectId"] = "42",
@@ -117,5 +140,31 @@ public sealed class SkillsServiceCollectionExtensionsTests
 
         var integrations = sp.GetServices<ISkillIntegration>().Select(i => i.Name).ToList();
         integrations.Should().BeEquivalentTo(new[] { "Wallabag", "Vikunja" });
+    }
+
+    [Fact]
+    public void AddFlowHubSkills_WithPaperlessConfigured_RegistersPaperlessIntegration()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Skills:Paperless:BaseUrl"] = "https://paperless.example.com",
+            ["Skills:Paperless:ApiToken"] = "tok",
+        }).Build();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IAttachmentStorage>(Substitute.For<IAttachmentStorage>());
+        services.AddFlowHubSkills(configuration);
+
+        using var sp = services.BuildServiceProvider();
+        sp.GetServices<ISkillIntegration>().Should().Contain(i => i.Name == "Paperless");
+    }
+
+    [Fact]
+    public void AddFlowHubSkills_WithoutPaperlessConfig_DoesNotRegisterPaperless()
+    {
+        var sp = Build(new Dictionary<string, string?>());
+
+        sp.GetServices<ISkillIntegration>().Should().NotContain(i => i.Name == "Paperless");
     }
 }

@@ -233,9 +233,9 @@ namespace FlowHub.Persistence.Migrations
                         },
                         new
                         {
-                            Name = "Quotes",
+                            Name = "Zitate",
                             RoutedToday = 0,
-                            Status = "Degraded"
+                            Status = "Healthy"
                         },
                         new
                         {
@@ -341,7 +341,50 @@ namespace FlowHub.Persistence.Migrations
                                 .HasForeignKey("CaptureEntityId");
                         });
 
+                    b.OwnsOne("FlowHub.Persistence.Entities.ClassifierTraceOwned", "ClassifierTrace", b1 =>
+                        {
+                            b1.Property<Guid>("CaptureEntityId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int?>("CompletionTokens")
+                                .HasColumnType("integer")
+                                .HasColumnName("ClassifierTrace_CompletionTokens");
+
+                            b1.Property<string>("Kind")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("character varying(16)")
+                                .HasColumnName("ClassifierTrace_Kind");
+
+                            b1.Property<int>("LatencyMs")
+                                .HasColumnType("integer")
+                                .HasColumnName("ClassifierTrace_LatencyMs");
+
+                            b1.Property<string>("Model")
+                                .HasMaxLength(128)
+                                .HasColumnType("character varying(128)")
+                                .HasColumnName("ClassifierTrace_Model");
+
+                            b1.Property<int?>("PromptTokens")
+                                .HasColumnType("integer")
+                                .HasColumnName("ClassifierTrace_PromptTokens");
+
+                            b1.Property<string>("Provider")
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("ClassifierTrace_Provider");
+
+                            b1.HasKey("CaptureEntityId");
+
+                            b1.ToTable("Captures");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CaptureEntityId");
+                        });
+
                     b.Navigation("Attachment");
+
+                    b.Navigation("ClassifierTrace");
                 });
 
             modelBuilder.Entity("FlowHub.Persistence.Entities.IntegrationHealthSampleEntity", b =>

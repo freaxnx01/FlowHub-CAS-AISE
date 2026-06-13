@@ -15,6 +15,8 @@ public sealed class WallabagContractTests : IClassFixture<WireMockServerFixture>
 
     private readonly WireMockServerFixture _wire;
     private readonly HttpClient _http;
+    private readonly HttpClient _tokenHttp;
+    private readonly WallabagTokenProvider _tokenProvider;
     private readonly WallabagSkillIntegration _sut;
 
     public WallabagContractTests(WireMockServerFixture wire)
@@ -22,18 +24,43 @@ public sealed class WallabagContractTests : IClassFixture<WireMockServerFixture>
         _wire = wire;
         _wire.Reset();
 
+        // OAuth grant stub: the provider mints the access token the entries POST then carries.
+        _wire.Server
+            .Given(Request.Create().WithPath("/oauth/v2/token").UsingPost())
+            .RespondWith(Response.Create()
+                .WithStatusCode(200)
+                .WithHeader("Content-Type", "application/json")
+                .WithBody($$"""{"access_token":"{{ApiToken}}","expires_in":3600,"token_type":"bearer","refresh_token":"r"}"""));
+
+        var options = Options.Create(new WallabagOptions
+        {
+            BaseUrl = _wire.BaseUrl,
+            ClientId = "client-id",
+            ClientSecret = "client-secret",
+            Username = "user",
+            Password = "pass",
+        });
+
+        _tokenHttp = new HttpClient { BaseAddress = new Uri(_wire.BaseUrl) };
+        _tokenProvider = new WallabagTokenProvider(
+            _tokenHttp,
+            options,
+            TimeProvider.System,
+            NullLogger<WallabagTokenProvider>.Instance);
+
         _http = new HttpClient { BaseAddress = new Uri(_wire.BaseUrl) };
         _sut = new WallabagSkillIntegration(
             _http,
-            Options.Create(new WallabagOptions
-            {
-                BaseUrl = _wire.BaseUrl,
-                ApiToken = ApiToken,
-            }),
+            _tokenProvider,
             NullLogger<WallabagSkillIntegration>.Instance);
     }
 
-    public void Dispose() => _http.Dispose();
+    public void Dispose()
+    {
+        _http.Dispose();
+        _tokenHttp.Dispose();
+        _tokenProvider.Dispose();
+    }
 
     private static Capture UrlCapture(string url = "https://en.wikipedia.org/wiki/Hexagonal_architecture") =>
         new(
@@ -142,7 +169,9 @@ public sealed class WallabagContractTests : IClassFixture<WireMockServerFixture>
 
         await _sut.HandleAsync(UrlCapture(), CancellationToken.None);
 
-        var logged = _wire.Server.LogEntries.Should().ContainSingle().Subject;
+        // The provider's grant POST is also logged; assert on the entries call specifically.
+        var logged = _wire.Server.LogEntries
+            .Should().ContainSingle(e => e.RequestMessage.AbsolutePath == "/api/entries.json").Subject;
         logged.RequestMessage.Method.Should().Be("POST");
         logged.RequestMessage.AbsolutePath.Should().Be("/api/entries.json");
         logged.RequestMessage.Headers!["Authorization"].ToString()

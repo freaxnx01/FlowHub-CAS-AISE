@@ -87,6 +87,36 @@ public sealed class CaptureEnrichmentConsumerTests
         updated!.Title.Should().Be("Hexagonal architecture");
     }
 
+    [Fact]
+    public async Task Consume_AttachmentCapture_RoutesToPaperless_WithoutCallingClassifier()
+    {
+        var classifier = Substitute.For<IClassifier>();
+        classifier.ClassifyAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns<Task<ClassificationResult>>(_ => throw new InvalidOperationException("classifier must not be called for attachments"));
+
+        await using var provider = PipelineTestBase.Build(
+            configure: s => s.AddSingleton(classifier),
+            configureBus: x => x.AddConsumer<CaptureEnrichmentConsumer>());
+
+        var harness = provider.GetRequiredService<ITestHarness>();
+        await harness.Start();
+
+        var captureService = provider.GetRequiredService<ICaptureService>();
+        using var bytes = new MemoryStream(new byte[] { 1, 2, 3 });
+        var capture = await captureService.SubmitAsync(
+            content: null, ChannelKind.Web,
+            new AttachmentInput { Content = bytes, FileName = "scan.pdf", ContentType = "application/pdf", SizeBytes = 3 },
+            default);
+
+        (await harness.Published.Any<CaptureClassified>(
+            x => x.Context.Message.CaptureId == capture.Id
+                && x.Context.Message.MatchedSkill == "Paperless"))
+            .Should().BeTrue();
+
+        var stored = await captureService.GetByIdAsync(capture.Id, default);
+        stored!.MatchedSkill.Should().Be("Paperless");
+    }
+
     private static IClassifier StubClassifier(ClassificationResult result)
     {
         var sub = Substitute.For<IClassifier>();

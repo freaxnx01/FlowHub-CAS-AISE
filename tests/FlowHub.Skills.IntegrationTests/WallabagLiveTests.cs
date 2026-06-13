@@ -12,14 +12,36 @@ public sealed class WallabagLiveTests
     public async Task HandleAsync_LiveWallabag_PostsUrlAndReturnsExternalRef()
     {
         var baseUrl = Environment.GetEnvironmentVariable("Skills__Wallabag__BaseUrl");
-        var token = Environment.GetEnvironmentVariable("Skills__Wallabag__ApiToken");
-        Skip.If(string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(token),
-            "Skills__Wallabag__BaseUrl/ApiToken not configured");
+        var clientId = Environment.GetEnvironmentVariable("Skills__Wallabag__ClientId");
+        var clientSecret = Environment.GetEnvironmentVariable("Skills__Wallabag__ClientSecret");
+        var username = Environment.GetEnvironmentVariable("Skills__Wallabag__Username");
+        var password = Environment.GetEnvironmentVariable("Skills__Wallabag__Password");
+        Skip.If(
+            string.IsNullOrWhiteSpace(baseUrl)
+            || string.IsNullOrWhiteSpace(clientId)
+            || string.IsNullOrWhiteSpace(username),
+            "Skills__Wallabag__BaseUrl/ClientId/Username not configured");
+
+        var options = Options.Create(new WallabagOptions
+        {
+            BaseUrl = baseUrl,
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            Username = username,
+            Password = password,
+        });
+
+        using var tokenHttp = new HttpClient { BaseAddress = new Uri(baseUrl!), Timeout = TimeSpan.FromSeconds(15) };
+        using var tokenProvider = new WallabagTokenProvider(
+            tokenHttp,
+            options,
+            TimeProvider.System,
+            NullLogger<WallabagTokenProvider>.Instance);
 
         using var http = new HttpClient { BaseAddress = new Uri(baseUrl!), Timeout = TimeSpan.FromSeconds(15) };
         var sut = new WallabagSkillIntegration(
             http,
-            Options.Create(new WallabagOptions { BaseUrl = baseUrl, ApiToken = token }),
+            tokenProvider,
             NullLogger<WallabagSkillIntegration>.Instance);
 
         var capture = new Capture(

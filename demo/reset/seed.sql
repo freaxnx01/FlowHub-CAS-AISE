@@ -63,10 +63,10 @@ VALUES
    NULL,'Receipt — Migros 2026-05-31',NULL,NULL,NULL,
    'receipt-migros-2026-05-31.pdf','application/pdf',184320,'uploads/demo/receipt-migros-2026-05-31.pdf', NOW() - INTERVAL '2 minutes'),
 
-  -- 10. free-text quote -> Wallabag, completed (AI-style)
+  -- 10. free-text quote -> Vikunja 'Zitate', completed + enriched (AI-style: classify -> Zitate route)
   ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
    'Save this quote: "Simplicity is the soul of efficiency." — Austin Freeman','Web','Completed', NOW() - INTERVAL '12 minutes',
-   'Wallabag','Quote — Austin Freeman','wb-demo-010',NULL,NULL, NULL,NULL,NULL,NULL,NULL);
+   'Vikunja','Quote — Austin Freeman','vk-demo-010',NULL,'Zitate', NULL,NULL,NULL,NULL,NULL);
 
 -- Tags (CaptureId, Value) — demonstrates the tagging feature + the Captures-grid tag display
 INSERT INTO "Tags" ("CaptureId","Value") VALUES

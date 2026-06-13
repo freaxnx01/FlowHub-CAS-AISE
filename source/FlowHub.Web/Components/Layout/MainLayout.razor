@@ -1,6 +1,6 @@
 @inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -38,7 +38,15 @@
     <MudMainContent>
         @if (DemoMode)
         {
-            <DemoBanner BannerText="@DemoBannerText" RepoUrl="@DemoRepoUrl" SkillBoardUrl="@DemoSkillBoardUrl" />
+            <DemoBanner BannerText="@DemoBannerText"
+                        RepoUrl="@DemoRepoUrl"
+                        WalkthroughUrl="@DemoWalkthroughUrl"
+                        StatusPageUrl="@DemoStatusUrl"
+                        SkillBoardUrl="@DemoSkillBoardUrl"
+                        ZitateBoardUrl="@DemoZitateBoardUrl"
+                        WallabagUrl="@DemoWallabagUrl"
+                        PaperlessUrl="@DemoPaperlessUrl"
+                        ServiceLogin="@DemoServiceLogin" />
         }
         <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
             @Body

@@ -23,6 +23,11 @@ pdf_renderer       := pdf_tool_dir + "/render.mjs"
 projbeschr_md      := "docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md"
 projbeschr_pdf     := "docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf"
 
+video_dir          := "video"
+video_piper        := justfile_directory() / "video/tools/piper/piper"
+video_model        := justfile_directory() / "video/tools/voices/en_US-amy-medium.onnx"
+video_ffmpeg_dir   := justfile_directory() / "video/tools/ffmpeg"
+
 compose            := "docker compose"
 
 # ── Default ──────────────────────────────────────────────────────────────────
@@ -634,6 +639,63 @@ pdf-eigenstaendigkeitserklaerung:
     set -euo pipefail
     if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
     node {{pdf_renderer}} docs/submission/eigenstaendigkeitserklaerung.md "Eigenständigkeitserklärung.pdf" --title "FlowHub — Hilfsmittelverzeichnis & Eigenständigkeitserklärung" --compact
+
+# ── Explainer videos (Remotion + Piper TTS) ──────────────────────────────────
+
+# Vendor Piper + English voice + emoji font + static ffmpeg into video/tools/, then npm install (one-time)
+[group('video')]
+video-setup:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    bash {{video_dir}}/tools/setup.sh
+    cd {{video_dir}} && npm install --no-fund --no-audit
+
+# Synthesize English narration with Piper → public/audio/tts/*.wav + src/durations.json
+[group('video')]
+video-tts:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -x "{{video_piper}}" ] || [ ! -x "{{video_ffmpeg_dir}}/ffprobe" ] || [ ! -s "{{video_model}}" ] || [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
+    cd {{video_dir}}
+    PATH="{{video_ffmpeg_dir}}:$PATH" PIPER_BIN="{{video_piper}}" PIPER_MODEL="{{video_model}}" npm run tts
+
+# Render both MP4s into video/out/ (run video-tts first for real narration)
+[group('video')]
+video-render:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
+    cd {{video_dir}}
+    PATH="{{video_ffmpeg_dir}}:$PATH" npm run render:users
+    PATH="{{video_ffmpeg_dir}}:$PATH" npm run render:technical
+
+# Capture the live VPS demo into video/public/demo/ (screenshots + manifest)
+[group('video')]
+video-capture:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
+    cd {{video_dir}}
+    CAPTURED_AT="$(date -u +%FT%TZ)" npm run capture:demo
+
+# Render the demo-walkthrough video → video/out/flowhub-demo.en.mp4
+[group('video')]
+video-demo:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{video_dir}}/node_modules" ]; then just video-setup; fi
+    cd {{video_dir}}
+    PATH="{{video_ffmpeg_dir}}:$PATH" npm run render:demo
+
+# Full pipeline: setup if needed → narration → render both videos
+[group('video')]
+video: video-tts video-render
+    @echo "✓ videos rendered to {{video_dir}}/out/"
+
+# Remove rendered MP4s and generated narration wavs
+[group('video')]
+video-clean:
+    rm -rf {{video_dir}}/out {{video_dir}}/public/audio/tts
 
 # ── Cleanup ──────────────────────────────────────────────────────────────────
 

@@ -41,5 +41,13 @@ public sealed class FilesystemAttachmentStorage : IAttachmentStorage
         return Task.CompletedTask;
     }
 
+    public Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var absolute = Path.Combine(AbsoluteRoot(), relativePath);
+        Stream stream = File.OpenRead(absolute);
+        return Task.FromResult(stream);
+    }
+
     private string AbsoluteRoot() => Path.Combine(_env.ContentRootPath, _options.Value.StoragePath);
 }

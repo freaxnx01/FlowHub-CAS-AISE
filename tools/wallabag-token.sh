@@ -12,9 +12,10 @@
 #
 # Outputs:
 #   default     — prints the access_token on stdout (single line)
-#   --export    — prints `export Skills__Wallabag__BaseUrl=...`
-#                 and       `export Skills__Wallabag__ApiToken=...`
-#                 suitable for `eval $(tools/wallabag-token.sh --export)`
+#   --export    — prints `export Skills__Wallabag__BaseUrl=...` plus the four
+#                 OAuth credential keys (ClientId/ClientSecret/Username/Password)
+#                 the skill binds to; suitable for `eval $(tools/wallabag-token.sh --export)`.
+#                 (The skill mints + refreshes its own access_token from these.)
 #
 # Exits non-zero on any failure (Passbolt unauthenticated, network down,
 # Wallabag returns an error, missing JSON fields).
@@ -79,7 +80,10 @@ fi
 
 if [ "$mode" = "--export" ]; then
   printf 'export Skills__Wallabag__BaseUrl=%q\n' "$WALLABAG_URL"
-  printf 'export Skills__Wallabag__ApiToken=%q\n' "$TOKEN"
+  printf 'export Skills__Wallabag__ClientId=%q\n' "$CLIENT_ID"
+  printf 'export Skills__Wallabag__ClientSecret=%q\n' "$CLIENT_SECRET"
+  printf 'export Skills__Wallabag__Username=%q\n' "$USERNAME"
+  printf 'export Skills__Wallabag__Password=%q\n' "$USERPW"
 else
   echo "$TOKEN"
 fi

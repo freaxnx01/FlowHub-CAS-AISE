@@ -12,6 +12,7 @@ Built as the project work for **CAS AI-Assisted Software Engineering (AISE)** at
 - **Submission document:** [`SUBMISSION.md`](SUBMISSION.md) (the PDF rendered from it is the Moodle deliverable)
 - **Architecture:** [`docs/adr/`](docs/adr/) (six ADRs) · [`docs/architektur/FlowHub_Arc42_v1_1.pdf`](docs/architektur/FlowHub_Arc42_v1_1.pdf) · [`docs/projektbeschreibung/`](docs/projektbeschreibung/)
 - **AI usage:** [`docs/ai-usage.md`](docs/ai-usage.md) · personal Lessons Learned in [`vault/Projektarbeit/Learnings.md`](vault/Projektarbeit/Learnings.md)
+- **Roadmap:** [`docs/project/ROADMAP.md`](docs/project/ROADMAP.md) — forward-looking ideas not yet scheduled into a Block
 
 ---
 
@@ -31,13 +32,33 @@ Full feature list — including **post-`v0.1.0`** product enhancements (citation
 
 ---
 
+## Explainer videos
+
+Two short, code-generated explainer videos (English narration). Built with Remotion + a local Piper voice — fully reproducible via `just video`; see [`video/`](video/).
+
+**For everyone — what FlowHub does** (~46s)
+
+https://github.com/user-attachments/assets/7e80b3a2-4c0f-4e92-9228-9ca2ea031031
+
+**Technical — how it's built** (~48s)
+
+https://github.com/user-attachments/assets/c000f88a-d31f-4ef4-a5a8-3ad84d4f4828
+
+**See it in action — using the live demo** (~70s, no narration)
+
+Screenshot walkthrough of the [public demo](https://demo.flowhub.freaxnx01.ch): each sample captured → AI-classified → landing in its service (Vikunja / Zitate / Wallabag / paperless), with an animated cursor. Built via `just video-capture` + `just video-demo`.
+
+https://github.com/user-attachments/assets/4eeffe75-91c9-4144-bec6-03c6ec94e43c
+
+---
+
 ## For a CAS reviewer who just cloned the repo
 
 You probably don't need to run anything to grade this. The submission document and its links cover every rubric item. If you *want* to verify a claim live, the commands below are enough.
 
 ### Option A — see it running, zero install
 
-Open <https://demo.flowhub.freaxnx01.ch>. The demo is intentionally open (no login) and resets every 15 min. What it shows — and what's intentionally disabled in the demo (embeddings, external skill writes) — is documented in [`DEMO.md`](DEMO.md) and [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md).
+Open <https://demo.flowhub.freaxnx01.ch>. The demo is intentionally open (no login) and resets every 15 min. What it shows — and what's intentionally disabled in the demo (embeddings, external skill writes) — is documented in [`docs/project/DEMO.md`](docs/project/DEMO.md) and [`docs/runbooks/public-demo.md`](docs/runbooks/public-demo.md).
 
 ### Option B — local stack via Docker
 
@@ -86,13 +107,14 @@ docs/                   ← architecture, specs, runbooks, insights
   spec/                 ← use-cases, NfA (SMART), acceptance criteria, DB model, testing strategy
   insights/             ← per-block lessons learned (Block 1–5)
   runbooks/             ← acceptance, demo, OIDC setup, test services
+  project/              ← roadmap, next steps, todos, demo + submission notes
   ai-usage.md           ← consolidated AI tool usage (rubric item, 12 pts)
 vault/                  ← Obsidian vault — CAS coursework and project notes
   Projektarbeit/        ← idea, dev notes, glossary, learnings
   Blöcke/01..05/        ← per-block Vorbereitung / PVA / Nachbereitung
   Organisation/         ← Bewertungskriterien (Moodle rubric)
 SUBMISSION.md           ← the Moodle submission document (rendered to PDF)
-submission-notes.md     ← operator notes: how the submission PDF is produced
+docs/project/submission-notes.md  ← operator notes: how the submission PDF is produced
 ```
 
 ## justfile cheat sheet
@@ -184,3 +206,10 @@ CAS-AISE project work — see repository owner.
 ## Agent conventions
 
 This repository was developed with heavy AI-assisted engineering. Agent conventions, skills, and the mandatory UI workflow are documented in [`CLAUDE.md`](CLAUDE.md); AI usage per block is in [`docs/ai-usage.md`](docs/ai-usage.md); personal lessons learned in [`vault/Projektarbeit/Learnings.md`](vault/Projektarbeit/Learnings.md).
+
+## Related repositories
+
+Part of the same AI-assisted engineering toolchain:
+
+- [`freaxnx01/ai-instructions`](https://github.com/freaxnx01/ai-instructions) — reusable AI-agent instruction templates (base conventions + per-stack overlays) that this repo's [`CLAUDE.md`](CLAUDE.md), Copilot instructions, and `.ai/` skills are synced from (via the `sync-ai-instructions` skill).
+- [`freaxnx01/agent-pipeline`](https://github.com/freaxnx01/agent-pipeline) — reusable GitHub Actions workflow for autonomous issue → implementation that this repo delegates to via [`.github/workflows/claude.yml`](.github/workflows/claude.yml) (see [`docs/CLAUDE-PIPELINE.md`](docs/CLAUDE-PIPELINE.md)).

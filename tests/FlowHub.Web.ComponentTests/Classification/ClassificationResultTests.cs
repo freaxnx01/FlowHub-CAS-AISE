@@ -20,9 +20,9 @@ public class ClassificationResultTests
     {
         var entities = new Dictionary<string, string> { ["author"] = "Richard Gabriel" };
 
-        var result = new ClassificationResult(["quote"], "Vikunja", "title", "Quotes", entities);
+        var result = new ClassificationResult(["quote"], "Vikunja", "title", "Zitate", entities);
 
-        result.VikunjaProject.Should().Be("Quotes");
+        result.VikunjaProject.Should().Be("Zitate");
         result.Entities.Should().ContainKey("author").WhoseValue.Should().Be("Richard Gabriel");
     }
 }

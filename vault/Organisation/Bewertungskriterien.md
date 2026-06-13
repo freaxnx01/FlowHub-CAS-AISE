@@ -1,12 +1,14 @@
 ---
 tags:
   - claude-generated
-updated: 2026-04-29
+updated: 2026-06-12
 ---
 
 # CAS AISE — Bewertungskriterien (Projektarbeit)
 
 Offizielle Moodle-Rubrik für die Projektarbeit. **Source of truth** für alle Block-Nachbereitungen — die Skala (`0 / 1 / 3 / 5`, `0 / 1 / 4 / 7`, `0 / 3 / 7 / 10`, `0 / 2 / 6`, `0 / 1 / 7 / 12`, `0 / 2`) zeigt die Gewichtung jedes Kriteriums.
+
+> **Rubrik-Update Juni 2026 (an die aktuelle Moodle-Fassung angeglichen):** Zwei Kriterien wurden umformuliert — beide zugunsten von FlowHub: (1) das Programmier­kriterium ist jetzt **framework-neutral** (vorher „Quarkus/Jakarta EE/Java") und damit für den .NET-Stack **direkt erfüllt**; (2) das Sub-System-Kriterium akzeptiert nun **explizit den modularen Monolithen** „als Container lauffähig betrieben". Es gibt **kein ausgeklammertes Item mehr** — alle **100 Punkte** sind erreichbar.
 
 > **Anwendung:** Am Ende jeder Block-Nachbereitung diese Liste durchgehen. Pro Kriterium prüfen, welche Stufe heute realistisch ist, und fehlende Deliverables proaktiv erzeugen — nicht erst zum Schlussabgabe-Zeitpunkt.
 
@@ -54,19 +56,19 @@ Offizielle Moodle-Rubrik für die Projektarbeit. **Source of truth** für alle B
 
 ## Programmierung
 
-**Programmierung: Ist der Code lesbar, dokumentiert und nach Layer, Modulen und Sub-Systemen strukturiert**
+**Ist der Code lesbar, dokumentiert und nach Schichten und Modulen mit klaren Verantwortlichkeiten strukturiert**
 - 0 — nicht bzw. kaum
 - 1 — teilweise bzw. ansatzweise
 - 4 — überwiegend bzw. mehrheitlich
 - 7 — vollständig bzw. korrekt
 
-**Programmierung: Wurden die Konzepte von Quarkus, Jakarta EE und modernen Java Applikationen berücksichtigt**
+**Programmierung: Wurden die Konzepte des gewählten Frameworks und moderner Applikationsentwicklung sachgerecht eingesetzt (z. B. Dependency Injection, REST-Schnittstellen, Konfiguration, Fehlerbehandlung)**
 - 0 — nicht bzw. kaum
 - 3 — teilweise bzw. ansatzweise
 - 7 — überwiegend bzw. mehrheitlich
 - 10 — vollständig bzw. korrekt
 
-> **FlowHub-Kontext:** Freie Stackwahl (in der PVA explizit bestätigt; Quarkus/Jakarta EE sind im Moodle-Auftrag nur Referenz-Stack, Lernziele stack-neutral). FlowHub ist .NET 10 / ASP.NET Core / Blazor / EF Core. Das Kriterium wird daher **über die .NET-Äquivalente erfüllt, nicht ausgeklammert** — die adressierten modernen Konzepte (DI, deklaratives REST, ORM, Config, Health/Metrics, async & Messaging, Fehlertoleranz, Container, Testbarkeit) sind vollständig umgesetzt und im Code nachgewiesen; siehe **`docs/spec/modern-app-concepts.md`**. Angestrebte Stufe **7–10**. Die im Folgenden weiterhin genannte „90/90"-Basis ist die konservative Untergrenze für den Fall einer strikt JVM-gebundenen Auslegung.
+> **FlowHub-Kontext (Rubrik-Update Juni 2026):** Dieses Kriterium ist **framework-neutral** formuliert (vorher Quarkus/Jakarta EE-spezifisch). Es ist für FlowHub **direkt und vollständig erfüllt** — das gewählte Framework ist .NET 10 / ASP.NET Core, und die genannten Konzepte sind im Code nachgewiesen: **Dependency Injection** (`IServiceCollection`, per-Modul `*ServiceCollectionExtensions`), **REST-Schnittstellen** (Minimal API + RFC 9457 ProblemDetails in `FlowHub.Api`), **Konfiguration** (`IConfiguration`/Options, 12-Factor), **Fehlerbehandlung** (ProblemDetails, MassTransit-Retry + deterministischer Fallback). Konzept-Belege: **`docs/spec/modern-app-concepts.md`**. Kein Stack-Mismatch, keine Ausklammerung mehr — angestrebte Stufe **„vollständig/korrekt" (10)**.
 
 **Programmierung: Sind die Erkenntnisse aus der Programmierung dokumentiert**
 - 0 — nicht bzw. kaum
@@ -115,11 +117,13 @@ Offizielle Moodle-Rubrik für die Projektarbeit. **Source of truth** für alle B
 - 2 — teilweise bzw. ansatzweise
 - 6 — vollständig bzw. korrekt
 
-**Wurde die Lösung in verschiedene Sub-Systeme aufgeteilt, die unabhängig voneinander als Container verteilt und betrieben werden können**
+**Ist die Lösung in klar abgegrenzte Module bzw. Sub-Systeme strukturiert (modularer Monolith oder verteilte Services) und als Container lauffähig betrieben**
 - 0 — nicht bzw. kaum
 - 1 — teilweise bzw. ansatzweise
 - 3 — überwiegend bzw. mehrheitlich
 - 5 — vollständig bzw. korrekt
+
+> **FlowHub-Kontext (Rubrik-Update Juni 2026):** Das Kriterium akzeptiert nun **explizit den modularen Monolithen** (statt nur verteilter, unabhängig deploybarer Container). FlowHub ist genau das: klar abgegrenzte Module (`FlowHub.Core/Api/AI/Persistence/Skills/Web`) mit sauberen Verantwortlichkeiten (ADR 0002), **als Container lauffähig betrieben** (Docker-Compose-Stack + Live-Demo). Damit ist **„vollständig/korrekt" (5)** erreichbar — die frühere Lücke „kein unabhängig deploybarer Sub-System-Container" entfällt durch die neue Formulierung.
 
 **Sind die Erfahrungen während der Projektarbeit mit KI-unterstützenden Werkzeugen als Fazit reflektiert**
 - 0 — nicht bzw. kaum
@@ -135,12 +139,12 @@ Offizielle Moodle-Rubrik für die Projektarbeit. **Source of truth** für alle B
 |---|---:|
 | Spezifikation (3 Items × 5) | 15 |
 | Entwurf (7 + 7 + 3) | 17 |
-| Programmierung (7 + 10 Quarkus + 3 + 2) | 22 |
+| Programmierung (7 + 10 + 3 + 2) | 22 |
 | Validierung (5 + 5 + 3 + 3) | 16 |
 | KI / Sub-Systeme / Reflexion (12 + 6 + 5 + 7) | 30 |
 | **Total** | **100** |
 
-Mit Quarkus-Item ausgeklammert (Stack-Mismatch .NET): erreichbar 90 / 90.
+**Rubrik-Update (Juni 2026):** Das frühere Java-/Quarkus-spezifische Programmier­kriterium wurde **framework-neutral** umformuliert und das Sub-System-Kriterium akzeptiert nun explizit den **modularen Monolithen**. Es gibt damit **kein ausgeklammertes Item mehr** — alle **100 Punkte sind für FlowHub erreichbar** (kein „/90"-Sonderfall).
 
 ---
 

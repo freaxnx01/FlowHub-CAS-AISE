@@ -28,15 +28,15 @@ public class EnricherDispatcherTests
     {
         var dispatcher = new EnricherDispatcher(
             Array.Empty<IEnricher>(),
-            Catalog(("Quotes", 7)),
+            Catalog(("Zitate", 7)),
             new VikunjaFallback("Inbox", 1),
             NullLogger<EnricherDispatcher>.Instance);
 
-        var classification = new ClassificationResult(["t"], "Vikunja", "title", "Quotes");
+        var classification = new ClassificationResult(["t"], "Vikunja", "title", "Zitate");
 
         var (project, enrichment) = await dispatcher.DispatchAsync(Sample(), classification, default);
 
-        project.Should().Be("Quotes");
+        project.Should().Be("Zitate");
         enrichment.Should().BeNull();
     }
 
@@ -61,20 +61,20 @@ public class EnricherDispatcherTests
     public async Task DispatchAsync_MatchingEnricher_RunsAndReturnsResult()
     {
         var enricher = Substitute.For<IEnricher>();
-        enricher.BucketName.Returns("Quotes");
+        enricher.BucketName.Returns("Zitate");
         enricher.EnrichAsync(Arg.Any<Capture>(), Arg.Any<ClassificationResult>(), Arg.Any<CancellationToken>())
             .Returns(new EnrichmentResult("**desc**"));
 
         var dispatcher = new EnricherDispatcher(
             new[] { enricher },
-            Catalog(("Quotes", 7)),
+            Catalog(("Zitate", 7)),
             new VikunjaFallback("Inbox", 1),
             NullLogger<EnricherDispatcher>.Instance);
 
         var (project, enrichment) = await dispatcher.DispatchAsync(
-            Sample(), new ClassificationResult(["t"], "Vikunja", "title", "Quotes"), default);
+            Sample(), new ClassificationResult(["t"], "Vikunja", "title", "Zitate"), default);
 
-        project.Should().Be("Quotes");
+        project.Should().Be("Zitate");
         enrichment!.Description.Should().Be("**desc**");
     }
 
@@ -82,20 +82,20 @@ public class EnricherDispatcherTests
     public async Task DispatchAsync_EnricherThrows_ReturnsNullAndLogs()
     {
         var enricher = Substitute.For<IEnricher>();
-        enricher.BucketName.Returns("Quotes");
+        enricher.BucketName.Returns("Zitate");
         enricher.EnrichAsync(Arg.Any<Capture>(), Arg.Any<ClassificationResult>(), Arg.Any<CancellationToken>())
             .Returns<EnrichmentResult?>(_ => throw new InvalidOperationException("LLM down"));
 
         var dispatcher = new EnricherDispatcher(
             new[] { enricher },
-            Catalog(("Quotes", 7)),
+            Catalog(("Zitate", 7)),
             new VikunjaFallback("Inbox", 1),
             NullLogger<EnricherDispatcher>.Instance);
 
         var (project, enrichment) = await dispatcher.DispatchAsync(
-            Sample(), new ClassificationResult(["t"], "Vikunja", "title", "Quotes"), default);
+            Sample(), new ClassificationResult(["t"], "Vikunja", "title", "Zitate"), default);
 
-        project.Should().Be("Quotes");
+        project.Should().Be("Zitate");
         enrichment.Should().BeNull();
     }
 }

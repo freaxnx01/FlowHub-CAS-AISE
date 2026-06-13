@@ -6,4 +6,5 @@ public sealed record CaptureCreated(
     Guid CaptureId,
     string Content,
     ChannelKind Source,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    bool HasAttachment = false);
