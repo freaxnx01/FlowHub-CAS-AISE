@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-06-11T19:16:17Z",
+  "capturedAt": "2026-06-13T08:34:06Z",
   "viewport": {
     "width": 1920,
     "height": 1080
@@ -161,6 +161,19 @@
       "sample": "url"
     },
     {
+      "id": "cap-pdf-upload",
+      "file": "demo/cap-pdf-upload.png",
+      "section": "capture",
+      "kind": "action",
+      "caption": "Sample: a PDF upload",
+      "sample": "pdf",
+      "cursor": {
+        "x": 137,
+        "y": 652,
+        "click": true
+      }
+    },
+    {
       "id": "svc-vikunja-link",
       "file": "demo/svc-vikunja-link.png",
       "section": "service",
@@ -235,6 +248,13 @@
       "section": "service",
       "kind": "result",
       "caption": "Lands in paperless-ngx"
+    },
+    {
+      "id": "svc-paperless-ngx-doc",
+      "file": "demo/svc-paperless-ngx-doc.png",
+      "section": "service",
+      "kind": "result",
+      "caption": "Opened in paperless-ngx"
     }
   ]
 }
