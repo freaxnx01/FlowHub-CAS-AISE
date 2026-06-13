@@ -36,7 +36,7 @@ kategorisieren → ablegen<br />
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering" data-theme="flowhub" lang="C" data-marpit-pagination="3" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering;--theme:flowhub;" data-marpit-pagination-total="16">
 <h2 id="konkret-das-skill-system">Konkret: das Skill-System</h2>
 <p>Jeder Input wird einem <strong>Skill</strong> zugewiesen — Erkennung über Keywords,<br />
-URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
+URL-Muster und, wenn nötig, ein <strong>LLM</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -102,6 +102,7 @@ URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
 </tr>
 </tbody>
 </table>
+<p><strong>HNSW</strong> = approximativer <strong>Nächste-Nachbarn-Index</strong> (sub-linear schnell) · <strong>Cosine-Distanz</strong> = inhaltliche Ähnlichkeit über den <strong>Winkel zwischen den Vektoren</strong></p>
 <p><code>GET /api/v1/captures/search?q=…</code> · Provider per Config tauschbar (OpenAI-kompatibel) · ohne Key → sauberes <code>503</code></p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering</footer>
 </section>
@@ -125,7 +126,7 @@ URL-Muster und, wenn nötig, ein <strong>lokales LLM</strong>.</p>
 </tr>
 <tr>
 <td>KI-Integration</td>
-<td><strong>Microsoft.Extensions.AI</strong> + Ollama (lokal) / Anthropic (Fallback)</td>
+<td><strong>Microsoft.Extensions.AI</strong> + Ollama (lokal) / Anthropic · OpenRouter (Fallback)</td>
 </tr>
 <tr>
 <td>Pipeline</td>
@@ -259,14 +260,14 @@ und lässt <strong>KI-gestützte Prüfungen</strong> finden, was die KI übersie
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering" data-theme="flowhub" lang="C" data-marpit-pagination="13" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering;--theme:flowhub;" data-marpit-pagination-total="16">
 <h2 id="wo-die-ki-gl%C3%A4nzt--und-wo-nicht">Wo die KI <strong>glänzt</strong> — und wo <strong>nicht</strong></h2>
-<p>Über alle Blöcke: <strong>~85–95 % des Codes KI-generiert</strong> — der Mensch-Anteil klein, aber <strong>hochwertig</strong>.</p>
+<p>Über alle Blöcke: <strong>~85–95 % des Codes KI-generiert</strong>.</p>
 <h3 id="gl%C3%A4nzt--repetitiv--gut-spezifiziert">Glänzt — <strong>repetitiv &amp; gut spezifiziert</strong></h3>
 <p>7 <code>IEntityTypeConfiguration&lt;T&gt;</code>, EF-Migrations, Refit-Interfaces, CI-YAML;<br />
 <strong>16 Integrationstests</strong> gegen echtes PostgreSQL — <strong>alle grün beim ersten Lauf</strong>.</p>
 <h3 id="scheitert--wo-dom%C3%A4ne--performance-z%C3%A4hlen">Scheitert — wo <strong>Domäne &amp; Performance</strong> zählen</h3>
 <ul>
 <li><strong>N+1-Blindheit</strong> — <code>ListAsync</code> ohne <code>.Include</code></li>
-<li><strong>CASCADE überall</strong> — <em>owned</em> vs. <em>referenced</em> ist eine <strong>Domänen-Entscheidung</strong></li>
+<li><strong>CASCADE überall</strong> — Löschen kaskadiert blind (Eltern weg → alle Kinder weg). Was <em>erhalten</em> bleiben muss (z. B. Audit-Trail), ist eine <strong>menschliche Entscheidung</strong></li>
 <li><strong>Veraltete Versionen</strong> — Trainingsdaten hinken neuen Releases hinterher</li>
 <li><strong>Feature-Drift</strong> — Scope-Disziplin muss vom <strong>Menschen</strong> kommen</li>
 </ul>
@@ -365,6 +366,12 @@ FK-Strategie, Performance, Scope, aktuelle Versionen.</p>
 <td>Foreign Key (Fremdschlüssel)</td>
 <td>N+1</td>
 <td>N+1-Query-Problem</td>
+</tr>
+<tr>
+<td>12-Factor</td>
+<td>12-Factor-App (Cloud-native-Prinzipien)</td>
+<td>CI</td>
+<td>Continuous Integration</td>
 </tr>
 </tbody>
 </table>

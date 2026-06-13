@@ -70,7 +70,7 @@ Schritten wird einer – und alles läuft self-hosted im eigenen Homelab, kein C
 ## Konkret: das Skill-System
 
 Jeder Input wird einem **Skill** zugewiesen — Erkennung über Keywords,
-URL-Muster und, wenn nötig, ein **lokales LLM**.
+URL-Muster und, wenn nötig, ein **LLM**.
 
 | Input | Skill | landet in |
 |---|---|---|
@@ -104,6 +104,8 @@ Nicht nur reinwerfen — auch **per Bedeutung wiederfinden**, nicht per Stichwor
 | pgvector-Suche | HNSW · Cosine-Distanz · Sub-ms bei < 1 Mio. Zeilen |
 | Treffer | inhaltlich ähnliche Captures — auch ohne exaktes Wort |
 
+**HNSW** = approximativer **Nächste-Nachbarn-Index** (sub-linear schnell) · **Cosine-Distanz** = inhaltliche Ähnlichkeit über den **Winkel zwischen den Vektoren**
+
 `GET /api/v1/captures/search?q=…` · Provider per Config tauschbar (OpenAI-kompatibel) · ohne Key → sauberes `503`
 
 <!--
@@ -122,7 +124,7 @@ Config tauschbar; ohne Key liefert die API sauber ein 503 statt zu raten.
 |---|---|
 | Backend | **.NET 10** / C# / ASP.NET Core (LTS) |
 | Web-UI | **Blazor SSR** — .NET-native, kein JS-Framework |
-| KI-Integration | **Microsoft.Extensions.AI** + Ollama (lokal) / Anthropic (Fallback) |
+| KI-Integration | **Microsoft.Extensions.AI** + Ollama (lokal) / Anthropic · OpenRouter (Fallback) |
 | Pipeline | **MassTransit** — In-Memory (dev) / RabbitMQ (prod) |
 | Persistenz | **PostgreSQL 17** + **pgvector** · EF Core 10 |
 | Deployment | **Docker Compose** — 6 Services, Migrations als Init-Container |
@@ -298,7 +300,7 @@ KI-gestützte Prüfungen finden, was die KI selbst übersieht."
 
 ## Wo die KI **glänzt** — und wo **nicht**
 
-Über alle Blöcke: **~85–95 % des Codes KI-generiert** — der Mensch-Anteil klein, aber **hochwertig**.
+Über alle Blöcke: **~85–95 % des Codes KI-generiert**.
 
 ### Glänzt — **repetitiv & gut spezifiziert**
 7 `IEntityTypeConfiguration<T>`, EF-Migrations, Refit-Interfaces, CI-YAML;
@@ -306,7 +308,7 @@ KI-gestützte Prüfungen finden, was die KI selbst übersieht."
 
 ### Scheitert — wo **Domäne & Performance** zählen
 - **N+1-Blindheit** — `ListAsync` ohne `.Include`
-- **CASCADE überall** — *owned* vs. *referenced* ist eine **Domänen-Entscheidung**
+- **CASCADE überall** — Löschen kaskadiert blind (Eltern weg → alle Kinder weg). Was *erhalten* bleiben muss (z. B. Audit-Trail), ist eine **menschliche Entscheidung**
 - **Veraltete Versionen** — Trainingsdaten hinken neuen Releases hinterher
 - **Feature-Drift** — Scope-Disziplin muss vom **Menschen** kommen
 
@@ -386,6 +388,7 @@ Reviewer. Danke – Fragen?"
 | MVP | Minimum Viable Product | LTS | Long-Term Support |
 | DMS | Dokumentenmanagement-System | OIDC | OpenID Connect (geplant) |
 | FK | Foreign Key (Fremdschlüssel) | N+1 | N+1-Query-Problem |
+| 12-Factor | 12-Factor-App (Cloud-native-Prinzipien) | CI | Continuous Integration |
 
 <!--
 [Backup] Nur bei Nachfragen zeigen — Akronyme aus dem Deck.
