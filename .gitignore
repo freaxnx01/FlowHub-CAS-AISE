@@ -443,6 +443,8 @@ flowhub.db-wal
 vault/_files/Moodle/
 **/Moodle/Modul/
 *_Moodle.pdf
+# Verbatim per-block Lernziele (FFHS course material) — local reference only
+lernziele.md
 
 # Submission PDF build artefacts (regenerated from SUBMISSION.md on demand)
 SUBMISSION.pdf
