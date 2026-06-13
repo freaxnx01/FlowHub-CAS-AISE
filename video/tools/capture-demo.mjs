@@ -52,6 +52,74 @@ async function centerOf(locator) {
   return {x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2), click: true};
 }
 
+/** Screenshot the current page and record it as a service result shot. */
+async function pushServiceShot(page, id, caption) {
+  await page.screenshot({path: join(outDir, `${id}.png`)});
+  shots.push({id, file: `demo/${id}.png`, section: 'service', kind: 'result', caption});
+}
+
+/** Render a small, unique sample receipt PDF (unique so paperless doesn't dedupe it). */
+async function makeReceiptPdf(ctx, ref) {
+  const gen = await ctx.newPage();
+  await gen.setContent(
+    '<html><body style="font-family:Arial,sans-serif;padding:64px;color:#1A1A2E">' +
+      '<h1>FlowHub — Demo Receipt</h1>' +
+      '<p>Migros · 2026 · CHF 42.50</p>' +
+      '<p>Bread, milk, coffee — uploaded to paperless-ngx.</p>' +
+      `<p style="color:#888">Reference ${ref}</p></body></html>`,
+  );
+  const buffer = await gen.pdf({format: 'A4'});
+  await gen.close();
+  return buffer;
+}
+
+/**
+ * Paperless: create a fresh document via the REST upload API (the Blazor Server
+ * file upload does not drive headlessly), then log in, wait for it to be
+ * consumed, screenshot the Documents view, and open the document itself.
+ */
+async function capturePaperless(svc, base, ctx, pdfBuffer, pdfName, creds) {
+  await ctx.request
+    .post(`${DEMO}/api/v1/captures/upload`, {
+      multipart: {file: {name: pdfName, mimeType: 'application/pdf', buffer: pdfBuffer}},
+    })
+    .catch((e) => console.warn(`paperless upload failed: ${e.message}`));
+
+  await maybeLogin(svc, creds);
+  const root = base.replace(/\/+$/, '');
+  const docsUrl = `${root}/documents?sort=created&reverse=1&page=1`;
+
+  // Poll until the uploaded document has been consumed (≈5–60s).
+  let docId = null;
+  for (let i = 0; i < 12; i++) {
+    await svc.goto(docsUrl, {waitUntil: 'networkidle'}).catch(() => {});
+    await svc.waitForTimeout(1500);
+    docId = await svc
+      .evaluate(async () => {
+        const d = await fetch('/api/documents/?page_size=1&ordering=-created', {
+          headers: {Accept: 'application/json'},
+        })
+          .then((x) => x.json())
+          .catch(() => ({}));
+        return d.results && d.results[0] ? d.results[0].id : null;
+      })
+      .catch(() => null);
+    if (docId) break;
+    await svc.waitForTimeout(6000);
+  }
+
+  await svc.waitForTimeout(800);
+  await pushServiceShot(svc, 'svc-paperless-ngx', captionFor('service', 'paperless-ngx'));
+
+  if (docId) {
+    await svc.goto(`${root}/documents/${docId}`, {waitUntil: 'networkidle'}).catch(() => {});
+    await svc.waitForTimeout(2500);
+    await pushServiceShot(svc, 'svc-paperless-ngx-doc', 'Opened in paperless-ngx');
+  } else {
+    console.warn('paperless: no document appeared in time');
+  }
+}
+
 /**
  * Wait for row 1 (the newest capture) to reach a terminal lifecycle state.
  * Strategy: wait a fixed period then reload the page (SignalR updates don't
@@ -76,6 +144,12 @@ async function run() {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({viewport: VIEWPORT});
   const page = await ctx.newPage();
+
+  // Unique sample document for the paperless path (unique content avoids the
+  // paperless duplicate-checksum rejection across reset cycles / re-runs).
+  const ref = 'REF-' + Date.now().toString(36).toUpperCase();
+  const pdfName = `receipt-${ref}.pdf`;
+  const pdfBuffer = await makeReceiptPdf(ctx, ref);
 
   // ── Home / intro ───────────────────────────────────────────────────────────
   await page.goto(DEMO, {waitUntil: 'networkidle'});
@@ -149,6 +223,27 @@ async function run() {
     });
   }
 
+  // ── PDF upload sample (the paperless path) ─────────────────────────────────
+  // Screenshot the /captures/new upload UI as the user-facing action; the actual
+  // document is created via the REST API in capturePaperless (Blazor Server file
+  // upload doesn't drive headlessly).
+  await page.goto(`${DEMO}/captures/new`, {waitUntil: 'networkidle'});
+  await page.waitForTimeout(800);
+  await page
+    .setInputFiles('input[type="file"]', {name: pdfName, mimeType: 'application/pdf', buffer: pdfBuffer})
+    .catch(() => {});
+  await page.waitForTimeout(600);
+  const submitBtn = page.getByRole('button', {name: 'Submit', exact: true});
+  const uploadCursor = (await submitBtn.count()) ? await centerOf(submitBtn) : undefined;
+  await shot(page, {
+    id: 'cap-pdf-upload',
+    section: 'capture',
+    kind: 'action',
+    caption: 'Sample: a PDF upload',
+    sample: 'pdf',
+    cursor: uploadCursor,
+  });
+
   // ── Service screens ────────────────────────────────────────────────────────
   await page.goto(DEMO, {waitUntil: 'networkidle'});
   await page.waitForTimeout(600);
@@ -194,17 +289,13 @@ async function run() {
     await svc.goto(href, {waitUntil: 'networkidle'}).catch((e) => {
       console.warn(`service "${name}" navigation error: ${e.message}`);
     });
-    await maybeLogin(svc, creds);
-    await svc.waitForTimeout(1200);
-    const svcId = `svc-${slug(name)}`;
-    await svc.screenshot({path: join(outDir, `${svcId}.png`)});
-    shots.push({
-      id: svcId,
-      file: `demo/${svcId}.png`,
-      section: 'service',
-      kind: 'result',
-      caption: captionFor('service', name),
-    });
+    if (slug(name) === 'paperless-ngx') {
+      await capturePaperless(svc, href, ctx, pdfBuffer, pdfName, creds);
+    } else {
+      await maybeLogin(svc, creds);
+      await svc.waitForTimeout(1200);
+      await pushServiceShot(svc, `svc-${slug(name)}`, captionFor('service', name));
+    }
     await svc.close();
   }
 
@@ -244,17 +335,23 @@ async function maybeLogin(page, creds) {
   if (!creds) return;
   const pass = page.locator('input[type="password"]').first();
   if ((await pass.count()) === 0) return;
+  // Wallabag uses input[name="_username"]; paperless uses input[name="login"]
+  // (id #inputUsername) with a "Sign in" button — cover both.
   const user = page
-    .locator('input[name="username"], input[type="email"], #username, input[name="_username"]')
+    .locator(
+      'input[name="username"], input[name="login"], input[name="_username"], #inputUsername, #username, input[type="email"]',
+    )
     .first();
   await user.fill(creds.user).catch(() => {});
   await pass.fill(creds.pass).catch(() => {});
   await page
-    .locator('button[type="submit"], input[type="submit"]')
+    .locator(
+      'button[type="submit"], input[type="submit"], button:has-text("Sign in"), button:has-text("Log in")',
+    )
     .first()
     .click()
     .catch(() => {});
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(2500);
 }
 
 run().catch((e) => {
