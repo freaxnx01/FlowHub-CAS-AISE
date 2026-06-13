@@ -73,7 +73,9 @@ FILES=(
   "2|Runbook — Public demo|docs/runbooks/public-demo.md"
   "2|Runbook — Test services|docs/runbooks/test-services.md"
 
-  "1|Grading rubric|vault/Organisation/Bewertungskriterien.md"
+  # Grading rubric intentionally NOT inlined — vault/Organisation/Bewertungskriterien.md
+  # is the verbatim Moodle Bewertungskriterien (FFHS / instructor IP) and must not ship
+  # in the public submission bundle.
 
   "1|Hilfsmittelverzeichnis & Eigenständigkeitserklärung|docs/submission/eigenstaendigkeitserklaerung.md"
 )

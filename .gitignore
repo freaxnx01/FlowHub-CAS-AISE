@@ -445,6 +445,12 @@ vault/_files/Moodle/
 *_Moodle.pdf
 # Verbatim per-block Lernziele (FFHS course material) — local reference only
 lernziele.md
+# Verbatim Moodle Bewertungskriterien (instructor IP) — kept locally as the
+# grade-self-check source of truth, but not redistributed in the public repo.
+vault/Organisation/Bewertungskriterien.md
+nachbereitung/bewertungskriterien.md
+# FFHS course brochure (marketing PDF, FFHS copyright)
+vault/_files/weiterbildung-cas-ai-assisted-software-engineering-de.pdf
 
 # Submission PDF build artefacts (regenerated from SUBMISSION.md on demand)
 SUBMISSION.pdf
@@ -454,3 +460,7 @@ Eigenständigkeitserklärung.pdf
 
 # Capture attachment blobs (demo storage)
 source/FlowHub.Web/App_Data/uploads/
+
+# Windows / file-manager cruft (NTFS mark-of-the-web ADS, trashed files)
+*:Zone.Identifier
+.trashed-*
