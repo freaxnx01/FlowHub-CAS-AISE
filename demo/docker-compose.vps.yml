@@ -58,3 +58,13 @@ services:
       - "traefik.http.routers.flowhub-paperless.tls.certresolver=default"
       - "traefik.http.services.flowhub-paperless.loadbalancer.server.port=8000"
       - "traefik.docker.network=web"
+
+  uptime-kuma:
+    labels: !override
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowhub-status.rule=Host(`status.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-status.entrypoints=web-secure"
+      - "traefik.http.routers.flowhub-status.tls=true"
+      - "traefik.http.routers.flowhub-status.tls.certresolver=default"
+      - "traefik.http.services.flowhub-status.loadbalancer.server.port=3001"
+      - "traefik.docker.network=web"

@@ -226,6 +226,25 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 
 ---
 
+## LLM Performance Benchmarking (LLMeter)
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** Observability today captures *real-world* LLM latency and token usage via OpenTelemetry, but there's no *controlled* characterisation of how the classifier behaves under varying load — how latency scales with Capture size, where concurrency starts to degrade, tokens-per-second per provider/model. That data is what turns "we monitor the LLM" into "we measured and **optimised** it" (the optimisation half of the Block 5 Monitoring Lernziel).
+
+### Proposed shape
+
+1. **Tool** — [LLMeter](https://github.com/awslabs/llmeter), a lightweight LLM-endpoint benchmarking library (latency / throughput / tokens-per-sec across payload sizes and concurrency, with plots). OpenRouter is OpenAI-compatible, so it can target FlowHub's configured provider directly.
+2. **A one-off study, not infra** — a small runnable script + a written result in `docs/insights/` (latency-vs-Capture-size curve, concurrency ceiling, model comparison). Not added to the app or compose.
+3. **Feeds tuning** — results inform classifier timeout, retry/fallback thresholds, and model choice.
+
+### Open questions
+
+- **Cost guard** — the demo's OpenRouter key has a **$1 hard cap**; benchmark runs must be small and rate-limited, or pointed at a separate paid key.
+- Overlap with the existing OTel metrics — LLMeter adds controlled benchmarking on top of live telemetry; decide how much is worth the spend.
+- Whether to keep it manual or wire a periodic CI benchmark (probably manual — cost).
+
+---
+
 ## References
 
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)
