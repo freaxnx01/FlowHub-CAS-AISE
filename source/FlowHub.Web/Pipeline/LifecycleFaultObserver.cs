@@ -5,6 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowHub.Web.Pipeline;
 
+/// <summary>
+/// Terminal fault handler for the async pipeline (ADR 0003): consumes the
+/// <c>Fault&lt;T&gt;</c> messages MassTransit publishes when a consumer exhausts its
+/// retries, and maps each to the correct failure stage with a <c>FailureReason</c> —
+/// <c>Fault&lt;CaptureCreated&gt;</c> (enrichment) → <c>MarkOrphanAsync</c>,
+/// <c>Fault&lt;CaptureClassified&gt;</c> (routing) → <c>MarkUnhandledAsync</c>. It does
+/// not retry the fault itself (that would loop); recovery is via the manual retry endpoint.
+/// </summary>
 public sealed partial class LifecycleFaultObserver
     : IConsumer<Fault<CaptureCreated>>, IConsumer<Fault<CaptureClassified>>
 {

@@ -57,6 +57,26 @@ public sealed class WallabagSkillIntegrationTests
     }
 
     [Fact]
+    public async Task HandleAsync_ContentWithSurroundingText_ExtractsAndPostsTheUrl()
+    {
+        // Read-later captures arrive as free text, e.g. "save <url> to read later" —
+        // the adapter must extract the URL from the content, not treat the whole
+        // content as a URL (which throws InvalidOperationException).
+        var (sut, mock) = Build();
+        mock.Expect(HttpMethod.Post, "https://wallabag.example.com/api/entries.json")
+            .WithPartialContent("\"url\":\"https://arxiv.org/abs/1706.03762\"")
+            .Respond("application/json", """{"id":512}""");
+
+        var capture = UrlCapture("Save https://arxiv.org/abs/1706.03762 to read later.");
+
+        var result = await sut.HandleAsync(capture, default);
+
+        result.Success.Should().BeTrue();
+        result.ExternalRef.Should().Be("512");
+        mock.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
     public async Task HandleAsync_PostsCaptureContentAsUrl_WithBearerToken_ReturnsExternalRef()
     {
         var (sut, mock) = Build();
@@ -132,7 +152,7 @@ public sealed class WallabagSkillIntegrationTests
         var act = () => sut.HandleAsync(capture, default);
 
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*not a valid absolute url*");
+            .WithMessage("*no http(s) url*");
         mock.GetMatchCount(mock.When("*")).Should().Be(0);
     }
 }

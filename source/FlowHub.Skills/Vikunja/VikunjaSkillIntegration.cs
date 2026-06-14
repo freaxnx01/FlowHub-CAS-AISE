@@ -8,6 +8,11 @@ using Microsoft.Extensions.Options;
 
 namespace FlowHub.Skills.Vikunja;
 
+/// <summary>
+/// Outbound <see cref="ISkillIntegration"/> adapter for Vikunja: creates a task in
+/// the project the classifier selected (e.g. the Inbox), using the AI-enriched title
+/// and description. Returns the created task id as the capture's external reference.
+/// </summary>
 public sealed partial class VikunjaSkillIntegration : ISkillIntegration
 {
     private const int FallbackTitleMaxLength = 120;

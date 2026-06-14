@@ -5,9 +5,13 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowHub.Web.Pipeline;
 
-// Embedding is generated off the request path so POST /api/v1/captures stays inside its
-// NF-09 p95 < 200 ms budget. A failed generation is non-fatal — the capture stays without
-// embedding and can be backfilled via POST /api/v1/admin/embeddings/rebuild.
+/// <summary>
+/// Best-effort pipeline branch (ADR 0006): consumes <c>CaptureCreated</c> and
+/// generates the capture's vector embedding off the request path, so
+/// <c>POST /api/v1/captures</c> stays inside its NF-09 p95 &lt; 200 ms budget. A
+/// failed generation is non-fatal — the capture stays without an embedding and can
+/// be backfilled via <c>POST /api/v1/admin/embeddings/rebuild</c>.
+/// </summary>
 public sealed partial class CaptureEmbeddingConsumer : IConsumer<CaptureCreated>
 {
     private readonly IEmbeddingService _embeddingService;

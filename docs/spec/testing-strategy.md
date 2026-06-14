@@ -44,9 +44,9 @@ graph TD
 > | This section / Block 3 | 3 | `Category!=AI` (default suite) | 99 |
 > | Block 4 Nachbereitung (`docs/insights/block-4.md`) | 4 | `FullyQualifiedName!~E2ETests` (incl. AI + integration) | 223 (6 skipped) |
 > | Block 5 Nachbereitung (`docs/insights/block-5.md`) | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | 171 (0 skipped) |
-> | **Submission build (this doc)** | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | **253 (0 skipped)** |
+> | **Submission build (this doc)** | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | **292 (0 skipped)** |
 >
-> **Canonical figure at submission:** **253 offline tests green, 0 failed, 0
+> **Canonical figure at submission:** **292 offline tests green, 0 failed, 0
 > skipped** (the default CI suite), and the suite additionally passes the AI +
 > live-service integration tests when their categories are enabled (E2E excluded).
 > The lower historical numbers are earlier per-block snapshots, retained in the
@@ -54,17 +54,17 @@ graph TD
 
 ### Verified test run (rendered evidence)
 
-Output of `just test` (`dotnet test FlowHub.slnx --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E"`), run **2026-06-08 against commit `0d52c3c`**:
+Output of `just test` (`dotnet test FlowHub.slnx --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E"`), run **2026-06-12**:
 
 | Test project | Passed | Failed | Skipped |
 |---|---:|---:|---:|
-| FlowHub.Core.Tests | 4 | 0 | 0 |
+| FlowHub.Core.Tests | 6 | 0 | 0 |
 | FlowHub.Skills.ContractTests | 17 | 0 | 0 |
-| FlowHub.Api.IntegrationTests | 17 | 0 | 0 |
-| FlowHub.Skills.Tests | 20 | 0 | 0 |
-| FlowHub.Web.ComponentTests (bUnit) | 160 | 0 | 0 |
-| FlowHub.Persistence.Tests (Testcontainers, real PostgreSQL) | 35 | 0 | 0 |
-| **Total** | **253** | **0** | **0** |
+| FlowHub.Api.IntegrationTests | 21 | 0 | 0 |
+| FlowHub.Skills.Tests | 31 | 0 | 0 |
+| FlowHub.Web.ComponentTests (bUnit) | 179 | 0 | 0 |
+| FlowHub.Persistence.Tests (Testcontainers, real PostgreSQL) | 38 | 0 | 0 |
+| **Total** | **292** | **0** | **0** |
 
 `Passed! - Failed: 0, …` for every assembly; the persistence suite runs against a
 real PostgreSQL container via Testcontainers (not InMemory). AI- and E2E-tagged
@@ -165,7 +165,7 @@ public sealed class AnthropicHaikuLiveTests
 #### Trait filtering strategy
 
 Tests use `[Trait("Category", "AI")]` to partition:
-- **Default suite** (`Category!=AI&Category!=BetaSmoke&Category!=E2E`): 253 tests, runs every build, no external dependencies
+- **Default suite** (`Category!=AI&Category!=BetaSmoke&Category!=E2E`): 292 tests, runs every build, no external dependencies
 - **Live AI suite** (`Category=AI`): 4 tests, runs on-demand, requires real API credentials
 
 ## Test Naming Convention

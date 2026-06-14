@@ -6,6 +6,15 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowHub.Web.Pipeline;
 
+/// <summary>
+/// Second stage of the async pipeline (ADR 0003): consumes <c>CaptureClassified</c>,
+/// resolves the matching <c>ISkillIntegration</c> by name, and writes to the
+/// downstream service (Wallabag / Vikunja). On success the capture becomes
+/// <c>Completed</c> with the external reference; if no integration is registered for
+/// the matched skill it is marked <c>Unhandled</c>. Routing failures retry per the
+/// MassTransit policy and, on exhaustion, surface to
+/// <see cref="LifecycleFaultObserver"/> (also → <c>Unhandled</c>).
+/// </summary>
 public sealed partial class SkillRoutingConsumer : IConsumer<CaptureClassified>
 {
     private readonly IEnumerable<ISkillIntegration> _integrations;

@@ -4,6 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowHub.AI;
 
+/// <summary>
+/// LLM-backed <see cref="IEmbeddingService"/> (ADR 0006): turns capture text into a
+/// vector embedding for pgvector semantic search. Provider errors are caught and
+/// treated as best-effort — the capture is stored without an embedding and search
+/// degrades to the non-vector path rather than failing the pipeline.
+/// </summary>
 public sealed partial class AiEmbeddingService : IEmbeddingService
 {
     private readonly IEmbeddingGenerator<string, Embedding<float>> _generator;
