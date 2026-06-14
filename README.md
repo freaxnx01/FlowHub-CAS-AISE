@@ -112,7 +112,7 @@ docs/                   ← architecture, specs, runbooks, insights
 vault/                  ← Obsidian vault — CAS coursework and project notes
   Projektarbeit/        ← idea, dev notes, glossary, learnings
   Blöcke/01..05/        ← per-block Vorbereitung / PVA / Nachbereitung
-  Organisation/         ← Bewertungskriterien (Moodle rubric)
+  Organisation/         ← course-org notes (enrolment, dates, costs); rubric is FFHS IP, kept local only
 SUBMISSION.md           ← the Moodle submission document (rendered to PDF)
 docs/project/submission-notes.md  ← operator notes: how the submission PDF is produced
 ```
