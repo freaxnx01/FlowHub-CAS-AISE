@@ -34,7 +34,7 @@
 - 🗺️ Further enrichers (book ISBN, link preview); paperless-ngx (DMS); Obsidian
 
 ## Search & Retrieval
-- 🔌 **Semantic / vector search** — `GET /api/v1/captures/search?q=…` over pgvector embeddings (cosine)
+- 🔌 **Semantic / vector search** — **Search** page + `GET /api/v1/captures/search?q=…` over pgvector embeddings (cosine); self-hosted `multilingual-e5-small` embedder (€0)
 - ✅ **Embedding pipeline** — Capture (title + body) → embedding → persisted (async)
 - ✅ **Transparent degradation** — 503 ProblemDetails when no embedding key is configured
 - 🗺️ Hybrid full-text + vector search (`tsvector` + pgvector)

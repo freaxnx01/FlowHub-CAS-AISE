@@ -13,7 +13,7 @@
 
 **OIDC Auth:** `DemoAuthHandler` replaces `DevAuthHandler` — auth mode now driven by `Auth:OIDC:Authority` presence, not `IsDevelopment()`. Production uses Authentik OIDC.
 
-**Semantic Search:** pgvector `vector(1024)` column on `Captures` with HNSW index. `AiEmbeddingService` wraps Mistral `mistral-embed` via MEAI. `IEmbeddingService` port in `FlowHub.Core`; graceful no-op when key absent. Search endpoint: `GET /api/v1/captures/search?q=...`. Admin rebuild: `POST /api/v1/admin/embeddings/rebuild`.
+**Semantic Search:** pgvector `vector(384)` column on `Captures` with HNSW index. `AiEmbeddingService` wraps any OpenAI-compatible embedder via MEAI — the demo self-hosts `multilingual-e5-small` (text-embeddings-inference, €0); `mistral-embed` (1024) is a documented swap (column migration). `IEmbeddingService` port in `FlowHub.Core`; graceful no-op when unconfigured. Surfaced via a **Search** UI page and the endpoint `GET /api/v1/captures/search?q=...`. Admin rebuild: `POST /api/v1/admin/embeddings/rebuild`.
 
 ## Key Decisions
 

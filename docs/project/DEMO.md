@@ -17,7 +17,7 @@ A fully open, rate-limited, self-resetting FlowHub instance — designed so the 
 | Data lifetime | 15-min sliding window — `flowhub.demo-reset` sidecar truncates Captures + reseeds 6 fixture rows |
 | AI provider | `google/gemma-4-31b-it:free` on OpenRouter, dedicated key with **$1/mo hard cap** |
 | AI fallback | Automatic — `KeywordClassifier` takes over when Gemma 429s or quota exhausts |
-| Embeddings | **Disabled** in demo profile — `/api/v1/captures/search` returns 503 ProblemDetails (transparent posture, not hidden) |
+| Embeddings | **Live** — self-hosted `embedder` (text-embeddings-inference, `multilingual-e5-small`, 384-dim) at €0; semantic search works via the **Search** page + `/api/v1/captures/search` |
 | Skill writes | **Vikunja: live** — `todo:` captures route to a self-contained demo Vikunja and appear as tasks (auto-provisioned, public read-only link-share, tasks cleared each reset). **Wallabag: disabled** — URL captures stop at `Unhandled`. |
 | Observability | Prometheus + Grafana not exposed publicly — internal metrics only |
 

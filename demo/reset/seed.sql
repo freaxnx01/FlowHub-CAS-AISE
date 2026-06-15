@@ -9,8 +9,9 @@
 --   * Tags and a file Attachment (paperless-ngx prep)
 --
 -- These are illustrative fixtures inserted directly into the DB. In the public demo,
--- *live* submissions stop at Unhandled (skill writes disabled) and /search returns 503
--- (embeddings disabled) — the fixtures show the outcomes a full deployment produces.
+-- live submissions route to the real Vikunja/Wallabag/paperless services and are
+-- searchable via the self-hosted embedder — the fixtures just give the dashboard
+-- realistic content immediately after each reset.
 -- Fixed UUIDs so Tags/attachments can reference rows and detail URLs stay stable.
 
 INSERT INTO "Captures"

@@ -40,7 +40,7 @@ public sealed class SearchEndpointsTests : IClassFixture<WebApplicationFactory<P
     [Fact]
     public async Task Search_WhenEmbeddingServiceConfigured_Returns200WithResults()
     {
-        var fakeEmbedding = Enumerable.Range(0, 1024).Select(i => (float)i / 1024).ToArray();
+        var fakeEmbedding = Enumerable.Range(0, 384).Select(i => (float)i / 384).ToArray();
         var fakeCaptures = new List<Capture>
         {
             new(Guid.NewGuid(), ChannelKind.Api, "Test content", DateTimeOffset.UtcNow, LifecycleStage.Completed, "test-skill")

@@ -23,8 +23,11 @@ internal sealed class CaptureEntityTypeConfiguration : IEntityTypeConfiguration<
         builder.HasIndex(c => c.CreatedAt).IsDescending().HasDatabaseName("IX_Captures_CreatedAt_DESC");
         builder.HasIndex(c => c.MatchedSkill).HasDatabaseName("IX_Captures_MatchedSkill");
 
+        // 384-dim — sized for the self-hosted multilingual-e5-small embedder (the demo's
+        // default, OpenAI-compatible via Embeddings__BaseUrl). mistral-embed (1024) remains a
+        // documented swap: change this to vector(1024) + a migration (see ADR 0006).
         builder.Property(c => c.Embedding)
-            .HasColumnType("vector(1024)")
+            .HasColumnType("vector(384)")
             .IsRequired(false);
 
         builder.OwnsOne(c => c.Attachment, a =>

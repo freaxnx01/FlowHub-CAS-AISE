@@ -17,10 +17,13 @@ services:
       Bus__RabbitMq__Host: rabbitmq
       Bus__RabbitMq__Username: ${RABBITMQ_USER:-flowhub}
       Bus__RabbitMq__Password: ${RABBITMQ_PASSWORD:-dev-secret}
-      # Embeddings deliberately UNSET — search returns 503 (transparent demo posture).
-      Embeddings__BaseUrl: ""
-      Embeddings__ApiKey: ""
-      Embeddings__Model: ""
+      # Semantic search is LIVE in the demo at €0 — a self-hosted text-embeddings-inference
+      # container (see the `embedder` service) serves multilingual-e5-small (384-dim) over an
+      # OpenAI-compatible API, so only BaseUrl + a placeholder key + model are needed.
+      # Dimensions left empty → the native 384 dims are used (no truncation param sent).
+      Embeddings__BaseUrl: "http://embedder:80/v1"
+      Embeddings__ApiKey: "local"
+      Embeddings__Model: "intfloat/multilingual-e5-small"
       Embeddings__Dimensions: ""
       # AI provider pinned to OpenRouter Gemma 4 31B free.
       Ai__Provider: "OpenRouter"
@@ -39,7 +42,7 @@ services:
       Auth__OIDC__ClientSecret: ""
       # Demo banner shown in the UI (read by FlowHub.Web layout).
       Demo__Mode: "true"
-      Demo__BannerText: "Public demo — type a capture (top bar) and AI routes it to a live tool: a todo to Vikunja, a URL to Wallabag, or a PDF/image upload (at /captures/new) to paperless-ngx. Open any capture to see its AI classification trace — model, timing, tokens, cost. Data resets every 15 min; semantic search is off."
+      Demo__BannerText: "Public demo — type a capture (top bar) and AI routes it to a live tool: a todo to Vikunja, a URL to Wallabag, or a PDF/image upload (at /captures/new) to paperless-ngx. Open any capture to see its AI classification trace — model, timing, tokens, cost. Data resets every 15 min; semantic search is live (try Search in the sidebar)."
       Demo__RepoUrl: "https://github.com/freaxnx01/FlowHub-CAS-AISE"
       Demo__WalkthroughUrl: "https://github.com/freaxnx01/FlowHub-CAS-AISE#explainer-videos"
       Demo__StatusUrl: "https://status.demo.flowhub.freaxnx01.ch/status/flowhub-demo"
@@ -69,6 +72,11 @@ services:
         condition: service_completed_successfully
       flowhub.paperless-bootstrap:
         condition: service_completed_successfully
+      # service_started (not healthy): the model can take a minute to download/load on
+      # first boot; embedding calls degrade gracefully until it's ready, and the reset
+      # cycle backfills embeddings once it is.
+      embedder:
+        condition: service_started
     labels:
       # Traefik route: demo.flowhub.freaxnx01.ch -> :5070
       - "traefik.enable=true"
@@ -94,6 +102,19 @@ services:
       - default
       - traefik_public
     ports: !reset []
+
+  # Self-hosted embedding model so the demo's semantic search works at €0 — no external API.
+  # HF text-embeddings-inference (CPU) serving multilingual-e5-small (384-dim), OpenAI-compatible
+  # at /v1/embeddings. Internal only (never routed through Traefik). mem-capped so it cannot
+  # starve the shared VPS; if it OOMs/restarts, search just degrades to "not available".
+  # The model is cached in the embedder-cache volume after first download.
+  embedder:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.7
+    command: ["--model-id", "intfloat/multilingual-e5-small", "--port", "80"]
+    volumes:
+      - embedder-cache:/data
+    mem_limit: 1536m
+    restart: unless-stopped
 
   flowhub.demo-reset:
     build:
@@ -454,3 +475,6 @@ volumes:
   paperless-media:
   # Uptime Kuma config + monitor history (SQLite). Persists monitors across restarts.
   uptime-kuma-data:
+  # Cached embedding model weights (multilingual-e5-small) so the embedder doesn't
+  # re-download from HuggingFace on every restart.
+  embedder-cache:

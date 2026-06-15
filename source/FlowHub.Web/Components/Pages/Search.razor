@@ -1,0 +1,58 @@
+@page "/search"
+@rendermode InteractiveServer
+
+<PageTitle>FlowHub — Search</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-1">Semantic Search</MudText>
+<MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+    Finds captures by meaning (pgvector embeddings), not just literal keywords.
+</MudText>
+
+<MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="mb-4" Style="max-width:720px;">
+    <MudTextField @bind-Value="_query"
+                  Placeholder="Search by meaning — e.g. 'a film about simulated reality'…"
+                  Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                  OnKeyDown="OnKeyDownAsync" Disabled="_searching" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Search"
+               OnClick="RunSearchAsync"
+               Disabled="_searching || string.IsNullOrWhiteSpace(_query)">
+        @(_searching ? "Searching…" : "Search")
+    </MudButton>
+</MudStack>
+
+@if (_notEnabled)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4" Style="max-width:720px;">
+        Semantic search isn't enabled in this deployment (no embedding provider configured).
+        The <MudLink Href="captures">Captures</MudLink> list still offers a plain content filter.
+    </MudAlert>
+}
+else if (_error is not null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-4" Style="max-width:720px;">@_error</MudAlert>
+}
+else if (_results is not null)
+{
+    @if (_results.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">No semantically similar captures found.</MudText>
+    }
+    else
+    {
+        <MudText Typo="Typo.caption" Class="mb-2">@_results.Count result(s) · most similar first</MudText>
+        <MudStack Spacing="2" Style="max-width:720px;">
+            @foreach (var c in _results)
+            {
+                <MudPaper Class="pa-3" Outlined="true" Style="cursor:pointer;"
+                          @onclick="@(() => Navigation.NavigateTo($"/captures/{c.Id}"))">
+                    <MudText Typo="Typo.body2">@Truncate(c.Content, 180)</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary mt-1">
+                        @c.Stage.ToString().ToLowerInvariant() · @c.Source.ToString()
+                    </MudText>
+                </MudPaper>
+            }
+        </MudStack>
+    }
+}

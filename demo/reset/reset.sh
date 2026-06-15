@@ -22,6 +22,17 @@ echo "[$(ts)] demo-reset: TRUNCATE Captures CASCADE — done"
 psql $PGOPTS -v ON_ERROR_STOP=1 -f /seed.sql
 echo "[$(ts)] demo-reset: seed inserted"
 
+# 2b. Re-embed the freshly seeded fixtures so semantic search (the Search page) returns
+#     them. Seeds are inserted straight into the DB, so they fire no CaptureCreated event
+#     and start with NULL embeddings — the admin rebuild backfills them via the local
+#     embedder. Best-effort: skipped cleanly if web/embedder aren't up yet (curl fails).
+WEB_URL="${FLOWHUB_WEB_URL:-http://flowhub.web:5070}"
+if curl -fsS -m 180 -X POST "${WEB_URL}/api/v1/admin/embeddings/rebuild" -o /tmp/rebuild.json 2>/dev/null; then
+  echo "[$(ts)] demo-reset: embeddings rebuild — $(cat /tmp/rebuild.json)"
+else
+  echo "[$(ts)] demo-reset: embeddings rebuild skipped (web/embedder not ready)"
+fi
+
 # 3. Purge MassTransit RabbitMQ queues so in-flight events from before the
 #    reset don't process against the now-truncated DB.
 RABBITMQ_HOST="${RABBITMQ_HOST:-rabbitmq}"
