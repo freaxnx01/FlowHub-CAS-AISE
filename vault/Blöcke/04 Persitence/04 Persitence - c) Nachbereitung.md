@@ -18,9 +18,13 @@ updated: 2026-05-06
 - Ich kann dynamische Abfragen effizient programmieren.
 - Ich kann mit Quarkus Panache Datenzugriffe auf verschiedene Datenbankmodelle realisieren.
 
-## Auftrag (Moodle)
+## Auftrag (Zusammenfassung)
 
-Wir wenden uns nun der dritten und letzten Schicht einer klassischen Enterprise Applikation zu, um Daten effizient zu speichern und für die entsprechenden Geschäftsprozesse flexibel zu nutzen. Da Daten jede Technologie überlebt und den wertvollen Teil Ihrer Applikation darstellt, ist das zugrunde liegende Datenmodell mit Bedacht zu wählen. Daten in ein neues Datenmodell zu migrieren oder fehlende Daten nachzuliefern, ist aufwändig. Entsprechend soll Ihr Datenmodell zukünftige Bedürfnisse antizipieren und daran anpassbar sein. Entwerfen Sie hier nun das geeignete Datenmodell und implementieren Sie dessen Abstraktion über Hibernate ORM, Panache und Jakarta Data. Nutzen Sie die Möglichkeiten von Criteria API, um dynamische Abfragen zu realisieren.
+Die **Persistenzschicht** (dritte/letzte Schicht einer klassischen Enterprise-App) entwerfen und umsetzen:
+
+- Das **Datenmodell mit Bedacht** wählen — Daten überleben jede Technologie, Migrationen sind aufwändig; das Modell soll künftige Bedürfnisse antizipieren und anpassbar bleiben.
+- Den Datenzugriff über eine **ORM-Abstraktion** kapseln (im Kurs Hibernate ORM / Panache / Jakarta Data; FlowHub: EF Core — siehe Stack-Mapping unten).
+- **Dynamische Abfragen** typsicher realisieren (Criteria API → LINQ / Expression Trees).
 
 **Termin:** Bis zur nächsten Präsenzveranstaltung (2026-06-20). Dieser Auftrag ist Grundlage für die weitere Arbeit in der Präsenzveranstaltung.
 
@@ -70,7 +74,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### Programmierung
 
 - [x] **Code lesbar/dokumentiert/strukturiert (7)** — `FlowHub.Persistence` als eigenes Projekt, sauber getrennt von Domain (`FlowHub.Core`)
-- [x] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10)
+- [x] **Konzepte des gewählten Frameworks sachgerecht eingesetzt (max. 10)** — framework-neutral (Rubrik-Update Juni 2026); für .NET 10 / ASP.NET Core direkt erfüllt: DI, REST-Schnittstellen, Konfiguration, Fehlerbehandlung (`docs/spec/modern-app-concepts.md`)
 - [x] **Erkenntnisse dokumentiert (3)** — `docs/ai-usage.md` Block-4-prep / Beta-MVP-Sektion: dual-provider EF-Core-8+ trap, `InternalsVisibleTo`-Pattern für Test-Seeding, surgical `MigrationRunner`-Removal in `IntegrationTestFactory`, `IDesignTimeDbContextFactory` für Tooling-Discovery, captive-`HttpClient`-Anti-Pattern (gemerkt für Block 4 Cleanup); ADR 0005 §"Alternatives considered" deckt Dapper/NHibernate/Repository-Pattern Trade-offs ab
 - [x] **Source in Git (2)** — alle Block-4-Commits gepusht
 

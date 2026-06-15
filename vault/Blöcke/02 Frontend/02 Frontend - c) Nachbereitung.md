@@ -28,8 +28,6 @@ updated: 2026-06-13
 - KI-generierte Unit-Tests, alle grün
 - Master-Detail-Übung in mehreren Varianten
 
-Volltext: `_files/Moodle/Modul/2-Frontend/pdf/W4B-C-AS001.AISE.ZH-Sa-1.PVA.FS26_ Projektarbeit_ Frontend _ Moodle.pdf`
-
 ---
 
 ## Bewertungskriterien (Block 2)
@@ -55,7 +53,7 @@ Snapshot am Ende der Block-2-Phase (~2026-04-25) gegen die offizielle Moodle-Rub
 ### Programmierung
 
 - [x] **Code lesbar / strukturiert (7)** — `source/FlowHub.Web/` sauber gegliedert (Components/Layout, Components/Pages, Components/DashboardCards, Components/Shared, Stubs/); MudBlazor-Konventionen, code-behind via partial class
-- [x] ~~Quarkus / Jakarta EE~~ — N/A (Stack: .NET 10)
+- [x] **Konzepte des gewählten Frameworks sachgerecht eingesetzt (max. 10)** — framework-neutral (Rubrik-Update Juni 2026); für .NET 10 / ASP.NET Core direkt erfüllt: DI, REST-Schnittstellen, Konfiguration, Fehlerbehandlung (`docs/spec/modern-app-concepts.md`)
 - [-] **Erkenntnisse dokumentiert (3)** — Block-2-Insights in `docs/insights/block-2.md` (UI-Workflow-Phasen-Disziplin, ADR-Lifecycle); CHANGELOG `[Unreleased]` mit Block-2-Deliverables
 - [x] **Source in Git (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE`, Block-2-Commits gepusht
 

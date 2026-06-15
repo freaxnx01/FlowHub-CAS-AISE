@@ -23,7 +23,9 @@ updated: 2026-05-17
 - Architektur-Optionen evaluieren und eine begründete Entscheidung dokumentieren
 - Initiales Repository-Setup mit dem gewählten Stack
 
-> **FlowHub-Kontext:** Stack-Entscheidung gegen Quarkus / Jakarta EE und für .NET 10 + Blazor Web App in der Projektbeschreibung dokumentiert (siehe `vault/Projektarbeit/Dev.md`). ADR 0001 (Frontend Render Mode and Architecture, Accepted 2026-02-15) und ADR 0002 (Service Architecture and Async Communication, Accepted 2026-03-01) halten die beiden tragenden Architekturentscheidungen fest.
+> **FlowHub-Kontext:**
+> - **Stack-Entscheid** für .NET 10 + Blazor Web App (statt Quarkus / Jakarta EE) — in der Projektbeschreibung dokumentiert (`vault/Projektarbeit/Dev.md`).
+> - **ADR 0001** (Frontend Render Mode & Architecture, Accepted 2026-02-15) und **ADR 0002** (Service Architecture & Async Communication, Accepted 2026-03-01) halten die beiden tragenden Architekturentscheidungen fest.
 
 ---
 
@@ -50,7 +52,7 @@ Snapshot am Ende der Block-1-Phase (~2026-03-21) gegen die offizielle Moodle-Rub
 ### Programmierung
 
 - [-] **Code lesbar / strukturiert (7)** — Solution-Skelett `FlowHub.slnx` mit `FlowHub.Core` Domain-Typen (`Capture`, `LifecycleStage`, `ChannelKind`); strukturell sauber, aber kaum Code-Volumen
-- [x] ~~Quarkus / Jakarta EE~~ — N/A (Stack: .NET 10)
+- [x] **Konzepte des gewählten Frameworks sachgerecht eingesetzt (max. 10)** — framework-neutral (Rubrik-Update Juni 2026); für .NET 10 / ASP.NET Core direkt erfüllt: DI, REST-Schnittstellen, Konfiguration, Fehlerbehandlung (`docs/spec/modern-app-concepts.md`)
 - [-] **Erkenntnisse dokumentiert (3)** — Reflexion-Sektion in dieser Datei + ADR 0001/0002 §"Alternatives considered"; ausführliche Insights folgen ab `docs/insights/block-1.md`
 - [x] **Source in Git (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE` aufgesetzt, Initial-Commits gepusht
 
