@@ -110,10 +110,25 @@ services:
   # The model is cached in the embedder-cache volume after first download.
   embedder:
     image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.7
-    command: ["--model-id", "intfloat/multilingual-e5-small", "--port", "80"]
+    # Low-traffic demo: trim batch/concurrency buffers to keep the footprint down.
+    # TEI + the e5-small ONNX backend needs ~2 GB during load, so the cap is 2.5 GB
+    # (the shared VPS has the headroom); steady-state settles well below that.
+    command:
+      - "--model-id"
+      - "intfloat/multilingual-e5-small"
+      - "--port"
+      - "80"
+      - "--max-batch-tokens"
+      - "2048"
+      - "--max-concurrent-requests"
+      - "16"
+      - "--tokenization-workers"
+      - "2"
+      - "--max-client-batch-size"
+      - "8"
     volumes:
       - embedder-cache:/data
-    mem_limit: 1536m
+    mem_limit: 2560m
     restart: unless-stopped
 
   flowhub.demo-reset:
