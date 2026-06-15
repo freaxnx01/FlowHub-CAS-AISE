@@ -2,6 +2,15 @@
 
 Forward-looking ideas not yet scheduled into a Block. Items here are exploratory — promote to an ADR + implementation plan before building.
 
+> **Why this list is mostly cheap to build.** FlowHub is a hexagonal modular
+> monolith: capture sources are **driving adapters** behind one entry point
+> (`ICaptureService`), and downstream targets are **driven adapters** behind one
+> port (`ISkillIntegration`); classification sits behind `IClassifier`, the LLM
+> behind a provider abstraction, and the pipeline behind MassTransit (transport
+> swappable in-memory↔RabbitMQ). So **a new channel, a new skill target, or a new
+> AI provider is a new adapter — not a core change.** The items below are grouped
+> by which seam they extend, which is the real point: FlowHub is built to grow.
+
 ---
 
 ## Capture Enrichment (post-classification data fetch)
@@ -245,8 +254,167 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 
 ---
 
+# Extensibility showcase — adapters the ports make cheap
+
+## paperless-ngx integration — documents & Belege (incl. its own AI)
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** FlowHub already routes links to Wallabag and tasks to Vikunja. The natural next homelab target is **paperless-ngx** for document/receipt/Beleg captures (PDFs, scans, photos of paperwork) — closing the "everything in my inbox finds its home" vision.
+
+### Proposed shape
+
+1. **New driven adapter** `PaperlessSkillIntegration : ISkillIntegration` — uploads the capture's attachment to the paperless-ngx REST API (`/api/documents/post_document/`), returns the document id as `ExternalRef`. Same pattern as Wallabag/Vikunja.
+2. **AI-to-AI handoff:** paperless-ngx runs its **own** OCR + (in recent versions) LLM-based title/tag/correspondent inference. FlowHub does the *routing* decision; paperless-ngx does the *document* enrichment. Optionally feed paperless-ngx's extracted text back as a follow-up Capture for cross-linking.
+3. **Attachment path:** the `Capture.Attachment` + `IAttachmentStorage` plumbing already exists for binary captures.
+
+**Architecture payoff:** one new `ISkillIntegration` class + options + DI line. Zero domain or pipeline change — the demo deliberately disables skill-writes, so this is purely a homelab-side adapter.
+
+---
+
+## More capture channels — Telegram, share-target, email
+
+**Status:** Idea (Telegram is a reserved placeholder).
+**Motivation:** "Capture without friction" means capturing from wherever you already are. The Web Quick-Capture + REST API are two channels; the architecture is built for more.
+
+### Proposed shape
+
+- **Telegram bot** — webhook → `ICaptureService.SubmitAsync(..., ChannelKind.Telegram)`. The original one-message-capture vision; realizes the `FlowHub.Telegram` placeholder.
+- **OS / PWA share-target** — register FlowHub as a share target so any app's "Share" sheet can send to it.
+- **Email-to-capture** — forward an email to a dedicated address → capture (IMAP poll or inbound webhook).
+
+**Architecture payoff:** each is a **driving adapter** in front of the existing `ICaptureService` — no new domain, classification, or routing code. The `ChannelKind` enum + per-channel adapter is the only surface that grows.
+
+---
+
+## GitHub-Issue Skill — a Capture becomes a forge issue
+
+**Status:** Idea — partially prototyped as the `flowhub-issue` CC-skill; see also *Forge Routing* above.
+**Motivation:** Dogfooding: a Capture like **`flowhub: Add i18n DE/EN`** should open a real GitHub issue in this very repo — title *"Add i18n (DE/EN)"*, body with the captured context, labels inferred from the text. FlowHub managing its own backlog is a compelling live demo for the examiner.
+
+### Proposed shape
+
+1. **New driven adapter** `GitHubIssueSkillIntegration : ISkillIntegration` — resolves the target repo from the capture prefix (`flowhub:` → `freaxnx01/FlowHub-CAS-AISE`) and POSTs to the GitHub Issues API; `ExternalRef` = issue number/URL.
+2. **Classifier routes** software-project captures to this skill (matched skill `GitHubIssue`), reusing the multi-forge repo-resolution already in the `flowhub-issue` skill.
+3. **Idea vs. issue** — defer the vague-vs-actionable decision to the *Forge Routing* item above (idea → backlog, actionable → issue).
+
+**Architecture payoff:** same `ISkillIntegration` shape as Wallabag/Vikunja; the forge-detection logic already exists in the `flowhub-issue` skill, so this is mostly wiring it as an in-app skill target. *(The `Add i18n DE/EN` example is itself a genuine FlowHub enhancement — a fitting first dogfooded issue.)*
+
+---
+
+## Further homelab skill targets
+
+**Status:** Idea.
+**Motivation:** The `ISkillIntegration` port is the extension point for the whole self-hosted ecosystem.
+
+- **Karakeep / Hoarder** — bookmarks with AI tagging (alternative/complement to Wallabag).
+- **Immich** — photo captures → albums.
+- **Firefly III / Actual** — receipt/expense captures → finance entries.
+
+**Architecture payoff:** each is a thin adapter; the matched-skill registry resolves by name, so adding a target is additive.
+
+---
+
+## Agentic, multi-step classification
+
+**Status:** Idea — `IClassifier` abstraction already isolates this; Semantic Kernel reserved (ADR 0004).
+**Motivation:** Today classification is single-shot. Some captures need reasoning + tools — *"fetch this opaque share URL, read the page title, then decide the skill."*
+
+### Proposed shape
+
+- A tool-using agent loop (MEAI `FunctionInvokingChatClient` or a Semantic Kernel agent) behind the **same `IClassifier` port** — fetch-URL / web-search / look-up tools, then a final routing decision.
+- Swap-in is transparent to the pipeline (the enrichment consumer just calls `IClassifier`).
+
+**Architecture payoff:** drops in behind the existing port — the deferred *"agentic AI multi-step workflows"* learning objective, realised without touching consumers.
+
+---
+
+## Local LLM via Ollama — full data residency (NfA-P1)
+
+**Status:** Idea — the target state of ADR 0007 / NfA-P1.
+**Motivation:** Classification + embeddings currently run on cloud providers (OpenRouter / Mistral). The privacy NFR's goal is local-by-default so capture content never leaves the homelab.
+
+### Proposed shape
+
+- A `Local`/Ollama provider behind the existing AI provider abstraction; `Embeddings:Provider=Local` as the default.
+- Add the `OutboundCallAuditTests` that asserts no cloud LLM call in the default profile.
+
+**Architecture payoff:** one new provider adapter — no classifier or consumer change — flips FlowHub to full data residency and closes NfA-P1.
+
+---
+
+## Confidence-driven human-in-the-loop
+
+**Status:** Idea.
+**Motivation:** When the classifier is unsure, guessing is worse than asking.
+
+### Proposed shape
+
+- The classifier returns a confidence; below a threshold the capture goes to a **review queue** (or asks back via the originating channel — e.g. a Telegram inline reply) instead of auto-routing.
+- The user's choice becomes a labelled example for future tuning.
+
+**Architecture payoff:** a branch in the routing consumer + a UI list; the `ClassifierTrace`/confidence plumbing already exists on `ClassificationResult`.
+
+---
+
+## Semantic features on the existing pgvector index
+
+**Status:** Idea — builds directly on ADR 0006.
+**Motivation:** Embeddings are already generated and stored; surface them.
+
+- **Related captures** — "you saved 3 similar things" on the detail page.
+- **Semantic dedup** — warn on near-duplicate captures at submit time.
+- **Natural-language search** over all captures (already partially present; promote to a first-class UX).
+
+**Architecture payoff:** read-side features on infrastructure that already exists (`SearchByEmbeddingAsync`) — no new write path.
+
+---
+
+## Independent worker split — modular monolith → distributed
+
+**Status:** Idea — explicitly the reversible path noted in ADR 0002.
+**Motivation:** The single-operator deployment doesn't need horizontal scale, but the architecture should *prove* it can get there.
+
+### Proposed shape
+
+- Extract the MassTransit consumer pipeline into a separate `flowhub.worker` host (own `Program.cs` + Dockerfile + compose service); the web app publishes, the worker consumes, over the shared RabbitMQ bus.
+- No code rewrite: the transport already swaps in-memory↔RabbitMQ; this is a hosting/composition change.
+
+**Architecture payoff:** demonstrates that the modular-monolith decision (ADR 0002) was *deliberate and reversible* — the consumers can scale independently of the UI by configuration, not redesign.
+
+---
+
+## Multi-user / multi-tenant
+
+**Status:** Idea.
+**Motivation:** FlowHub is single-operator today; the auth seam is already designed for more.
+
+### Proposed shape
+
+- Replace `DemoAuthHandler` with the real OIDC flow (Authentik) already specified in the ADRs.
+- Partition captures + skill credentials per user; per-user skill configuration.
+
+**Architecture payoff:** auth is a cross-cutting adapter, not woven through the domain — the dev/demo `DemoAuthHandler` ↔ real OIDC swap is a registration change.
+
+---
+
+## Complete the observability story
+
+**Status:** Idea — metrics are live; tracing is wired-but-dormant.
+**Motivation:** Prometheus metrics + Grafana run today; distributed tracing and AI metrics are specified but not exported.
+
+### Proposed shape
+
+- Enable the OTLP trace exporter + `WithTracing` + the MassTransit instrumentation source so a Capture's full pipeline span is visible in Grafana/Tempo.
+- Export `gen_ai.*` metrics (per ADR 0004) and ship the Grafana dashboard JSON.
+
+**Architecture payoff:** OpenTelemetry is already at the composition root — this is configuration + a dashboard, completing the production-readiness picture.
+
+---
+
 ## References
 
+- ADR 0002 — Service Architecture & Async Communication (`docs/adr/0002-service-architecture-and-async-communication.md`)
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)
 - ADR 0006 — Vector Search (`docs/adr/0006-vector-search.md`)
+- ADR 0007 — LLM Hosting (`docs/adr/0007-llm-hosting.md`)
 - `source/FlowHub.Web/Pipeline/CaptureEnrichmentConsumer.cs` — current classify-only "enrichment" consumer
