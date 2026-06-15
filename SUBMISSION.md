@@ -109,11 +109,21 @@ Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Pr
 
 ### 3.6 Bewertungskriterien & Selbsteinschätzung
 
-- **Bewertungskriterien (Moodle-Rubric)** — kanonische Quelle der Bewertung: 18 Items, 5 Buckets, max. 100 Punkte. Die offizielle Moodle-Rubrik ist FFHS-Lehrmaterial und wird **nicht im öffentlichen Repository mitveröffentlicht**; die Selbsteinschätzung pro Block (siehe 3.4) bildet die relevanten Kriterien mit Punktgewichtung ab.
-- Selbst-Check pro Block: jeweils im unteren Abschnitt der Block-Nachbereitung (siehe 3.4) als Checkliste mit Punktgewichtung
-- [Lernziele-Coverage (alle Blöcke)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/lernziele-coverage.md) — die *andere* Achse zur Rubrik: jedes Block-Lernziel (Vorbereitung + Nachbereitung) auf konkrete Code- **und** Dokument-Belege abgebildet, inkl. .NET-Stack-Mapping und bewusst zurückgestelltem Scope (SOAP, Service-Mesh, Kubernetes, Cloud-IaaS, Agentic AI)
-- **Programmierkriterium „Konzepte des gewählten Frameworks" (max. 10 Pkt.):** Das Kriterium ist in der aktuellen Moodle-Rubrik (Update Juni 2026) **framework-neutral** formuliert — nicht mehr Quarkus-/Jakarta-EE-spezifisch. Für FlowHub ist es damit **direkt und vollständig erfüllt**: das gewählte Framework ist .NET 10 / ASP.NET Core, und die ausdrücklich genannten Konzepte sind im Code nachgewiesen — **Dependency Injection** (`IServiceCollection`, per-Modul-Registrierung), **REST-Schnittstellen** (Minimal API + RFC 9457 ProblemDetails, `FlowHub.Api`), **Konfiguration** (`IConfiguration`/Options, 12-Factor) und **Fehlerbehandlung** (ProblemDetails, MassTransit-Retry + deterministischer Fallback). Konzept-Belege je Konzept: [`docs/spec/modern-app-concepts.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/modern-app-concepts.md). **Es gibt kein ausgeklammertes Item mehr — alle 100 Punkte sind erreichbar** (kein „/90"-Sonderfall).
-- **Sub-System-Kriterium (max. 5 Pkt.):** Die aktuelle Rubrik akzeptiert **explizit den modularen Monolithen** („modularer Monolith oder verteilte Services … als Container lauffähig betrieben"). FlowHub erfüllt das vollständig: klar abgegrenzte Module (ADR 0002), als Container-Stack lauffähig (Docker Compose + Live-Demo).
+- **Bewertungskriterien (Moodle-Rubric)** — kanonische Quelle: 18 Items, 5 Buckets, max. 100 Punkte.
+  - Die offizielle Moodle-Rubrik ist FFHS-Lehrmaterial und wird **nicht im öffentlichen Repository mitveröffentlicht**.
+  - Die **Selbsteinschätzung pro Block** (siehe 3.4) bildet die relevanten Kriterien mit Punktgewichtung ab — als Checkliste am Ende jeder Block-Nachbereitung.
+- **[Lernziele-Coverage (alle Blöcke)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/lernziele-coverage.md)** — die *andere* Achse zur Rubrik:
+  - jedes Block-Lernziel (Vorbereitung + Nachbereitung) auf konkrete Code- **und** Dokument-Belege abgebildet, inkl. .NET-Stack-Mapping;
+  - bewusst zurückgestellter Scope ist dokumentiert: SOAP, Service-Mesh, Kubernetes, Cloud-IaaS, Agentic AI.
+- **Programmierkriterium „Konzepte des gewählten Frameworks" (max. 10 Pkt.)** — in der aktuellen Rubrik (Update Juni 2026) **framework-neutral** (nicht mehr Quarkus-/Jakarta-EE-spezifisch). Für .NET 10 / ASP.NET Core **direkt und vollständig erfüllt**; die genannten Konzepte sind im Code nachgewiesen:
+  - **Dependency Injection** — `IServiceCollection`, per-Modul-Registrierung
+  - **REST-Schnittstellen** — Minimal API + RFC 9457 ProblemDetails (`FlowHub.Api`)
+  - **Konfiguration** — `IConfiguration`/Options, 12-Factor
+  - **Fehlerbehandlung** — ProblemDetails, MassTransit-Retry + deterministischer Fallback
+  - Belege je Konzept: [`docs/spec/modern-app-concepts.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/modern-app-concepts.md). **Kein ausgeklammertes Item mehr — alle 100 Punkte erreichbar** (kein „/90"-Sonderfall).
+- **Sub-System-Kriterium (max. 5 Pkt.)** — die Rubrik akzeptiert **explizit den modularen Monolithen** („modularer Monolith oder verteilte Services … als Container lauffähig betrieben"). FlowHub erfüllt das vollständig:
+  - klar abgegrenzte Module (ADR 0002);
+  - als Container-Stack lauffähig (Docker Compose + Live-Demo).
 
 ### 3.7 Knowledge Base (Hintergrund)
 
