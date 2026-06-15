@@ -22,15 +22,41 @@ echo "[$(ts)] demo-reset: TRUNCATE Captures CASCADE — done"
 psql $PGOPTS -v ON_ERROR_STOP=1 -f /seed.sql
 echo "[$(ts)] demo-reset: seed inserted"
 
-# 2b. Re-embed the freshly seeded fixtures so semantic search (the Search page) returns
-#     them. Seeds are inserted straight into the DB, so they fire no CaptureCreated event
-#     and start with NULL embeddings — the admin rebuild backfills them via the local
-#     embedder. Best-effort: skipped cleanly if web/embedder aren't up yet (curl fails).
-WEB_URL="${FLOWHUB_WEB_URL:-http://flowhub.web:5070}"
-if curl -fsS -m 180 -X POST "${WEB_URL}/api/v1/admin/embeddings/rebuild" -o /tmp/rebuild.json 2>/dev/null; then
-  echo "[$(ts)] demo-reset: embeddings rebuild — $(cat /tmp/rebuild.json)"
-else
-  echo "[$(ts)] demo-reset: embeddings rebuild skipped (web/embedder not ready)"
+# 2b. Embed the freshly seeded fixtures so semantic search returns them — ATOMICALLY.
+#     Seeds are inserted straight into the DB (no CaptureCreated event → NULL embeddings).
+#     The app's per-row rebuild commits one capture at a time, so a query landing mid-rebuild
+#     would see a half-embedded set (an unrelated result can momentarily rank #1). Instead we
+#     embed every fixture against the local embedder and apply all vectors in a SINGLE
+#     transaction — the fixtures become searchable all-at-once, never partially. Visitor-typed
+#     captures are embedded separately and in real time by CaptureEmbeddingConsumer.
+#     Best-effort: if the embedder isn't ready the fixtures stay unembedded (search returns
+#     nothing) until the next cycle, rather than ever showing a partial ranking.
+EMBEDDER_URL="${EMBEDDER_URL:-http://embedder:80}"
+embed_fixtures() {
+  local ids id content vec tx="/tmp/embed.sql" n=0
+  ids=$(psql $PGOPTS -tAc 'SELECT "Id" FROM "Captures" WHERE "Embedding" IS NULL;') || return 1
+  [ -n "$ids" ] || { echo "[$(ts)] demo-reset: no fixtures to embed"; return 0; }
+  # Give the embedder a bounded grace period if it's still warming up.
+  for _ in $(seq 1 10); do
+    curl -fsS -m 3 "${EMBEDDER_URL}/health" >/dev/null 2>&1 && break
+    sleep 3
+  done
+  : > "$tx"; echo 'BEGIN;' >> "$tx"
+  for id in $ids; do
+    content=$(psql $PGOPTS -tAc "SELECT \"Content\" FROM \"Captures\" WHERE \"Id\"='$id';") || return 1
+    # content goes only into the embedder payload (jq --arg escapes it), never into SQL.
+    vec=$(curl -fsS -m 20 "${EMBEDDER_URL}/v1/embeddings" -H 'Content-Type: application/json' \
+            --data-binary "$(jq -nc --arg t "$content" '{model:"e5",input:$t}')" \
+          | jq -ce '.data[0].embedding') || return 1
+    printf "UPDATE \"Captures\" SET \"Embedding\"='%s'::vector WHERE \"Id\"='%s';\n" "$vec" "$id" >> "$tx"
+    n=$((n+1))
+  done
+  echo 'COMMIT;' >> "$tx"
+  psql $PGOPTS -v ON_ERROR_STOP=1 -f "$tx" >/dev/null || return 1
+  echo "[$(ts)] demo-reset: embedded ${n} fixture(s) atomically"
+}
+if ! embed_fixtures; then
+  echo "[$(ts)] demo-reset: fixture embedding skipped (embedder not ready)"
 fi
 
 # 3. Purge MassTransit RabbitMQ queues so in-flight events from before the
