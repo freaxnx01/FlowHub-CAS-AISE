@@ -123,6 +123,17 @@ Vertiefende Notizen aus den Vorlesungen, nicht Teil der primären Bewertung, abe
 - [UML](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Knowledge/UML.md)
 - [Akronyme](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Knowledge/Akronyme.md)
 
+### 3.8 Ausblick & Erweiterbarkeit
+
+Die [**Roadmap**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/project/ROADMAP.md) zeigt das Weiterentwicklungspotenzial — und ist zugleich der beste Beleg für die **Tragfähigkeit der Architektur**: Weil FlowHub ein hexagonaler Modular Monolith ist, sind die meisten Erweiterungen **dünne Adapter** an bestehenden Ports, kein Umbau des Kerns:
+
+- **Neue Capture-Kanäle** (Telegram, OS-/PWA-Share-Target, E-Mail) → je ein *driving adapter* vor `ICaptureService`.
+- **Neue Skill-Ziele** (paperless-ngx inkl. dessen eigener KI, GitHub-Issues z. B. `flowhub: Add i18n DE/EN`, Karakeep, Immich, Firefly) → je eine `ISkillIntegration`-Implementierung.
+- **KI-Tiefe** (agentische Mehrschritt-Klassifikation, lokales LLM via Ollama für volle Datenresidenz, Confidence-basierter Human-in-the-Loop, semantische Features auf dem vorhandenen pgvector-Index) → hinter den bestehenden `IClassifier`/Provider-Abstraktionen.
+- **Skalierungspfad** (eigenständiger Worker-Container, Multi-User via OIDC, vollständiges Tracing) → bewusst *reversible* Konsequenz der Modular-Monolith-Entscheidung (ADR 0002): per Konfiguration, nicht per Neuentwicklung.
+
+> Dies ist **Potenzial, nicht zugesagter Abgabe-Umfang** (vgl. Scope-Freeze) — aufgeführt, um die Erweiterbarkeit des Entwurfs zu zeigen.
+
 ---
 
 ## 4. Hinweise für die Bewertung
