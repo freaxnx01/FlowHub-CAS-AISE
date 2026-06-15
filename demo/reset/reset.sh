@@ -22,6 +22,14 @@ echo "[$(ts)] demo-reset: TRUNCATE Captures CASCADE — done"
 psql $PGOPTS -v ON_ERROR_STOP=1 -f /seed.sql
 echo "[$(ts)] demo-reset: seed inserted"
 
+# 2a. Drop the approximate HNSW index for the demo. On this tiny fixture set it gives no
+#     speed benefit, and its approximate recall (worsened by the bulk re-embeds below) can
+#     rank an unrelated capture #1. Dropping it makes demo search an exact seqscan — instant
+#     and always correct. The index stays in the schema/migrations for production scale; this
+#     is a demo-only runtime tuning (idempotent — survives redeploys that recreate it).
+psql $PGOPTS -c 'DROP INDEX IF EXISTS captures_embedding_hnsw_idx;' >/dev/null 2>&1 || true
+echo "[$(ts)] demo-reset: dropped HNSW index (exact search on the small demo set)"
+
 # 2b. Embed the freshly seeded fixtures so semantic search returns them — ATOMICALLY.
 #     Seeds are inserted straight into the DB (no CaptureCreated event → NULL embeddings).
 #     The app's per-row rebuild commits one capture at a time, so a query landing mid-rebuild
