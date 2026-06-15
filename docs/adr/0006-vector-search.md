@@ -5,7 +5,7 @@
 
 ## Context
 
-FlowHub accumulates Captures over time. Keyword search fails when the query doesn't share vocabulary with stored titles or content. Semantic (embedding-based) search finds by meaning. The CAS AISE rubric item "Intelligente Services mit KI" (6 pts) requires a KI-based search feature.
+FlowHub accumulates Captures over time — todos, quotes, links, receipts — captured without friction and without manual organisation. Weeks later the user no longer remembers the exact words. Keyword search fails when the query doesn't share vocabulary with stored titles or content (e.g. "the saying about simplicity" won't match a stored quote that never uses the word *simplicity*). Semantic (embedding-based) search finds by **meaning** instead. This "capture without friction, retrieve by meaning later" loop is the core product value; the CAS AISE rubric item "Intelligente Services mit KI" (6 pts) also requires a KI-based search feature.
 
 ## Decision
 

@@ -319,6 +319,10 @@ See `Projektarbeit/Idee FlowHub.md` in the CAS Obsidian vault for the original c
 
 ## UC-18: Semantic Search for Captures
 
+**Motivation (product value):** FlowHub's premise is *capture without friction, retrieve by meaning later*. Users throw todos, quotes, links, and receipts into FlowHub all day without organising them — and weeks later they no longer remember the exact words. Semantic search lets them retrieve by *meaning*: "that film someone recommended about dreams", "the saying about simplicity" — and find the capture even when the query shares **no keywords** with the stored text. That is the value over the literal substring filter on the Captures list (which only matches captures that contain the typed characters).
+
+**Entry points:** the **Search** page in the web UI (embeds the query in-process), and the REST endpoint below — the latter for external/programmatic callers (scripts, a CLI, another app, or an AI agent given an "inbox search" tool).
+
 **Actor:** Operator
 **Precondition:** `Embeddings__ApiKey` is configured; at least one Capture exists with a stored embedding.
 **Note on embedding generation:** Embeddings for new Captures are generated asynchronously by `CaptureEmbeddingConsumer` (subscribed to `CaptureCreated`), so a Capture submitted via UC-09 becomes searchable a moment after submission, not synchronously with the `POST /api/v1/captures` response. This keeps capture submission inside the NF-09 p95 < 200 ms budget regardless of embedding-provider latency. Backfill of captures stored before the provider was configured is via `POST /api/v1/admin/embeddings/rebuild`.
