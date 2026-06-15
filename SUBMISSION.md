@@ -1,9 +1,9 @@
 # FlowHub – CAS AISE Projektabgabe
 
 **CAS AI-Assisted Software Engineering (AISE)** · W4B-C-AS001 · ZH-Sa-1 · FS26
-**Student:** Andreas Imboden (`freaxnx01`)
+**Student:** Andreas Imboden
 **Repository:** <https://github.com/freaxnx01/FlowHub-CAS-AISE>
-**Abgabedatum:** Mai 2026
+**Abgabedatum:** 2026-07-04
 
 ---
 
@@ -15,9 +15,9 @@ Diese Datei ist die zentrale Einreichungs-Seite für die CAS-AISE-Projektarbeit.
 
 ## 1. Projektzusammenfassung
 
-**FlowHub** ist ein KI-gestützter persönlicher Eingangskorb, der Informationsschnipsel aus dem Alltag (Filmtipps, Artikel, Belege, Bookmarks, Notizen) automatisch erkennt, klassifiziert und an die passenden Self-Hosted-Services im Homelab des Benutzers weiterleitet — ohne dass der Benutzer im Moment der Erfassung entscheiden muss, wohin die Information gehört.
+**FlowHub** ist ein KI-gestützter persönlicher Eingangskorb, der Informationsschnipsel aus dem Alltag (Filmtipps, Artikel, Belege, Bookmarks, Notizen) automatisch erkennt, klassifiziert und an die passenden Ziel-Dienste des Benutzers weiterleitet — self-hosted im Homelab oder extern (z. B. Cloud-Dienste, Forge-Tracker) — ohne dass der Benutzer im Moment der Erfassung entscheiden muss, wohin die Information gehört.
 
-Das adressierte Kernbedürfnis ist **"Capture without friction"**: Statt heute fünf Schritte (Idee → App-Wahl → App öffnen → Kategorisieren → Ablegen) reduziert FlowHub die Erfassung auf einen einzigen Schritt — typischerweise eine Nachricht an einen Telegram-Bot. Die Klassifikation übernimmt ein **Skill-basiertes Routing-System** (Keywords, URL-Muster, lokales LLM als Fallback), die Ablage erfolgt in bestehende Homelab-Services wie Vikunja, paperless-ngx oder Wallabag.
+Das adressierte Kernbedürfnis ist **"Capture without friction"**: Statt heute fünf Schritte (Idee → App-Wahl → App öffnen → Kategorisieren → Ablegen) reduziert FlowHub die Erfassung auf einen einzigen Schritt — typischerweise eine Nachricht an einen Telegram-Bot. Die Klassifikation übernimmt ein **Skill-basiertes Routing-System**: ein LLM (Cloud-Provider wie OpenRouter oder ein lokales LLM) klassifiziert den Schnipsel, mit deterministischem Keyword-/URL-Muster-Matching als Fallback. Die Ablage erfolgt in bestehende Dienste — self-hosted im Homelab (z. B. Vikunja, paperless-ngx, Wallabag) ebenso wie externe Services (z. B. GitHub Issues).
 
 Technisch ist FlowHub ein **Modular Monolith in .NET 10** mit Blazor-Frontend (MudBlazor, Interactive Server) und einer hexagonalen Schichtung innerhalb der Module. Die Implementierung erfolgt inkrementell über die fünf CAS-Blöcke (Einführung, Frontend, Service, Persistence, Deployment) — jeder Block schliesst mit einer dokumentierten Nachbereitung ab, die gegen die Moodle-Bewertungskriterien selbst geprüft wird. Ein expliziter Fokus liegt auf **KI-unterstützter Entwicklung**: Skills, Agent-Instructions, Prompt-Hygiene und Reflexion über den AI-Workflow sind dokumentiert und Teil des Bewertungsumfangs.
 

@@ -2,7 +2,7 @@
 
 **Modul:** CAS AI-Assisted Software Engineering (AISE) · W4B-C-AS001 · ZH-Sa-1 · FS26
 **Projektarbeit:** FlowHub — AI-assisted personal inbox
-**Studierender:** Andreas Imboden (`freaxnx01`)
+**Studierender:** Andreas Imboden
 **Repository:** <https://github.com/freaxnx01/FlowHub-CAS-AISE>
 **Abgabe-Termin:** vor 2026-07-04 24:00
 
