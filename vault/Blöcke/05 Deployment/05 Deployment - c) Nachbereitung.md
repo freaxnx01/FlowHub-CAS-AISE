@@ -20,9 +20,14 @@ updated: 2026-06-12
 - Ich bin fähig, entsprechendes Monitoring und Observation aufzusetzen, Systeme zu überwachen und zu optimieren.
 - Ich bin in der Lage, mit Quarkus KI-gestützte Applikationen zu bauen.
 
-## Auftrag (Moodle)
+## Auftrag (Zusammenfassung)
 
-In der letzten Nachbearbeitungsphase geht es nun darum, die Lösung zu containerisieren und für den Betrieb zu verteilen. Nutzen Sie die Möglichkeit Ihrer Git-Host-Lösung, um den Deployment-Prozess weitgehend zu automatisieren. Erweitern Sie Ihre Applikation um KI-basierende Suche und Workflows. Schliessen Sie Ihre Arbeit ab und laden Sie diese als PDF hoch. Die Arbeit enthält die URL auf das Git-Repository Ihrer Lösung.
+Abschlussphase — die Lösung betriebsbereit machen und einreichen:
+
+- Die Lösung **containerisieren** und für den Betrieb verteilen.
+- Den **Deployment-Prozess** über die Git-Host-Plattform (CI/CD) weitgehend automatisieren.
+- Die Applikation um **KI-gestützte Suche und Workflows** erweitern.
+- Die Arbeit abschliessen und als **PDF** einreichen — inkl. URL auf das Git-Repository der Lösung.
 
 **Termin:** Bis zwei Wochen nach der letzten PVA — **konkret: 2026-07-04, 24:00**.
 
@@ -59,7 +64,7 @@ In der letzten Nachbearbeitungsphase geht es nun darum, die Lösung zu container
 ### Programmierung
 
 - [x] **Code lesbar/dokumentiert/strukturiert (7)** — alle Module sauber, README pro Hauptprojekt, Inline-Doku wo Why nicht obvious
-- [x] ~~Quarkus / Jakarta EE~~ — N/A (Stack: .NET 10)
+- [x] **Konzepte des gewählten Frameworks sachgerecht eingesetzt (max. 10)** — framework-neutral (Rubrik-Update Juni 2026); für .NET 10 / ASP.NET Core direkt erfüllt: DI, REST-Schnittstellen, Konfiguration, Fehlerbehandlung (`docs/spec/modern-app-concepts.md`)
 - [x] **Erkenntnisse dokumentiert (3)** — `docs/insights/` mit Block-1 bis -5 Erkenntnissen
 - [x] **Source in Git (2)** — alles auf `main` gepusht; Tag `v0.1.0` für die Abgabe-Version (Directory.Build.props ships 0.1.0; Bewertungskriterien-Item ist 0/2 binär — erreicht)
 

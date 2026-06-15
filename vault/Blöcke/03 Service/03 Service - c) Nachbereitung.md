@@ -19,15 +19,22 @@ updated: 2026-05-04
 - Ich kann mit KI flexible Microservice-Architekturen bauen.
 - Ich kann mit Spring-AI und Koog AI Agenten bauen.
 
-## Auftrag (Moodle)
+## Auftrag (Zusammenfassung)
 
-Wahrscheinlich sind Sie mit einer monolithischen oder einer einfachen Schichtenarchitektur im letzten Block gestartet, um das Frontend zu implementieren. Nun möchten wir die Services schrittweise in unabhängige Microservices auftrennen und verschiedene Technologien verwenden, diese flexibler und resilienter zu machen; resilienter — beispielsweise durch eine asynchrone Kommunikation mittels einer Queue. Wir wollen aber auch die KI selbst in den Services verwenden, um diese intelligenter zu gestalten. Nutzen Sie OpenAPI und MicroProfile REST Clients, um die Konsistenz zwischen Server und Client sicherzustellen. Am Ende dieser Nacharbeit haben Sie eine verteilte Lösung, in der Ihre Microservices fiktive oder statische Daten zurückgeben.
+- Die Service-Schicht aus Block 2 in unabhängigere, **resilientere Services** auftrennen — u. a. über **asynchrone Kommunikation** (Queue).
+- **KI in den Services** einsetzen, um sie intelligenter zu machen.
+- **Server↔Client-Konsistenz** über OpenAPI + typsichere REST-Clients sicherstellen.
+- Ergebnis: eine verteilte Lösung, deren Services (noch) fiktive/statische Daten liefern.
 
 **Termin:** Bis zur nächsten Präsenzveranstaltung (2026-05-23).
 
 **Reflexion & Auswertung:** Das Ergebnis dieser Projektarbeit ist Grundlage für den nächsten Block, wo die Lösung um die Persistenzschicht erweitert wird.
 
-> **FlowHub-Kontext:** ADR 0002 (Accepted, 2026-04-17) hält fest, dass FlowHub ein Modular Monolith bleibt. Statt physischem Service-Split wird die Auftrennung über eine **MassTransit-basierte Async-Pipeline** (Capture-Enrichment, Skill-Routing) und eine eigene **REST-API in `source/FlowHub.Api/`** für Nicht-UI-Clients realisiert. gRPC und Multi-Prozess-Deployment sind explizit out of scope. Die Lernziel-Bullets zu Spring-AI / Koog werden als Stack-neutrale Konzepte interpretiert und mit .NET-Äquivalenten (Microsoft.Extensions.AI / Semantic Kernel) abgedeckt.
+> **FlowHub-Kontext:**
+> - **Modular Monolith** (ADR 0002, Accepted 2026-04-17) — kein physischer Service-Split.
+> - Auftrennung stattdessen über die **MassTransit-Async-Pipeline** (Capture-Enrichment, Skill-Routing) + eine eigene **REST-API** (`source/FlowHub.Api/`) für Nicht-UI-Clients.
+> - **Out of scope:** gRPC, Multi-Prozess-Deployment.
+> - Spring-AI / Koog werden als stack-neutrale Konzepte interpretiert und mit .NET-Äquivalenten (Microsoft.Extensions.AI / Semantic Kernel) abgedeckt.
 
 ---
 
@@ -55,7 +62,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ### Programmierung
 
 - [x] **Code lesbar, dokumentiert, nach Layer/Modul/Sub-System strukturiert (7)** — Slice B: hexagonale Ports (`IClassifier`, `ISkillIntegration`), Pipeline-Modul, EventId-Namespacing (1000–1999 / 2000–2999), `LoggerMessage` source-gen
-- [x] ~~Quarkus / Jakarta EE / moderne Java-Konzepte~~ — N/A (Stack: .NET 10), siehe [[Bewertungskriterien]]; consciously skipped, will be noted in submission PDF
+- [x] **Konzepte des gewählten Frameworks sachgerecht eingesetzt (max. 10)** — framework-neutral (Rubrik-Update Juni 2026); für .NET 10 / ASP.NET Core direkt erfüllt: DI, REST-Schnittstellen, Konfiguration, Fehlerbehandlung (`docs/spec/modern-app-concepts.md`)
 - [x] **Erkenntnisse aus der Programmierung dokumentiert (3)** — ADR 0003, `docs/ai-usage.md` (Reflexion-Sektion mit ⚠/❌ Tabelle); CHANGELOG noch offen
 - [x] **Source in Git-Repository (2)** — `github.com/freaxnx01/FlowHub-CAS-AISE`; Slice-B-Branch `feat/block3-async-pipeline` lokal committed, Push folgt nach Final Code Review
 
@@ -70,7 +77,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 
 - [x] **KI-Werkzeug-Nutzung beschrieben (12)** ⭐ höchstgewichtetes Kriterium — `docs/ai-usage.md` (Living Doc): Tool-Stack, Workflow (brainstorming → writing-plans → SDD), generierter vs. handgeschriebener Anteil, notable Adaptationen die Subagents gefunden haben (z.B. Captive-Dependency-Trap)
 - [x] **Intelligente / flexible Services mit KI gebaut (6)** — `KeywordClassifier` (deterministische Heuristik) ✅ + `AiClassifier` (Anthropic Haiku 4.5 / OpenRouter Llama 3.1 70B via MEAI) ✅; graceful fallback bei AI-Fehlern dokumentiert (ADR 0004, EventId 3010)
-- [x] **Sub-Systeme als unabhängige Container deploybar (5)** — Sketch-Level: `docker-compose.yml` (web + rabbitmq + future api) im Repo; finale Block-5-Variante folgt
+- [x] **Module/Sub-Systeme strukturiert + als Container lauffähig (5)** — modularer Monolith (ADR 0002), als Docker-Compose-Stack lauffähig (Block-5-Stand); Rubrik-Update Juni 2026 akzeptiert den modularen Monolithen explizit
 - [x] **KI-Erfahrungen als Fazit reflektiert (7)** — Reflexion-Sektion in `docs/ai-usage.md` mit ✅ / ⚠ / ❌ Auflistung; PVA-Folien-Material noch zu destillieren
 
 ---
