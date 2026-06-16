@@ -28,12 +28,13 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
 
     public async Task<float[]?> GenerateAsync(string text, CancellationToken cancellationToken = default)
     {
-        // TEMP DEBUG (umlaut investigation) — logs the exact bytes every caller passes.
-        LogEmbedDebug(text.Length, Convert.ToHexString(System.Text.Encoding.UTF8.GetBytes(text)), text);
         try
         {
             var result = await _generator.GenerateAsync([text], _options, cancellationToken);
-            return result[0].Vector.ToArray();
+            var vec = result[0].Vector.ToArray();
+            // TEMP DEBUG (ranking investigation) — logs caller text + the output vector head.
+            LogEmbedDebug(text, string.Join(",", vec.Take(5).Select(f => f.ToString("R", System.Globalization.CultureInfo.InvariantCulture))));
+            return vec;
         }
         catch (Exception ex)
         {
@@ -47,6 +48,6 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
     private partial void LogEmbeddingFailed(Exception ex);
 
     [LoggerMessage(EventId = 6099, Level = LogLevel.Warning,
-        Message = "EMBED-DEBUG len={Len} hex={Hex} text={Text}")]
-    private partial void LogEmbedDebug(int len, string hex, string text);
+        Message = "EMBED-DEBUG text={Text} vec5={Vec5}")]
+    private partial void LogEmbedDebug(string text, string vec5);
 }
