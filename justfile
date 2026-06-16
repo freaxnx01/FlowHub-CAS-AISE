@@ -632,6 +632,15 @@ pdf-submission-bundle:
     tools/submission-bundle.sh tools/build/submission-bundle.md
     node {{pdf_renderer}} tools/build/submission-bundle.md SUBMISSION-bundle.pdf --title "FlowHub — CAS AISE Submission Bundle"
 
+# Build SUBMISSION-main.pdf — concise self-contained reading doc (Projektbeschreibung + rubric self-check)
+[group('pdf')]
+pdf-submission-main:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
+    tools/submission-main.sh tools/build/submission-main.md
+    node {{pdf_renderer}} tools/build/submission-main.md SUBMISSION-main.pdf --title "FlowHub — CAS AISE Projektarbeit (Hauptdokument)"
+
 # Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
 [group('pdf')]
 pdf-eigenstaendigkeitserklaerung:

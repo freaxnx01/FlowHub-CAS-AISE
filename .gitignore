@@ -459,6 +459,7 @@ vault/_files/weiterbildung-cas-ai-assisted-software-engineering-de.pdf
 # Submission PDF build artefacts (regenerated from SUBMISSION.md on demand)
 SUBMISSION.pdf
 SUBMISSION-bundle.pdf
+SUBMISSION-main.pdf
 tools/build/
 Eigenständigkeitserklärung.pdf
 
