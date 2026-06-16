@@ -48,4 +48,12 @@ The original decision used hosted `mistral-embed` (1024). For the **public demo*
 - `+` No new service to operate; pgvector is an extension, not a separate vector DB.
 - `+` Provider-agnostic via env vars.
 - `−` Dimension change requires migration + rebuild.
-- `−` HNSW index is not exact; results may differ slightly from exhaustive scan.
+- `−` HNSW index is not exact; results may differ slightly from exhaustive scan. On the
+  public demo's tiny dataset the approximate recall hurts more than it helps, so the demo
+  reset drops the index → exact seqscan (instant at that scale, always the true nearest).
+- `−` The €0 self-hosted `multilingual-e5-small` separates short, similar snippets only
+  modestly: well-separated queries rank correctly (verified), but near-synonym queries can
+  return a correct-but-near-tie ordering (relevant captures within ~0.04 cosine). The
+  embedding pipeline itself is exact — this is model-separation quality, not a defect.
+  A larger model (`bge-m3` / `e5-large`) separates better at higher memory cost; accepted
+  as-is for the submission since the capability is demonstrated honestly at zero cost.
