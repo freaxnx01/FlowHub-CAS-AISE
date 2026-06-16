@@ -31,10 +31,7 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
         try
         {
             var result = await _generator.GenerateAsync([text], _options, cancellationToken);
-            var vec = result[0].Vector.ToArray();
-            // TEMP DEBUG (ranking investigation) — logs caller text + the output vector head.
-            LogEmbedDebug(text, string.Join(",", vec.Take(5).Select(f => f.ToString("R", System.Globalization.CultureInfo.InvariantCulture))));
-            return vec;
+            return result[0].Vector.ToArray();
         }
         catch (Exception ex)
         {
@@ -46,8 +43,4 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
     [LoggerMessage(EventId = 6001, Level = LogLevel.Warning,
         Message = "Embedding generation failed — Capture will be stored without embedding.")]
     private partial void LogEmbeddingFailed(Exception ex);
-
-    [LoggerMessage(EventId = 6099, Level = LogLevel.Warning,
-        Message = "EMBED-DEBUG text={Text} vec5={Vec5}")]
-    private partial void LogEmbedDebug(string text, string vec5);
 }
