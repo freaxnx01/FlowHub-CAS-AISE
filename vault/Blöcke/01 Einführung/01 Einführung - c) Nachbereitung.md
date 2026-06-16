@@ -12,11 +12,11 @@ updated: 2026-05-17
 
 ## Lernziel
 
-- Ich kann ein KI-gestütztes Software-Engineering-Projekt initial aufsetzen und die wichtigsten Architekturentscheidungen begründen.
-- Ich kann Software-Architekturoptionen (Monolith, Modular Monolith, Microservices) für ein Projektszenario gegeneinander abwägen.
-- Ich kann das Tooling für KI-assistierte Entwicklung (Claude Code, IDE-Integration, Skills) für ein neues Repository einrichten.
+- Ein KI-gestütztes Software-Engineering-Projekt von Grund auf aufsetzen und die tragenden Architekturentscheidungen begründen.
+- Architekturstile (Monolith, modularer Monolith, Microservices) für ein Szenario gegeneinander abwägen und die Wahl begründen.
+- Die KI-Werkzeugkette (Claude Code, IDE-Integration, eigene Skills) für ein neues Repository einrichten.
 
-## Auftrag (Moodle)
+## Auftrag (Zusammenfassung)
 
 - Sichtung der Materialien und Ergebnisse der Präsenzveranstaltung 1
 - Projektbeschreibung verfassen (Idee, Solution Vision, fokussierte Sub-Systeme, Beispiel-Eingabedaten)
@@ -35,7 +35,7 @@ Snapshot am Ende der Block-1-Phase (~2026-03-21) gegen die offizielle Moodle-Rub
 
 > **Sektion nachträglich ergänzt (2026-05-17)** — damit das Pattern aus Block 3 / 4 / 5 auch in Block 1 / 2 vorhanden ist.
 
-> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
+> **Rubrik-Update (Juni 2026):** Programmierkriterium ist framework-neutral → für .NET direkt erfüllt, alle 100 Punkte erreichbar (`docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 

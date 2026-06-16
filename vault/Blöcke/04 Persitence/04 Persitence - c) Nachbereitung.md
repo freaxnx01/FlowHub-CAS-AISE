@@ -13,10 +13,10 @@ updated: 2026-05-06
 
 ## Lernziel
 
-- Ich kann für die jeweilige Problemstellung die geeignete Persistenzform bestimmen.
-- Ich kann mit Spezifikationen wie ORM, JPA und Alternativen den DB-Zugriff abstrahieren.
-- Ich kann dynamische Abfragen effizient programmieren.
-- Ich kann mit Quarkus Panache Datenzugriffe auf verschiedene Datenbankmodelle realisieren.
+- Die passende Persistenzform für eine gegebene Problemstellung bestimmen.
+- Den Datenbankzugriff über eine ORM-Abstraktion kapseln.
+- Dynamische Abfragen effizient und typsicher formulieren.
+- Datenzugriffe über ein ORM auf unterschiedliche Datenbankmodelle umsetzen.
 
 ## Auftrag (Zusammenfassung)
 
@@ -54,7 +54,7 @@ Die **Persistenzschicht** (dritte/letzte Schicht einer klassischen Enterprise-Ap
 
 Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[Bewertungskriterien]] für **diesen** Block durchgehen, bevor "fertig" geclaimed wird. Punkteangaben in Klammern zeigen Max-Score.
 
-> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
+> **Rubrik-Update (Juni 2026):** Programmierkriterium ist framework-neutral → für .NET direkt erfüllt, alle 100 Punkte erreichbar (`docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 

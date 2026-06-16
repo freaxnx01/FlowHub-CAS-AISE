@@ -12,14 +12,14 @@ updated: 2026-06-13
 
 ## Lernziel
 
-- Ich bin in der Lage, verschiedene Technologien und Frameworks für die Entwicklung von Web-Apps einzusetzen.
-- Ich kann die Konzepte von SSR und CSR erklären und anwenden.
-- Ich bin in der Lage, Quarkus für Web-Formulare zu nutzen.
-- Ich bin in der Lage, Unit-Tests zu generieren und Services zu testen.
+- Verschiedene Web-Frameworks und Rendering-Technologien gezielt einsetzen.
+- Server- und Client-seitiges Rendering (SSR/CSR) erklären und anwenden.
+- Ein server-seitiges Framework für Web-Formulare einsetzen.
+- KI-generierte Unit-Tests erstellen und Services damit absichern.
 
-> **Stack-Mapping (.NET statt Quarkus):** „Quarkus für Web-Formulare" → **Blazor SSR** (.NET-natives Server-Rendering; MudBlazor-Formulare mit Validierung, `MudForm` + `MudTextField`/`MudSelect`). Quarkus ist im Moodle-Auftrag nur Beispiel-Stack — die Lernziele (SSR/CSR, Web-Frameworks, Unit-Tests) sind stack-neutral und mit Blazor erfüllt.
+> **Stack-Mapping:** Server-seitiges Rendering für Web-Formulare → **Blazor SSR** (.NET-natives Server-Rendering; MudBlazor-Formulare mit Validierung, `MudForm` + `MudTextField`/`MudSelect`). Der Kurs nennt Quarkus/Qute als Beispiel-Stack — die Lernziele (SSR/CSR, Web-Frameworks, Unit-Tests) sind stack-neutral und mit Blazor erfüllt.
 
-## Auftrag (Moodle)
+## Auftrag (Zusammenfassung)
 
 - Tech-Entscheid Präsentationsschicht (CSR/SSR/Mix) + Begründung
 - Wireframes für FlowHub-Frontend
@@ -36,7 +36,7 @@ Snapshot am Ende der Block-2-Phase (~2026-04-25) gegen die offizielle Moodle-Rub
 
 > **Sektion nachträglich ergänzt (2026-05-17)** — damit das Pattern aus Block 3 / 4 / 5 auch in Block 1 / 2 vorhanden ist.
 
-> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
+> **Rubrik-Update (Juni 2026):** Programmierkriterium ist framework-neutral → für .NET direkt erfüllt, alle 100 Punkte erreichbar (`docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 

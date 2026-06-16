@@ -15,10 +15,10 @@ updated: 2026-06-12
 
 ## Lernziel
 
-- Ich bin fähig, meine Applikation zu containerisieren und in Docker und Kubernetes zu betreiben.
-- Ich kann GitHub und Copilot sowie die GitLab-Agent-Plattform einsetzen, um CI/CD-Pipelines aufzusetzen und den Deployment-Prozess zu automatisieren.
-- Ich bin fähig, entsprechendes Monitoring und Observation aufzusetzen, Systeme zu überwachen und zu optimieren.
-- Ich bin in der Lage, mit Quarkus KI-gestützte Applikationen zu bauen.
+- Die Applikation containerisieren und in Docker / Kubernetes betreiben.
+- CI/CD-Pipelines auf einer Git-Host-Plattform aufsetzen und das Deployment automatisieren.
+- Monitoring und Observability aufsetzen, um das System zu überwachen und zu optimieren.
+- KI-gestützte Applikationen bauen.
 
 ## Auftrag (Zusammenfassung)
 
@@ -47,7 +47,7 @@ Abschlussphase — die Lösung betriebsbereit machen und einreichen:
 
 ⚠️ **Hier zählt's:** Alle 18 Items aus [[Bewertungskriterien]] müssen Abgabe-fähig sein. Punkte in Klammern = Max-Score.
 
-> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
+> **Rubrik-Update (Juni 2026):** Programmierkriterium ist framework-neutral → für .NET direkt erfüllt, alle 100 Punkte erreichbar (`docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 
