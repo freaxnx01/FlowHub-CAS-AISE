@@ -100,11 +100,12 @@ GraalVM native image — a lean Alpine container isn't AOT.)
 ## D. Validierung
 
 **Q: How many tests, and what does CI actually prove?**
-A: **171** offline tests green (default suite: `Category!=AI&!=BetaSmoke&!=E2E`),
-**223** green including AI + live-service integration (E2E excluded). The different
-numbers across docs are per-block / per-filter snapshots — see the reconciliation
-table in `docs/spec/testing-strategy.md`. CI proves the offline suite; AI/E2E are
-trait-gated and run on demand.
+A: **294** offline tests green (default CI suite: `Category!=AI&!=BetaSmoke&!=E2E`),
+0 failed, 0 skipped; the suite additionally passes the trait-gated AI + live-service
+integration tests when enabled (E2E excluded). The lower numbers in the
+Nachbereitungen (31, 99, 171, 223) are earlier per-block / per-filter snapshots — see
+the reconciliation table in `docs/spec/testing-strategy.md`. CI proves the offline
+suite; AI/E2E are trait-gated and run on demand.
 
 **Q: Why Testcontainers over EF InMemory for persistence tests?**
 A: Real PostgreSQL catches what InMemory can't: pgvector queries, FK cascade
@@ -159,7 +160,7 @@ record the shift with concrete incidents (e.g. dual-provider EF trap, N+1 `.Incl
 
 **Done — earlier doc passes (shipped):** NF-table relabel, as-built §6.1 + rendered
 diagrams, XML-doc on the Core ports, removed the empty Integrations/Telegram folders,
-verified-test-run embedded (253/0/0). These already landed.
+verified-test-run embedded (294/0/0). These already landed.
 
 **Resolved by the June-2026 rubric update — no longer a gap:** the "independent
 first-party container" requirement. The rubric now accepts a **modular monolith run
