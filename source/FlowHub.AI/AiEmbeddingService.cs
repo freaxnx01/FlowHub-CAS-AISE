@@ -28,6 +28,9 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
 
     public async Task<float[]?> GenerateAsync(string text, CancellationToken cancellationToken = default)
     {
+        // TEMP DEBUG (umlaut investigation) — logs the exact bytes every caller passes.
+        _log.LogWarning("EMBED-DEBUG len={Len} hex={Hex} text={Text}",
+            text.Length, Convert.ToHexString(System.Text.Encoding.UTF8.GetBytes(text)), text);
         try
         {
             var result = await _generator.GenerateAsync([text], _options, cancellationToken);
