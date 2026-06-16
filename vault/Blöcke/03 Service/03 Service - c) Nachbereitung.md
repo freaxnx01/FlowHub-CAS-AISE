@@ -13,11 +13,11 @@ updated: 2026-05-04
 
 ## Lernziel
 
-- Ich kann Microservices- und Service-based Architekturen entwerfen.
-- Ich bin fähig, die verschiedenen Protokolle wie SOAP, REST und gRPC zu nutzen.
-- Ich kann Service-Discovery und Service-Mesh für GenAI entwickeln.
-- Ich kann mit KI flexible Microservice-Architekturen bauen.
-- Ich kann mit Spring-AI und Koog AI Agenten bauen.
+- Service- und Microservice-orientierte Architekturen entwerfen.
+- Gängige Service-Protokolle einordnen und einsetzen (z. B. REST, gRPC, SOAP).
+- Service-Discovery- und Service-Mesh-Konzepte für KI-gestützte Dienste verstehen.
+- Mit KI flexible, resiliente Service-Architekturen bauen.
+- KI-Agenten mit einem geeigneten Agent-Framework bauen.
 
 ## Auftrag (Zusammenfassung)
 
@@ -42,7 +42,7 @@ updated: 2026-05-04
 
 Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[Bewertungskriterien]] für **diesen** Block durchgehen, bevor "fertig" geclaimed wird. Punkteangaben in Klammern zeigen Max-Score (volle Erfüllung).
 
-> **Rubrik-Update Juni 2026:** Das Programmierkriterium ist jetzt framework-neutral (nicht mehr Quarkus/Jakarta-EE-spezifisch) und für FlowHub (.NET) **direkt erfüllt** — kein ausgeklammertes Item mehr, alle 100 Punkte erreichbar (siehe `vault/Organisation/Bewertungskriterien.md` + `docs/spec/modern-app-concepts.md`).
+> **Rubrik-Update (Juni 2026):** Programmierkriterium ist framework-neutral → für .NET direkt erfüllt, alle 100 Punkte erreichbar (`docs/spec/modern-app-concepts.md`).
 
 ### Spezifikation
 
