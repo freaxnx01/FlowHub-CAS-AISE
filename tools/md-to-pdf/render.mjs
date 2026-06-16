@@ -181,6 +181,33 @@ async function main() {
     } catch {
       console.error("mermaid render timed out — proceeding with whatever is rendered");
     }
+    // Guard: every ```mermaid``` block must have rendered to an <svg>. A CDN
+    // failure (mermaid.js is fetched at build time), a render timeout, or a
+    // diagram syntax error leaves the raw source in the <div class="mermaid">.
+    // Fail loudly rather than silently shipping a PDF with broken diagrams —
+    // this PDF is the self-contained submission artefact.
+    const mermaidFailures = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("div.mermaid"))
+        .map((el, i) => {
+          const svg = el.querySelector("svg");
+          const ok = !!svg && !/syntax error/i.test(svg.textContent || "");
+          return { i, ok, snippet: (el.textContent || "").trim().slice(0, 60) };
+        })
+        .filter((b) => !b.ok),
+    );
+    if (mermaidFailures.length > 0) {
+      console.error(
+        `mermaid render guard: ${mermaidFailures.length} diagram(s) did not render ` +
+          "(CDN unreachable, timeout, or syntax error):",
+      );
+      for (const f of mermaidFailures) {
+        console.error(`  - block #${f.i}: ${f.snippet}…`);
+      }
+      throw new Error(
+        "refusing to write a PDF with unrendered mermaid diagrams — " +
+          "rebuild with network access to cdn.jsdelivr.net, or fix the diagram syntax",
+      );
+    }
     await page.emulateMediaType("print");
     const printMargin = compact
       ? { top: "12mm", right: "14mm", bottom: "14mm", left: "14mm" }
