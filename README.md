@@ -22,7 +22,7 @@ Built as the project work for **CAS AI-Assisted Software Engineering (AISE)** at
 - **AI classification** — LLM classifier (Anthropic / OpenRouter via Microsoft.Extensions.AI) with keyword + URL heuristics as a graceful fallback; produces tags + a title.
 - **Skill routing** — classified captures route to *Skills* → *Integrations* (Wallabag, Vikunja); outbound payloads carry tag + URL only.
 - **Async pipeline** — MassTransit + RabbitMQ consumers (classify, enrich, embed) with per-consumer retry + dead-lettering.
-- **Semantic search** — pgvector embeddings via a **Search** UI page + `GET /api/v1/captures/search`; self-hosted `multilingual-e5-small` embedder, so it runs at €0.
+- **Semantic search** — pgvector embeddings + `GET /api/v1/captures/search` (cosine). Provider-agnostic (OpenAI-compatible); disabled on the public demo (returns 503), demonstrated via integration tests + ADR 0006.
 - **Web UI** — Blazor (MudBlazor, Interactive Server): Dashboard, Captures list/detail, New Capture, Skills, Integrations.
 - **Persistence** — PostgreSQL + EF Core 10; migrations run as a separate init container (12-Factor XII).
 - **Ops & security** — `/health/*`, `/metrics` (Prometheus) + Grafana, OpenTelemetry, Serilog → stdout; OIDC (Authentik) or dev/demo auth; AI-transparency posture (EU AI Act).

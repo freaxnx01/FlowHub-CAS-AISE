@@ -115,7 +115,7 @@ Abschlussphase — die Lösung betriebsbereit machen und einreichen:
 
 - [x] ADR 0006 — KI-Suche (Embeddings-Provider, pgvector vs. eigener Vector-Store, Index-Strategie)
 - [x] Embedding-Pipeline: Capture (Title + Body) → Embedding → Persistenz
-- [x] Such-Endpoint: `GET /api/v1/captures/search?q=…` (vector-only, pgvector-Cosine) **+ Such-UI** (`/search`-Seite) — **live in der Public-Demo** über einen selbst-gehosteten Embedder (`multilingual-e5-small`, 384-dim, OpenAI-kompatibel, €0; `mistral-embed`@1024 als dokumentierter Swap, ADR 0006). Hybrid-Match (full-text + `tsvector` + Vector) deferred; FluentAssertions-Integration-Tests + `tests/FlowHub.Api.IntegrationTests/SearchEndpointTests.cs`.
+- [x] Such-Endpoint: `GET /api/v1/captures/search?q=…` (vector-only, pgvector-Cosine) — Provider-agnostisch (OpenAI-kompatibel; `mistral-embed`@1024 oder self-hosted `multilingual-e5-small`@384, ADR 0006). Auf der Public-Demo **deaktiviert** (503, transparent); per FluentAssertions-Integration-Tests nachgewiesen (`tests/FlowHub.Api.IntegrationTests/SearchEndpointTests.cs`). Hybrid-Match (full-text + `tsvector` + Vector) deferred.
 - [x] KI-Workflow-Beispiel: **automatisches Skill-Routing via Klassifikation** (`AiClassifier` → `MatchedSkill` → `SkillRoutingConsumer` → `ISkillIntegration`) ist der eingebaute KI-Workflow. Embedding-Cluster-Routing und LLM-Tag-Suggestions sind in docs/project/ROADMAP.md ("Capture Enrichment") als post-CAS-Erweiterung skizziert.
 
 ### Monitoring / Observability

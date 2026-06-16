@@ -39,21 +39,28 @@ To switch to hosted Mistral `mistral-embed` (1024 dims):
 
 (Same recipe for OpenAI `text-embedding-3-*`: set its base URL/model and the matching `vector(N)` migration.) OpenRouter and Anthropic are **not supported** for embeddings — neither exposes an embeddings API.
 
-## Amendment 2026-06-15 — self-hosted default
+## Amendment 2026-06-15/16 — self-hosted embedder trialled on the demo, then rolled back
 
-The original decision used hosted `mistral-embed` (1024). For the **public demo** that meant either a paid API key or a disabled feature (503 on `/search`). Switched the default to a **self-hosted `multilingual-e5-small`** (384-dim) served by HF text-embeddings-inference: €0, no external dependency, multilingual (the demo carries German *Zitate*), and a better fit for the self-hosting/privacy narrative. The column is now `vector(384)` (migration `0013`); `mistral-embed` @ 1024 stays a one-migration swap. The feature is surfaced via a **Search** UI page and is live on the demo.
+The column was migrated to `vector(384)` (migration `0013`) and a **self-hosted
+`multilingual-e5-small`** (HF text-embeddings-inference, €0) was wired into the public demo,
+with a web Search UI, to make the feature demonstrable live. It was **rolled back** (2026-06-16):
+on the tiny demo dataset `multilingual-e5-small` separated short, similar snippets only modestly
+(near-synonym queries returned correct-but-near-tie orderings), the web Search UI behaved
+inconsistently, and the embedder cost ~1 GB on a shared VPS — not worth it.
+
+**Current state:** the column stays `vector(384)`; the endpoint + pgvector + admin-rebuild +
+integration tests remain as the deliverable. Embeddings are **disabled on the public demo**
+(`/search` returns 503, transparent). Any OpenAI-compatible embedder enables it — `mistral-embed`
+needs a one-migration swap back to `vector(1024)`; a 384-dim provider needs no migration. The
+embedding pipeline is exact; ranking quality is bounded by the chosen model (`bge-m3` / `e5-large`
+separate better at higher memory cost).
 
 ## Consequences
 
 - `+` No new service to operate; pgvector is an extension, not a separate vector DB.
-- `+` Provider-agnostic via env vars.
+- `+` Provider-agnostic via env vars; no embedder required to ship the code/tests.
 - `−` Dimension change requires migration + rebuild.
-- `−` HNSW index is not exact; results may differ slightly from exhaustive scan. On the
-  public demo's tiny dataset the approximate recall hurts more than it helps, so the demo
-  reset drops the index → exact seqscan (instant at that scale, always the true nearest).
-- `−` The €0 self-hosted `multilingual-e5-small` separates short, similar snippets only
-  modestly: well-separated queries rank correctly (verified), but near-synonym queries can
-  return a correct-but-near-tie ordering (relevant captures within ~0.04 cosine). The
-  embedding pipeline itself is exact — this is model-separation quality, not a defect.
-  A larger model (`bge-m3` / `e5-large`) separates better at higher memory cost; accepted
-  as-is for the submission since the capability is demonstrated honestly at zero cost.
+- `−` HNSW index is not exact; results may differ slightly from exhaustive scan — at small
+  scale exact seqscan is both faster and more correct.
+- `−` Ranking quality is bounded by the embedding model; small models give near-tie
+  orderings on short, similar texts. This is model-separation quality, not a pipeline defect.
