@@ -29,8 +29,7 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
     public async Task<float[]?> GenerateAsync(string text, CancellationToken cancellationToken = default)
     {
         // TEMP DEBUG (umlaut investigation) — logs the exact bytes every caller passes.
-        _log.LogWarning("EMBED-DEBUG len={Len} hex={Hex} text={Text}",
-            text.Length, Convert.ToHexString(System.Text.Encoding.UTF8.GetBytes(text)), text);
+        LogEmbedDebug(text.Length, Convert.ToHexString(System.Text.Encoding.UTF8.GetBytes(text)), text);
         try
         {
             var result = await _generator.GenerateAsync([text], _options, cancellationToken);
@@ -46,4 +45,8 @@ public sealed partial class AiEmbeddingService : IEmbeddingService
     [LoggerMessage(EventId = 6001, Level = LogLevel.Warning,
         Message = "Embedding generation failed — Capture will be stored without embedding.")]
     private partial void LogEmbeddingFailed(Exception ex);
+
+    [LoggerMessage(EventId = 6099, Level = LogLevel.Warning,
+        Message = "EMBED-DEBUG len={Len} hex={Hex} text={Text}")]
+    private partial void LogEmbedDebug(int len, string hex, string text);
 }
