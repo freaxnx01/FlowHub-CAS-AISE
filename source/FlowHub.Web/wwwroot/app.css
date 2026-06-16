@@ -41,12 +41,27 @@
 .mud-appbar .mud-chip.mud-chip-text.mud-chip-color-inherit {
     color: #fff;
     background-color: rgba(255, 255, 255, 0.14);
-    min-height: 36px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    min-height: 34px;
     cursor: pointer;
 }
 
 .mud-appbar .mud-chip.mud-chip-text.mud-chip-color-inherit:hover {
     background-color: rgba(255, 255, 255, 0.26);
+}
+
+/* The demo app bar carries TWO rows (Quick-Capture input + the "Try:" chips). The
+   default 64px bar can't fit them once the chips are a comfortable click target — the
+   input row gets pushed out of view. Grow the bar to fit, and bump the main-content top
+   offset to match so page content isn't hidden under the taller fixed bar. Scoped with
+   :has() to only when chips are present (demo mode) — the non-demo bar stays 64px. */
+.mud-appbar.mud-appbar-fixed-top:has(.mud-chip) {
+    height: 96px;
+}
+
+.mud-appbar.mud-appbar-fixed-top:has(.mud-chip) .mud-toolbar-appbar {
+    min-height: 96px;
+}
+
+.mud-layout:has(.mud-appbar .mud-chip) .mud-main-content {
+    padding-top: 96px !important;
 }
