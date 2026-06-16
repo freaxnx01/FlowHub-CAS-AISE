@@ -8,8 +8,9 @@
 //     built-in markdown preview that the extension wraps.
 //   - github-markdown-css — standard GitHub markdown stylesheet (light mode).
 //   - highlight.js — syntax highlighting (extension's default).
-//   - mermaid-isomorphic — pre-render mermaid diagrams to inline SVG so
-//     they survive Chromium's print pipeline.
+//   - mermaid — diagrams render client-side in the headless browser; the
+//     package is vendored locally and served via request interception, so
+//     rendering works offline and survives Chromium's print pipeline.
 //   - puppeteer — headless Chromium, identical mechanism the extension uses.
 //
 // Usage:
@@ -174,10 +175,42 @@ async function main() {
   });
   try {
     const page = await browser.newPage();
+    // Serve mermaid.js (and its lazily-loaded diagram chunks) from the locally
+    // vendored package instead of the CDN, so diagram rendering works fully
+    // offline and can't be broken by CDN/egress issues at build time. The page
+    // still `import`s the jsdelivr URL (see wrapHtml); we intercept and fulfil it
+    // from node_modules/mermaid/dist, which keeps the relative chunk imports
+    // resolving to the same intercepted base.
+    const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/";
+    const mermaidDist = path.join(__dirname, "node_modules", "mermaid", "dist");
+    await page.setRequestInterception(true);
+    page.on("request", async (req) => {
+      const url = req.url();
+      if (url.startsWith(MERMAID_CDN)) {
+        try {
+          const rel = url.slice(MERMAID_CDN.length).split("?")[0];
+          const body = await fs.readFile(path.join(mermaidDist, rel));
+          // The setContent page has a `null` origin, so the cross-origin module
+          // fetch needs CORS headers (the real jsdelivr sends `*`).
+          await req.respond({
+            status: 200,
+            contentType: "text/javascript",
+            headers: { "Access-Control-Allow-Origin": "*" },
+            body,
+          });
+        } catch (e) {
+          console.error(`failed to serve vendored mermaid asset (${url}): ${e.message}`);
+          await req.abort();
+        }
+        return;
+      }
+      await req.continue();
+    });
     await page.setContent(fullHtml, { waitUntil: "networkidle0" });
-    // Wait for client-side mermaid render to finish (or skip after 15s).
+    // Wait for client-side mermaid render to finish (rendering is offline via the
+    // vendored package, so this is fast; the timeout only bounds a genuine hang).
     try {
-      await page.waitForFunction("window.__mermaidDone === true", { timeout: 15_000 });
+      await page.waitForFunction("window.__mermaidDone === true", { timeout: 30_000 });
     } catch {
       console.error("mermaid render timed out — proceeding with whatever is rendered");
     }
@@ -217,6 +250,12 @@ async function main() {
       format: "A4",
       margin: printMargin,
       printBackground: true,
+      // Generate a navigable bookmark outline from the heading structure (h1–h6)
+      // so large documents like the submission bundle (~280pp) are usable in any
+      // PDF reader's sidebar, offline. `outline` is derived from the tagged-PDF
+      // tag tree, so `tagged` must be enabled too.
+      tagged: true,
+      outline: true,
       displayHeaderFooter: true,
       headerTemplate: "<span></span>",
       footerTemplate:

@@ -50,7 +50,6 @@ FILES=(
   "3|Sequenz — Capture-Enrichment|docs/design/sequences/capture-enrichment.md"
   "3|Sequenz — Skill-Routing|docs/design/sequences/skill-routing.md"
   "3|Sequenz — Skill-Routing (Hot Path)|docs/design/sequences/skill-routing-hot-path.md"
-  "2|Design — User Journeys|docs/design/journeys.md"
 
   "1|AI usage|docs/ai-usage.md"
   "1|Learnings (personal)|vault/Projektarbeit/Learnings.md"
@@ -61,18 +60,17 @@ FILES=(
   "1|Block 4 — Nachbereitung|vault/Blöcke/04 Persitence/04 Persitence - c) Nachbereitung.md"
   "1|Block 5 — Nachbereitung|vault/Blöcke/05 Deployment/05 Deployment - c) Nachbereitung.md"
 
-  "1|Per-block insights|docs/insights/block-1.md"
-  "2|Block 2 — insights|docs/insights/block-2.md"
-  "2|Block 3 — insights|docs/insights/block-3.md"
-  "2|Block 4 — insights|docs/insights/block-4.md"
-  "2|Block 5 — insights|docs/insights/block-5.md"
-
   "1|Operations — CI/CD|docs/ci-cd.md"
-  "2|Runbook — Authentik OIDC setup|docs/runbooks/authentik-oidc-setup.md"
-  "2|Runbook — Beta-MVP acceptance (Block 4 milestone, historical)|docs/runbooks/beta-mvp-acceptance.md"
-  "2|Runbook — Public demo|docs/runbooks/public-demo.md"
-  "2|Runbook — Test services|docs/runbooks/test-services.md"
 
+  # --- Intentionally NOT inlined (still on GitHub; trimmed to keep the bundle < 300pp) ---
+  # Per-block insights (docs/insights/block-1..5.md): the per-block reflection is already
+  #   covered by the vault Block Nachbereitungen above (which also carry the rubric
+  #   self-checks). Kept on GitHub to avoid a duplicate reflection track in the bundle.
+  # User Journeys (docs/design/journeys.md): behaviour is covered by Use Cases +
+  #   sequence diagrams + perspectives; the journeys doc is a design extra.
+  # Runbooks (docs/runbooks/*.md): operational how-tos (Authentik OIDC, beta-MVP
+  #   acceptance [historical], public demo, test services) — not graded evidence.
+  #
   # Grading rubric intentionally NOT inlined — vault/Organisation/Bewertungskriterien.md
   # is the verbatim Moodle Bewertungskriterien (FFHS / instructor IP) and must not ship
   # in the public submission bundle.
