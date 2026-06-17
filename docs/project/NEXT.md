@@ -1,6 +1,6 @@
 # Next Session Prompt
 
-> **2026-05-16 update — see top of file.** The block snapshot below ("submission-ready on paper", 171 tests, `v1.0.0` plan, 2026-07-06 deadline) is **superseded**. Submission tag is now `v0.1.0`, deadline is **2026-07-04 24:00**, total test count is **234**, and the SUBMISSION-document side (TOC, Fazit, NfA SMART, ACs, ER, Hilfsmittelverzeichnis, Eigenständigkeitserklärung, README) has been overhauled — the docs PR is on branch `worktree-doc`, step 1 (operator tooling + README + build pipeline) already merged via commit `07c43ad`. Keep this header section authoritative; the legacy snapshot below is kept for traceability only.
+> **2026-05-16 update — see top of file.** The block snapshot below ("submission-ready on paper", 171 tests, `v1.0.0` plan, 2026-07-06 deadline) is **superseded**. Submission tag is now `v0.1.0`, deadline is **2026-07-04 24:00**, total test count is **294**, and the SUBMISSION-document side (TOC, Fazit, NfA SMART, ACs, ER, Hilfsmittelverzeichnis, Eigenständigkeitserklärung, README) has been overhauled — the docs PR is on branch `worktree-doc`, step 1 (operator tooling + README + build pipeline) already merged via commit `07c43ad`. Keep this header section authoritative; the legacy snapshot below is kept for traceability only.
 
 ---
 
