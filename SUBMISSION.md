@@ -37,6 +37,10 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 
 ## 3. Inhaltsverzeichnis der Abgabe-Artefakte
 
+> 📄 **[Dokumentenübersicht](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/submission/dokumentenuebersicht.md)** — kompakte Tabelle aller Dokumente (Upload-Set + Repository-Artefakte) mit Kurzbeschreibung.
+>
+> **In Moodle hochgeladen (5 Dateien):** diese Einreichungsseite · [Arc42 (as built)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.pdf) · [Reflexion](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.pdf) · [Präsentation](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · Eigenständigkeitserklärung.
+
 ### 3.1 Projektbeschreibung & Architektur
 
 - [Projektbeschreibung v4 (Markdown)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md) — aktueller Stand: Vision, Stakeholder, Funktionsumfang, Architektur
@@ -101,6 +105,7 @@ Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Pr
 ### 3.5 Projektarbeit & Reflexion
 
 - [**Reflexion — KI-gestützte Entwicklung** — Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.md) · [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.pdf) — **Reflexions-Hauptdokument**: Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit
+- [**Präsentation** (PDF)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) — **Abgabe-Foliensatz**: Teil 1 Produkt, Teil 2 Bauen mit KI
 - [Idee FlowHub](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Idee%20FlowHub.md) — Konzept-Notizen
 - [Dev](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Dev.md) — Entwicklungsnotizen
 - [Skills](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Skills.md) — Skill-System
