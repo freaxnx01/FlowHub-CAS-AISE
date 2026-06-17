@@ -9,7 +9,7 @@
 
 ## Hinweis zum Aufbau dieses Dokuments
 
-Diese Datei (`FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie beginnt mit der Dokumentenübersicht und enthält danach eine kurze Projektzusammenfassung sowie ein klickbares Inhaltsverzeichnis aller Artefakte. Die vollständigen Inhalte liegen im verlinkten GitHub-Repository; sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar.
+Diese Datei (`00-FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie beginnt mit der Dokumentenübersicht und enthält danach eine kurze Projektzusammenfassung sowie ein klickbares Inhaltsverzeichnis aller Artefakte. Die vollständigen Inhalte liegen im verlinkten GitHub-Repository; sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar.
 
 ---
 
@@ -19,11 +19,11 @@ Diese Datei (`FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie b
 
 | # | Dokument | Seiten | Inhalt |
 |---|---|---:|---|
-| 1 | **FlowHub_Uebersicht** *(diese Datei)* | 8 | Einstieg: Dokumentenübersicht + Projektzusammenfassung + klickbares Inhaltsverzeichnis |
-| 2 | **FlowHub_Arc42_v2** — Architektur (as built) | 24 | 12 arc42-Kapitel, 9 Diagramme (System-Kontext, Bausteine, Lebenszyklus, Sequenzen, ER) |
-| 3 | **FlowHub_Reflexion** | 7 | KI-Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit |
-| 4 | **flowhub-praesentation** | 18 | Foliensatz: Teil 1 Produkt, Teil 2 Bauen mit KI |
-| 5 | **Eigenständigkeitserklärung** | 2 | Hilfsmittelverzeichnis + unterschriebene Erklärung |
+| 0 | **`00-FlowHub_Uebersicht.pdf`** *(diese Datei)* | 8 | Einstieg: Dokumentenübersicht + Projektzusammenfassung + klickbares Inhaltsverzeichnis |
+| 1 | **`01-FlowHub_Arc42.pdf`** — Architektur (as built) | 24 | 12 arc42-Kapitel, 9 Diagramme (System-Kontext, Bausteine, Lebenszyklus, Sequenzen, ER) |
+| 2 | **`02-FlowHub_Reflexion.pdf`** | 7 | KI-Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit |
+| 3 | **`03-FlowHub_Praesentation.pdf`** | 18 | Foliensatz: Teil 1 Produkt, Teil 2 Bauen mit KI |
+| 4 | **`04-FlowHub_Eigenstaendigkeitserklaerung.pdf`** | 2 | Hilfsmittelverzeichnis + unterschriebene Erklärung |
 
 ### Weitere Dokumente im Repository (verlinkt, nicht separat hochgeladen)
 

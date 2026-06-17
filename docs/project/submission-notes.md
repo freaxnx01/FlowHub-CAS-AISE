@@ -107,10 +107,12 @@ The signature applies to the **separate `Eigenständigkeitserklärung.pdf`**. Pi
 
 ### F — Upload to Moodle (T-0, before 2026-07-04 24:00)
 
+- [ ] Run `just package-submission` → assembles the numbered set into `./upload/`:
+      `00-FlowHub_Uebersicht.pdf` · `01-FlowHub_Arc42.pdf` · `02-FlowHub_Reflexion.pdf` ·
+      `03-FlowHub_Praesentation.pdf` · `04-FlowHub_Eigenstaendigkeitserklaerung.pdf`
+- [ ] **Sign** `04-FlowHub_Eigenstaendigkeitserklaerung.pdf` (overwrite in `./upload/`)
 - [ ] Log into FFHS Moodle → *PVA FS26 → Deployment & Abgabe Projektarbeit*
-- [ ] Upload the **5 files**: `FlowHub_Uebersicht.pdf` · `FlowHub_Arc42_v2.pdf` ·
-      `FlowHub_Reflexion.pdf` · `flowhub-praesentation.pdf` ·
-      `Eigenständigkeitserklärung.pdf` (**signed**)
+- [ ] Upload the **5 files** from `./upload/` (the `00–04` prefixes keep them in reading order)
 - [ ] Confirm — Moodle shows all 5 files and a submission timestamp
 - [ ] Screenshot the confirmation (fallback proof)
 
@@ -124,10 +126,8 @@ The signature applies to the **separate `Eigenständigkeitserklärung.pdf`**. Pi
 ### Pre-flight quick check
 
 ```bash
-just build && just test && \
-  just pdf-submission && just pdf-arc42 && just pdf-reflexion && \
-  just pdf-eigenstaendigkeitserklaerung && \
-  echo "Pre-flight OK — sign Eigenständigkeitserklärung.pdf, then upload the 5 files"
+just build && just test && just package-submission && \
+  echo "Pre-flight OK — sign ./upload/04-*.pdf, then upload all 5 from ./upload/"
 ```
 
 ## Outputs are gitignored (or tracked)
