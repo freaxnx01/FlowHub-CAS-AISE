@@ -615,6 +615,22 @@ pdf-projektbeschreibung:
     if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
     node {{pdf_renderer}} {{projbeschr_md}} {{projbeschr_pdf}} --title "FlowHub – Projektbeschreibung"
 
+# Regenerate the as-built Arc42 architecture document PDF
+[group('pdf')]
+pdf-arc42:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
+    node {{pdf_renderer}} docs/architektur/FlowHub_Arc42_v2.md docs/architektur/FlowHub_Arc42_v2.pdf --title "FlowHub – Arc42 (as built)"
+
+# Regenerate the KI-Reflexion document PDF
+[group('pdf')]
+pdf-reflexion:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
+    node {{pdf_renderer}} docs/reflexion/FlowHub_Reflexion.md docs/reflexion/FlowHub_Reflexion.pdf --title "FlowHub – Reflexion"
+
 # Render SUBMISSION.md → SUBMISSION.pdf (hub PDF — links into the GitHub main branch)
 [group('pdf')]
 pdf-submission:
