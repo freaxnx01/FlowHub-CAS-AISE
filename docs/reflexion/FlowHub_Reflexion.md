@@ -40,10 +40,19 @@ gemacht.
 | 4 — Persistence | Sonnet als Default, Haiku für Mechanik; Per-Task-Quality-Review zugunsten einer Branch-Review am Slice-Ende fallen gelassen — ca. 60 % Token-Burn reduziert ohne Qualitätsverlust. |
 | 5 — Deployment | `/ultrareview` und rubrik-gegroundetes `cas-aise-grade-self-check` ergänzt; jede Block-Abschluss-Prüfung läuft durch die Skill. |
 
-Bis Block 5 verantworten Implementer-Subagents ganze Slices end-to-end. Die
-menschliche Arbeit konzentriert sich an zwei Stellen: **Spec** (wo Verträge
-festgenagelt werden) und **Review** (wo System-Invarianten geprüft werden). Der
-Engpass wandert vom Tippen zu diesen beiden Punkten.
+*Subagent-Driven Development (SDD)* bezeichnet das hier verwendete Muster: ein
+Plan wird in kleine, wohldefinierte Tasks zerlegt, jeder Task von einem
+isolierten Implementer-Subagent umgesetzt, während **getrennte** Subagents
+Spezifikation und Code-Qualität prüfen.
+
+Bis Block 5 verantworten solche Implementer-Subagents ganze Slices end-to-end.
+Die menschliche Arbeit konzentriert sich dadurch auf zwei Stellen: **Spec** (wo
+die Verträge festgelegt werden) und **Review** (wo die System-Invarianten geprüft
+werden). Anders gesagt: Sobald die KI das Implementieren übernimmt, ist nicht mehr
+die Tipp- bzw. Implementierungsgeschwindigkeit der begrenzende Faktor, sondern die
+Qualität von Spezifikation und Review. Der **Engpass** des Projekts — die Stelle,
+die das Tempo bestimmt — verschiebt sich also vom Code-Schreiben hin zu diesen
+beiden Tätigkeiten.
 
 ---
 
@@ -68,9 +77,12 @@ Engpass wandert vom Tippen zu diesen beiden Punkten.
    Strukturen, in denen der 90 %-korrekte AI-Erstwurf reale Zeit spart.
    Architektur-Entscheidungen (hexagonaler Split, In-Process vs. RabbitMQ)
    bleiben beim Menschen; die KI listet Alternativen, sie wählt nicht.
-5. **Korrektur-Geschichten sind die Rubrik-Evidenz, die zählt.** „KI produzierte
-   X, Smoke fing Y, Fix landete in Commit Z" schliesst einen nachvollziehbaren
-   Loop — pauschale „KI hat geholfen"-Aussagen nicht.
+5. **Konkrete Korrektur-Geschichten sind die überzeugendste Evidenz für den
+   KI-Einsatz.** Eine nachvollziehbare Kette — *die KI erzeugte Code X, der
+   Smoke-Test fand den Fehler Y, der Fix landete in Commit Z* — macht den
+   KI-gestützten Workflow überprüfbar (Defekt, fixender Commit, Lehre sind
+   verlinkt). Pauschale Aussagen wie „die KI hat geholfen" leisten das nicht und
+   sind für eine Bewertung wertlos.
 
 ---
 
@@ -120,9 +132,11 @@ Arbeitsweisen:
   schreiben und gezielt mit `Read`/`grep` lesen, statt ganze Streams ins
   Kontextfenster zu kippen — subjektiv Faktor 5–10 weniger Token pro
   Debug-Session.
-- **Code-Exploration bewusst eskalieren.** Erst `rg`; wenn drei Suchanläufe
-  nichts liefern, ist die Frage semantisch (LSP / semantische Suche), nicht
-  lexikalisch.
+- **Code-Exploration bewusst eskalieren.** Erst `rg` (ripgrep, schnelle
+  Text-Suche); wenn drei Suchanläufe nichts liefern, ist die Frage semantisch und
+  kein reines Text-Matching. Dann helfen ein **LSP** (Language Server Protocol —
+  löst Symbole, Referenzen und Definitionen auf, statt nur Textstellen zu finden)
+  oder semantische Such-Tools.
 - **Spec → Plan → Implement mit harten `/clear`-Schnitten.** Jede Phase
   produziert ein Artefakt auf Disk, das die nächste Phase als reinen Input
   zurückliest; der vorherige Dialog wird verworfen. Das ist die strukturelle
@@ -141,29 +155,41 @@ Arbeitsweisen:
 - **Ein `just smoke`-Rezept pro Block, nicht nur Block 5.** Ein einfaches Smoke
   (App booten, Feature-Pfad curlen) hätte mindestens drei der fünf späten Bugs
   früher gefangen.
-- **Mechanische Patterns ins Plan-Template kodifizieren** (`InternalsVisibleTo`,
-  EF-Core-Test-Host) — einmal ausgeschrieben verschwindet die Friktion.
+- **Mechanische Patterns ins Plan-Template kodifizieren.** Beispiel
+  `InternalsVisibleTo`: ein .NET-Attribut, das einem Test-Projekt Zugriff auf die
+  `internal`-Typen des Produktiv-Projekts gibt, ohne diese öffentlich (`public`)
+  zu machen — die Domänen-Entities bleiben gekapselt und sind trotzdem testbar.
+  Implementer-Subagents weiteten bei Compile-Fehlern stattdessen oft reflexartig
+  die Sichtbarkeit auf `public` aus; einmal im Plan-Template ausgeschrieben
+  (ebenso das EF-Core-Test-Host-Setup), verschwindet diese Friktion.
 
 ---
 
 ## 7. Hat die Ausgangshypothese gestimmt?
 
-Die Block-1-Annahme war: Claude ist „ein schneller Tipper mit guter
-Library-Kenntnis" — nützlich für Boilerplate, suspekt bei Architektur, im Kern
-ein Produktivitäts-Multiplikator und keine Workflow-Änderung. Bis Block 5 ist das
-in **beide** Richtungen weit daneben.
+Die Hypothese zu Projektbeginn (Block 1) lautete: Claude sei „ein schneller
+Tipper mit guter Library-Kenntnis" — also nützlich für Boilerplate, fragwürdig
+bei Architektur, und insgesamt ein Produktivitäts-Multiplikator, der den Workflow
+aber nicht grundlegend verändert. Bis Block 5 erwies sich diese Annahme in
+**beiden** Punkten als falsch — und zwar in entgegengesetzte Richtungen.
 
-**Boilerplate ist schneller als erwartet.** Der 95 %+ AI-drafted-Anteil im
-Produktionscode heisst nicht „KI hat 95 % der Arbeit gemacht" — die 5 %
-Mensch-Input konzentrieren sich auf High-Judgment-Punkte (Scope, Verträge,
-Trade-offs). Das eigentliche Tippen ist ein kleiner Bruchteil der Zeit.
+**Beim Boilerplate wurde die KI unterschätzt.** Über 95 % des Produktionscodes
+sind KI-erstellt. Das heisst aber nicht „die KI hat 95 % der Arbeit gemacht": die
+verbleibenden ~5 % menschlicher Anteil verlagern sich fast vollständig auf
+Entscheidungen mit hohem Urteilsbedarf — Scope, Verträge, Trade-offs. Das reine
+Tippen ist nur noch ein kleiner Bruchteil der aufgewendeten Zeit.
 
-**Architektur ist gefährlicher als erwartet.** Der Embedding-on-Submit-Fall ist
-ein Ein-Absatz-Rewrite, der im Nachhinein offensichtlich ist: lokal korrekter
-Code, der eine System-Invariante brach, den ein Single-Pass-Review ausgeliefert
-hätte. Die menschliche Rolle an der Architektur-Grenze ist nicht geschrumpft, sie
-ist **gewachsen** — weil der Agent genug Code schnell genug produziert, dass nur
-noch der Filter an Design und Review zählt.
+**Bei der Architektur wurde dagegen die menschliche Rolle unterschätzt.** Der
+Embedding-on-Submit-Fall (Kapitel 4) zeigt es: lokal korrekter, plausibel
+aussehender Code, der eine System-Invariante — das Submit-Latenz-Budget —
+verletzte und ein oberflächliches Single-Pass-Review passiert hätte. Solche
+Fehler produziert die KI schneller, als ein flüchtiges Review sie fangen kann.
+Die menschliche Rolle an der Architektur-Grenze ist deshalb nicht geschrumpft,
+sondern **gewachsen**: Gerade weil der Agent genug korrekten Code schnell genug
+liefert, wird der entscheidende menschliche Beitrag der **Filter** aus Design und
+Review.
+
+Beide Beobachtungen zeigen in dieselbe Richtung und führen direkt zum Fazit.
 
 ---
 
