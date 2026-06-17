@@ -231,16 +231,31 @@ nichts geht in main ohne zwei Reviews. Diese Struktur hält die KI auf Kurs."
 - `/flowhub-capture · -triage · -issue` — das Produkt selbst bedienen
 - `examiner-sim` · `cas-aise-grade-self-check` — **Selbstbewertung** gegen die Moodle-Rubrik
 
-**Obsidian-Vault als 2nd Brain** (`vault/`, Markdown) — les- **und** schreibbarer Kontextspeicher: der Agent **liest** (CAS-Kontext, Entscheidungen) und **schreibt** (Nachbereitungen, Notizen, Learnings). Markdown = menschen- *und* LLM-lesbar, git-/diff-fähig, ohne Export-Schicht.
-
 <!--
-[~45 s] Steuerung statt Zuruf.
+[~40 s] Steuerung statt Zuruf.
 "Damit die KI nicht bei null anfängt: ein eigenes ai-instructions-Repo – stack-agnostischer
 Kern plus .NET-Blazor-Overlay mit Coding Guidelines, SemVer, Conventional Commits, TDD als
 festen Regeln, aus denen sich das CLAUDE.md ableitet. Plus eigene Skills als Slash-Commands:
-der UI-Workflow, Commands fürs Produkt, und ein Skill zur Selbstbewertung gegen die Rubrik.
-Und drittens der Obsidian-Vault als zweites Gehirn: reine Markdown-Dateien, die die KI als
-Kontext liest und selbst wieder beschreibt – Mensch und Agent teilen sich dieselbe Wissensbasis."
+der UI-Workflow, Commands fürs Produkt, und ein Skill zur Selbstbewertung gegen die Rubrik."
+-->
+
+---
+
+## Obsidian-Vault als **2nd Brain**
+
+`vault/` — reine **Markdown**-Dateien als gemeinsamer Wissensspeicher von Mensch **und** Agent:
+
+- Der Agent **liest** Kontext — CAS-Scope, Block-Inhalte, Entscheidungen
+- … und **schreibt** zurück — Nachbereitungen, Knowledge-Notizen, Learnings
+- **Markdown**: menschen- *und* LLM-lesbar, git-/diff-fähig — keine Export-/API-Schicht
+- Konventionen in `vault/CLAUDE.md` — Tags (`claude-generated`/`-updated`), Auto-Commit
+
+<!--
+[~30 s] Das zweite Gehirn.
+"Der Obsidian-Vault ist reines Markdown – gleichzeitig für mich und für die KI lesbar.
+Der Agent zieht sich daraus den Kontext (CAS-Stoff, Entscheidungen) und schreibt selbst
+wieder rein: Block-Nachbereitungen, Notizen, Learnings. Mensch und Agent teilen sich
+dieselbe Wissensbasis – kein Export, keine API dazwischen, alles versioniert in git."
 -->
 
 ---
