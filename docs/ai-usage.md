@@ -10,6 +10,7 @@
 | Claude Sonnet 4.6 (subagents) | Implementer + spec reviewer + code-quality reviewer subagents under the superpowers SDD workflow | All `source/` and `tests/` changes from Block 3 Slice B |
 | GitHub Copilot | Inline suggestions during editing | Sparingly — Claude Code drives sessions end-to-end |
 | ChatGPT | Ad-hoc concept clarification, side checks | Only when Claude is mid-task on something else |
+| Obsidian vault (Markdown) | "2nd brain" — persistent context store the agent **reads** (CAS scope, block content, decisions) and **writes** (Nachbereitungen, knowledge notes, Learnings) | `vault/`; conventions + auto-commit in `vault/CLAUDE.md` |
 
 ## Workflow used in Block 3
 

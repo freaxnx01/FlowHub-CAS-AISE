@@ -411,6 +411,26 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 
 ---
 
+## Terminzettel → Calendar — a photo of an appointment slip becomes a calendar event
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** You're handed a paper appointment slip (Arzt, Amt, Coiffeur) and have to retype it into your calendar by hand — exactly the friction FlowHub exists to remove. Snap a photo as a Capture; a Skill reads the slip and creates the event in **Google Calendar**, no manual entry.
+
+### Proposed shape
+
+1. **Image capture** — the Capture is a photo (camera / share-target / upload), reusing the image path already prepped for the paperless-ngx integration.
+2. **Vision extraction** — a vision-capable model (MEAI multimodal `CompleteAsync<T>`) or OCR extracts a typed `Appointment` DTO (title, start/end, location, notes) via JSON-schema structured output (ADR 0004).
+3. **Skill → Google Calendar** — a new `ISkillIntegration` creates the event via the Google Calendar API (OAuth). A confirm/edit step before the write fits the confidence-driven human-in-the-loop idea above.
+
+### Open questions
+
+- **Auth** — Google OAuth flow + per-user token storage; which calendar to target.
+- **Extraction reliability** — date/time parsing across formats (DD.MM., handwritten), timezone handling, recurring appointments.
+- **Privacy** — medical/appointment data is sensitive: keep the image and extraction out of anything that ships in the CAS bundle.
+- **Generalisation** — CalDAV / Nextcloud Calendar as additional targets → a natural fit for the [Marketplace for Skills](#marketplace-for-skills) idea above.
+
+---
+
 ## References
 
 - ADR 0002 — Service Architecture & Async Communication (`docs/adr/0002-service-architecture-and-async-communication.md`)
