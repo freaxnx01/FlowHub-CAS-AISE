@@ -64,7 +64,9 @@ async function loadCss() {
 function buildMarkdownIt() {
   const md = new MarkdownIt({
     html: true,
-    linkify: true,
+    // linkify off: it auto-linked domain-like text such as "ASP.NET" / ".NET".
+    // All real links in these docs are explicit ([text](url) or <url>).
+    linkify: false,
     typographer: false,
     highlight: (code, lang) => {
       if (lang && hljs.getLanguage(lang)) {
@@ -131,10 +133,19 @@ function wrapHtml({ title, body, css, compact }) {
 <style>
 ${css}
 .markdown-body { box-sizing: border-box; max-width: 980px; margin: 0 auto; padding: 24px 36px; }
+/* github-markdown-css renders tables as display:block; width:max-content; overflow:auto,
+   which CLIPS wide tables in print (no horizontal scroll on paper). Force full-width
+   wrapping tables so cell content wraps instead of being cut off. */
+.markdown-body table { display: table; width: 100%; table-layout: auto; }
+.markdown-body th, .markdown-body td { overflow-wrap: anywhere; }
 @media print {
   .markdown-body { max-width: 100%; padding: 0; }
   pre, code { font-size: 11px; }
-  table { page-break-inside: avoid; }
+  /* Let long tables flow across page breaks (avoids near-empty pages when a
+     big table would otherwise be pushed whole onto the next page); repeat the
+     header row on each page. */
+  table, tr, td, th { page-break-inside: auto; }
+  thead { display: table-header-group; }
   pre { page-break-inside: avoid; }
   h1, h2, h3, h4 { page-break-after: avoid; }
 }

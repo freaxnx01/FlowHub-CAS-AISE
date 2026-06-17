@@ -364,7 +364,9 @@ erDiagram
 ```
 
 `Captures` ist das Aggregat-Root. Das `Embedding` (pgvector-Spalte mit
-HNSW-Cosine-Index) kam in Block 5 hinzu; auf der öffentlichen Demo sind
+**HNSW**-Index — *Hierarchical Navigable Small World*, ein
+Approximate-Nearest-Neighbour-Index für schnelle Vektor-Ähnlichkeitssuche — mit
+Cosine-Distanz) kam in Block 5 hinzu; auf der öffentlichen Demo sind
 Embeddings deaktiviert (`/search` → 503), siehe ADR 0006 (inkl. Amendment).
 
 ---
@@ -603,6 +605,10 @@ sind automatisiert; das **Environment-Rollout** ist bewusst manuell (ein
 
 ## 8. Querschnittliche Konzepte
 
+*„Querschnittlich" = übergreifend: Themen, die nicht zu einem einzelnen Baustein
+gehören, sondern viele zugleich betreffen. Der Begriff ist die deutsche
+arc42-Bezeichnung für „Crosscutting Concepts".*
+
 ### 8.1 KI-Integration (ADR 0004, 0007)
 
 Die KI ist über `Microsoft.Extensions.AI` (`IChatClient`) abstrahiert. Zwei
@@ -630,9 +636,9 @@ PostgreSQL — keine separate Vektor-Datenbank.
 
 ### 8.3 Asynchrones Messaging (ADR 0002, 0003)
 
-MassTransit trägt die Pipeline; Endpoint-Namen werden via
-`SetKebabCaseEndpointNameFormatter` vergeben (`capture-enrichment`,
-`skill-routing`). Der Transport ist umschaltbar: In-Memory in Dev/Test, RabbitMQ
+MassTransit trägt die Pipeline; die Endpoint- bzw. Queue-Namen werden via
+`SetKebabCaseEndpointNameFormatter` im **kebab-case** vergeben — Kleinbuchstaben
+mit Bindestrichen, z. B. `capture-enrichment`, `skill-routing`. Der Transport ist umschaltbar: In-Memory in Dev/Test, RabbitMQ
 in Prod (`Bus__Transport`). Jeder Consumer hat seine eigene Retry-Policy; der
 `LifecycleFaultObserver` ist die zentrale Fault-Senke (Kapitel 6.6).
 
@@ -641,8 +647,10 @@ in Prod (`Bus__Transport`). Jeder Consumer hat seine eigene Retry-Policy; der
 OpenTelemetry instrumentiert ASP.NET Core und die .NET-Runtime; der
 Prometheus-Exporter liefert `/metrics` (`dotnet_*`- und `http_*`-Serien), Grafana
 ist provisioniert. Health-Endpunkte: `/health/live` und `/health/ready`. MEAI-
-(`gen_ai.*`) und MassTransit-Traces sowie der OTLP-Export sind **vorbereitet, im
-Abgabe-Build aber nicht aktiv** (ADR 0009) — siehe technische Schulden, Kapitel 11.
+(`gen_ai.*`) und MassTransit-Traces sowie der **OTLP**-Export (OpenTelemetry
+Protocol — das Wire-Format, um Traces/Metriken an einen Collector zu senden) sind
+**vorbereitet, im Abgabe-Build aber nicht aktiv** (ADR 0009) — siehe technische
+Schulden, Kapitel 11.
 
 ### 8.5 Logging-Policy (ADR 0008)
 
@@ -682,7 +690,9 @@ Reconciliation-Tabelle in `docs/spec/testing-strategy.md`.
 
 ## 9. Architekturentscheidungen (ADR)
 
-Volltext je ADR in `docs/adr/`. Alle akzeptiert.
+Volltext je ADR in `docs/adr/`. Alle neun ADRs haben den Status *Accepted* —
+d. h. die Entscheidung wurde getroffen und ist in der Lösung umgesetzt (im
+Gegensatz zu *Proposed*, *Rejected* oder *Superseded*).
 
 | ADR | Titel | Entscheidung (Kurz) |
 |---|---|---|
@@ -727,7 +737,7 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 |---|---|---|
 | **EF-Outbox nicht verdrahtet** | Tech. Schuld | Crash zwischen Persist und Publish kann einen Capture in `Raw` zurücklassen; Mitigation: manueller Retry-Endpunkt + Dashboard-Sichtbarkeit (ADR 0003) |
 | **OTLP-Tracing / KI-Metriken nicht aktiv** | Tech. Schuld | Im Abgabe-Build deaktiviert; Allow-List/Helper vorbereitet (ADR 0009) |
-| **NfA-P1 / NfA-P2 offen** | Ziel offen | Cloud-LLM + Cloud-Embeddings sind Live-Default; kein lokaler Ollama-Adapter, keine KI-Badges/Provenienz-Spalten |
+| **NfA-P1 / NfA-P2 offen** | Ziel offen | Cloud-LLM + Cloud-Embeddings sind Live-Default; kein lokaler Ollama-Adapter, keine KI-Badges und keine **Provenienz-Spalten** — also keine Herkunfts-Felder wie `ClassificationSource` (KI / Heuristik / Manuell), `ClassifiedAt`, `ConfidenceScore`, die festhalten, *wie* ein Capture klassifiziert wurde |
 | **Compliance-Audit-Tests geplant** | Tech. Schuld | `SerilogPiiAuditTests`, `TracingPiiAuditTests`, `OutboundCallAuditTests` als Block-5/geplant markiert |
 | **Semantische Suche auf Demo zurückgerollt** | Bewusste Einschränkung | Self-hosted Embedder getestet, dann entfernt (schwache Trennschärfe auf kleinem Datensatz); `/search` → 503; Pipeline + Tests bleiben als Deliverable (ADR 0006 Amendment) |
 | **Idempotenz-Receiver fehlt** | Tech. Schuld | RabbitMQ-At-least-once-Redelivery nicht abgesichert |
@@ -750,6 +760,22 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 | **EF Core** | Entity Framework Core — .NET-ORM |
 | **Blazor SSR** | Server-seitiges Rendering mit Blazor |
 | **Homelab** | Selbst betriebene Server-Infrastruktur (Proxmox) |
+
+### Abkürzungen
+
+| Kürzel | Bedeutung |
+|---|---|
+| **MEAI** | Microsoft.Extensions.AI — Provider-Abstraktion für LLMs in .NET |
+| **ORM** | Object-Relational Mapper (hier EF Core) — bildet Objekte auf DB-Tabellen ab |
+| **DI** | Dependency Injection — Abhängigkeiten werden injiziert statt selbst erzeugt |
+| **SSR / CSR** | Server-Side / Client-Side Rendering |
+| **OIDC / SSO** | OpenID Connect / Single Sign-On — Authentifizierung über einen zentralen Identity-Provider (Authentik) |
+| **pgvector** | PostgreSQL-Erweiterung für Vektor-Spalten + Ähnlichkeitssuche |
+| **HNSW** | Hierarchical Navigable Small World — Approximate-Nearest-Neighbour-Index für Vektorsuche |
+| **OTLP** | OpenTelemetry Protocol — Wire-Format zum Senden von Traces/Metriken an einen Collector |
+| **GHCR** | GitHub Container Registry — hostet die veröffentlichten Docker-Images |
+| **RFC 9457** | Standard für maschinenlesbare HTTP-Fehler („Problem Details") |
+| **DTO** | Data Transfer Object — einfaches Datenobjekt für die Übertragung über eine Grenze |
 
 ---
 

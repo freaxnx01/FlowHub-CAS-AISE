@@ -32,6 +32,7 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 - **Lizenz / README:** [`README.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/README.md)
 - **Changelog:** [`CHANGELOG.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CHANGELOG.md)
 - **Agent-Konventionen:** [`CLAUDE.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CLAUDE.md)
+- **🌐 Live-Demo:** <https://demo.flowhub.freaxnx01.ch> — öffentliche Instanz (Reset alle 15 min). Angebundene Ziel-Dienste: [Vikunja](https://vikunja.demo.flowhub.freaxnx01.ch) · [Wallabag](https://wallabag.demo.flowhub.freaxnx01.ch) · [paperless-ngx](https://paperless.demo.flowhub.freaxnx01.ch). Status: <https://status.demo.flowhub.freaxnx01.ch>
 
 ---
 
