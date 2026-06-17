@@ -648,6 +648,20 @@ pdf-submission-bundle:
     tools/submission-bundle.sh tools/build/submission-bundle.md
     node {{pdf_renderer}} tools/build/submission-bundle.md SUBMISSION-bundle.pdf --title "FlowHub — CAS AISE Submission Bundle"
 
+# Assemble the numbered Moodle upload set (00–04) into ./upload/
+[group('pdf')]
+package-submission: pdf-submission pdf-arc42 pdf-reflexion pdf-eigenstaendigkeitserklaerung
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p upload
+    cp FlowHub_Uebersicht.pdf                       upload/00-FlowHub_Uebersicht.pdf
+    cp docs/architektur/FlowHub_Arc42_v2.pdf        upload/01-FlowHub_Arc42.pdf
+    cp docs/reflexion/FlowHub_Reflexion.pdf         upload/02-FlowHub_Reflexion.pdf
+    cp docs/presentation/flowhub-praesentation.pdf  upload/03-FlowHub_Praesentation.pdf
+    cp "Eigenständigkeitserklärung.pdf"             upload/04-FlowHub_Eigenstaendigkeitserklaerung.pdf
+    echo "Upload set ready in ./upload/ (00–04). Sign 04 before uploading."
+    ls -1 upload/
+
 # Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
 [group('pdf')]
 pdf-eigenstaendigkeitserklaerung:
