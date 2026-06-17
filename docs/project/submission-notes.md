@@ -108,9 +108,9 @@ The signature applies to the **separate `Eigenständigkeitserklärung.pdf`**. Pi
 ### F — Upload to Moodle (T-0, before 2026-07-04 24:00)
 
 - [ ] Run `just package-submission` → assembles the numbered set into `./upload/`:
-      `00-FlowHub_Uebersicht.pdf` · `01-FlowHub_Arc42.pdf` · `02-FlowHub_Reflexion.pdf` ·
-      `03-FlowHub_Praesentation.pdf` · `04-FlowHub_Eigenstaendigkeitserklaerung.pdf`
-- [ ] **Sign** `04-FlowHub_Eigenstaendigkeitserklaerung.pdf` (overwrite in `./upload/`)
+      `00_FlowHub_Uebersicht.pdf` · `01_FlowHub_Arc42.pdf` · `02_FlowHub_Reflexion.pdf` ·
+      `03_FlowHub_Praesentation.pdf` · `04_FlowHub_Eigenstaendigkeitserklaerung.pdf`
+- [ ] **Sign** `04_FlowHub_Eigenstaendigkeitserklaerung.pdf` (overwrite in `./upload/`)
 - [ ] Log into FFHS Moodle → *PVA FS26 → Deployment & Abgabe Projektarbeit*
 - [ ] Upload the **5 files** from `./upload/` (the `00–04` prefixes keep them in reading order)
 - [ ] Confirm — Moodle shows all 5 files and a submission timestamp
