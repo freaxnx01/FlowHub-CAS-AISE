@@ -245,6 +245,7 @@ URL-Muster und, wenn nötig, ein <strong>LLM</strong>.</p>
 <li><code>/flowhub-capture · -triage · -issue</code> — das Produkt selbst bedienen</li>
 <li><code>examiner-sim</code> · <code>cas-aise-grade-self-check</code> — <strong>Selbstbewertung</strong> gegen die Moodle-Rubrik</li>
 </ul>
+<p><strong>Obsidian-Vault als 2nd Brain</strong> (<code>vault/</code>, Markdown) — les- <strong>und</strong> schreibbarer Kontextspeicher: der Agent <strong>liest</strong> (CAS-Kontext, Entscheidungen) und <strong>schreibt</strong> (Nachbereitungen, Notizen, Learnings). Markdown = menschen- <em>und</em> LLM-lesbar, git-/diff-fähig, ohne Export-Schicht.</p>
 <footer>FlowHub · CAS AI-Assisted Software Engineering</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering" data-theme="flowhub" lang="C" data-marpit-pagination="11" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering;--theme:flowhub;--marpit-advanced-background-split:40%;" data-marpit-pagination-total="17" data-marpit-advanced-background="background" data-marpit-advanced-background-split="right"><div data-marpit-advanced-background-container="true" data-marpit-advanced-background-direction="horizontal"><figure style="background-image:url(&quot;assets/ui-flow-example.svg&quot;);background-size:auto 300px;"></figure></div></section></foreignObject><foreignObject width="60%" height="720"><section id="11" data-paginate="true" data-footer="FlowHub · CAS AI-Assisted Software Engineering" data-theme="flowhub" lang="C" data-marpit-pagination="11" style="--paginate:true;--footer:FlowHub · CAS AI-Assisted Software Engineering;--theme:flowhub;--marpit-advanced-background-split:40%;" data-marpit-pagination-total="17" data-marpit-advanced-background="content" data-marpit-advanced-background-split="right">
@@ -441,11 +442,13 @@ die alles zusammenhält. Die nächsten Folien gehen die wichtigsten durch.&quot;
 &quot;Der grösste Lerneffekt: Gute KI-Entwicklung ist NICHT 'Prompt rein, Code raus' – es ist
 eine Pipeline. Erst Design als A/B/C-Entscheidungen, dann Spec, dann ein Plan in
 test-first-Reihenfolge. Erst dann implementiert ein Subagent mit frischem Kontext. Und
-nichts geht in main ohne zwei Reviews. Diese Struktur hält die KI auf Kurs.&quot;</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>[~40 s] Steuerung statt Zuruf.
+nichts geht in main ohne zwei Reviews. Diese Struktur hält die KI auf Kurs.&quot;</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>[~45 s] Steuerung statt Zuruf.
 &quot;Damit die KI nicht bei null anfängt: ein eigenes ai-instructions-Repo – stack-agnostischer
 Kern plus .NET-Blazor-Overlay mit Coding Guidelines, SemVer, Conventional Commits, TDD als
 festen Regeln, aus denen sich das CLAUDE.md ableitet. Plus eigene Skills als Slash-Commands:
-der UI-Workflow, Commands fürs Produkt, und ein Skill zur Selbstbewertung gegen die Rubrik.&quot;</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>[~40 s] Konkret zeigen, nicht abstrakt behaupten.
+der UI-Workflow, Commands fürs Produkt, und ein Skill zur Selbstbewertung gegen die Rubrik.
+Und drittens der Obsidian-Vault als zweites Gehirn: reine Markdown-Dateien, die die KI als
+Kontext liest und selbst wieder beschreibt – Mensch und Agent teilen sich dieselbe Wissensbasis.&quot;</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>[~40 s] Konkret zeigen, nicht abstrakt behaupten.
 &quot;Vier Phasen, jede mit einem Gate. Phase 1 zwingt mich, das Layout erst als ASCII-Wireframe
 zu klären – links. Phase 2 macht den Zustandsfluss explizit als Mermaid-Diagramm – rechts.
 Beides muss freigegeben sein, bevor eine Zeile Blazor entsteht. So baut die KI nicht am
