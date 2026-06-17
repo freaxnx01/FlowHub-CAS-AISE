@@ -9,7 +9,34 @@
 
 ## Hinweis zum Aufbau dieses Dokuments
 
-Diese Datei ist die zentrale Einreichungs-Seite für die CAS-AISE-Projektarbeit. Sie wird als PDF in Moodle hochgeladen und enthält bewusst **keine** vollständigen Inhalte — alle Artefakte (Architektur, ADRs, Block-Nachbereitungen, Reflexion, Bewertungskriterien-Selfcheck, …) liegen im verlinkten GitHub-Repository und sind über das Inhaltsverzeichnis weiter unten direkt erreichbar. Sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar.
+Diese Datei (`FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie beginnt mit der Dokumentenübersicht und enthält danach eine kurze Projektzusammenfassung sowie ein klickbares Inhaltsverzeichnis aller Artefakte. Die vollständigen Inhalte liegen im verlinkten GitHub-Repository; sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar.
+
+---
+
+## Dokumentenübersicht
+
+### Abgabe-Dokumente (Upload Moodle — 5 Dateien)
+
+| # | Dokument | Seiten | Inhalt |
+|---|---|---:|---|
+| 1 | **FlowHub_Uebersicht** *(diese Datei)* | 8 | Einstieg: Dokumentenübersicht + Projektzusammenfassung + klickbares Inhaltsverzeichnis |
+| 2 | **FlowHub_Arc42_v2** — Architektur (as built) | 24 | 12 arc42-Kapitel, 9 Diagramme (System-Kontext, Bausteine, Lebenszyklus, Sequenzen, ER) |
+| 3 | **FlowHub_Reflexion** | 7 | KI-Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit |
+| 4 | **flowhub-praesentation** | 18 | Foliensatz: Teil 1 Produkt, Teil 2 Bauen mit KI |
+| 5 | **Eigenständigkeitserklärung** | 2 | Hilfsmittelverzeichnis + unterschriebene Erklärung |
+
+### Weitere Dokumente im Repository (verlinkt, nicht separat hochgeladen)
+
+| Dokument | Inhalt |
+|---|---|
+| **Projektbeschreibung v4** (27 S.) | Ausführliche Projektbeschreibung: Vision, Stakeholder, Funktionsumfang, Architektur, Risiken |
+| **SUBMISSION-Bundle** (267 S.) | Vollständiges Offline-Archiv: diese Seite + alle referenzierten Artefakte inline (Sicherheitsnetz) |
+| **ADR 0001–0009** | Architekturentscheidungen (Render-Mode, Service-/Async-Architektur, KI, Persistenz, Vektor-Suche, LLM-Hosting, Logging, Telemetrie) |
+| **Spezifikation** (`docs/spec/`) | Use Cases, NfA (SMART), Akzeptanzkriterien, Test-Strategie, System-Kontext |
+| **Design** (`docs/design/`) | Perspektiven, Datenfluss, Sequenzdiagramme, Datenmodell (ER) |
+| **Block-Nachbereitungen** (5×) · **Insights** (5×) | Pro Block: Auftrag, Umsetzung, Rubrik-Self-Check · Lessons learned |
+| **`docs/ai-usage.md`** · **Learnings** | Detaillierte blockweise KI-Nutzung · persönliche Lessons Learned |
+| **README · CHANGELOG · CLAUDE.md** | Projekt-Einstieg & Run-Anleitung · Changelog · Agent-Konventionen |
 
 ---
 
@@ -38,9 +65,7 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 
 ## 3. Inhaltsverzeichnis der Abgabe-Artefakte
 
-> 📄 **[Dokumentenübersicht](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/submission/dokumentenuebersicht.md)** — kompakte Tabelle aller Dokumente (Upload-Set + Repository-Artefakte) mit Kurzbeschreibung.
->
-> **In Moodle hochgeladen (5 Dateien):** diese Einreichungsseite · [Arc42 (as built)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.pdf) · [Reflexion](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.pdf) · [Präsentation](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · Eigenständigkeitserklärung.
+> Die Abgabe-Dokumente und die weiteren Repository-Artefakte sind oben in der **Dokumentenübersicht** aufgelistet; dieses Inhaltsverzeichnis verlinkt jedes Artefakt einzeln.
 
 ### 3.1 Projektbeschreibung & Architektur
 

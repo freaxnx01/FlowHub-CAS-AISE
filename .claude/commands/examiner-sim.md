@@ -42,7 +42,7 @@ Steps to perform:
    `workflow({ scriptPath: ".claude/workflows/examiner-sim.js" }, { focus, demoUrl })`
    and run that. (See `tools/build/examiner-sim-arch-run.js` for the pattern.)
 
-   The workflow itself: rebuilds `SUBMISSION.pdf` + `SUBMISSION-bundle.pdf`,
+   The workflow itself: rebuilds `FlowHub_Uebersicht.pdf` + `SUBMISSION-bundle.pdf`,
    extracts the real PDF text, runs five rubric-bucket examiners plus a live-demo
    examiner in parallel (plus the architecture lenses when `focus=architecture`),
    applies an adversarial skeptic pass, then writes a dated grade sheet to

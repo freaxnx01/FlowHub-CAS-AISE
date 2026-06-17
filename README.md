@@ -172,7 +172,7 @@ docs/project/submission-notes.md  ← operator notes: how the submission PDF is 
 
 | Target | What it does |
 |---|---|
-| `just pdf-submission` | Render `SUBMISSION.md` → `SUBMISSION.pdf` (the Moodle hub PDF) |
+| `just pdf-submission` | Render `SUBMISSION.md` → `FlowHub_Uebersicht.pdf` (the Moodle entry/overview PDF) |
 | `just pdf-eigenstaendigkeitserklaerung` | Render `docs/submission/eigenstaendigkeitserklaerung.md` → `Eigenständigkeitserklärung.pdf` (mandatory FFHS beilage) |
 | `just pdf-submission-bundle` | Build `SUBMISSION-bundle.pdf` — every referenced artefact inlined (offline safety net) |
 | `just pdf-projektbeschreibung` | Regenerate the project description PDF |
