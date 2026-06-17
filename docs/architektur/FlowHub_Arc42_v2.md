@@ -1,0 +1,757 @@
+# FlowHub – Arc42 Architekturdokumentation
+
+**CAS AI-Assisted Software Engineering (AISE)** · W4B-C-AS001 · ZH-Sa-1 · FS26
+**Student:** Andreas Imboden
+**Version:** 2.0 (as built) · **Stand:** Juni 2026 · **Template:** arc42 v8 (adaptiert)
+
+> **Hinweis zur Version.** Version 1.0 (Februar 2026) dokumentierte die *geplante*
+> Konzept-Architektur zu Projektbeginn. Diese Version 2.0 beschreibt die
+> **tatsächlich gebaute** Lösung am Abgabestand und kennzeichnet bewusst, wo das
+> Konzept (Zielbild) über das Umgesetzte hinausgeht. Die Quell-Artefakte
+> (Projektbeschreibung, ADRs 0001–0009, Design-Dokumente) liegen im Repository:
+> <https://github.com/freaxnx01/FlowHub-CAS-AISE>.
+
+---
+
+## 1. Einführung und Ziele
+
+FlowHub ist ein **KI-gestützter persönlicher Eingangskorb**. Er nimmt
+Informationsschnipsel aus dem Alltag entgegen (ein Film-Tipp, ein Fachartikel,
+ein Beleg-Foto, eine Notiz), **erkennt und klassifiziert** sie automatisch und
+**leitet sie an den passenden Ziel-Dienst** weiter — ohne dass der Benutzer im
+Moment der Erfassung entscheiden muss, wohin die Information gehört.
+
+Das adressierte Kernbedürfnis ist **„Capture without friction"**: Statt der
+heutigen fünf Schritte (Idee → App-Wahl → App öffnen → Kategorisieren → Ablegen)
+reduziert FlowHub die Erfassung auf einen einzigen Schritt. Die Klassifikation
+übernimmt ein **Skill-basiertes Routing-System**: ein LLM klassifiziert den
+Schnipsel, deterministisches Keyword-/URL-Muster-Matching dient als Fallback.
+
+### 1.1 Aufgabenstellung
+
+- **Funktional:** Captures über mehrere Kanäle entgegennehmen, automatisch
+  klassifizieren, an den passenden externen Dienst routen und den Lebenszyklus
+  jedes Captures (inkl. Fehlerfälle und Retry) nachvollziehbar machen.
+- **Qualitativ:** saubere, begründete Architektur (Modular Monolith, hexagonal),
+  dokumentierte Architekturentscheidungen (ADRs) und eine reflektierte,
+  KI-unterstützte Entwicklungsweise.
+- **Rahmen:** Umsetzung inkrementell über die fünf CAS-Blöcke (Einführung,
+  Frontend, Service, Persistence, Deployment).
+
+### 1.2 Qualitätsziele
+
+Die Qualitätsziele sind als SMART-Anforderungen in `docs/spec/nfa.md`
+spezifiziert (Volltext-Tabelle in Kapitel 10). Die fünf tragenden Ziele:
+
+| Priorität | Qualitätsziel | Konkretisierung |
+|---|---|---|
+| 1 | **Performance** | Capture-Listen-Abfrage (Limit ≤ 50) p95 < 100 ms (NfA-01); B-Tree-Indizes auf allen häufigen Filterspalten (NfA-02). |
+| 2 | **Betreibbarkeit** | Migrations-first, idempotentes SQL als Init-Container, nie Auto-Migrate in `app.Run()` (NfA-03). |
+| 3 | **Zuverlässigkeit** | Npgsql-Connection-Pooling + transiente Retry-Policy (NfA-05); Retry + Fault-Observer in der Async-Pipeline. |
+| 4 | **Beobachtbarkeit** | Prometheus-`/metrics`-Endpoint, `dotnet_*`- und `http_*`-Serien (NfA-O1). |
+| 5 | **Datenschutz** *(Ziel)* | Verarbeitung möglichst auf eigener Infrastruktur (NfA-P1), KI-Transparenz/Provenienz (NfA-P2) — **noch nicht umgesetzt**, siehe Kapitel 11. |
+
+### 1.3 Stakeholder
+
+| Stakeholder | Rolle | Erwartung an die Architektur |
+|---|---|---|
+| Homelab-Operator (Primärnutzer) | Betreibt FlowHub selbst (Proxmox/Docker), nutzt bereits Vikunja, Wallabag, paperless-ngx | Reibungslose Erfassung; self-hostbar; nachvollziehbarer Verbleib jeder Information |
+| „Digital Hoarders" (Sekundär) | Sammeln viel, ohne abzulegen | Niedrigschwellige Erfassung |
+| CAS-/FFHS-Dozenten (Bewertung) | Beurteilen die Projektarbeit | Verteilte Web-App mit KI, saubere Architektur, ADRs, KI-Einsatz-Reflexion |
+
+FlowHub ist bewusst ein **Single-Operator-System**, keine Multi-User-Plattform
+(siehe Abgrenzung, Kapitel 11 / Projektbeschreibung §10).
+
+---
+
+## 2. Randbedingungen
+
+### 2.1 Technische Randbedingungen
+
+| Bereich | Festlegung |
+|---|---|
+| Plattform | .NET 10 / C# / ASP.NET Core (LTS) |
+| Frontend | Blazor Web App (Interactive Server) + MudBlazor als einzige Komponenten-Bibliothek |
+| API | ASP.NET Core Minimal APIs, versioniert unter `/api/v1`, Fehler als RFC 9457 ProblemDetails |
+| Persistenz | EF Core 10 + PostgreSQL 17 (Image `pgvector/pgvector:pg17`); Code-First-Migrations |
+| Messaging | MassTransit (In-Memory in Dev/Test, RabbitMQ in Prod via `Bus__Transport`) |
+| KI-Abstraktion | Microsoft.Extensions.AI (`IChatClient`); Provider via `Ai__Provider` wechselbar |
+| Build/Betrieb | Multi-Stage-Dockerfile (`sdk:10.0-alpine` → `aspnet:10.0-alpine`, non-root), Docker Compose |
+| Konventionen | Warnings-as-Errors, Nullable Reference Types, SemVer, Conventional Commits, 12-Factor |
+
+### 2.2 Organisatorische Randbedingungen
+
+- **CAS-Struktur:** fünf FFHS-Blöcke (1 Konzept, 2 Frontend, 3 Service/REST,
+  4 Persistence, 5 Deployment), Abgabe Juli 2026. Jeder Block schliesst mit einer
+  dokumentierten Nachbereitung ab, die gegen die Moodle-Bewertungskriterien
+  selbst geprüft wird.
+- **Dokumentation:** arc42 als Architektur-Vorlage; Architekturentscheidungen als
+  ADRs (Kapitel 9).
+- **Stack-Wahl:** Die freie Technologie-Wahl wurde in der PVA bestätigt. Wo der
+  Kurs einen Quarkus-/Jakarta-EE-Stack als Beispiel nennt, setzt FlowHub
+  funktionale .NET-Äquivalente ein (EF Core ↔ Hibernate/Panache, MassTransit ↔
+  Queue-basiertes Messaging, MEAI ↔ Spring-AI). Das Programmierkriterium der
+  Rubrik ist seit dem Update Juni 2026 framework-neutral.
+
+---
+
+## 3. Kontextabgrenzung
+
+### 3.1 Fachlicher Kontext
+
+FlowHub sitzt zwischen **Eingangs-Kanälen** und **Ziel-Diensten**:
+
+- **Eingangs-Kanäle (gebaut):** Web Quick-Capture (Eingabefeld in der Blazor-
+  AppBar) und REST-API `POST /api/v1/captures`. Ein **Telegram-Bot** ist
+  konzipiert, aber **nicht umgesetzt**.
+- **Ziel-Dienste:** Wallabag (Read-Later), Vikunja (Tasks/Kanban) — beide als
+  `ISkillIntegration`-Adapter **gebaut**; paperless-ngx (DMS) in der Live-Demo;
+  Obsidian/GitLab als Wissens-Ablage **geplant**. Fällt keine Zuordnung, bleibt
+  der Capture in der FlowHub-Inbox (PostgreSQL).
+
+Skill → Ziel-Dienst (Konzept-Mapping): Artikel → Wallabag; Homelab/Buch/Film →
+Vikunja; Dokument → paperless-ngx; Wissen/Zitat → Obsidian/GitLab; generisch →
+Inbox. **Wired am Abgabestand:** Wallabag und Vikunja.
+
+### 3.2 Technischer Kontext
+
+```mermaid
+graph TD
+    Operator["👤 Operator<br/>(single user)"]
+
+    subgraph FlowHub ["FlowHub (this system)"]
+        Web["FlowHub.Web<br/>Blazor Interactive Server + REST API host"]
+        Core["FlowHub.Core<br/>Domain types + driving ports"]
+        Api["FlowHub.Api<br/>REST endpoints (in-process library)"]
+        AI["FlowHub.AI<br/>AI classification<br/>(cloud LLM; Ollama geplant)"]
+        Persistence["FlowHub.Persistence<br/>EF Core + PostgreSQL + pgvector"]
+        Skills["FlowHub.Skills<br/>Wallabag + Vikunja adapters"]
+        Telegram["FlowHub.Telegram<br/>Telegram bot channel (geplant)"]
+    end
+
+    subgraph Downstream ["Downstream Integrations (self-hosted)"]
+        Wallabag["Wallabag<br/>Read-later"]
+        Vikunja["Vikunja<br/>Tasks / lists / kanban"]
+        Paperless["Paperless-ngx<br/>DMS"]
+        Obsidian["Obsidian<br/>Markdown notes via git"]
+    end
+
+    Authentik["Authentik<br/>SSO / OIDC IdP<br/>(homelab)"]
+    Ollama["Ollama<br/>Local LLM inference<br/>(homelab, geplant)"]
+    TelegramAPI["Telegram Bot API<br/>(external)"]
+
+    Operator -- "browser (SignalR)" --> Web
+    Operator -- "Telegram message" --> TelegramAPI
+    TelegramAPI -- "webhook" --> Telegram
+    Web -- "in-process DI" --> Core
+    Telegram -- "in-process DI" --> Core
+    Core --> AI
+    AI -- "REST" --> Ollama
+    Core --> Skills
+    Skills -- "REST" --> Wallabag
+    Skills -- "REST" --> Vikunja
+    Skills -- "REST" --> Paperless
+    Skills -- "git push" --> Obsidian
+    Web -- "OIDC" --> Authentik
+```
+
+> **Ist-Stand-Hinweis.** Das Kontextdiagramm zeigt das Gesamtbild inkl. geplanter
+> Bausteine. Am Abgabestand umgesetzt sind die sechs Projekte
+> `FlowHub.{Web,Core,Api,AI,Persistence,Skills}` mit Wallabag- und
+> Vikunja-Adaptern; **Telegram-Kanal, lokales Ollama, Authentik/OIDC und der
+> Obsidian-Pfad sind geplant** (KI läuft heute über Cloud-Provider, Auth über
+> Dev-Bypass). paperless-ngx ist nur in der Live-Demo angebunden.
+
+| Beziehung | Mechanismus |
+|---|---|
+| Operator → Web-UI | HTTP + SignalR (langlebiger Blazor-Interactive-Server-Circuit) |
+| Web / API → Core | In-Process-DI (kein HTTP für UI-Daten, ADR 0001) |
+| Core → KI-Provider | REST (Cloud: OpenRouter/Mistral heute; lokales Ollama als Ziel, ADR 0007) |
+| Skills → externe Dienste | HTTP REST (Wallabag, Vikunja) |
+| Web → Authentik (OIDC) | **geplant** — heute Dev-Bypass (`DevAuthHandler`) |
+
+---
+
+## 4. Lösungsstrategie
+
+| Problem / Treiber | Lösungsansatz | Begründung / ADR |
+|---|---|---|
+| Klare Modulgrenzen ohne Microservice-Overhead | **Modularer Monolith** — ein deploybarer Prozess, Fähigkeiten als getrennte .NET-Projekte, modulübergreifende Aufrufe nur über Ports in `FlowHub.Core` | ADR 0001, ADR 0002 |
+| Testbarkeit, austauschbare Infrastruktur | **Hexagonale Schichtung** je Modul — Driving-Ports (`IClassifier`, `ICaptureService`) und Driven-Ports (`ISkillIntegration`, Repositories) im Core, Adapter in den Fähigkeits-Projekten | ADR 0002 |
+| Entkopplung Erfassung ↔ Verarbeitung, Resilienz | **Asynchrone Pipeline** über MassTransit (In-Memory in Dev, RabbitMQ in Prod); ausgehende Integrationen synchron innerhalb der Consumer | ADR 0002, ADR 0003 |
+| Austauschbarkeit des LLM-Providers | **KI-Provider-Abstraktion** (MEAI `IChatClient`); Anthropic + OpenRouter; `KeywordClassifier` als deterministischer Fallback-Boden | ADR 0004 |
+| KI-Suche ohne separate Vektor-DB | **pgvector** auf derselben PostgreSQL statt zusätzlicher Infrastruktur | ADR 0006 |
+
+---
+
+## 5. Bausteinsicht
+
+### 5.1 Ebene 1 — Module (Ist-Architektur)
+
+```mermaid
+flowchart TB
+    subgraph channels["Capture-Kanäle"]
+        web["Web Quick-Capture<br/>(Blazor)"]
+        api["REST API<br/>/api/v1/captures"]
+    end
+
+    subgraph host["FlowHub.Web — einziger Host-Prozess (Modular Monolith)"]
+        direction TB
+        apilib["FlowHub.Api<br/>(Endpoints, In-Process-Library)"]
+        core["FlowHub.Core<br/>Domäne + Ports (keine Infra-Refs)"]
+        subgraph pipe["MassTransit-Pipeline (5 Consumer)"]
+            enrich["CaptureEnrichmentConsumer"]
+            route["SkillRoutingConsumer"]
+            embed["CaptureEmbeddingConsumer"]
+            notify["CaptureNotificationConsumer"]
+            fault["LifecycleFaultObserver"]
+        end
+        ai["FlowHub.AI<br/>AiClassifier : IClassifier"]
+        skills["FlowHub.Skills<br/>Wallabag / Vikunja : ISkillIntegration"]
+        persist["FlowHub.Persistence<br/>EF Core + 6 Repositories"]
+    end
+
+    subgraph backing["Backing Services (eigene Container)"]
+        pg[("PostgreSQL<br/>+ pgvector")]
+        mq["RabbitMQ"]
+        obs["Prometheus + Grafana"]
+        mig["flowhub.migrations<br/>(Init-Job)"]
+    end
+
+    cloud["Cloud-LLM<br/>OpenRouter / Mistral"]
+
+    web --> apilib
+    api --> apilib
+    apilib --> core
+    core --> pipe
+    enrich --> ai
+    ai -.HTTP.-> cloud
+    route --> skills
+    skills -.HTTP.-> ext["Wallabag / Vikunja"]
+    core --> persist
+    persist --> pg
+    pipe <--> mq
+    mig --> pg
+```
+
+| Modul | Verantwortung |
+|---|---|
+| `FlowHub.Core` | Domänen-Typen (`Capture`, `Skill`, Health) + Driving-/Driven-Ports (`IClassifier`, `IEmbeddingService`, `ISkillIntegration`, Repository-Interfaces). Keine Infrastruktur-Referenzen. |
+| `FlowHub.Web` | Blazor Web App (Interactive Server, MudBlazor) + MassTransit-Consumer (`/Pipeline/`) + Host des Minimal-API. Komponiert `FlowHub.Api` **in-process** (kein separater Container). |
+| `FlowHub.Api` | Minimal-API-Endpunkte (`CaptureEndpoints`, `SearchEndpoints`, `AdminEndpoints`) als In-Process-Library. |
+| `FlowHub.AI` | `AiClassifier` + `AiEmbeddingService` über MEAI. |
+| `FlowHub.Persistence` | EF Core + PostgreSQL + pgvector; sechs `Ef*Repository`-Implementierungen. |
+| `FlowHub.Skills` | `ISkillIntegration`-Adapter für Wallabag und Vikunja. |
+
+Diese sechs Projekte bilden die vollständige `FlowHub.slnx`. Telegram-Kanal und
+generische Integrations-Schicht sind **geplant, nicht gescaffolded**.
+
+### 5.2 Skill-System (Kernarchitektur)
+
+- **`IClassifier`** (Driving-Port): `ClassifyAsync(content) → ClassificationResult
+  (Tags, MatchedSkill, Title?)`. Zwei Adapter: `KeywordClassifier` (Regeln) und
+  `AiClassifier` (MEAI; füllt zusätzlich Title).
+- **`ISkillIntegration`** (Driven-Port): `Name` + `HandleAsync(Capture) →
+  SkillResult`. Auflösung per exaktem `Name` == `MatchedSkill`.
+- **`SkillRoutingConsumer`** ist der Dispatcher: kein Treffer → `MarkUnhandledAsync`
+  (Capture bleibt in der Inbox).
+
+### 5.3 Ebene 2 — MassTransit-Pipeline (5 Consumer)
+
+Die Async-Pipeline ist die innere Zerlegung des Host-Prozesses. Jeder Consumer
+ist ein eigener Baustein mit klarer Verantwortung und eigener Retry-Policy:
+
+| Consumer | Reagiert auf | Verantwortung | Retry |
+|---|---|---|---|
+| `CaptureEnrichmentConsumer` | `CaptureCreated` | Klassifikation via `IClassifier`; setzt `Classified` oder `Orphan` | `[100ms, 500ms]` |
+| `SkillRoutingConsumer` | `CaptureClassified` | Auflösung `ISkillIntegration` per Name; Write; setzt `Routed`/`Unhandled` | `[500ms, 2s, 5s]` |
+| `CaptureEmbeddingConsumer` | `CaptureCreated` | Best-Effort-Embedding (pgvector); parallel zum Enrichment | `[500ms, 2s, 5s]` |
+| `CaptureNotificationConsumer` | Lifecycle-Events | optionale ntfy.sh-Benachrichtigung | — |
+| `LifecycleFaultObserver` | `Fault<…>` | bildet Faults auf `Orphan`/`Unhandled` ab (kein Retry) | keine |
+
+Zwei Events tragen die Pipeline: `CaptureCreated` (nach dem Submit) und
+`CaptureClassified` (nach erfolgreicher Klassifikation). Enrichment und Embedding
+hängen beide am `CaptureCreated` und laufen damit parallel.
+
+### 5.4 Ebene 2 — Skill-System (Ports & Adapter)
+
+```
+Capture submitted
+  → IClassifier.ClassifyAsync(content)           (Driving-Port, FlowHub.Core)
+      → ClassificationResult { MatchedSkill, Tags, Title? }
+  → CaptureClassified (MassTransit-Event)
+  → SkillRoutingConsumer
+      → ISkillIntegration where Name == MatchedSkill   (Driven-Port, FlowHub.Core)
+      → integration.HandleAsync(capture) → SkillResult
+```
+
+- **`IClassifier`** — zwei Adapter: `KeywordClassifier` (deterministische Regeln,
+  immer `Title = null`) und `AiClassifier` (MEAI; füllt zusätzlich `Title`, fällt
+  bei Provider-Fehlern auf `KeywordClassifier` zurück).
+- **`ISkillIntegration`** — ein Adapter je Ziel-Dienst, jeder kapselt HTTP/Auth/
+  Tagging selbst. Verdrahtet: `Wallabag`, `Vikunja`. Auflösung per exaktem
+  `Name`-Match gegen `MatchedSkill`.
+- **Einen Skill ergänzen** (Erweiterungspunkt): `ISkillIntegration` in
+  `FlowHub.Skills/<Service>/` implementieren, in den DI-Extensions registrieren,
+  dem Classifier den neuen `MatchedSkill` beibringen. Roadmap: paperless-ngx,
+  Wekan, Obsidian/GitLab teilen denselben Vertrag.
+
+### 5.5 Paketstruktur
+
+Flaches Layout `source/FlowHub.<Capability>/` (ADR 0001). Keine
+Sibling-Projekt-Referenzen zwischen Fähigkeiten; jede Abhängigkeit läuft über
+einen Port in `FlowHub.Core`.
+
+### 5.4 Datenmodell
+
+```mermaid
+erDiagram
+    Captures {
+        uuid Id PK
+        text Content
+        varchar(32) Source
+        varchar(32) Stage
+        timestamptz CreatedAt
+        varchar(64) MatchedSkill
+        text FailureReason
+        varchar(512) Title
+        varchar(256) ExternalRef
+        vector Embedding "Mistral mistral-embed, HNSW idx (cosine)"
+    }
+    Channels {
+        varchar(64) Name PK
+        varchar(32) Kind
+        bool IsEnabled
+        varchar(16) Status
+        timestamptz LastActiveAt
+    }
+    Skills {
+        varchar(64) Name PK
+        varchar(16) Status
+        int RoutedToday
+        timestamptz LastResetAt
+    }
+    SkillRuns {
+        uuid Id PK
+        varchar(64) SkillName FK
+        uuid CaptureId FK
+        timestamptz StartedAt
+        timestamptz CompletedAt
+        bool Success
+        text FailureReason
+    }
+    Integrations {
+        varchar(64) Name PK
+        varchar(16) Status
+        timestamptz LastWriteAt
+        bigint LastWriteDurationMs
+    }
+    IntegrationHealthSamples {
+        uuid Id PK
+        varchar(64) IntegrationName FK
+        timestamptz SampledAt
+        varchar(16) Status
+        bigint DurationMs
+    }
+    Tags {
+        uuid CaptureId FK
+        varchar(64) Value
+    }
+    Captures ||--o{ Tags : "has"
+    Captures ||--o{ SkillRuns : "routed via"
+    Skills ||--o{ SkillRuns : "executed"
+    Integrations ||--o{ IntegrationHealthSamples : "sampled"
+```
+
+`Captures` ist das Aggregat-Root. Das `Embedding` (pgvector-Spalte mit
+HNSW-Cosine-Index) kam in Block 5 hinzu; auf der öffentlichen Demo sind
+Embeddings deaktiviert (`/search` → 503), siehe ADR 0006 (inkl. Amendment).
+
+---
+
+## 6. Laufzeitsicht
+
+### 6.1 Capture-Lebenszyklus
+
+```mermaid
+stateDiagram-v2
+    [*] --> Raw : POST /api/v1/captures (Submit)
+    Raw --> Classified : CaptureEnrichmentConsumer<br/>(AiClassifier → KeywordClassifier fallback)
+    Raw --> Orphan : kein Skill gefunden (MatchedSkill = "")<br/>oder Enrichment-Fault
+    Classified --> Routed : SkillRoutingConsumer ruft<br/>ISkillIntegration.HandleAsync
+    Routed --> Completed : Integration write succeeded<br/>(ExternalRef persistiert)
+    Routed --> Unhandled : kein Integration-Adapter registriert /<br/>Routing-Fault nach Retry-Policy
+    Orphan --> Raw : POST /api/v1/captures/{id}/retry
+    Unhandled --> Raw : POST /api/v1/captures/{id}/retry
+    Completed --> [*]
+```
+
+`Raw → Classified → Routed → Completed` ist der Happy Path; `Orphan` (kein Skill /
+Enrichment-Fault) und `Unhandled` (kein Adapter / Routing-Fault) sind die
+retry-baren Terminal-Zustände — beide kehren über den Retry-Endpunkt nach `Raw`
+zurück.
+
+### 6.2 Hot-Path — Submit → Skill-Write
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as REST / Web Client
+    participant Api as Minimal API<br/>CaptureEndpoints
+    participant CapSvc as EfCaptureService
+    participant DB as PostgreSQL
+    participant Bus as MassTransit
+    participant Enrich as CaptureEnrichmentConsumer
+    participant AI as AiClassifier (MEAI)
+    participant Embed as CaptureEmbeddingConsumer
+    participant Mistral as AiEmbeddingService
+    participant Route as SkillRoutingConsumer
+    participant Skill as ISkillIntegration<br/>(Vikunja / Wallabag)
+
+    Client->>Api: POST /api/v1/captures { content, source }
+    Api->>CapSvc: SubmitAsync(content, source)
+    CapSvc->>DB: INSERT INTO "Captures" (stage=Raw)
+    CapSvc-->>Api: Capture
+    Api-->>Client: 201 Created (Capture)
+    CapSvc->>Bus: Publish CaptureCreated
+
+    par Enrichment branch
+        Bus->>Enrich: CaptureCreated
+        Enrich->>AI: ClassifyAsync(content)
+        AI-->>Enrich: ClassificationResult (Tags, MatchedSkill, Title)
+        Enrich->>DB: UPDATE stage=Classified, MatchedSkill, Title
+        Enrich->>Bus: Publish CaptureClassified
+    and Embedding branch (best effort)
+        Bus->>Embed: CaptureCreated
+        Embed->>Mistral: GenerateAsync(content)
+        Mistral-->>Embed: float[]
+        Embed->>DB: UPDATE Embedding (pgvector)
+    end
+
+    Bus->>Route: CaptureClassified
+    Route->>Skill: HandleAsync(capture)
+    Skill->>Skill: HTTP POST/PUT to external service
+    Skill-->>Route: SkillResult { Success, ExternalRef }
+    Route->>DB: UPDATE stage=Completed, ExternalRef
+```
+
+Wesentlich: Die HTTP-Antwort (201) erfolgt **vor** Klassifikation und Routing —
+der Submit-Pfad bleibt schnell, die teure Arbeit läuft asynchron. Enrichment und
+Embedding laufen parallel; das Embedding ist Best-Effort.
+
+### 6.3 Enrichment — Happy Path (AI-Classifier erfolgreich)
+
+Gilt, wenn `Ai__Provider` und der passende API-Key gesetzt sind. `AiClassifier`
+macht **einen** strukturierten Provider-Call, validiert das Schema und liefert
+`ClassificationResult(Tags, MatchedSkill, Title)`. Ein leerer `MatchedSkill` ist
+ein *gültiges* Ergebnis (→ `MarkOrphanAsync`), keine Exception.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Web as WebUI / REST API
+    participant Store as ICaptureService
+    participant Bus as MassTransit Bus
+    participant Consumer as CaptureEnrichmentConsumer
+    participant AI as AiClassifier
+    participant Chat as IChatClient (Provider)
+
+    User->>Web: submit content
+    Web->>Store: SubmitAsync(content, source)
+    Store-->>Web: Capture(Stage=Raw)
+    Web->>Bus: Publish CaptureCreated
+    Bus->>Consumer: deliver CaptureCreated
+    Consumer->>AI: ClassifyAsync(content)
+    AI->>Chat: GetResponseAsync<AiClassificationResponse>(…)
+    Chat-->>AI: ChatCompletion
+    Note right of AI: validate MatchedSkill ∈ {"Wallabag","Vikunja",""}
+    AI-->>Consumer: ClassificationResult(Tags, MatchedSkill, Title)
+    alt MatchedSkill leer
+        Consumer->>Store: MarkOrphanAsync(CaptureId, "no skill matched")
+    else MatchedSkill getroffen
+        Consumer->>Store: MarkClassifiedAsync(CaptureId, MatchedSkill)
+        Consumer->>Bus: Publish CaptureClassified
+    end
+```
+
+### 6.4 Enrichment — Fallback (Provider-Fehler → KeywordClassifier)
+
+Jede Exception aus `IChatClient` (Netzwerk, Timeout, JSON-Parse,
+Schema-Verletzung) wird **innerhalb** `AiClassifier` gefangen, auf Warning-Level
+geloggt (EventId 3010) und an `KeywordClassifier` als harten Boden delegiert. Der
+Consumer sieht in beiden Fällen ein gültiges Ergebnis — er bekommt nie eine
+Exception aus dem Classifier-Port. KI-Ausfall degradiert die Klassifikations-
+*Qualität*, nicht die *Verfügbarkeit*.
+
+```mermaid
+sequenceDiagram
+    participant Consumer as CaptureEnrichmentConsumer
+    participant AI as AiClassifier
+    participant Chat as IChatClient (Provider)
+    participant Floor as KeywordClassifier
+
+    Consumer->>AI: ClassifyAsync(content)
+    AI->>Chat: GetResponseAsync<…>(…)
+    Chat-->>AI: throws (HttpRequest / Timeout / Json / Schema-Guard)
+    Note right of AI: log Warning EventId 3010<br/>AiClassifierFellBackToKeyword
+    AI->>Floor: ClassifyAsync(content)
+    Floor-->>AI: ClassificationResult(Tags, MatchedSkill, Title=null)
+    AI-->>Consumer: ClassificationResult (Title=null)
+```
+
+### 6.5 Skill-Routing — Erfolg
+
+`SkillRoutingConsumer` löst die `ISkillIntegration` per exaktem `Name ==
+MatchedSkill` auf. Kein registrierter Adapter → synchroner Terminal-Zustand
+`Unhandled` (kein Fault-Observer-Pfad).
+
+```mermaid
+sequenceDiagram
+    participant Bus as MassTransit Bus
+    participant Consumer as SkillRoutingConsumer
+    participant Store as ICaptureService
+    participant Integration as ISkillIntegration<br/>(Wallabag / Vikunja)
+
+    Bus->>Consumer: deliver CaptureClassified
+    Consumer->>Consumer: resolve ISkillIntegration by Name == MatchedSkill
+    alt kein Adapter registriert
+        Consumer->>Store: MarkUnhandledAsync(CaptureId, "no integration for skill")
+    else Adapter gefunden
+        Consumer->>Store: GetByIdAsync(CaptureId)
+        Store-->>Consumer: Capture
+        Consumer->>Integration: WriteAsync(capture, tags)
+        Integration-->>Consumer: success
+        Consumer->>Store: MarkRoutedAsync(CaptureId)
+    end
+```
+
+### 6.6 Skill-Routing — Retry-Erschöpfung → Fault-Observer
+
+Wirft `WriteAsync` bei jedem Versuch, erschöpft MassTransit das Retry-Budget
+(`[500ms, 2s, 5s]`) und publiziert `Fault<CaptureClassified>`. Der
+`LifecycleFaultObserver` (registriert **ohne** Retry-Policy, sonst Endlos-Loop)
+markiert den Capture `Unhandled` mit Grund aus der ersten Exception. Best-Effort:
+wirft `MarkUnhandledAsync` selbst, wird der Fehler geschluckt (Error, EventId
+1003), um keine `Fault<Fault<T>>`-Rekursion auszulösen.
+
+```mermaid
+sequenceDiagram
+    participant Bus as MassTransit Bus
+    participant Consumer as SkillRoutingConsumer
+    participant Integration as ISkillIntegration
+    participant Observer as LifecycleFaultObserver
+    participant Store as ICaptureService
+
+    Bus->>Consumer: deliver CaptureClassified
+    Consumer->>Integration: WriteAsync(capture, tags)
+    Integration-->>Consumer: throws
+    Note over Consumer,Bus: Retries +500ms → +2s → +5s (alle werfen)
+    Bus->>Observer: deliver Fault<CaptureClassified>
+    Observer->>Store: MarkUnhandledAsync(CaptureId, "exhausted retries: …")
+    Note over Observer: Stage=Unhandled — sichtbar im Dashboard + API-Filter
+```
+
+Ein steckengebliebener `Unhandled`-Capture kann über `POST
+/api/v1/captures/{id}/retry` neu eingereiht werden (re-published `CaptureCreated`,
+Lifecycle zurück auf `Raw`).
+
+### 6.7 Fehler- und Retry-Semantik (Zusammenfassung)
+
+- **Per-Consumer-Retry** (ADR 0003): Enrichment `[100ms, 500ms]`; Embedding +
+  Routing `[500ms, 2s, 5s]`.
+- **Fault-Observer:** `LifecycleFaultObserver` bildet jeden Fault auf den
+  passenden Terminal-Zustand ab — `Fault<CaptureCreated>` → `Orphan`,
+  `Fault<CaptureClassified>` → `Unhandled` (kein Retry auf den Fault selbst).
+- **Embedding ist Best-Effort:** Provider-Fehler → Capture wird ohne Embedding
+  gespeichert, die Suche degradiert auf den Nicht-Vektor-Pfad.
+
+---
+
+## 7. Verteilungssicht
+
+### 7.1 Docker-Compose-Topologie
+
+| Service | Image / Build | Funktion |
+|---|---|---|
+| `flowhub.web` | Build aus `source/FlowHub.Web/Dockerfile` | Blazor-UI + Minimal-API-Host; Healthcheck `/health/live` |
+| `flowhub.migrations` | Build aus `docker/migrations/Dockerfile` | Init-Job: führt `efbundle` vor App-Start aus (12-Factor XII) |
+| `postgres` | `pgvector/pgvector:pg17` | Persistenz inkl. pgvector; `pg_isready`-Healthcheck |
+| `rabbitmq` | `rabbitmq:3-management-alpine` | Message-Bus (Prod-Transport) |
+| `prometheus` | `prom/prometheus:latest` | Scrapt `/metrics` (7 d Retention) |
+| `grafana` | `grafana/grafana:latest` | Dashboards (anonymer Viewer, provisioniert) |
+
+Nur `flowhub.web` wird beim Release gebaut und veröffentlicht; `FlowHub.Api` ist
+in den Web-Host gefaltet (ADR 0003, „as built"). Die Demo-Overlay-Compose-Datei
+(`demo/docker-compose.yml`) ergänzt live laufende Ziel-Dienste (Vikunja,
+Wallabag, paperless), einen 15-Minuten-Reset, Traefik-Labels mit Rate-Limit und
+eine Uptime-Kuma-Statusseite.
+
+### 7.2 CI/CD
+
+| Workflow | Trigger | Schritte |
+|---|---|---|
+| `ci.yml` | jeder Push / PR auf `main` | restore → build (warnings-as-errors) → test (XPlat-Coverage) → Artefakte; gated Merge |
+| `release.yml` | Tags `v*` | Image `flowhub.web` bauen, nach GHCR pushen, Release-Notes via git-cliff, GitHub-Release |
+| `migrations.yml` | Push auf `main` mit Migrations-Änderung | self-contained `efbundle` als 30-Tage-Artefakt |
+
+**Automatisierungsgrenze:** Build/Test, Image-Publishing und Migrations-Bundle
+sind automatisiert; das **Environment-Rollout** ist bewusst manuell (ein
+`docker compose up`-Runbook), kein Auto-Deploy-on-Tag (ADR-Begründung in
+`docs/ci-cd.md`).
+
+---
+
+## 8. Querschnittliche Konzepte
+
+### 8.1 KI-Integration (ADR 0004, 0007)
+
+Die KI ist über `Microsoft.Extensions.AI` (`IChatClient`) abstrahiert. Zwei
+Adapter sind verdrahtet — Anthropic (nativ via `Anthropic.SDK`) und OpenRouter
+(via `Microsoft.Extensions.AI.OpenAI`) — die Provider-Wahl läuft über
+`Ai__Provider`, ohne Code-Änderung. Die Klassifikation nutzt **strukturierte
+Ausgabe**: das Antwort-Schema wird aus einem DTO mit `AllowedValues` generiert,
+sodass der Provider `MatchedSkill` nur aus der erlaubten Menge liefern kann; der
+Code re-validiert das Ergebnis zusätzlich defensiv. Jede Provider-Exception wird
+innerhalb `AiClassifier` gefangen und auf `KeywordClassifier` zurückgeführt
+(Warning, EventId 3010) — KI-Ausfall senkt die Qualität, nicht die Verfügbarkeit.
+Kosten- und Latenz-Guards: `MaxOutputTokens = 300`, `Temperature = 0.2`, 10 s
+HTTP-Timeout.
+
+### 8.2 Persistenz (ADR 0005, 0006)
+
+EF Core 10 + Npgsql. Sechs Repository-Ports liegen im `FlowHub.Core`, die
+`Ef*Repository`-Adapter in `FlowHub.Persistence`; `EfCaptureService` komponiert
+die Repositories und exponiert **nie** den `DbContext` nach aussen. Listen nutzen
+Keyset-/Cursor-Pagination auf `(CreatedAt DESC, Id DESC)` mit auf [1, 200]
+geklammertem Limit. Entities sind `internal sealed` (+ `InternalsVisibleTo` für
+Tests), sodass die Domäne nicht durch EF-Mapping-Attribute verunreinigt wird. Die
+semantische Suche liegt als pgvector-Spalte mit HNSW-Cosine-Index auf **derselben**
+PostgreSQL — keine separate Vektor-Datenbank.
+
+### 8.3 Asynchrones Messaging (ADR 0002, 0003)
+
+MassTransit trägt die Pipeline; Endpoint-Namen werden via
+`SetKebabCaseEndpointNameFormatter` vergeben (`capture-enrichment`,
+`skill-routing`). Der Transport ist umschaltbar: In-Memory in Dev/Test, RabbitMQ
+in Prod (`Bus__Transport`). Jeder Consumer hat seine eigene Retry-Policy; der
+`LifecycleFaultObserver` ist die zentrale Fault-Senke (Kapitel 6.6).
+
+### 8.4 Beobachtbarkeit
+
+OpenTelemetry instrumentiert ASP.NET Core und die .NET-Runtime; der
+Prometheus-Exporter liefert `/metrics` (`dotnet_*`- und `http_*`-Serien), Grafana
+ist provisioniert. Health-Endpunkte: `/health/live` und `/health/ready`. MEAI-
+(`gen_ai.*`) und MassTransit-Traces sowie der OTLP-Export sind **vorbereitet, im
+Abgabe-Build aber nicht aktiv** (ADR 0009) — siehe technische Schulden, Kapitel 11.
+
+### 8.5 Logging-Policy (ADR 0008)
+
+Serilog schreibt strukturiert nach stdout (12-Factor XI). Log-Aufrufe nutzen
+verpflichtend source-generierte `LoggerMessage` (Analyzer CA1848/CA1873). Eine
+**Allow-List** definiert loggbare Felder (`CaptureId`, `Stage`, `MatchedSkill`,
+Dauern …); verboten sind Capture-Body, Title, Absender-Handles, Embeddings,
+Prompts/Responses und Secrets. Ein `PiiScrubbingEnricher` greift als
+Defense-in-Depth; `ex.Message` wird nicht als Feld geloggt (nur der Exception-Typ).
+EventId-Namespace: 1xxx Pipeline, 2xxx Skills, 3xxx KI, 5xxx Persistenz, 9xxx
+Compliance.
+
+### 8.6 Telemetry- & PII-Policy (ADR 0009)
+
+Span-Tags sind auf eine `flowhub.*`-Allow-List mit ausschliesslich
+Low-Cardinality-Werten beschränkt; High-Cardinality-Grössen landen in
+Histogrammen/Countern statt als Tags. Ein `TagAllowListProcessor` plus
+`FlowHubActivitytags`-Helper setzen das im Code durch.
+
+### 8.7 Fehlerbehandlung
+
+Alle API-Fehler werden als RFC 9457 ProblemDetails serialisiert (stabile
+`type`-URIs je Fehlerklasse). FluentValidation prüft an der API-Boundary und
+liefert maschinenlesbare Validierungsfehler.
+
+### 8.8 Teststrategie
+
+TDD ist nicht verhandelbar (`CLAUDE.md`). Die Schichten: bUnit für
+Blazor-Komponenten, NSubstitute für Mocks, FluentAssertions, xUnit;
+**Testcontainers gegen echtes PostgreSQL** für Repository-Tests (kein
+In-Memory-Provider-Drift); Playwright für E2E; Live-KI-Tests sind trait-gegatet
+(`[Trait("Category","AI")]`) und aus der Default-Suite ausgeschlossen.
+Abgabestand: **294 Offline-Tests grün, 0 Fehler, 0 übersprungen**. Volltext und
+Reconciliation-Tabelle in `docs/spec/testing-strategy.md`.
+
+---
+
+## 9. Architekturentscheidungen (ADR)
+
+Volltext je ADR in `docs/adr/`. Alle akzeptiert.
+
+| ADR | Titel | Entscheidung (Kurz) |
+|---|---|---|
+| 0001 | Frontend Render Mode & Architecture | Blazor Interactive Server; UI ruft Services in-process (kein REST für UI); OIDC/Authentik; flaches `source/`-Layout; Web ist selbst ein Channel |
+| 0002 | Service Architecture & Async Communication | Modularer Monolith (logischer, kein physischer Split); MassTransit-Bus; ausgehende Integrationen synchron in Consumern; kein gRPC; `/api/v1` |
+| 0003 | Async Pipeline (MassTransit) | Zwei Events (`CaptureCreated`, `CaptureClassified`); Per-Consumer-Retry; `LifecycleFaultObserver`; Kebab-Queue-Namen |
+| 0004 | AI Integration — Provider-Abstraktion | MEAI `IChatClient`; Anthropic + OpenRouter; strukturierte Ausgabe; Keyword-Fallback |
+| 0005 | Persistence — EF Core + PostgreSQL | EF Core 10, Code-First-Migrations, Cursor-Pagination, interne Entities, Migrations als Init-Container |
+| 0006 | Vector Search — pgvector + Embeddings | pgvector auf bestehender Postgres, HNSW-Cosine, Embedding off-request-path; OpenAI-kompatibler Provider via ENV |
+| 0007 | LLM Hosting | *Ziel:* lokales Ollama als Default, Cloud als expliziter Opt-in — **noch nicht umgesetzt, Cloud ist Live-Default** |
+| 0008 | Logging Policy | Kein PII/Capture-Body im Log; source-gen LoggerMessage; Allow-List + Scrubber |
+| 0009 | Telemetry & PII Policy | OTel-Span-Tag-Allow-List (`flowhub.*`), Low-Cardinality; Tracing im Abgabe-Build noch nicht aktiv |
+
+Projektbeschreibung §7 listet zusätzlich die frühen Plattform-/Strategie-
+Entscheidungen (PE-1…PE-7), entkoppelt von den Implementierungs-ADRs.
+
+---
+
+## 10. Qualitätsanforderungen
+
+SMART-Anforderungen aus `docs/spec/nfa.md`:
+
+| ID | Kategorie | Ziel | Messung |
+|---|---|---|---|
+| NfA-01 | Performance | Capture-Listen-Abfrage (Limit ≤ 50) p95 < 100 ms | OTel-Span-Dauer auf `ListAsync`; Testcontainers mit 10k Zeilen |
+| NfA-02 | Performance | B-Tree-Index auf jeder häufigen Filterspalte | `HasIndex` im Modell + Migration; `EXPLAIN` zeigt Index-Scans |
+| NfA-03 | Betreibbarkeit | Code-First-Migrations, idempotentes SQL via Init-Container, kein Auto-Migrate | Migrationsdateien; `migrations script --idempotent`; Init-Container |
+| NfA-04 | Skalierbarkeit | Volumen-Obergrenzen (Captures ≤ 100k, HealthSamples ≤ 10k/Integration, SkillRuns ≤ 500k) | dokumentiert; Lasttest seedet 10k Zeilen |
+| NfA-05 | Zuverlässigkeit | Npgsql-Pool + transiente Retries | Data-Source-Optionen; Integrationstests |
+| NfA-D1 | Deployment | Image-Cold-Build < 5 min | `release.yml`-Build-Schritt ≤ 300 s |
+| NfA-D2 | Deployment | Veröffentlichtes Image < 200 MB komprimiert | GHCR-Layer-Grössen |
+| NfA-D3 | Deployment | `/health/live` < 30 s nach Cold-Start | Compose-Healthcheck 10 s × 3 |
+| NfA-O1 | Beobachtbarkeit | Prometheus `/metrics` exponiert | `curl /metrics` → 200, `dotnet_*` + `http_*` |
+| NfA-P1 | Datenschutz *(Ziel)* | Verarbeitung nur auf eigener Infrastruktur; LLM lokal (Ollama) | `OutboundCallAuditTests` — **heute nicht erfüllt (Cloud aktiv)** |
+| NfA-P2 | Datenschutz *(Ziel)* | KI-klassifizierte Captures sichtbar gekennzeichnet + Provenienz | Badge-Test + Migration + API-Felder — **nicht gebaut** |
+
+---
+
+## 11. Risiken und technische Schulden
+
+| Punkt | Art | Status / Mitigation |
+|---|---|---|
+| **EF-Outbox nicht verdrahtet** | Tech. Schuld | Crash zwischen Persist und Publish kann einen Capture in `Raw` zurücklassen; Mitigation: manueller Retry-Endpunkt + Dashboard-Sichtbarkeit (ADR 0003) |
+| **OTLP-Tracing / KI-Metriken nicht aktiv** | Tech. Schuld | Im Abgabe-Build deaktiviert; Allow-List/Helper vorbereitet (ADR 0009) |
+| **NfA-P1 / NfA-P2 offen** | Ziel offen | Cloud-LLM + Cloud-Embeddings sind Live-Default; kein lokaler Ollama-Adapter, keine KI-Badges/Provenienz-Spalten |
+| **Compliance-Audit-Tests geplant** | Tech. Schuld | `SerilogPiiAuditTests`, `TracingPiiAuditTests`, `OutboundCallAuditTests` als Block-5/geplant markiert |
+| **Semantische Suche auf Demo zurückgerollt** | Bewusste Einschränkung | Self-hosted Embedder getestet, dann entfernt (schwache Trennschärfe auf kleinem Datensatz); `/search` → 503; Pipeline + Tests bleiben als Deliverable (ADR 0006 Amendment) |
+| **Idempotenz-Receiver fehlt** | Tech. Schuld | RabbitMQ-At-least-once-Redelivery nicht abgesichert |
+| Scope Creep (zu viele Skills) | Projektrisiko | Schlanke MVP-Liste, Future klar abgegrenzt |
+| Ollama zu langsam (kein GPU) | Projektrisiko | Cloud-Fallback + Keyword-Baseline |
+| Zeitdruck (Abgabe Juli) | Projektrisiko | MVP bewusst schlank, Future-Features dokumentiert |
+
+---
+
+## 12. Glossar
+
+| Begriff | Bedeutung |
+|---|---|
+| **Capture** | Eingehender Informationsschnipsel (URL, Text, Datei); Aggregat-Root mit Lifecycle-Stage, Source, MatchedSkill, Tags, Title, ExternalRef, Embedding |
+| **Skill** | Kategorie/Handler für einen Capture-Typ; routet zu genau einem Ziel-Dienst. Ist-Mechanismus: `MatchedSkill`-String auf eine `ISkillIntegration.Name` abgebildet |
+| **Channel** | Eingangs-Quelle für Captures (Web Quick-Capture, REST-API; Telegram geplant). Die Web-UI ist selbst ein Channel (ADR 0001) |
+| **Integration** | Ausgehender Adapter zu einem Ziel-Dienst (`ISkillIntegration`); verdrahtet: Wallabag, Vikunja |
+| **Lifecycle-Stages** | `Raw → Classified → Routed → Completed`; Fehler-Terminale `Orphan` und `Unhandled` (beide retry-bar) |
+| **MEAI** | Microsoft.Extensions.AI — Provider-Abstraktion für LLMs in .NET |
+| **EF Core** | Entity Framework Core — .NET-ORM |
+| **Blazor SSR** | Server-seitiges Rendering mit Blazor |
+| **Homelab** | Selbst betriebene Server-Infrastruktur (Proxmox) |
+
+---
+
+*Arc42 v2.0 (as built), Juni 2026. Erstellt mit Unterstützung von Claude
+(Anthropic) gemäss den FFHS-Richtlinien für KI-Einsatz in Projektarbeiten.*

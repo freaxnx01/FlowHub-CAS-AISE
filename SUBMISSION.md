@@ -41,7 +41,7 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 
 - [Projektbeschreibung v4 (Markdown)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md) — aktueller Stand: Vision, Stakeholder, Funktionsumfang, Architektur
 - [Projektbeschreibung v4 (PDF)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf)
-- [Arc42-Architekturdokumentation v1.1 (PDF)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v1_1.pdf) — vollständige Arc42-Sicht
+- [**Arc42-Architekturdokumentation (as built)** — Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.md) · [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.pdf) — **Haupt-Architekturdokument**: 12 Arc42-Kapitel mit Modul-, Lebenszyklus-, Sequenz- und ER-Diagrammen (Ist-Stand)
 - [Architektur-Übersicht v2 (SVG)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Architecture-v2.svg)
 
 ### 3.2 Architecture Decision Records (ADRs)
@@ -100,6 +100,7 @@ Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Pr
 
 ### 3.5 Projektarbeit & Reflexion
 
+- [**Reflexion — KI-gestützte Entwicklung** — Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.md) · [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.pdf) — **Reflexions-Hauptdokument**: Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit
 - [Idee FlowHub](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Idee%20FlowHub.md) — Konzept-Notizen
 - [Dev](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Dev.md) — Entwicklungsnotizen
 - [Skills](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Skills.md) — Skill-System
