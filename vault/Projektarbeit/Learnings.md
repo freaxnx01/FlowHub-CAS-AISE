@@ -2,7 +2,7 @@
 tags:
   - claude-generated
   - claude-updated
-updated: 2026-06-05
+updated: 2026-06-17
 ---
 
 # Learnings CAS AISE
@@ -16,6 +16,12 @@ Persönliche Lessons Learned aus der Arbeit am FlowHub-Projekt mit Claude Code, 
 Die wichtigste strukturelle Erkenntnis war: AI-Agents brauchen genauso ein gepflegtes "Onboarding-Dokument" wie ein neuer Teamkollege. In FlowHub wurde das in mehrere Ebenen aufgeteilt — `CLAUDE.md` für die unmittelbar harten Regeln, `.ai/base-instructions.md` als kanonische Konventionsreferenz und `.ai/cas-instructions.md` für den CAS-spezifischen Kontext (Block-Schedule, Bewertungskriterien, Implementierungs-Rhythmus). Ohne diese Schichten driftet jeder Agent in seine eigenen Defaults ab; mit ihnen werden Instruktionen einmal geschrieben und von Claude Code, Codex, Copilot und Gemini gleichermassen befolgt. Das `update-ai-instructions` Skill hält diese Files synchron mit dem Upstream-Template, damit Verbesserungen aus anderen Projekten zurückfliessen.
 
 Parallel dazu hat sich das Schreiben **eigener** Skills als stärkster Hebel herausgestellt, um wiederkehrende Workflows verlässlich zu machen. Skills sind kleine, scharf umrissene Markdown-Definitionen mit einer Trigger-Description und einem expliziten Vorgehen — und genau das macht den Unterschied zu blossen Prompt-Templates: der Agent erkennt selbst, *wann* ein Skill anzuwenden ist, und folgt dann einer geprüften Checkliste statt zu improvisieren. Das `superpowers:writing-skills` Skill diente als Meta-Werkzeug für genau diesen Prozess (Verifikation vor Deployment, klare Triggerbedingungen). Konkret entstanden so für FlowHub u.a. die `/ui-brainstorm → /ui-flow → /ui-build → /ui-review` Pipeline, der `/commit` und `/push` Flow sowie das `cas-aise-grade-self-check` Skill, das jede Block-Nachbereitung gegen die Moodle-Bewertungskriterien prüft.
+
+---
+
+## Obsidian Vault als 2nd Brain (read & write)
+
+Der Obsidian-Vault (`vault/`, reine Markdown-Dateien) dient als **zweites Gehirn** des Projekts — und zwar nicht nur für den Menschen, sondern als **les- und schreibbarer Kontextspeicher für die AI-Agents**. Claude Code liest den Vault vor jeder inhaltlichen Frage (CAS-Scope, Block-Inhalte, Projektentscheidungen) und schreibt selbst zurück: Block-Nachbereitungen, Knowledge-Notizen, diese Learnings. Markdown ist dabei der entscheidende Punkt — gleichzeitig menschenlesbar, diff-/git-fähig und für das LLM verlustfrei konsumierbar, ohne Export- oder API-Zwischenschicht. Konventionen in `vault/CLAUDE.md` (Tagging mit `claude-generated`/`claude-updated`, Ordner-Zuständigkeiten, Auto-Commit) halten Mensch- und Agent-Schreibzugriffe nachvollziehbar getrennt. So wird der Vault zur gemeinsamen Wissensbasis: was der Mensch in der Vorlesung notiert, nutzt der Agent als Kontext — und was der Agent erarbeitet, landet wieder als durchsuchbare Notiz im selben Speicher.
 
 ---
 
