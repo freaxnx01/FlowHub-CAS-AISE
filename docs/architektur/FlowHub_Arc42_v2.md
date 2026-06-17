@@ -115,6 +115,53 @@ Inbox. **Wired am Abgabestand:** Wallabag und Vikunja.
 
 ### 3.2 Technischer Kontext
 
+```mermaid
+graph TD
+    Operator["👤 Operator<br/>(single user)"]
+
+    subgraph FlowHub ["FlowHub (this system)"]
+        Web["FlowHub.Web<br/>Blazor Interactive Server + REST API host"]
+        Core["FlowHub.Core<br/>Domain types + driving ports"]
+        Api["FlowHub.Api<br/>REST endpoints (in-process library)"]
+        AI["FlowHub.AI<br/>AI classification<br/>(cloud LLM; Ollama geplant)"]
+        Persistence["FlowHub.Persistence<br/>EF Core + PostgreSQL + pgvector"]
+        Skills["FlowHub.Skills<br/>Wallabag + Vikunja adapters"]
+        Telegram["FlowHub.Telegram<br/>Telegram bot channel (geplant)"]
+    end
+
+    subgraph Downstream ["Downstream Integrations (self-hosted)"]
+        Wallabag["Wallabag<br/>Read-later"]
+        Vikunja["Vikunja<br/>Tasks / lists / kanban"]
+        Paperless["Paperless-ngx<br/>DMS"]
+        Obsidian["Obsidian<br/>Markdown notes via git"]
+    end
+
+    Authentik["Authentik<br/>SSO / OIDC IdP<br/>(homelab)"]
+    Ollama["Ollama<br/>Local LLM inference<br/>(homelab, geplant)"]
+    TelegramAPI["Telegram Bot API<br/>(external)"]
+
+    Operator -- "browser (SignalR)" --> Web
+    Operator -- "Telegram message" --> TelegramAPI
+    TelegramAPI -- "webhook" --> Telegram
+    Web -- "in-process DI" --> Core
+    Telegram -- "in-process DI" --> Core
+    Core --> AI
+    AI -- "REST" --> Ollama
+    Core --> Skills
+    Skills -- "REST" --> Wallabag
+    Skills -- "REST" --> Vikunja
+    Skills -- "REST" --> Paperless
+    Skills -- "git push" --> Obsidian
+    Web -- "OIDC" --> Authentik
+```
+
+> **Ist-Stand-Hinweis.** Das Kontextdiagramm zeigt das Gesamtbild inkl. geplanter
+> Bausteine. Am Abgabestand umgesetzt sind die sechs Projekte
+> `FlowHub.{Web,Core,Api,AI,Persistence,Skills}` mit Wallabag- und
+> Vikunja-Adaptern; **Telegram-Kanal, lokales Ollama, Authentik/OIDC und der
+> Obsidian-Pfad sind geplant** (KI läuft heute über Cloud-Provider, Auth über
+> Dev-Bypass). paperless-ngx ist nur in der Live-Demo angebunden.
+
 | Beziehung | Mechanismus |
 |---|---|
 | Operator → Web-UI | HTTP + SignalR (langlebiger Blazor-Interactive-Server-Circuit) |
@@ -122,11 +169,6 @@ Inbox. **Wired am Abgabestand:** Wallabag und Vikunja.
 | Core → KI-Provider | REST (Cloud: OpenRouter/Mistral heute; lokales Ollama als Ziel, ADR 0007) |
 | Skills → externe Dienste | HTTP REST (Wallabag, Vikunja) |
 | Web → Authentik (OIDC) | **geplant** — heute Dev-Bypass (`DevAuthHandler`) |
-
-Der C4-Kontext (Level 1) ist in `docs/spec/system-context.md` modelliert; der
-Abschnitt „Current state (Block 5)" dort hält den Ist-Stand fest (sechs
-implementierte Projekte; Telegram/generische Integrations-Schicht und Authentik
-nicht gescaffolded; KI läuft heute in der Cloud).
 
 ---
 
