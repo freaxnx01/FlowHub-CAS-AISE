@@ -654,11 +654,12 @@ package-submission: pdf-submission pdf-arc42 pdf-reflexion pdf-eigenstaendigkeit
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p upload
-    cp FlowHub_Uebersicht.pdf                       upload/00-FlowHub_Uebersicht.pdf
-    cp docs/architektur/FlowHub_Arc42_v2.pdf        upload/01-FlowHub_Arc42.pdf
-    cp docs/reflexion/FlowHub_Reflexion.pdf         upload/02-FlowHub_Reflexion.pdf
-    cp docs/presentation/flowhub-praesentation.pdf  upload/03-FlowHub_Praesentation.pdf
-    cp "Eigenständigkeitserklärung.pdf"             upload/04-FlowHub_Eigenstaendigkeitserklaerung.pdf
+    rm -f upload/*.pdf
+    cp FlowHub_Uebersicht.pdf                       upload/00_FlowHub_Uebersicht.pdf
+    cp docs/architektur/FlowHub_Arc42_v2.pdf        upload/01_FlowHub_Arc42.pdf
+    cp docs/reflexion/FlowHub_Reflexion.pdf         upload/02_FlowHub_Reflexion.pdf
+    cp docs/presentation/flowhub-praesentation.pdf  upload/03_FlowHub_Praesentation.pdf
+    cp "Eigenständigkeitserklärung.pdf"             upload/04_FlowHub_Eigenstaendigkeitserklaerung.pdf
     echo "Upload set ready in ./upload/ (00–04). Sign 04 before uploading."
     ls -1 upload/
 
