@@ -631,13 +631,13 @@ pdf-reflexion:
     if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
     node {{pdf_renderer}} docs/reflexion/FlowHub_Reflexion.md docs/reflexion/FlowHub_Reflexion.pdf --title "FlowHub – Reflexion"
 
-# Render SUBMISSION.md → SUBMISSION.pdf (hub PDF — links into the GitHub main branch)
+# Render SUBMISSION.md → FlowHub_Uebersicht.pdf (Einstieg/Übersicht; links into the GitHub main branch)
 [group('pdf')]
 pdf-submission:
     #!/usr/bin/env bash
     set -euo pipefail
     if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
-    node {{pdf_renderer}} SUBMISSION.md SUBMISSION.pdf --title "FlowHub — CAS AISE Submission Document"
+    node {{pdf_renderer}} SUBMISSION.md FlowHub_Uebersicht.pdf --title "FlowHub — Übersicht & Einreichung"
 
 # Build SUBMISSION-bundle.pdf — SUBMISSION.md + every referenced artefact inlined (safety net)
 [group('pdf')]
@@ -647,15 +647,6 @@ pdf-submission-bundle:
     if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
     tools/submission-bundle.sh tools/build/submission-bundle.md
     node {{pdf_renderer}} tools/build/submission-bundle.md SUBMISSION-bundle.pdf --title "FlowHub — CAS AISE Submission Bundle"
-
-# Build SUBMISSION-main.pdf — concise self-contained reading doc (Projektbeschreibung + rubric self-check)
-[group('pdf')]
-pdf-submission-main:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
-    tools/submission-main.sh tools/build/submission-main.md
-    node {{pdf_renderer}} tools/build/submission-main.md SUBMISSION-main.pdf --title "FlowHub — CAS AISE Projektarbeit (Hauptdokument)"
 
 # Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
 [group('pdf')]
