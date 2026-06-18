@@ -6,6 +6,9 @@ W4B-C-AS001 · ZH-Sa-1 · FS26
 **Student:** Andreas Imboden
 **Datum:** Februar 2026
 
+> 📑 **Navigation:** Das Inhaltsverzeichnis dieses PDFs liegt als
+> **Lesezeichen / Outline** vor — im PDF-Viewer über die Seitenleiste erreichbar.
+
 ---
 
 ## 1. Vision

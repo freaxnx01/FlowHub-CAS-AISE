@@ -11,6 +11,10 @@
 > (Projektbeschreibung, ADRs 0001–0009, Design-Dokumente) liegen im Repository:
 > <https://github.com/freaxnx01/FlowHub-CAS-AISE>.
 
+> 📑 **Navigation:** Das Inhaltsverzeichnis dieses PDFs liegt als
+> **Lesezeichen / Outline** vor — im PDF-Viewer über die Seitenleiste erreichbar
+> (Adobe Acrobat: *Lesezeichen*; Edge/Chrome: *Inhalt/Document outline*).
+
 ---
 
 ## 1. Einführung und Ziele

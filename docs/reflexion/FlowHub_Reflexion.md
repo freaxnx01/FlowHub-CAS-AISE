@@ -10,6 +10,9 @@
 > Aufschlüsselung (generated-vs-handwritten-Anteile, Korrektur-Geschichten) liegt
 > in `docs/ai-usage.md`.
 
+> 📑 **Navigation:** Das Inhaltsverzeichnis dieses PDFs liegt als
+> **Lesezeichen / Outline** vor — im PDF-Viewer über die Seitenleiste erreichbar.
+
 ---
 
 ## Abkürzungen
