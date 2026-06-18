@@ -9,7 +9,7 @@
 
 ## Hinweis zum Aufbau dieses Dokuments
 
-Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie beginnt mit der Dokumentenübersicht und enthält danach eine kurze Projektzusammenfassung sowie ein klickbares Inhaltsverzeichnis aller Artefakte. Die vollständigen Inhalte liegen im verlinkten GitHub-Repository; sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar.
+Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie beginnt mit der Dokumentenübersicht und enthält danach eine kurze Projektzusammenfassung sowie ein klickbares Inhaltsverzeichnis aller Artefakte. Die vollständigen Inhalte liegen im verlinkten GitHub-Repository; sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar. 📑 Das Inhaltsverzeichnis liegt zusätzlich als **PDF-Lesezeichen / Outline** vor (im Viewer über die Seitenleiste).
 
 ---
 
