@@ -70,9 +70,26 @@ else
             }
             else if (_capture.Stage == LifecycleStage.Unhandled)
             {
-                <MudAlert Severity="Severity.Error" Class="mb-4">
-                    Skill integration failed: @(_capture.FailureReason ?? "Unknown error")
-                </MudAlert>
+                @* Unhandled ≠ crash: either no skill matched, or the matched skill has no
+                   configured integration. Only show a hard failure when there's an actual reason. *@
+                @if (!string.IsNullOrWhiteSpace(_capture.FailureReason))
+                {
+                    <MudAlert Severity="Severity.Warning" Class="mb-4">
+                        Not routed: @_capture.FailureReason
+                    </MudAlert>
+                }
+                else if (string.IsNullOrWhiteSpace(_capture.MatchedSkill))
+                {
+                    <MudAlert Severity="Severity.Info" Class="mb-4">
+                        No matching skill — this capture wasn't routed to any integration. Assign a skill or ignore it.
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info" Class="mb-4">
+                        No <strong>@_capture.MatchedSkill</strong> integration is configured, so this capture wasn't routed. Assign a skill or ignore it.
+                    </MudAlert>
+                }
             }
 
             @* Content *@

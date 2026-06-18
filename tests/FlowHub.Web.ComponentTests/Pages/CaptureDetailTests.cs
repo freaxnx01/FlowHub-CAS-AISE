@@ -89,7 +89,7 @@ public class CaptureDetailTests : TestContext
     }
 
     [Fact]
-    public void Render_Unhandled_ShowsIntegrationFailedAlertAndAssignButton()
+    public void Render_Unhandled_WithReason_ShowsNotRoutedAlertAndAssignButton()
     {
         var id = Guid.NewGuid();
         _captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
@@ -98,10 +98,28 @@ public class CaptureDetailTests : TestContext
 
         var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
 
-        cut.Markup.Should().Contain("Skill integration failed");
+        cut.Markup.Should().Contain("Not routed");
         cut.Markup.Should().Contain("wallabag 503");
         cut.Markup.Should().Contain("Assign skill");
         cut.Markup.Should().NotContain("Retry routing");
+    }
+
+    [Fact]
+    public void Render_Unhandled_NoSkillNoReason_ShowsNoMatchingSkillNotUnknownError()
+    {
+        // Regression: an Unhandled capture with neither a matched skill nor a failure reason
+        // (e.g. the demo's seeded file-upload fixture) must not read as a crash.
+        var id = Guid.NewGuid();
+        _captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(new Capture(id, ChannelKind.Web, "Scanned receipt", DateTimeOffset.UtcNow,
+                LifecycleStage.Unhandled, MatchedSkill: null, FailureReason: null));
+
+        var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
+
+        cut.Markup.Should().Contain("No matching skill");
+        cut.Markup.Should().NotContain("Skill integration failed");
+        cut.Markup.Should().NotContain("Unknown error");
+        cut.Markup.Should().Contain("Assign skill");
     }
 
     [Fact]
