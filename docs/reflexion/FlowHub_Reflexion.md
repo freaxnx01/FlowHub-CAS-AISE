@@ -12,6 +12,19 @@
 
 ---
 
+## Abkürzungen
+
+| Kürzel | Bedeutung |
+|---|---|
+| **SDD** | Subagent-Driven Development (siehe Kap. 2) |
+| **LSP** | Language Server Protocol (Symbol-/Referenz-Auflösung) |
+| **MEAI** | Microsoft.Extensions.AI — Provider-Abstraktion für LLMs in .NET |
+| **ADR** | Architecture Decision Record |
+| **TDD** | Test-Driven Development |
+| **rg** | ripgrep (schnelle Text-Suche) |
+
+---
+
 ## 1. KI-Werkzeuge im Entwicklungsprozess
 
 | Werkzeug | Einsatzbereich |
