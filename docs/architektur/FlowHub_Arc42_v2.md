@@ -38,6 +38,19 @@ Schnipsel, deterministisches Keyword-/URL-Muster-Matching dient als Fallback.
 - **Rahmen:** Umsetzung inkrementell über die fünf CAS-Blöcke (Einführung,
   Frontend, Service, Persistence, Deployment).
 
+**KI-Nutzen je Kernfunktion** (ein Satz pro Funktion):
+
+- **Erfassung:** KI macht die Ein-Schritt-Erfassung möglich — der Nutzer muss im
+  Moment des Capture nicht entscheiden, wohin die Information gehört.
+- **Klassifikation:** ein LLM erkennt Typ und Ziel-Skill des Captures, mit
+  deterministischem Keyword-Matching als Fallback.
+- **Anreicherung:** das LLM ergänzt Titel und Tags, die der Nutzer sonst manuell
+  setzen müsste.
+- **Routing:** profitiert direkt von der KI-Klassifikation — der richtige
+  Ziel-Dienst wird ohne Nutzer-Entscheid gewählt.
+- **Semantische Suche:** Embeddings erlauben Suche nach Bedeutung statt nach
+  exakten Stichwörtern.
+
 ### 1.2 Qualitätsziele
 
 Die Qualitätsziele sind als SMART-Anforderungen in `docs/spec/nfa.md`
@@ -610,6 +623,14 @@ gehören, sondern viele zugleich betreffen. Der Begriff ist die deutsche
 arc42-Bezeichnung für „Crosscutting Concepts".*
 
 ### 8.1 KI-Integration (ADR 0004, 0007)
+
+FlowHub setzt **zwei substanzielle KI-Rollen** ein: **(1) LLM-gestützte
+Klassifikation und Anreicherung** (`AiClassifier` — Typ-/Skill-Erkennung, Titel,
+Tags) und **(2) Embedding-basierte semantische Suche** (pgvector). Beide sind
+durch **Guardrails** abgesichert (deterministischer `KeywordClassifier`-Fallback,
+Schema-Validierung von `MatchedSkill`) und durch **Human-in-the-Loop** (nicht
+zugeordnete oder fehlgeschlagene Captures landen in der Orphan-/Unhandled-Inbox
+und sind per `POST …/retry` erneut anstossbar).
 
 Die KI ist über `Microsoft.Extensions.AI` (`IChatClient`) abstrahiert. Zwei
 Adapter sind verdrahtet — Anthropic (nativ via `Anthropic.SDK`) und OpenRouter

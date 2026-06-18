@@ -106,6 +106,15 @@ suites are trait-gated and excluded from this default run.
   - **1 `KeywordClassifier` test** — `ClassifyAsync_AnyContent_KeywordClassifierReturnsNullTitle` locks the `Title=null` contract
   - **4 trait-gated live integration tests** in `tests/FlowHub.AI.IntegrationTests/` — Anthropic Haiku 4.5 (URL→Wallabag, todo→Vikunja) + OpenRouter Llama 3.1 (URL→Wallabag, todo→Vikunja)
 
+> **Testing the AI parts (guardrails + non-determinism).** Because LLM output is
+> non-deterministic, the AI components are tested at their *guardrails*, not on
+> exact model wording: the 5 fallback-path tests assert that any provider failure
+> degrades to the deterministic `KeywordClassifier` (never throws); the
+> schema-violation guard asserts `MatchedSkill` is re-validated against the allowed
+> set even on a "successful" call; and the live tests are trait-gated
+> (`Category=AI`) so the default suite stays deterministic and offline. This is how
+> the KI-Anteil is kept verifiable despite non-deterministic responses.
+
 ### What's deferred
 
 | Test type | Why deferred | Lands in |
