@@ -56,6 +56,8 @@ Schnipsel, deterministisches Keyword-/URL-Muster-Matching dient als Fallback.
 Die Qualitätsziele sind als SMART-Anforderungen in `docs/spec/nfa.md`
 spezifiziert (Volltext-Tabelle in Kapitel 10). Die fünf tragenden Ziele:
 
+*Tabelle 1: Qualitätsziele (Auszug)*
+
 | Priorität | Qualitätsziel | Konkretisierung |
 |---|---|---|
 | 1 | **Performance** | Capture-Listen-Abfrage (Limit ≤ 50) p95 < 100 ms (NfA-01); B-Tree-Indizes auf allen häufigen Filterspalten (NfA-02). |
@@ -65,6 +67,8 @@ spezifiziert (Volltext-Tabelle in Kapitel 10). Die fünf tragenden Ziele:
 | 5 | **Datenschutz** *(Ziel)* | Verarbeitung möglichst auf eigener Infrastruktur (NfA-P1), KI-Transparenz/Provenienz (NfA-P2) — **noch nicht umgesetzt**, siehe Kapitel 11. |
 
 ### 1.3 Stakeholder
+
+*Tabelle 2: Stakeholder*
 
 | Stakeholder | Rolle | Erwartung an die Architektur |
 |---|---|---|
@@ -168,6 +172,8 @@ graph TD
     Web -- "OIDC" --> Authentik
 ```
 
+*Abbildung 1: System-Kontext (C4 Level 1)*
+
 > **Ist-Stand-Hinweis.** Das Kontextdiagramm zeigt das Gesamtbild inkl. geplanter
 > Bausteine. Am Abgabestand umgesetzt sind die sechs Projekte
 > `FlowHub.{Web,Core,Api,AI,Persistence,Skills}` mit Wallabag- und
@@ -247,6 +253,8 @@ flowchart TB
     mig --> pg
 ```
 
+*Abbildung 2: Ist-Architektur — Bausteinsicht Ebene 1 (modularer Monolith)*
+
 | Modul | Verantwortung |
 |---|---|
 | `FlowHub.Core` | Domänen-Typen (`Capture`, `Skill`, Health) + Driving-/Driven-Ports (`IClassifier`, `IEmbeddingService`, `ISkillIntegration`, Repository-Interfaces). Keine Infrastruktur-Referenzen. |
@@ -315,7 +323,7 @@ Flaches Layout `source/FlowHub.<Capability>/` (ADR 0001). Keine
 Sibling-Projekt-Referenzen zwischen Fähigkeiten; jede Abhängigkeit läuft über
 einen Port in `FlowHub.Core`.
 
-### 5.4 Datenmodell
+### 5.6 Datenmodell
 
 ```mermaid
 erDiagram
@@ -376,6 +384,8 @@ erDiagram
     Integrations ||--o{ IntegrationHealthSamples : "sampled"
 ```
 
+*Abbildung 3: Datenmodell (Entity-Relationship)*
+
 `Captures` ist das Aggregat-Root. Das `Embedding` (pgvector-Spalte mit
 **HNSW**-Index — *Hierarchical Navigable Small World*, ein
 Approximate-Nearest-Neighbour-Index für schnelle Vektor-Ähnlichkeitssuche — mit
@@ -400,6 +410,8 @@ stateDiagram-v2
     Unhandled --> Raw : POST /api/v1/captures/{id}/retry
     Completed --> [*]
 ```
+
+*Abbildung 4: Capture-Lebenszyklus (Zustandsdiagramm)*
 
 `Raw → Classified → Routed → Completed` ist der Happy Path; `Orphan` (kein Skill /
 Enrichment-Fault) und `Unhandled` (kein Adapter / Routing-Fault) sind die
@@ -450,6 +462,8 @@ sequenceDiagram
     Route->>DB: UPDATE stage=Completed, ExternalRef
 ```
 
+*Abbildung 5: Hot-Path — Submit bis Skill-Write (Sequenz)*
+
 Wesentlich: Die HTTP-Antwort (201) erfolgt **vor** Klassifikation und Routing —
 der Submit-Pfad bleibt schnell, die teure Arbeit läuft asynchron. Enrichment und
 Embedding laufen parallel; das Embedding ist Best-Effort.
@@ -489,6 +503,8 @@ sequenceDiagram
     end
 ```
 
+*Abbildung 6: Enrichment — Happy Path (Sequenz)*
+
 ### 6.4 Enrichment — Fallback (Provider-Fehler → KeywordClassifier)
 
 Jede Exception aus `IChatClient` (Netzwerk, Timeout, JSON-Parse,
@@ -513,6 +529,8 @@ sequenceDiagram
     Floor-->>AI: ClassificationResult(Tags, MatchedSkill, Title=null)
     AI-->>Consumer: ClassificationResult (Title=null)
 ```
+
+*Abbildung 7: Enrichment — Fallback auf KeywordClassifier (Sequenz)*
 
 ### 6.5 Skill-Routing — Erfolg
 
@@ -540,6 +558,8 @@ sequenceDiagram
     end
 ```
 
+*Abbildung 8: Skill-Routing — Erfolg (Sequenz)*
+
 ### 6.6 Skill-Routing — Retry-Erschöpfung → Fault-Observer
 
 Wirft `WriteAsync` bei jedem Versuch, erschöpft MassTransit das Retry-Budget
@@ -565,6 +585,8 @@ sequenceDiagram
     Observer->>Store: MarkUnhandledAsync(CaptureId, "exhausted retries: …")
     Note over Observer: Stage=Unhandled — sichtbar im Dashboard + API-Filter
 ```
+
+*Abbildung 9: Skill-Routing — Retry-Erschöpfung & Fault-Observer (Sequenz)*
 
 Ein steckengebliebener `Unhandled`-Capture kann über `POST
 /api/v1/captures/{id}/retry` neu eingereiht werden (re-published `CaptureCreated`,
@@ -715,6 +737,8 @@ Volltext je ADR in `docs/adr/`. Alle neun ADRs haben den Status *Accepted* —
 d. h. die Entscheidung wurde getroffen und ist in der Lösung umgesetzt (im
 Gegensatz zu *Proposed*, *Rejected* oder *Superseded*).
 
+*Tabelle 3: Architekturentscheidungen (ADR-Übersicht)*
+
 | ADR | Titel | Entscheidung (Kurz) |
 |---|---|---|
 | 0001 | Frontend Render Mode & Architecture | Blazor Interactive Server; UI ruft Services in-process (kein REST für UI); OIDC/Authentik; flaches `source/`-Layout; Web ist selbst ein Channel |
@@ -736,6 +760,8 @@ Entscheidungen (PE-1…PE-7), entkoppelt von den Implementierungs-ADRs.
 
 SMART-Anforderungen aus `docs/spec/nfa.md`:
 
+*Tabelle 4: Qualitätsanforderungen (SMART-NfA)*
+
 | ID | Kategorie | Ziel | Messung |
 |---|---|---|---|
 | NfA-01 | Performance | Capture-Listen-Abfrage (Limit ≤ 50) p95 < 100 ms | OTel-Span-Dauer auf `ListAsync`; Testcontainers mit 10k Zeilen |
@@ -753,6 +779,8 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 ---
 
 ## 11. Risiken und technische Schulden
+
+*Tabelle 5: Risiken und technische Schulden*
 
 | Punkt | Art | Status / Mitigation |
 |---|---|---|
@@ -797,6 +825,49 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 | **GHCR** | GitHub Container Registry — hostet die veröffentlichten Docker-Images |
 | **RFC 9457** | Standard für maschinenlesbare HTTP-Fehler („Problem Details") |
 | **DTO** | Data Transfer Object — einfaches Datenobjekt für die Übertragung über eine Grenze |
+
+---
+
+## Abbildungsverzeichnis
+
+- **Abbildung 1:** System-Kontext (C4 Level 1) — Kap. 3.2
+- **Abbildung 2:** Ist-Architektur — Bausteinsicht Ebene 1 (modularer Monolith) — Kap. 5.1
+- **Abbildung 3:** Datenmodell (Entity-Relationship) — Kap. 5.6
+- **Abbildung 4:** Capture-Lebenszyklus (Zustandsdiagramm) — Kap. 6.1
+- **Abbildung 5:** Hot-Path — Submit bis Skill-Write (Sequenz) — Kap. 6.2
+- **Abbildung 6:** Enrichment — Happy Path (Sequenz) — Kap. 6.3
+- **Abbildung 7:** Enrichment — Fallback auf KeywordClassifier (Sequenz) — Kap. 6.4
+- **Abbildung 8:** Skill-Routing — Erfolg (Sequenz) — Kap. 6.5
+- **Abbildung 9:** Skill-Routing — Retry-Erschöpfung & Fault-Observer (Sequenz) — Kap. 6.6
+
+## Tabellenverzeichnis
+
+- **Tabelle 1:** Qualitätsziele (Auszug) — Kap. 1.2
+- **Tabelle 2:** Stakeholder — Kap. 1.3
+- **Tabelle 3:** Architekturentscheidungen (ADR-Übersicht) — Kap. 9
+- **Tabelle 4:** Qualitätsanforderungen (SMART-NfA) — Kap. 10
+- **Tabelle 5:** Risiken und technische Schulden — Kap. 11
+
+## Literaturverzeichnis
+
+- arc42 — Template für Architekturdokumentation, v8. <https://arc42.org>
+- Simon Brown — *The C4 model for visualising software architecture.* <https://c4model.com>
+- *The Twelve-Factor App.* <https://12factor.net>
+- IETF RFC 9457 — *Problem Details for HTTP APIs.* <https://www.rfc-editor.org/rfc/rfc9457>
+- Microsoft — *Microsoft.Extensions.AI* (MEAI) Dokumentation. <https://learn.microsoft.com/dotnet/ai/>
+- Microsoft — *Entity Framework Core* Dokumentation. <https://learn.microsoft.com/ef/core/>
+- MassTransit — Dokumentation. <https://masstransit.io>
+- pgvector — *Open-source vector similarity search for Postgres* (HNSW-Index). <https://github.com/pgvector/pgvector>
+- Malkov & Yashunin (2018) — *Efficient and robust approximate nearest neighbor search using HNSW graphs.* IEEE TPAMI.
+
+## Anhang
+
+Der vollständige Quellcode, die ADR-Volltexte (0001–0009), Spezifikations- und
+Design-Dokumente sowie die Test-Suite liegen im Repository und sind aus der
+Einreichungs-Seite (`FlowHub_Uebersicht`) verlinkt:
+<https://github.com/freaxnx01/FlowHub-CAS-AISE>. Das Hilfsmittelverzeichnis und
+die Selbständigkeitserklärung sind dem separaten Dokument
+`Eigenständigkeitserklärung` beigelegt.
 
 ---
 
