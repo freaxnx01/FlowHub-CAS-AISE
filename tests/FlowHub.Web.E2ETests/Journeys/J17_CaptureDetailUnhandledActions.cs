@@ -16,7 +16,7 @@ public sealed class J17_CaptureDetailUnhandledActions : JourneyTestBase
         await row.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
         await row.ClickAsync();
 
-        await Page.Locator(".mud-alert", new PageLocatorOptions { HasText = "Skill integration failed" })
+        await Page.Locator(".mud-alert", new PageLocatorOptions { HasText = "No matching skill" })
             .First.WaitForAsync(new LocatorWaitForOptions { Timeout = 15_000 });
 
         (await Page.GetByText("Assign skill").CountAsync()).Should().BeGreaterThan(0);

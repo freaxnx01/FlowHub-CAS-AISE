@@ -153,12 +153,18 @@ public class SmokeTests : TestContext
 
         var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, unhandled.Id));
 
-        // Failure alert surfaces FailureReason (Beta MVP — Unhandled means a skill matched but
-        // its integration failed; the operator drills in here to read the reason).
-        cut.Markup.Should().Contain("Skill integration failed");
+        // Unhandled alert explains why the capture wasn't routed. When a FailureReason exists it
+        // is surfaced ("Not routed: …"); otherwise the alert states no skill matched (the stub's
+        // Unhandled fixture has neither a matched skill nor a reason) — never a bare "Unknown error".
+        cut.Markup.Should().NotContain("Unknown error");
         if (!string.IsNullOrWhiteSpace(unhandled.FailureReason))
         {
+            cut.Markup.Should().Contain("Not routed");
             cut.Markup.Should().Contain(unhandled.FailureReason);
+        }
+        else
+        {
+            cut.Markup.Should().Contain("No matching skill");
         }
 
         // Full content
