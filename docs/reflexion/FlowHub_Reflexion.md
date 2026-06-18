@@ -201,6 +201,44 @@ Design- und Review-Durchsatz sind es. Für das nächste Projekt: zuerst die
 Spec-Dokumente, `/ultrareview` ab Tag eins, ein Smoke-Target vor dem ersten
 Feature.
 
+### Drei Veto-Entscheidungen («nie an die KI delegiert»)
+
+Drei Klassen von Entscheidungen blieben bewusst beim Menschen — die KI durfte
+Optionen auflisten, aber nicht entscheiden:
+
+1. **Architektur-Stil und Transport.** Die Wahl *modularer Monolith statt
+   Microservices* und *In-Process-MassTransit (In-Memory in Dev, RabbitMQ in
+   Prod) statt verteiltem Service-Mesh* traf ich selbst. Die KI listete in den
+   ADRs die Alternativen auf („Alternatives considered"), die Abwägung und Wahl
+   gehörten mir. *Begründung:* Architektur-Trade-offs prägen den Code über
+   Monate und hängen an Kontext (Skala, Betrieb, Homelab), den ein
+   Single-Pass-Vorschlag nicht gewichtet. *Belegt:* ADR 0001, ADR 0002 (§
+   „Alternatives considered").
+
+2. **System-Invarianten gegen lokal-korrekten KI-Code.** Die KI erzeugte Code,
+   der die Embedding-Generierung in `EfCaptureService.SubmitAsync` integrierte —
+   lokal korrekt (eine Transaktion), global falsch, weil ein langsamer
+   Embedding-Provider das Submit-Latenz-Budget gesprengt hätte. Ich verwarf das
+   und verschob die Embedding-Erzeugung in den asynchronen
+   `CaptureEmbeddingConsumer`. *Begründung:* System-Invarianten (Latenz,
+   Konsistenzgrenzen) sind genau die Fehlerklasse, die ein lokal fokussiertes
+   Review nicht sieht. *Belegt:* `docs/ai-usage.md` („Embedding-on-Submit"),
+   `docs/insights/block-5.md` + fixender Commit.
+
+3. **Scope und Port-Verträge.** *Was* gebaut wird (welche Skills/Integrationen)
+   und die Form der treibenden/getriebenen Ports (`IClassifier`,
+   `ISkillIntegration`) blieben menschlich festgelegt; offene Prompts blähen den
+   Scope auf, deshalb wurde jeder Plan vor der Umsetzung von mir eingefroren
+   („der Plan ist der Vertrag"). *Begründung:* Der Vertrag zwischen Modulen ist
+   die teuerste spätere Änderung — er gehört vor die Generierung, nicht in sie.
+   *Belegt:* `docs/spec/` (Port-/UC-Definitionen), die Pläne unter
+   `docs/superpowers/plans/`.
+
+Der Übertrag auf die künftige Arbeitsweise: Diese drei Grenzen — Architektur,
+System-Invarianten, Verträge — bleiben auch im nächsten Projekt menschlich; die
+KI beschleunigt das Davor (Recherche, Optionen) und das Danach (Generierung,
+Review), nicht die Entscheidung selbst.
+
 ### Transfer CAS → Projektarbeit
 
 | CAS-Block | Mitgenommener Inhalt | Konkrete FlowHub-Entscheidung |
