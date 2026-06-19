@@ -12,10 +12,16 @@ itself — internal documentation of the build process and the upload procedure.
   | # | Datei | Quelle | Build |
   |---|---|---|---|
   | 1 | `FlowHub_Uebersicht.pdf` (Einstieg/Übersicht + Index, ~8 S.) | `SUBMISSION.md` | `just pdf-submission` |
-  | 2 | `FlowHub_Arc42_v2.pdf` (Architektur, as built, ~24 S.) | `docs/architektur/FlowHub_Arc42_v2.md` | `just pdf-arc42` |
-  | 3 | `FlowHub_Reflexion.pdf` (KI-Reflexion, ~7 S.) | `docs/reflexion/FlowHub_Reflexion.md` | `just pdf-reflexion` |
-  | 4 | `flowhub-praesentation.pdf` (Foliensatz, ~18 S.) | `docs/presentation/flowhub-praesentation.md` (Marp) | Marp-Build |
+  | 2 | `FlowHub_Arc42_v2.pdf` (Architektur / SAD, as built, ~24 S.) | `docs/architektur/FlowHub_Arc42_v2.md` | `just pdf-arc42` |
+  | 3 | `FlowHub_Projektbeschreibung_v4.pdf` (Umsetzung + Code-Struktur, ~27 S.) | `docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md` | `just pdf-projektbeschreibung` |
+  | 4 | `FlowHub_Reflexion.pdf` (KI-Reflexion + Fazit, ~7 S.) | `docs/reflexion/FlowHub_Reflexion.md` | `just pdf-reflexion` |
   | 5 | `Eigenständigkeitserklärung.pdf` (**signiert**, ~2 S.) | `docs/submission/eigenstaendigkeitserklaerung.md` | `just pdf-eigenstaendigkeitserklaerung` |
+
+  Die **Präsentation** (`docs/presentation/flowhub-praesentation.pdf`, Marp) wird
+  **nicht** mehr hochgeladen — das Upload-Limit (5 Dateien) deckt jetzt die
+  Kurzformel ab (SAD + Projektbeschreibung + Reflexion/Fazit). Der Foliensatz ist
+  stattdessen aus der **Übersicht** verlinkt und liegt committet unter `docs/` auf
+  GitHub.
 
 - **Repo-only Sicherheitsnetz:** `SUBMISSION-bundle.pdf` (~267 S., alle Artefakte
   inline) via `just pdf-submission-bundle` — nicht hochgeladen, nur Archiv.
@@ -28,9 +34,13 @@ URL auf das Git-Repository Ihrer Lösung"*. FlowHub liefert ein **Mehr-Dokumente
 - **`FlowHub_Uebersicht`** ist der Einstieg: öffnet mit der Dokumentenübersicht,
   enthält die Projektzusammenfassung und ein klickbares Inhaltsverzeichnis, das
   jedes Artefakt auf dem `main`-Branch verlinkt (inkl. der Repo-URL).
-- **`Arc42`** und **`Reflexion`** sind die inhaltlichen Hauptdokumente
-  (Architektur bzw. KI-Reflexion), die ohne GitHub-Browsing lesbar sind.
-- **`Präsentation`** ist der Foliensatz.
+- **`Arc42`** (SAD), **`Projektbeschreibung`** und **`Reflexion`** sind die
+  inhaltlichen Hauptdokumente (Architektur · Umsetzung/Code-Struktur · KI-Reflexion
+  + Fazit), die ohne GitHub-Browsing lesbar sind — sie decken die Kurzformel
+  RE + SAD + Projektbeschreibung + Reflexion + Fazit ab (RE steckt in Arc42 §1/§3
+  + `docs/spec/use-cases.md`).
+- **`Präsentation`** ist der Foliensatz; er wird **nicht hochgeladen**, sondern aus
+  der Übersicht verlinkt (committet unter `docs/presentation/` auf GitHub).
 - **`Eigenständigkeitserklärung`** ist die signierte FFHS-Pflicht-Beilage.
 - Das **Bundle** (267 S., alles inline) bleibt das Offline-Archiv im Repo — es
   wird nicht hochgeladen (das Upload-Limit ist mit 5 Dateien erreicht), steht
@@ -88,9 +98,10 @@ Walk this list top-to-bottom. Each step is gated by the previous.
 
 - [ ] `just pdf-submission` → `FlowHub_Uebersicht.pdf` (no warnings)
 - [ ] `just pdf-arc42` → `docs/architektur/FlowHub_Arc42_v2.pdf`
+- [ ] `just pdf-projektbeschreibung` → `docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf`
 - [ ] `just pdf-reflexion` → `docs/reflexion/FlowHub_Reflexion.pdf`
-- [ ] `flowhub-praesentation.pdf` current (rebuild the Marp deck if the source changed)
 - [ ] `just pdf-eigenstaendigkeitserklaerung` → `Eigenständigkeitserklärung.pdf`
+- [ ] `flowhub-praesentation.pdf` current (rebuild the Marp deck if the source changed) — **linked from the Übersicht, not uploaded**, but must be current on GitHub
 - [ ] *(optional)* `just pdf-submission-bundle` → `SUBMISSION-bundle.pdf` (archive)
 - [ ] Open each PDF: bookmarks/TOC clickable, **all diagrams rendered** (the guard
       fails the build otherwise), no horizontal table clipping
@@ -108,8 +119,8 @@ The signature applies to the **separate `Eigenständigkeitserklärung.pdf`**. Pi
 ### F — Upload to Moodle (T-0, before 2026-07-04 24:00)
 
 - [ ] Run `just package-submission` → assembles the numbered set into `./upload/`:
-      `00_FlowHub_Uebersicht.pdf` · `01_FlowHub_Arc42.pdf` · `02_FlowHub_Reflexion.pdf` ·
-      `03_FlowHub_Praesentation.pdf` · `04_FlowHub_Eigenstaendigkeitserklaerung.pdf`
+      `00_FlowHub_Uebersicht.pdf` · `01_FlowHub_Arc42.pdf` · `02_FlowHub_Projektbeschreibung.pdf` ·
+      `03_FlowHub_Reflexion.pdf` · `04_FlowHub_Eigenstaendigkeitserklaerung.pdf`
 - [ ] **Sign** `04_FlowHub_Eigenstaendigkeitserklaerung.pdf` (overwrite in `./upload/`)
 - [ ] Log into FFHS Moodle → *PVA FS26 → Deployment & Abgabe Projektarbeit*
 - [ ] Upload the **5 files** from `./upload/` (the `00–04` prefixes keep them in reading order)
@@ -134,7 +145,7 @@ just build && just test && just package-submission && \
 
 `FlowHub_Uebersicht.pdf`, `SUBMISSION-bundle.pdf` and `Eigenständigkeitserklärung.pdf`
 are **build artefacts** rendered on demand — gitignored, not committed. The
-content PDFs `FlowHub_Arc42_v2.pdf`, `FlowHub_Reflexion.pdf` and
-`flowhub-praesentation.pdf` **are committed** so their hub links resolve on
-GitHub. Either way, regenerate them before uploading so they reflect the latest
+content PDFs `FlowHub_Arc42_v2.pdf`, `FlowHub_Projektbeschreibung_v4.pdf`,
+`FlowHub_Reflexion.pdf` and `flowhub-praesentation.pdf` **are committed** so their
+hub links resolve on GitHub. Either way, regenerate them before uploading so they reflect the latest
 sources.
