@@ -20,16 +20,16 @@ Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Si
 | # | Dokument | Seiten | Inhalt |
 |---|---|---:|---|
 | 0 | **`00_FlowHub_Uebersicht.pdf`** *(diese Datei)* | 8 | Einstieg: Dokumentenübersicht + Projektzusammenfassung + klickbares Inhaltsverzeichnis |
-| 1 | **`01_FlowHub_Arc42.pdf`** — Architektur (as built) | 24 | 12 arc42-Kapitel, 9 Diagramme (System-Kontext, Bausteine, Lebenszyklus, Sequenzen, ER) |
-| 2 | **`02_FlowHub_Reflexion.pdf`** | 7 | KI-Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit |
-| 3 | **`03_FlowHub_Praesentation.pdf`** | 18 | Foliensatz: Teil 1 Produkt, Teil 2 Bauen mit KI |
+| 1 | **`01_FlowHub_Arc42.pdf`** — Architektur / SAD (as built) | 24 | 12 arc42-Kapitel, 9 Diagramme (System-Kontext, Bausteine, Lebenszyklus, Sequenzen, ER); RE in §1/§3 |
+| 2 | **`02_FlowHub_Projektbeschreibung.pdf`** | 27 | Umsetzung des SAD + Code-Struktur: Vision, Stakeholder, Funktionsumfang, Architektur, Risiken |
+| 3 | **`03_FlowHub_Reflexion.pdf`** | 7 | KI-Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit |
 | 4 | **`04_FlowHub_Eigenstaendigkeitserklaerung.pdf`** | 2 | Hilfsmittelverzeichnis + unterschriebene Erklärung |
 
 ### Weitere Dokumente im Repository (verlinkt, nicht separat hochgeladen)
 
 | Dokument | Inhalt |
 |---|---|
-| **Projektbeschreibung v4** (27 S.) | Ausführliche Projektbeschreibung: Vision, Stakeholder, Funktionsumfang, Architektur, Risiken |
+| **Präsentation** (18 S., Foliensatz) | Teil 1 Produkt, Teil 2 Bauen mit KI — verlinkt, nicht separat hochgeladen: [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) |
 | **SUBMISSION-Bundle** (267 S.) | Vollständiges Offline-Archiv: diese Seite + alle referenzierten Artefakte inline (Sicherheitsnetz) |
 | **ADR 0001–0009** | Architekturentscheidungen (Render-Mode, Service-/Async-Architektur, KI, Persistenz, Vektor-Suche, LLM-Hosting, Logging, Telemetrie) |
 | **Spezifikation** (`docs/spec/`) | Use Cases, NfA (SMART), Akzeptanzkriterien, Test-Strategie, System-Kontext |

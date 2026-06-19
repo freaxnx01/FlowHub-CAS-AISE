@@ -650,17 +650,18 @@ pdf-submission-bundle:
 
 # Assemble the numbered Moodle upload set (00–04) into ./upload/
 [group('pdf')]
-package-submission: pdf-submission pdf-arc42 pdf-reflexion pdf-eigenstaendigkeitserklaerung
+package-submission: pdf-submission pdf-arc42 pdf-projektbeschreibung pdf-reflexion pdf-eigenstaendigkeitserklaerung
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p upload
     rm -f upload/*.pdf
-    cp FlowHub_Uebersicht.pdf                       upload/00_FlowHub_Uebersicht.pdf
-    cp docs/architektur/FlowHub_Arc42_v2.pdf        upload/01_FlowHub_Arc42.pdf
-    cp docs/reflexion/FlowHub_Reflexion.pdf         upload/02_FlowHub_Reflexion.pdf
-    cp docs/presentation/flowhub-praesentation.pdf  upload/03_FlowHub_Praesentation.pdf
-    cp "Eigenständigkeitserklärung.pdf"             upload/04_FlowHub_Eigenstaendigkeitserklaerung.pdf
+    cp FlowHub_Uebersicht.pdf                                      upload/00_FlowHub_Uebersicht.pdf
+    cp docs/architektur/FlowHub_Arc42_v2.pdf                       upload/01_FlowHub_Arc42.pdf
+    cp docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf upload/02_FlowHub_Projektbeschreibung.pdf
+    cp docs/reflexion/FlowHub_Reflexion.pdf                        upload/03_FlowHub_Reflexion.pdf
+    cp "Eigenständigkeitserklärung.pdf"                            upload/04_FlowHub_Eigenstaendigkeitserklaerung.pdf
     echo "Upload set ready in ./upload/ (00–04). Sign 04 before uploading."
+    echo "Note: the Präsentation is NOT uploaded — it is linked in the Übersicht (docs/presentation/ on GitHub)."
     ls -1 upload/
 
 # Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
