@@ -8,7 +8,7 @@
 This document was originally a forward-looking sketch authored during Block 3 Nachbereitung. The Beta MVP slice (`docs/superpowers/specs/2026-05-04-beta-mvp-design.md`, ADR 0005) landed the `Capture` aggregate ahead of the formal Block-4 phase, so the Capture-related rows below now reflect what actually shipped. Skill / Integration / CaptureTag rows remain design sketches and will be re-litigated in Block 4 — column types, lengths, and constraints may evolve before implementation.
 
 > **Implementation status (2026-05-04):**
-> - ✅ `Capture` — shipped as `CaptureEntity` in `source/FlowHub.Persistence/Entities/CaptureEntity.cs`, with EF Core configuration in `FlowHubDbContext.OnModelCreating`. Initial migration: `Migrations/20260504120638_Initial.cs`.
+> - ✅ `Capture` — shipped as `CaptureEntity` in `source/FlowHub.Persistence/Entities/CaptureEntity.cs`, with EF Core configuration in `FlowHubDbContext.OnModelCreating`. Initial migration: `Migrations/20260506194548_0001_Initial.cs`.
 > - ⏳ `Skill`, `Integration`, `CaptureTag` — sketch only; Block 4 implementation pending.
 > - 🚫 Outbox / idempotency receiver — explicitly deferred (ADR 0003 §"Open items"); not in Block 4 scope.
 
@@ -146,7 +146,7 @@ This join table is the straightforward option. The alternative — a `text[]` Po
 - `source/FlowHub.Core/Captures/Capture.cs` — aggregate root (actual field list)
 - `source/FlowHub.Persistence/Entities/CaptureEntity.cs` — shipped EF Core entity (Beta MVP, internal sealed)
 - `source/FlowHub.Persistence/FlowHubDbContext.cs` — shipped DbContext + indexes
-- `source/FlowHub.Persistence/Migrations/20260504120638_Initial.cs` — shipped initial migration
+- `source/FlowHub.Persistence/Migrations/20260506194548_0001_Initial.cs` — shipped initial migration
 - ADR 0005 (`docs/adr/0005-persistence.md`) — Persistence ADR
 - `source/FlowHub.Core/Health/SkillHealth.cs`, `IntegrationHealth.cs` — health snapshot records
 - `source/FlowHub.Core/Classification/ClassificationResult.cs` — Tags + MatchedSkill + Title
