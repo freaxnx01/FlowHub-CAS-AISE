@@ -83,6 +83,36 @@ spezifiziert (Volltext-Tabelle in Kapitel 10). Die fünf tragenden Ziele:
 FlowHub ist bewusst ein **Single-Operator-System**, keine Multi-User-Plattform
 (siehe Abgrenzung, Kapitel 11 / Projektbeschreibung §10).
 
+### 1.4 Anwendungsfälle (Überblick)
+
+Die funktionalen Anforderungen sind als 18 Anwendungsfälle (UC-01…UC-18) — mit
+Akteur, Auslöser, Ablauf, Nachbedingung und Akzeptanzkriterien (inkl. prüfendem
+Test) — in `docs/spec/use-cases.md` spezifiziert. Überblick (Status: ✅ gebaut ·
+⏳ geplant):
+
+*Tabelle 3: Anwendungsfälle (UC-Überblick)*
+
+| UC | Anwendungsfall | Akteur | Status |
+|---|---|---|---|
+| UC-01 | Capture via Web-UI erfassen (Quick) | Operator | ✅ |
+| UC-02 | Capture via Web-UI erfassen (Langform) | Operator | ✅ |
+| UC-03 | Capture via Telegram erfassen | Operator | ⏳ |
+| UC-04 | Capture-Health im Dashboard überwachen | Operator | ✅ |
+| UC-05 | Captures durchsuchen & filtern | Operator | ✅ |
+| UC-06 | Fehlgeschlagenen Capture inspizieren & behandeln | Operator | ✅ |
+| UC-07 | Skill- & Integration-Health einsehen | Operator | ✅ |
+| UC-08 | Capture via REST-API erfassen | Nicht-UI-Client | ✅ |
+| UC-09 | Capture KI-klassifizieren & routen (Async-Pipeline) | System | ✅ |
+| UC-10 | Graceful Fallback auf Keyword-Klassifikation | System | ✅ |
+| UC-11 | Fehlgeschlagenen Capture per Dashboard erneut routen | Operator | ✅ |
+| UC-12 | Captures nach Lifecycle-Stage filtern | Operator | ✅ |
+| UC-13 | Captures nach Tag filtern | Operator | ✅ |
+| UC-14 | Captures nach Inhalt/Titel suchen | Operator | ✅ |
+| UC-15 | Skill-Run-Historie eines Captures ansehen | Operator | ✅ |
+| UC-16 | Integration-Health-Historie ansehen | Operator | ✅ |
+| UC-17 | Deployment via Docker Compose | Operator | ✅ |
+| UC-18 | Semantische Suche über Captures (REST; Cloud-Embedding-Key nötig) | Operator | ✅ |
+
 ---
 
 ## 2. Randbedingungen
@@ -741,7 +771,7 @@ Volltext je ADR in `docs/adr/`. Alle neun ADRs haben den Status *Accepted* —
 d. h. die Entscheidung wurde getroffen und ist in der Lösung umgesetzt (im
 Gegensatz zu *Proposed*, *Rejected* oder *Superseded*).
 
-*Tabelle 3: Architekturentscheidungen (ADR-Übersicht)*
+*Tabelle 4: Architekturentscheidungen (ADR-Übersicht)*
 
 | ADR | Titel | Entscheidung (Kurz) |
 |---|---|---|
@@ -764,7 +794,7 @@ Entscheidungen (PE-1…PE-7), entkoppelt von den Implementierungs-ADRs.
 
 SMART-Anforderungen aus `docs/spec/nfa.md`:
 
-*Tabelle 4: Qualitätsanforderungen (SMART-NfA)*
+*Tabelle 5: Qualitätsanforderungen (SMART-NfA)*
 
 | ID | Kategorie | Ziel | Messung |
 |---|---|---|---|
@@ -784,7 +814,7 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 
 ## 11. Risiken und technische Schulden
 
-*Tabelle 5: Risiken und technische Schulden*
+*Tabelle 6: Risiken und technische Schulden*
 
 | Punkt | Art | Status / Mitigation |
 |---|---|---|
@@ -848,9 +878,10 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 
 - **Tabelle 1:** Qualitätsziele (Auszug) — Kap. 1.2
 - **Tabelle 2:** Stakeholder — Kap. 1.3
-- **Tabelle 3:** Architekturentscheidungen (ADR-Übersicht) — Kap. 9
-- **Tabelle 4:** Qualitätsanforderungen (SMART-NfA) — Kap. 10
-- **Tabelle 5:** Risiken und technische Schulden — Kap. 11
+- **Tabelle 3:** Anwendungsfälle (UC-Überblick) — Kap. 1.4
+- **Tabelle 4:** Architekturentscheidungen (ADR-Übersicht) — Kap. 9
+- **Tabelle 5:** Qualitätsanforderungen (SMART-NfA) — Kap. 10
+- **Tabelle 6:** Risiken und technische Schulden — Kap. 11
 
 ## Literaturverzeichnis
 
