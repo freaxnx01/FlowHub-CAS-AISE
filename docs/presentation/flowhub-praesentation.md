@@ -111,7 +111,7 @@ Zwei entkoppelte MassTransit-Consumer (ADR 0003), verbunden über Events:
         └ PUT /api/v1/projects/{Zitate}/tasks  →  ③ Completed (= Vikunja-Task-ID)
 ```
 
-Stufe 1 klassifiziert (LLM, mit Keyword-Fallback) **und** reichert an; Stufe 2 routet zum Ziel-Dienst. Enricher leben in `FlowHub.AI/Enrichers` — **pro Bucket eine `IEnricher`-Klasse**, nur für Vikunja. **Zwei System-Prompts** ans LLM — Wortlaut auf den nächsten Folien.
+Stufe 1 klassifiziert (LLM, mit Keyword-Fallback) **und** reichert an; Stufe 2 routet zum Ziel-Dienst. Enricher leben in `FlowHub.AI/Enrichers` — **pro Bucket eine `IEnricher`-Klasse**, nur für Vikunja. **Zwei System-Prompts** ans LLM.
 
 <!--
 [~50 s] Der technische Kern in einem Bild.
@@ -151,7 +151,7 @@ Talk is cheap. Show me the code.
 >
 > About Linus Torvalds: *<2–4-Satz-Info vom Modell>*
 
-Den **Autor** liefert schon die Klassifikation (Modell-Wissen aus dem berühmten Spruch); die **Autor-Info** ergänzt der Enricher mit *„Never invent facts."* als Halluzinations-Bremse.
+Den **Autor** liefert schon die Klassifikation (Modell-Wissen); die **Autor-Info** ergänzt der Enricher mit *„Never invent facts."* als Halluzinations-Stopper.
 
 </div>
 </div>
@@ -167,7 +167,7 @@ schreibt alles als Beschreibung in den Vikunja-Task im Projekt Zitate."
 
 <!-- _class: dense -->
 
-## System-Prompt ① — **Klassifikation** (Torvalds-Zitat)
+## System-Prompt ① — **Klassifikation** (Zitat)
 
 `AiClassifier` → `IChatClient.GetResponseAsync<AiClassificationResponse>` · *role: system* (`AiPrompts`)
 
@@ -214,7 +214,7 @@ ausschliesslich über das strukturierte Schema, nie in Prosa."
 
 <!-- _class: dense -->
 
-## System-Prompt ② — **Anreicherung** (Torvalds-Zitat)
+## System-Prompt ② — **Anreicherung** (Zitat)
 
 `ZitateEnricher.FetchBioAsync` → zweiter LLM-Call · *role: system* (`ZitateEnricherPrompts`) · `Temperature 0.2` · `MaxOutputTokens 280`
 
@@ -235,7 +235,7 @@ Quote: "Talk is cheap. Show me the code."
 
 <div class="small">
 
-**Warum ein eigener Prompt?** Andere Aufgabe als Klassifikation → eigener, fokussierter Prompt. Input: nur `author` + `quote` aus den `entities` (der **Autor** wurde schon bei der Klassifikation erkannt; hier kommt die **Autor-Info** dazu). *„Never invent facts"* + Leerstring-bei-Unbekannt = **Halluzinations-Bremse**.
+**Warum ein eigener Prompt?** Andere Aufgabe als Klassifikation → eigener, fokussierter Prompt. Input: nur `author` + `quote` aus den `entities` (der **Autor** wurde schon bei der Klassifikation erkannt; hier kommt die **Autor-Info** dazu). *„Never invent facts"* + Leerstring-bei-Unbekannt = **Halluzinations-Stopper**.
 
 **Warum `Temperature 0.2`?** Niedrige Temperatur = wenig Zufall bei der Token-Wahl → **faktentreue, reproduzierbare** Antworten statt „kreativer" Variation — genau richtig für eine Autoren-Bio (zusammen mit *„Never invent facts"*). `MaxOutputTokens 280` deckelt die Länge.
 
@@ -245,7 +245,7 @@ Quote: "Talk is cheap. Show me the code."
 [~40 s] Der zweite Prompt — bewusst getrennt.
 "Anreicherung ist eine andere Aufgabe, also ein eigener, knapper System-Prompt. Er sieht nur
 Autor und Zitat, nicht den ganzen Capture. Entscheidend ist die letzte Zeile: 'Never invent
-facts' und bei Unbekannten ein Leerstring — das ist die Halluzinations-Bremse. Das Resultat
+facts' und bei Unbekannten ein Leerstring — das ist die Halluzinations-Stopper. Das Resultat
 wird die Beschreibung des Vikunja-Tasks im Projekt Zitate."
 -->
 
@@ -301,9 +301,10 @@ pgvector. Alles in Docker Compose, inkrementell über fünf Blöcke gebaut."
 
 ## Genutzte **externe Services**
 
-![bg right:12%](assets/demo-qr.png)
+**🔴 Live-Demo:** **`https://demo.flowhub.freaxnx01.ch`**
 
-**🔴 Live-Demo:** **`https://demo.flowhub.freaxnx01.ch`** — QR rechts scannen.
+<div class="cols">
+<div style="flex: 3">
 
 | Service | Rolle in FlowHub | Web |
 |---|---|---|
@@ -314,7 +315,15 @@ pgvector. Alles in Docker Compose, inkrementell über fünf Blöcke gebaut."
 | **OpenRouter** | LLM-Gateway — Klassifikation (Gemma) | `openrouter.ai` |
 | **Mistral** | Embeddings (1024-dim) → Suche | `mistral.ai` |
 
-<span class="small">Alt. Cloud-LLM-Adapter: **Anthropic** (Claude) · Hosting-Policy ADR 0007 (Default lokal **Ollama** geplant) · Persistenz **PostgreSQL + pgvector**.</span>
+</div>
+<div style="flex: 1; text-align: center;">
+
+![w:150](assets/demo-qr.png)
+
+</div>
+</div>
+
+<span class="small">Cloud-LLM-Adapter: **Anthropic** (Claude) · Hosting-Policy ADR 0007 (Default lokal **Ollama** geplant) · Persistenz **PostgreSQL + pgvector**.</span>
 
 <!--
 [~35 s] Was FlowHub draussen anbindet — nicht alle vorlesen.
@@ -326,7 +335,7 @@ Ollama ist die geplante Default-Hosting-Variante."
 
 ---
 
-## Betrieb: beobachten & selbst heilen
+## Betrieb: Monitoring & selbst heilen
 
 | Was | Wie |
 |---|---|
@@ -334,8 +343,6 @@ Ollama ist die geplante Default-Hosting-Variante."
 | Health | `/health/live` · In-App-Integration-Health (Vikunja/Wallabag/Paperless) |
 | Demo-Status | öffentliche **Uptime-Kuma**-Statusseite (`status.demo.flowhub…`) — prüft auch LLM-Erreichbarkeit |
 | Self-Healing | Container-`restart`-Policies + Healthchecks · KeywordClassifier-Fallback bei LLM-Ausfall |
-
-*Block-5-Lernziel „Systeme überwachen und optimieren" — von der App bis zur Demo.*
 
 <!--
 [~30 s] Monitoring ist nicht nachträglich angeklebt: Metriken via OpenTelemetry,
@@ -363,7 +370,7 @@ mit KI zu bauen? Werkzeuge, Disziplin und die Learnings."
 
 ## Der Harness — Überblick
 
-Die KI wurde nicht ad-hoc geprompted, sondern über eine **Werkzeugkette** gesteuert:
+Die KI wurde nicht ad-hoc geprompted, sondern über einen **Tool-Workflow** gesteuert:
 
 | Ebene | Werkzeug |
 |---|---|
@@ -409,20 +416,20 @@ nichts geht in main ohne zwei Reviews. Diese Struktur hält die KI auf Kurs."
 **`ai-instructions`** (eigenes Repo) — Konventionen als **feste Regeln**, nicht als Prompt:
 
 - `base` (stack-agnostisch) **+ Stack-Overlay `dotnet-blazor`** → daraus leitet sich `CLAUDE.md` ab
-- z. B. **Coding Guidelines** (Clean Code) · **SemVer** · **Conventional Commits** · **12-Factor** · **TDD** — *Tests werden nie nachträglich angepasst, nur damit Code grün wird*
+- z. B. **Coding Guidelines** (Clean Code) · **SemVer** · **Conventional Commits** · **12-Factor** (Prinzipien für Cloud-native Apps) · **TDD** — *Tests werden nie nachträglich angepasst, nur damit Code grün wird*
 
-**Eigene CAS-AISE-Skills** (Claude-Code-Slash-Commands):
+**Eigene Skills** (Claude-Code-Slash-Commands):
 
 - `/ui-brainstorm · /ui-flow · /ui-build · /ui-review` — der **4-Phasen-UI-Workflow**
 - `/flowhub-capture · -triage · -issue` — das Produkt selbst bedienen
-- `examiner-sim` · `cas-aise-grade-self-check` — **Selbstbewertung** gegen die Moodle-Rubrik
+- `examiner-sim` · `cas-aise-grade-self-check` — **Selbstbewertung** gegen die Moodle-Bewertungskriterien
 
 <!--
 [~40 s] Steuerung statt Zuruf.
 "Damit die KI nicht bei null anfängt: ein eigenes ai-instructions-Repo – stack-agnostischer
 Kern plus .NET-Blazor-Overlay mit Coding Guidelines, SemVer, Conventional Commits, TDD als
 festen Regeln, aus denen sich das CLAUDE.md ableitet. Plus eigene Skills als Slash-Commands:
-der UI-Workflow, Commands fürs Produkt, und ein Skill zur Selbstbewertung gegen die Rubrik."
+der UI-Workflow, Commands fürs Produkt, und ein Skill zur Selbstbewertung gegen die Bewertungskriterien."
 -->
 
 ---
@@ -478,7 +485,7 @@ Ziel vorbei, und ich denke das UI durch, bevor Code existiert."
 
 ---
 
-## Context-Hygiene — das **unterschätzte Thema**
+## Context-Hygiene
 
 Der Kontext ist das **knappste Gut**. Zwei Disziplinen brachten am meisten:
 
@@ -504,20 +511,17 @@ Faustregel: Was weiterleben muss, gehört in eine Datei – nicht in den Chat."
 
 ## Automatisierung — **KI prüft KI**
 
-**`agent-pipeline`** (GitHub Actions) — **autonome Issue-Implementierung**:
-Issue mit `ai-implement` labeln → **Branch + Draft-PR**, mit Retry-Policy.
+**`cas-aise-submission-preflight`** (Multi-Agent-Check) — **Dry-Run der Moodle-Abgabe**:
+baut das Bundle, prüft alle Verweise, scannt auf Leaks → **Go/No-Go** vor dem Upload.
 
 **`examiner-sim`** (Multi-Agent-Workflow) — baut die Abgabe-PDFs, **benotet** sie
-gegen die **Moodle-Rubrik** mit einem Agenten-Panel und übt die Live-Demo.
-
-> Der Mensch schreibt nicht mehr jede Zeile — er definiert die **Leitplanken**
-> und lässt **KI-gestützte Prüfungen** finden, was die KI übersieht.
+gegen die **Moodle-Bewertungskriterien** mit einem Agenten-Panel und bedient die Live-Demo.
 
 <!--
 [~35 s] Die Meta-Ebene: KI prüft KI.
-"Zwei Automatisierungen: eine Pipeline, die ein gelabeltes Issue autonom implementiert und
-einen Draft-PR öffnet; und ein examiner-sim, der die Abgabe-PDFs baut, gegen die
-Moodle-Rubrik benotet und die Demo durchspielt. Der Mensch definiert die Leitplanken;
+"Zwei KI-gestützte Prüfungen: ein Preflight-Check, der die Moodle-Abgabe als Dry-Run baut,
+alle Verweise prüft und ein Go/No-Go gibt; und ein examiner-sim, der die Abgabe-PDFs baut,
+gegen die Moodle-Bewertungskriterien benotet und die Demo bedient. Der Mensch definiert die Leitplanken;
 KI-gestützte Prüfungen finden, was die KI selbst übersieht."
 -->
 
@@ -527,33 +531,34 @@ KI-gestützte Prüfungen finden, was die KI selbst übersieht."
 
 ## `agent-pipeline` — autonome **Issue → PR**
 
-Wiederverwendbarer GitHub-Actions-Workflow (`freaxnx01/agent-pipeline`); lokaler Einstieg `.github/workflows/claude.yml` ist nur ein dünner Stub.
+Wiederverwendbarer GitHub-Actions-Workflow (`freaxnx01/agent-pipeline`); der lokale `.github/workflows/claude.yml` reicht die Arbeit nur an die Pipeline weiter.
 
 ```text
-Issue --[Label: ai-implement]--> claude.yml   (Trigger, write-Rechte)
-                                    |  ruft reusable workflow auf
-                                    v
-           agent-pipeline / claude-implement.yml@main
-                                    |
-  Branch -> commit -> Claude implementiert -> Draft-PR
-                                    |
-  '--> Kommentar am Issue: Run-URL · Branch · PR-Link · Retry-Hinweise
+Issue + Label "ai-implement"
+   -> claude.yml  ->  agent-pipeline/claude-implement.yml@main
+        -> Branch · commit · Claude implementiert · Draft-PR
+            -> Issue-Kommentar: Run-URL · PR-Link · Retry-Hinweise
 ```
 
 <div class="cols small">
 <div>
 
 **Auslösen**
-- Issue mit **`ai-implement`** labeln — nur Write-Zugriff (Gate auf Public-Repo); oder manuell *Actions → Run workflow*.
+- Issue mit **`ai-implement`** labeln; oder manuell *Actions → Run workflow*.
 - `ubuntu-latest`, Timeout 60 min.
+
+**Retry-Policy**
+- `attempt`-Zähler, Reruns gedeckelt.
+- Rate-Limit erreicht → **automatischer** Retry.
+- `max-turns`-Erschöpfung → Kommentar im Issue, **Mensch** entscheidet.
 
 </div>
 <div>
 
-**Retry-Policy**
-- `attempt`-Zähler, Reruns gedeckelt.
-- Rate-Limit / transient → **automatischer** Retry.
-- `max-turns`-Erschöpfung → Hinweis am Issue, **Mensch** entscheidet.
+**LLM-Run (Claude)**
+- Auth via `CLAUDE_CODE_OAUTH_TOKEN`.
+- Budget über **`max-turns`**.
+- Claude-Code-Action meldet je Lauf **Modell + Token-Verbrauch** (Input/Output).
 
 </div>
 </div>
@@ -570,10 +575,10 @@ automatisch bei Rate-Limits, nur die max-turns-Erschöpfung gibt zurück an den 
 
 ## Wo die KI **glänzt** — und wo **nicht**
 
-Über alle Blöcke: **~85–95 % des Codes KI-generiert**.
+Über alle Blöcke: **~95 % des Codes KI-generiert**.
 
 ### Glänzt — **repetitiv & gut spezifiziert**
-7 `IEntityTypeConfiguration<T>`, EF-Migrations, Refit-Interfaces, CI-YAML;
+7 `IEntityTypeConfiguration<T>`, EF-Migrations, CI-YAML;
 **16 Integrationstests** gegen echtes PostgreSQL — **alle grün beim ersten Lauf**.
 
 ### Scheitert — wo **Domäne & Performance** zählen
@@ -584,10 +589,10 @@ automatisch bei Rate-Limits, nur die max-turns-Erschöpfung gibt zurück an den 
 
 <!--
 [~45 s] Ehrlich und konkret – überzeugt die Dozenten.
-"89 Prozent KI-Anteil in der Persistenz, projektweit 85 bis 95. Wo sie glänzt: alles
+"Projektweit rund 95 Prozent KI-Anteil. Wo sie glänzt: alles
 Repetitive und gut Spezifizierte – Konfigurationsklassen, Migrations, 16 Integrationstests
 gegen echtes Postgres, alle grün beim ersten Lauf. Wo sie scheitert: N+1-Abfragen, blind
-gesetzte CASCADE-Löschungen, veraltete Versionen, ständiger Feature-Drang. Diese 10 bis 15
+gesetzte CASCADE-Löschungen, veraltete Versionen, ständiger Feature-Drang. Diese letzten
 Prozent Mensch entscheiden über Erfolg oder Desaster."
 -->
 
@@ -598,15 +603,14 @@ Prozent Mensch entscheiden über Erfolg oder Desaster."
 Die KI schrieb den ganzen Deployment-Stack. Dann lief **ein** Befehl:
 `make smoke-prod` — End-to-End-Probe des laufenden Stacks.
 
-**An einem Nachmittag fand er 5 reale, latente Bugs:**
+**Folgende Bugs wurden gefunden:**
 
 - `.editorconfig` fehlt im Build-Image → Build bricht mit `TreatWarningsAsErrors` ab
 - Compose-Env-Casing `${EMBEDDINGS__APIKEY}` ≠ `Embeddings__ApiKey` → Embeddings still no-op
 - Leerstring-Modellname → `AssertNotNullOrEmpty`-Crash beim Start
 - Mistral lehnt das `dimensions`-Feld ab → 422
-- Passbolt-Refs vom Makefile überschattet → KI-Call erreichte nie den Provider
 
-**¡AI, caramba!** — fünf Bugs, die jeder für sich die Abgabe blockiert hätten.
+**¡AI, caramba!**
 
 > KI schrieb den Code. Eine **KI-gestützte Prüfung** fand, was die KI übersah.
 > **Der Mensch bleibt im Loop — als Reviewer.**
@@ -615,7 +619,7 @@ Die KI schrieb den ganzen Deployment-Stack. Dann lief **ein** Befehl:
 [~45 s] Die beste Geschichte – mit etwas Spannung.
 "Mein liebster Moment: Die KI hatte den kompletten Deployment-Stack geschrieben, sah gut
 aus. Dann ein – auch KI-geschriebener – Smoke-Test, der den echten Stack hochfährt. Erster
-Lauf: fünf latente Bugs, alle hätten die Abgabe blockiert. Lektion: KI schreibt den Code,
+Lauf: mehrere latente Bugs, die die Abgabe blockiert hätten. Lektion: KI schreibt den Code,
 aber eine – idealerweise KI-gestützte – Prüfung muss finden, was die KI übersieht."
 -->
 
@@ -625,15 +629,17 @@ aber eine – idealerweise KI-gestützte – Prüfung muss finden, was die KI ü
 
 ## Fazit
 
-**KI ist ein starker Accelerator für Infrastruktur-Code** —
-Boilerplate, Migrations, Tests entstehen in Minuten.
+**KI ist ein starker Accelerator für Coding** —
+Logik, Boilerplate, EF-Migrations, Tests entstehen in Minuten.
 
 **Sie braucht menschliche Führung bei Architektur & Domäne** —
-FK-Strategie, Performance, Scope, aktuelle Versionen.
+FK-Strategie, Performance, Scope.
 
 ### Der Mensch bleibt **Architekt und Reviewer**.
 
 <span class="small">Code & Doku: github.com/freaxnx01/FlowHub-CAS-AISE · Danke — Fragen?</span>
+
+![w:130](assets/repo-qr.png)
 
 <!--
 [~30 s] Klar landen, Q&A öffnen.
