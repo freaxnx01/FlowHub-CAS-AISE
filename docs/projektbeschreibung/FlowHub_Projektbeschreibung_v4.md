@@ -27,7 +27,7 @@ FlowHub schafft einen einzigen Eingang für all diese Inputs und erledigt die Ab
 
 - Technisch versierter Anwender
 - Betreibt Self-Hosted Services im Heimnetzwerk (Proxmox, Docker)
-- Nutzt bereits: paperless-ngx, Passbolt, GitLab, Vikunja, Wallabag
+- Nutzt bereits: paperless-ngx, Passbolt, Git Forge, Vikunja, Wallabag
 - Problem: Informationsschnipsel landen überall, kein einheitlicher Eingang
 - Ziel: Schnelle, reibungslose Erfassung von Alltagsinformationen via Telegram
 
@@ -70,7 +70,7 @@ FlowHub integriert ausschliesslich Self-Hosted Services aus dem eigenen Homelab 
 | Vikunja | https://vikunja.io/ | Task-Management für Bücher, Filme/TV |
 | paperless-ngx | https://docs.paperless-ngx.com/ | Dokumenten-Management-System (DMS) |
 | Wallabag | https://wallabag.org/ | Read-Later Service für Artikel |
-| GitLab (Self-Hosted) | https://gitlab.freaxnx01.ch/ | Repository mit Obsidian Markdown Files (Knowledge Base) |
+| Git Forge (Self-Hosted) | — | Repository mit Obsidian Markdown Files (Knowledge Base) |
 
 ---
 
@@ -120,7 +120,7 @@ Beispiele:
 
 ---
 
-#### KnowledgeSkill – Knowledge Base Einträge (→ Obsidian via GitLab)
+#### KnowledgeSkill – Knowledge Base Einträge (→ Obsidian via Git Forge)
 
 Erkennung: Artikel-URL mit explizitem Wissensbasis-Kontext; Keywords: notiz, wissen, merken, knowledge, speichern
 
@@ -140,7 +140,7 @@ Beispiele:
 
 ---
 
-#### QuoteSkill – Zitate mit KI-Anreicherung (→ Obsidian via GitLab)
+#### QuoteSkill – Zitate mit KI-Anreicherung (→ Obsidian via Git Forge)
 
 Erkennung: Keywords: zitat, quote, gesagt von; Anführungszeichen im Text; Share-Links auf Zitate
 
@@ -191,8 +191,8 @@ Der MVP-Scope ist bewusst eng gefasst. Komplexität wird durch saubere Architekt
 | BookSkill | URL (Buchshop) + Keywords | Vikunja | ✅ MVP |
 | MovieSkill | Keywords + Google-Share-URL | Vikunja | ✅ MVP |
 | DocumentSkill | Dateianhang (Foto/PDF) | paperless-ngx | ✅ MVP |
-| KnowledgeSkill | URL + Keywords | Obsidian (GitLab) | Future |
-| QuoteSkill | Keywords + Anführungszeichen | Obsidian (GitLab) | Future |
+| KnowledgeSkill | URL + Keywords | Obsidian (Git Forge) | Future |
+| QuoteSkill | Keywords + Anführungszeichen | Obsidian (Git Forge) | Future |
 | GenericSkill | Kein anderer Skill greift | FlowHub Inbox (PostgreSQL) | ✅ MVP |
 | Skill-Vorschlag | Unbekannter Input → neuen Skill vorschlagen | – | Future |
 
@@ -203,7 +203,7 @@ Der MVP-Scope ist bewusst eng gefasst. Komplexität wird durch saubere Architekt
 | Wallabag | Self-Hosted | REST API | URL speichern |
 | Vikunja | Self-Hosted | REST API | Task/Item erstellen |
 | paperless-ngx | Self-Hosted | REST API | Dokument hochladen |
-| Obsidian / GitLab | Self-Hosted | Git API | Markdown-Datei erstellen |
+| Obsidian / Git Forge | Self-Hosted | Git API | Markdown-Datei erstellen |
 | FlowHub Inbox | Eigene DB | PostgreSQL | Fallback-Speicher |
 
 **Benutzerinteraktion**
@@ -243,7 +243,7 @@ Diese Features sind architekturell vorbereitet, werden aber nicht für die Abgab
 
 | Service | Erweiterung |
 |---|---|
-| Obsidian / GitLab | RAG-Quelle für den Assistenten |
+| Obsidian / Git Forge | RAG-Quelle für den Assistenten |
 | paperless-ngx | AI-gestützte Tagging und Metadaten-Extraktion |
 | Vikunja | Erweiterte Metadaten (Cover, Rating, Genre für Filme/Bücher) |
 
@@ -348,7 +348,7 @@ flowchart TB
         REG["SkillRegistry — lädt SKILL.md (Dependency Injection)<br/>+ Skill-Vorschlag für unbekannten Input"]
         DISP["SkillDispatcher<br/>Keyword-Match → AI-Confidence-Score → direkt / Rückfrage"]
         AI["AI-Layer — Microsoft.Extensions.AI<br/>Provider via Config wechselbar: Ollama lokal / Cloud (Anthropic) als Fallback"]
-        RC["REST-Clients (Refit, typsicher) — ISkillHandler-Port<br/>WallabagClient · VikunjaClient · PaperlessClient · GitLabClient"]
+        RC["REST-Clients (Refit, typsicher) — ISkillHandler-Port<br/>WallabagClient · VikunjaClient · PaperlessClient · GitForgeClient"]
         WEB["Blazor SSR Admin-Dashboard<br/>Inbox · Skill-Konfig · Logs · Vorschlag-Review"]
         PG[("PostgreSQL 16<br/>FlowHub-Inbox, EF Core")]
         RD[("Redis 7<br/>Pending Inputs / Session")]
@@ -359,7 +359,7 @@ flowchart TB
         WB["Wallabag"]
         VK["Vikunja"]
         PL["paperless-ngx"]
-        GL["GitLab + Obsidian"]
+        GL["Git Forge + Obsidian"]
     end
 
     TG --> BOT --> REG --> DISP
@@ -381,7 +381,7 @@ flowchart TB
 | `ArticleSkill` | Wallabag |
 | `HomelabSkill` · `BookSkill` · `MovieSkill` | Vikunja |
 | `DocumentSkill` | paperless-ngx |
-| `KnowledgeSkill` · `QuoteSkill` | Obsidian / GitLab |
+| `KnowledgeSkill` · `QuoteSkill` | Obsidian / Git Forge |
 | `GenericSkill` | Inbox (PostgreSQL) |
 
 _Konzept-Stand Februar 2026 · Andreas Imboden — Services self-hosted auf Proxmox, Cloud-LLM als KI-Fallback, Docker-Compose-Deployment. Maßgeblich für den Abgabestand ist die **Ist-Architektur** oben._
@@ -465,7 +465,7 @@ Proxmox VE
 +-- VM/LXC: paperless-ngx   (bereits vorhanden)
 +-- VM/LXC: Vikunja         (Task-Management / Kanban)
 +-- VPS (extern, DE):
-    +-- GitLab              (Obsidian Markdown Repo)
+    +-- Git Forge           (Obsidian Markdown Repo)
 
 Cloud:
 +-- Anthropic API           (Claude, Fallback für KI)
@@ -568,7 +568,7 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 - Kostenfreiheit: Keine laufenden SaaS-Gebühren
 - Vikunja ersetzt Todoist vollständig für Task/Item-Management und übernimmt auch die Kanban-Sicht für Homelab-Services
 
-**Konsequenz:** Alle 4 Ziel-Services (Wallabag, Vikunja, paperless-ngx, GitLab) sind Self-Hosted auf Proxmox.
+**Konsequenz:** Alle 4 Ziel-Services (Wallabag, Vikunja, paperless-ngx, Git Forge) sind Self-Hosted auf Proxmox.
 
 ---
 
@@ -693,7 +693,7 @@ KI hat keine Rolle im Workflow ersetzt. Sie hat verschoben, welche Rolle der Eng
 | M.E.AI | Microsoft.Extensions.AI – Abstraktion für LLM-Provider in .NET |
 | Vikunja | Self-Hosted Task-Management / Kanban (ersetzt Todoist) |
 | Wallabag | Self-Hosted Read-Later Service für Artikel |
-| Knowledge Base | Obsidian Markdown Files, versioniert in GitLab (Self-Hosted) |
+| Knowledge Base | Obsidian Markdown Files, versioniert in Git Forge (Self-Hosted) |
 
 ---
 
