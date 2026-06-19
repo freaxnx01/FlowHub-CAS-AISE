@@ -255,6 +255,29 @@ System-Invarianten, Verträge — bleiben auch im nächsten Projekt menschlich; 
 KI beschleunigt das Davor (Recherche, Optionen) und das Danach (Generierung,
 Review), nicht die Entscheidung selbst.
 
+### Konzept → Ist: das Skill-System bewusst vereinfacht
+
+Die Konzeptphase sah ein **deklaratives Hybrid-Skill-System** vor: eine
+`SKILL.md` (YAML-Frontmatter, „wie eine Claude-Skill") plus typsicherer Handler,
+zur Laufzeit ladbar — neue Skills ohne Rebuild (Projektbeschreibung v4 §6.2).
+Gebaut wurde die typsichere Hälfte allein: kompilierte
+`ISkillIntegration`-Adapter, vom `SkillRoutingConsumer` per `Name` aufgelöst; die
+`SkillRegistry` hält nur **Metadaten** für Health/UI. Der Grund kam erst bei der
+Umsetzung scharf heraus: Die **Kommunikation mit dem Ziel-Dienst** — HTTP-Pfad,
+Auth-Schema, Payload-Mapping, Response-Parsing (Vikunja-Task-PUT,
+Wallabag-OAuth-Refresh, Paperless-Upload) — lebt im Adapter und ist *nicht
+deklarierbar*; sie bleibt zwingend Code. Eine `SKILL.md` hätte den Handler nicht
+ersetzt, nur ergänzt — also mehr bewegliche Teile bei kaum Mehrwert. Ich verwarf
+den deklarativen Loader zugunsten eines einfacheren, vollständig getesteten
+Routings. *Lernen für die nächste Konzeptphase:* Ein deklarativer Anspruch muss
+am **teuersten Teilproblem** (hier: der Integrationslogik) geprüft werden,
+*bevor* er als Architektur ins Konzept geschrieben wird — sonst trägt das Konzept
+ein Versprechen, das die Umsetzung wieder einsammeln muss. Die deklarative Idee
+ist nicht verworfen, sondern als Roadmap-Eintrag (*Marketplace for Skills* +
+*Declarative Skills + declarative target interaction*) verortet. *Belegt:*
+Projektbeschreibung v4 §6.2 (Umsetzungshinweis), ADR 0002, Arc42 v2 (as built),
+`docs/project/ROADMAP.md`.
+
 ### Transfer CAS → Projektarbeit
 
 | CAS-Block | Mitgenommener Inhalt | Konkrete FlowHub-Entscheidung |

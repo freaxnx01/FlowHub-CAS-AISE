@@ -174,3 +174,9 @@ section img { display: block; margin-inline: auto; }
 
 /* Small / dense text utility */
 .small { font-size: 0.82em; color: var(--fh-muted); }
+
+/* Dense slides (code-heavy deep-dives): scale the whole slide down so
+   verbatim content keeps clear of the footer band. Apply via _class: dense */
+section.dense { font-size: 21px; }
+section.dense pre { margin: 0.35em 0; }
+section.dense h2 { margin-bottom: 0.25em; }

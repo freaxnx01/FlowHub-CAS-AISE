@@ -20,8 +20,8 @@ npx @marp-team/marp-cli --html \
   --theme-set theme/flowhub.css --allow-local-files \
   flowhub-praesentation.md -o flowhub-praesentation.html
 
-# PDF mit Sprechnotizen
-npx @marp-team/marp-cli --html --pdf --pdf-notes \
+# PDF mit Sprechnotizen + Lesezeichen (TOC aus den Folientiteln, ohne "Page N")
+npx @marp-team/marp-cli --html --pdf --pdf-notes --pdf-outlines --pdf-outlines.pages=false \
   --theme-set theme/flowhub.css --allow-local-files \
   flowhub-praesentation.md -o flowhub-praesentation.pdf
 
