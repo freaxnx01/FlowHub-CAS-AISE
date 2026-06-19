@@ -117,3 +117,37 @@ This is a deliberate Block-4 decision (ADR 0005 §6 area): the operational conce
 | Column | Type | Index | Notes |
 |---|---|---|---|
 | `Captures.Embedding` | `vector(1024)` (pgvector) | `captures_embedding_hnsw_idx` (HNSW, `vector_cosine_ops`) | Populated asynchronously by `CaptureEmbeddingConsumer` via Mistral `mistral-embed`. Nullable — captures without an embedding fall back to keyword search. |
+
+## Migrations
+
+The schema is evolved exclusively through EF Core migrations (10 to date,
+`Migrations/20260506194548_0001_Initial.cs` … `…_0009_AddCaptureAttachment.cs`),
+applied migrations-first by the `flowhub.migrations` init job — never via
+`EnsureCreated`/auto-migrate at runtime (ADR 0005). Representative script — the
+Block-5 pgvector migration that backs the vector-search row above
+(`Migrations/20260507115906_0004_AddEmbedding.cs`):
+
+```csharp
+protected override void Up(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.AlterDatabase()
+        .Annotation("Npgsql:PostgresExtension:vector", ",,");
+
+    migrationBuilder.AddColumn<Vector>(
+        name: "Embedding", table: "Captures",
+        type: "vector(1024)", nullable: true);
+
+    migrationBuilder.Sql("""
+        CREATE INDEX IF NOT EXISTS captures_embedding_hnsw_idx
+        ON "Captures" USING hnsw ("Embedding" vector_cosine_ops);
+        """);
+}
+
+protected override void Down(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.Sql("""DROP INDEX IF EXISTS captures_embedding_hnsw_idx;""");
+    migrationBuilder.DropColumn(name: "Embedding", table: "Captures");
+    migrationBuilder.AlterDatabase()
+        .OldAnnotation("Npgsql:PostgresExtension:vector", ",,");
+}
+```
