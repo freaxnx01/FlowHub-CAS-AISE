@@ -639,6 +639,8 @@ FK-Strategie, Performance, Scope.
 
 <span class="small">Code & Doku: github.com/freaxnx01/FlowHub-CAS-AISE · Danke — Fragen?</span>
 
+![w:130](assets/repo-qr.png)
+
 <!--
 [~30 s] Klar landen, Q&A öffnen.
 "Mein Fazit: KI ist ein starker Beschleuniger für Infrastruktur-Code, braucht aber
