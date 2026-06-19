@@ -3,7 +3,7 @@ export const meta = {
   description: 'Simulate the CAS-AISE examiner: rebuild the real submission PDFs, grade them against the Moodle rubric with a multi-agent panel, exercise the live public demo, and produce a dated grade sheet.',
   whenToUse: 'Run before a real exam/submission checkpoint to get an honest, rubric-anchored grade prediction against the freshly-built artifacts and the live demo. Repeatable.',
   phases: [
-    { title: 'Build', detail: 'regenerate SUBMISSION + bundle PDFs, extract text from the real PDFs' },
+    { title: 'Build', detail: 'regenerate the 5 uploaded PDFs (package-submission) + the convenience bundle, extract text per uploaded PDF' },
     { title: 'Examine', detail: '5 rubric-bucket examiners + 1 live-demo examiner, in parallel' },
     { title: 'Architecture', detail: 'deep architecture lenses (focus=architecture only): ADRs, structure fidelity, behavior/interaction views, deployment topology, NFR alignment' },
     { title: 'Skeptic', detail: 'adversarial pass — challenge over-generous scores per bucket' },
@@ -27,8 +27,9 @@ const REPO    = (args && args.repoDir) || '.'
 
 const RUBRIC      = REPO + '/vault/Organisation/Bewertungskriterien.md'
 const WORK        = REPO + '/tools/build/examiner-sim'
-const BUNDLE_TXT  = WORK + '/bundle.txt'
-const SUB_TXT     = WORK + '/submission.txt'
+const BUNDLE_TXT  = WORK + '/bundle.txt'        // convenience superset (repo-only safety net, NOT uploaded)
+const UPLOAD_TXT  = WORK + '/upload.txt'        // concatenated text of the 5 PDFs actually uploaded to Moodle
+const SUB_TXT     = WORK + '/submission.txt'    // Übersicht only (== uploaded PDF #00)
 const SHOTS       = REPO + '/nachbereitung/examiner-sim/screenshots'
 // REPORT path + effective metadata are resolved AFTER the build agent runs,
 // so they use the freshly-derived commit/stamp/date even when args don't propagate.
@@ -43,7 +44,7 @@ const ITEM = {
     awarded:       { type: 'number', description: 'one of the discrete scale values' },
     max:           { type: 'number' },
     justification: { type: 'string', description: 'why this exact level, in the examiner voice' },
-    evidence:      { type: 'array', items: { type: 'string' }, description: 'concrete citations: file/section/page in the bundle PDF that justify the score' },
+    evidence:      { type: 'array', items: { type: 'string' }, description: 'concrete citations: file/section/page in the uploaded PDFs (or bundle) that justify the score' },
     gaps:          { type: 'array', items: { type: 'string' }, description: 'what is missing to reach the next level' },
   },
 }
@@ -116,6 +117,8 @@ const BUILD_SCHEMA = {
     bundleBytes:   { type: 'number' },
     bundleTxt:     { type: 'string' },
     submissionTxt: { type: 'string' },
+    uploadTxt:     { type: 'string', description: 'path to concatenated text of the 5 uploaded PDFs (what Moodle receives)' },
+    uploadFiles:   { type: 'array', items: { type: 'string' }, description: 'uploaded PDFs with page counts, e.g. "02_FlowHub_Projektbeschreibung.pdf (27p)"' },
     commit:        { type: 'string', description: 'git rev-parse --short HEAD' },
     stamp:         { type: 'string', description: 'filesystem-safe timestamp, e.g. 2026-06-07T0758 from `date +%Y-%m-%dT%H%M`' },
     date:          { type: 'string', description: 'YYYY-MM-DD from `date +%F`' },
@@ -244,16 +247,18 @@ const build = await agent(
     'FIRST: cd into the repository checkout you are grading: ' + REPO + '  (all steps below run there; the extracted-text and report paths are given as absolute paths).',
     'Then, from that repo root:',
     '',
-    '1. Regenerate the real submission PDFs (these call the project puppeteer renderer):',
-    '   just pdf-submission',
-    '   just pdf-submission-bundle',
-    '   If `just` is unavailable, read the justfile targets `pdf-submission` / `pdf-submission-bundle` and run the equivalent commands. The bundle build (tools/submission-bundle.sh) uses `set -euo pipefail`, so a successful exit means every referenced artifact was found and inlined; a failure means a referenced file is missing — capture that as a warning (an examiner would see a broken bundle).',
+    '1. Regenerate the REAL Moodle upload set — the 5 separately-uploaded PDFs (puppeteer renderer):',
+    '   just package-submission',
+    '   This builds + numbers ./upload/00_FlowHub_Uebersicht.pdf, 01_FlowHub_Arc42.pdf, 02_FlowHub_Projektbeschreibung.pdf, 03_FlowHub_Reflexion.pdf, 04_FlowHub_Eigenstaendigkeitserklaerung.pdf. NOTE: the Präsentation is intentionally NOT uploaded (it is linked from the Übersicht) — do not expect it in ./upload/.',
+    '   Also build the convenience superset: just pdf-submission-bundle  (the repo-only safety net, NOT uploaded — it inlines repo-only artifacts too). Both use `set -euo pipefail`; a non-zero exit means a referenced/built file was missing — capture that as a warning and continue.',
+    '   If `just` is unavailable, read those justfile targets and run the equivalent renderer commands.',
     '2. mkdir -p ' + WORK,
-    '3. Extract the REAL PDF text so the examiners read what the examiner sees:',
-    '   pdftotext -layout SUBMISSION-bundle.pdf ' + BUNDLE_TXT,
-    '   pdftotext -layout FlowHub_Uebersicht.pdf ' + SUB_TXT,
-    '4. Record evidence of freshness: run `ls -l --time-style=full-iso SUBMISSION-bundle.pdf FlowHub_Uebersicht.pdf` and `pdfinfo SUBMISSION-bundle.pdf` (page count + byte size). Confirm the mtimes are from this run.',
-    '5. Sanity-check the extracted text is non-empty and contains the cover title "FlowHub" and the table-of-contents.',
+    '3. Extract the REAL PDF text so the examiners read EXACTLY what the examiner receives:',
+    '   - Upload set (PRIMARY): for each ./upload/0*_*.pdf in 00..04 order, append a "===== <filename> =====" header then its `pdftotext -layout` output, concatenated into ' + UPLOAD_TXT + '.',
+    '   - Übersicht alone into ' + SUB_TXT + ' (pdftotext -layout ./upload/00_FlowHub_Uebersicht.pdf).',
+    '   - Convenience bundle into ' + BUNDLE_TXT + ' (pdftotext -layout SUBMISSION-bundle.pdf).',
+    '4. Record freshness: `ls -l --time-style=full-iso upload/*.pdf SUBMISSION-bundle.pdf` and `pdfinfo` page counts per upload PDF + bundle. Confirm mtimes are from this run; populate uploadFiles (name + page count) and bundlePages.',
+    '5. Sanity-check ' + UPLOAD_TXT + ' is non-empty and contains the cover title "FlowHub", the Arc42 architecture content, and the Projektbeschreibung.',
     '6. Capture run metadata so the report can be dated independently of any caller-supplied args: `git rev-parse --short HEAD` (→ commit), `date +%Y-%m-%dT%H%M` (→ stamp, used in the report filename), and `date +%F` (→ date). If args provided different values, prefer the freshly-derived ones.',
     '',
     'Return the structured result. If a build command genuinely cannot run, set built=false, explain in notes, and still attempt pdftotext on any existing PDFs so the run can degrade gracefully.',
@@ -315,7 +320,8 @@ const examinePrompt = (b) => [
   b.items.map((i) => '  - ' + i).join('\n'),
   '',
   'Grade against the REAL rendered submission, exactly as the examiner receives it:',
-  '  - Primary source: the extracted text of the real bundle PDF at ' + BUNDLE_TXT + ' (grep/Read it). This is the single PDF uploaded to Moodle; if content is absent from the bundle it effectively does not count, even if it exists elsewhere in the repo.',
+  '  - PRIMARY source: the text of the 5 uploaded PDFs at ' + UPLOAD_TXT + ' (grep/Read it) — Übersicht, Arc42, Projektbeschreibung, Reflexion, Eigenständigkeitserklärung. This is literally what Moodle receives.',
+  '  - The examiner also has the GitHub repo, linked from the Übersicht. The bundle text at ' + BUNDLE_TXT + ' inlines those repo-only artifacts (full use-cases, design docs, all ADRs, Block-Nachbereitungen) as a SUPERSET. Content found ONLY in the bundle (not in ' + UPLOAD_TXT + ') is reachable by the real examiner only by following a repo link — treat it as weaker/secondary evidence and say so when a score leans on it.',
   '  - You MAY also open the underlying repo files for depth/cross-check: ' + b.read.map((p) => REPO + '/' + p).join(', ') + '.',
   '',
   (archFocus && (b.key === 'Entwurf' || b.key === 'Programmierung' || b.key.startsWith('KI')))
@@ -328,7 +334,7 @@ const skepticPrompt = (b, examined) => [
   'You are an adversarial second examiner (the skeptical co-grader) for the CAS-AISE bucket "' + b.key + '". A first examiner produced these scores:',
   JSON.stringify(examined, null, 2),
   '',
-  'Your job is to challenge over-generous scoring. For each item, verify the cited evidence actually exists at the claimed strength in the real bundle text (' + BUNDLE_TXT + ', grep for the cited terms). Where the first examiner awarded a level the evidence does not fully support, recommend a lower (or, rarely, higher) value with a crisp reason. Default to challenging: if evidence is vague, hand-wavy, or merely asserted, push the score down. Compute the adjusted bucket total. Be specific and cite what you checked.',
+  'Your job is to challenge over-generous scoring. For each item, verify the cited evidence actually exists at the claimed strength in the real uploaded-PDF text (' + UPLOAD_TXT + ', grep for the cited terms; the bundle ' + BUNDLE_TXT + ' is only a repo-link superset — push back on any score that leans on bundle-only content). Where the first examiner awarded a level the evidence does not fully support, recommend a lower (or, rarely, higher) value with a crisp reason. Default to challenging: if evidence is vague, hand-wavy, or merely asserted, push the score down. Compute the adjusted bucket total. Be specific and cite what you checked.',
 ].join('\n')
 
 // Pipeline: each bucket is graded, then immediately challenged by the skeptic.
@@ -372,7 +378,7 @@ const verdict = await agent(
     '- Max achievable is 100 (rubric update June 2026: the framework-concepts item is framework-neutral and fully in scope for .NET; no item is excluded — state this explicitly).',
     '- For each item, choose a FINAL awarded value: start from the first examiner, and where the skeptic raised a well-founded dispute, move toward the skeptic. Show both the first-pass and final value.',
     '- Fold the live-demo findings into the KI/Sub-Systeme bucket items ("intelligente und flexible Services" and "Container/Sub-Systeme") — the working live demo is first-hand evidence.',
-    '- If the build step reported warnings or built=false, reflect that as real risk (a broken/incomplete bundle PDF is what the examiner would actually receive).',
+    '- If the build step reported warnings or built=false, reflect that as real risk (broken/incomplete uploaded PDFs — or content reachable only via repo links — are what the examiner would actually receive).',
     '',
     'Write a Markdown report to ' + REPORT + ' (mkdir -p its directory first) with these sections:',
     '  1. Title (note focus=' + focus + ') + run metadata (date, commit, demo URL, bundle pages).',
