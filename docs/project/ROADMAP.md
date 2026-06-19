@@ -177,6 +177,31 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 
 ---
 
+## Declarative Skills + declarative target interaction (no-rebuild authoring)
+
+**Status:** Idea — not scoped into any Block. Foundation the *Marketplace for Skills* (above) would build on.
+**Motivation:** Today a Skill is a compiled `ISkillIntegration` adapter — adding a new skill *or* a new target service means writing C#, registering DI, and shipping a release. The concept-phase pitched a declarative `SKILL.md` hybrid (see Projektbeschreibung v4 §6.2 / ADR 0002); it was descoped because the **target-system communication itself** (HTTP path, auth, payload mapping, response parsing) lives in the adapter and resisted declaration. The boost is unlocked only if **both halves** go declarative: the Skill *and* its target interaction. Then introducing a skill/target is dropping in files, not recompiling.
+
+### Proposed shape
+
+1. **Declarative Skill descriptor** — a `SKILL.md` with YAML frontmatter authored like a Claude Skill (name, description, trigger keywords / URL patterns, required config keys, which target it routes to). The `SkillRegistry` discovers and loads these at runtime instead of resolving compiled types by name.
+2. **Declarative target interaction** *(the hard part — brainstorm)* — a descriptor for the outbound call: endpoint + method, auth scheme, a mapping from `Capture` fields → request body, and a path from response → external ref. Candidate mechanisms to weigh:
+   - a request-template / mapping DSL (e.g. JSONata / Liquid / Scriban) over a constrained schema;
+   - an **MCP-style contract** where the target is an external service FlowHub talks to over a stable protocol (sidesteps bespoke HTTP entirely);
+   - a generated typed client from an OpenAPI/descriptor (Refit-style) loaded dynamically.
+3. **Hybrid escape hatch** — declarative-first, but a target too bespoke for the DSL (Wallabag's OAuth refresh, Paperless' multipart upload, Vikunja's project-id resolution) can still fall back to a compiled `ISkillIntegration`. Declarative covers the common case; code covers the long tail.
+4. **Payoff** — a new skill/target = author two declarative files (or one `SKILL.md` referencing a target profile), enable in the UI, done. No rebuild, no redeploy — the customization story the concept phase wanted.
+
+### Open questions
+
+- **Expressiveness vs. safety of the mapping DSL** — how much request/response shaping can be declared before it becomes a programming language; where the compiled-adapter fallback line sits.
+- **Auth declaratively** — Bearer / API-key / OAuth-refresh expressed without leaking secrets; reuse the existing `Skills__*` config surface for the actual credentials.
+- **Trust / SSRF** — a declarative skill that can name any endpoint is an exfiltration risk; needs allow-listing + the Marketplace's sandboxing/trust model.
+- **Validation & testing** — contract-test a declarative skill (e.g. WireMock) *without* a rebuild, so authoring stays fast.
+- **Format reuse** — align the `SKILL.md` frontmatter with the CC-skills convention (`flowhub-capture`, `flowhub-triage`, …) so one mental model covers both layers.
+
+---
+
 ## Speech-to-Text for Captures (voice notes)
 
 **Status:** Idea — not scoped into any Block.
@@ -251,6 +276,58 @@ A short, hand-curated Markdown file capturing stable personal facts, e.g.:
 - **Cost guard** — the demo's OpenRouter key has a **$1 hard cap**; benchmark runs must be small and rate-limited, or pointed at a separate paid key.
 - Overlap with the existing OTel metrics — LLMeter adds controlled benchmarking on top of live telemetry; decide how much is worth the spend.
 - Whether to keep it manual or wire a periodic CI benchmark (probably manual — cost).
+
+---
+
+## Ausflug-Assistant — natural-language recommender over a Vikunja "Ausflugsziele" project
+
+**Status:** Idea — not scoped into any Block. The first *read-side* use case (everything else on this list is capture → route; this is query → recommend → write-back).
+**Motivation:** A Vikunja project **`Ausflugsziele`** accumulates excursion destinations over time (Ausflüge mit Tochter, Freundin, Wandergruppe). Today it's a flat todo list. The value is locked up until you can *ask* it:
+
+> *"Kommenden Sonntag (heute ist 19.06.2026) möchte ich mit meiner Tochter einen Ausflug machen. Nicht zu weit entfernt mit dem Auto. Soll draussen sein, aber nicht die ganze Zeit an der Sonne. Wir haben 3 Stunden Zeit."*
+
+The assistant parses that, filters/ranks the catalogue against the constraints, proposes one option, and — once visited — marks it done with a `DoneDate`. This inverts the existing pipeline: instead of a Capture flowing *in* and being routed, a query flows in and a stored destination flows *out* as a recommendation.
+
+### Two genuinely new pieces (everything else composes existing seams)
+
+1. **A read/query surface** — request/response, user-initiated (chat, a Telegram command, a quick-action), distinct from the capture channels which are fire-and-forget inbound.
+2. **A visit-log / revisit data model** — see below; the one part that doesn't already exist.
+
+Everything else is reuse: the Vikunja adapter, the AI provider abstraction, pgvector ([Semantic features on the existing pgvector index](#semantic-features-on-the-existing-pgvector-index) / ADR 0006), the enrichment seam ([Capture Enrichment](#capture-enrichment-post-classification-data-fetch)), the tool-use pattern ([Web Search Strategy](#web-search-strategy)), and the confirm step ([Confidence-driven human-in-the-loop](#confidence-driven-human-in-the-loop)).
+
+### Proposed shape
+
+1. **Enrich each destination on capture** — when an Ausflug enters the project, derive structured attributes so it's queryable later: drive-time-from-home (geocode + routing), indoor/outdoor/mixed, shade vs. open-sun, typical duration, suitable-for (Kind / Freundin / Wandergruppe), season/weather suitability. This *is* the [Capture Enrichment](#capture-enrichment-post-classification-data-fetch) seam, applied to a new type.
+2. **Parse the query into a structured filter** — an LLM (the existing structured-output pattern, `AiClassificationResponse`-style) turns the free-text request into typed constraints: `maxDriveMinutes`, `setting=outdoor`, `shade=partial`, `durationHours≈3`, `companion=child`, `date=2026-06-21`.
+3. **Hybrid retrieval + rank** *(the core decision — see brainstorm)*:
+   - **deterministic filter** for the hard, numeric constraints (drive-time, duration, indoor/outdoor) — embeddings can't reason about "3 Stunden" or "nicht zu weit";
+   - **pgvector semantic match** for the soft/vibe part ("etwas Ruhiges in der Natur");
+   - a small scoring function combines them + a **recency/novelty** term (see revisit model).
+4. **Weather-aware for the specific date** — "nicht die ganze Zeit an der Sonne" + a concrete Sunday ⇒ call a forecast API for that date/region and factor it in (rain → prefer indoor fallback; blazing sun → prefer forest/shade). A tool call, not vector search — the standout demo hook.
+5. **Propose → confirm → write back** — surface one (or top-3) options with a one-line *why*; on confirmation, record the visit (`DoneDate`).
+
+### The DoneDate / revisit problem (the real modelling question)
+
+A Vikunja task has a single `done` boolean + one `done_at`. That's a one-shot model and it breaks for places like **Zoo Basel ("Zolli")** that are visited many times and stay valid candidates *after* a visit.
+
+- **Separate the catalogue from the visit history.** The Vikunja project is the *catalogue of destinations*; visits are an **append-only log** (`ExcursionVisit { destinationRef, visitedOn, companion }`) owned by FlowHub. A revisitable place is **never "closed"** — it accumulates *n* visit dates.
+- **`revisitable: bool` per destination.** A one-shot idea (a specific event) marks done normally and drops out; a revisitable place uses the visit log instead and its score **decays with recency** ("you were at the Zolli two weeks ago — maybe somewhere new") rather than being filtered out.
+- **Where the log lives** — open question: FlowHub's own DB (clean, but splits state across two systems) vs. dated Vikunja **comments** on a perpetually-open task (stays in Vikunja, hacky) vs. Vikunja **recurring tasks** (calendar-recurrence ≠ "visited on these dates" — semantic mismatch, probably wrong).
+
+### In FlowHub or outside?
+
+- **Prototype as a CC-skill / agent first** (`flowhub-ausflug`, sibling to `flowhub-triage`) — reads Vikunja, calls weather + drive-time tools, proposes. Zero app change, fastest path, fits the existing skills layer.
+- **But the durable pieces belong in the app:** the per-destination enrichment attributes and the visit-log / revisit model. Same split the repo already uses (app pipeline vs. CC-skills). The conversational assistant sits on top of an enriched, queryable catalogue.
+
+### Open questions
+
+- **Drive-time source** — a routing API (OpenRouteService / Google) vs. a one-time enrichment that stores drive-time-from-home per destination (cheaper at query time, stale if "home" changes).
+- **Vector vs. structured weight** — how much ranking is hard-filter vs. semantic vs. weather vs. recency; keep it explainable (the user should see *why* the Zolli won).
+- **Cold start** — destinations captured before enrichment existed have no attributes; backfill enrichment pass vs. enrich-on-first-query.
+- **Multi-modal** — a Wandergruppe vs. a 5-year-old are different constraint profiles on the same catalogue; `companion` as a first-class filter dimension.
+- **Discovery beyond the list** — when nothing fits, should it *web-search* a new idea and offer to capture it (ties into [Web Search Strategy](#web-search-strategy))?
+
+**Architecture payoff:** demonstrates the same ports run *backwards* — the Vikunja adapter as a read source, the AI abstraction for query-parsing + ranking, pgvector for semantic match, the tool-use seam for weather/routing — proving FlowHub is a substrate, not just an inbound funnel. Only the visit-log model and the query surface are net-new.
 
 ---
 

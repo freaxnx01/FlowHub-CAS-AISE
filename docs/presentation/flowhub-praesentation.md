@@ -19,7 +19,7 @@ Fokus liegt auf Teil 2 (Erfahrung · Harness · Learnings).
 
 # FlowHub
 
-## Ein KI-gestützter persönlicher Eingangskorb
+## Eine KI-gestützte persönliche Inbox
 
 **Andreas Imboden** · CAS AI-Assisted Software Engineering · FFHS FS26
 
@@ -94,6 +94,163 @@ der Confidence-Score in Aktion."
 
 ---
 
+<!-- _class: dense -->
+
+## Unter der Haube: **Klassifikation → Anreicherung → Routing**
+
+Zwei entkoppelte MassTransit-Consumer (ADR 0003), verbunden über Events:
+
+```text
+① CaptureCreated ─▶ CaptureEnrichmentConsumer
+   • IClassifier → AiClassifier ── LLM, structured JSON ──┐ Fallback ↘ KeywordClassifier
+   • Ergebnis: matched_skill · project · title · entities · tags
+   • EnricherDispatcher → IEnricher[project]
+        └ ZitateEnricher ── 2. LLM-Call: kurze Autor-Info
+② CaptureClassified ─▶ SkillRoutingConsumer
+   • ISkillIntegration[Name] → VikunjaSkillIntegration
+        └ PUT /api/v1/projects/{Zitate}/tasks  →  ③ Completed (= Vikunja-Task-ID)
+```
+
+Stufe 1 klassifiziert (LLM, mit Keyword-Fallback) **und** reichert an; Stufe 2 routet zum Ziel-Dienst. Enricher leben in `FlowHub.AI/Enrichers` — **pro Bucket eine `IEnricher`-Klasse**, nur für Vikunja. **Zwei System-Prompts** ans LLM — Wortlaut auf den nächsten Folien.
+
+<!--
+[~50 s] Der technische Kern in einem Bild.
+"Zwei Stufen, über Events entkoppelt. Stufe 1 klassifiziert — die KI gibt strukturiertes
+JSON zurück; fällt sie aus, übernimmt deterministisch der Keyword-Classifier, ein Capture
+bleibt nie liegen. Nur Vikunja-Captures laufen durch einen bucket-spezifischen Enricher —
+für Zitate ein zweiter LLM-Call. Stufe 2 löst die Skill-Integration per Name auf und schreibt
+in Vikunja. Zwei getrennte System-Prompts — Klassifizieren und Anreichern, gleich im Wortlaut."
+-->
+
+---
+
+## Beispiel: Capture ist **nur das Zitat**
+
+<div class="cols">
+<div>
+
+**Eingang & Verarbeitung**
+
+Telegram-Capture:
+```text
+Talk is cheap. Show me the code.
+```
+
+→ **AiClassifier** (LLM) erkennt das Zitat:
+&nbsp;&nbsp;&nbsp;`matched_skill: Vikunja` · `project: Zitate`
+&nbsp;&nbsp;&nbsp;`entities { quote, author: "Linus Torvalds" }`
+→ **ZitateEnricher** (2. LLM-Call) → kurze **Autor-Info**
+→ **VikunjaSkillIntegration** → `PUT …/tasks` → **Completed**
+
+</div>
+<div>
+
+**Ergebnis — Vikunja-Task im Projekt „Zitate"**
+
+> "Talk is cheap. Show me the code." — Linus Torvalds
+>
+> About Linus Torvalds: *<2–4-Satz-Info vom Modell>*
+
+Den **Autor** liefert schon die Klassifikation (Modell-Wissen aus dem berühmten Spruch); die **Autor-Info** ergänzt der Enricher mit *„Never invent facts."* als Halluzinations-Bremse.
+
+</div>
+</div>
+
+<!--
+[~40 s] Ein Capture durch die ganze Kette.
+"Der Capture ist nur das Zitat — kein Autor im Text. Der Klassifikator erkennt den berühmten
+Spruch und füllt Autor und Projekt selbst. Der Enricher holt dann die kurze Autor-Info und
+schreibt alles als Beschreibung in den Vikunja-Task im Projekt Zitate."
+-->
+
+---
+
+<!-- _class: dense -->
+
+## System-Prompt ① — **Klassifikation** (Torvalds-Zitat)
+
+`AiClassifier` → `IChatClient.GetResponseAsync<AiClassificationResponse>` · *role: system* (`AiPrompts`)
+
+<div class="small">
+
+```text
+You classify user-captured snippets for a personal knowledge tool called FlowHub.
+
+For each capture, return:
+- tags: 1–5 short lowercase tags describing the snippet
+- matched_skill: which downstream skill should handle it. Choose exactly ONE:
+    "Wallabag"  – the snippet is a URL or article worth saving for later reading
+    "Vikunja"   – the snippet is a task, todo, OR a structured piece of content
+                  that belongs in a Vikunja project (quote, movie, book, …)
+    ""          – none of the above; it will be marked as Orphan
+- project: when matched_skill="Vikunja", pick the best matching project from
+  this list. If unsure, pick "Inbox".
+    Available: Inbox, Zitate
+  Leave empty otherwise.
+- title: a 3–8 word title summarising the snippet (omit only if the snippet
+         is itself shorter than 8 words)
+- entities: optional structured fields the project may use, e.g.
+    Zitate → {"quote": "...", "author": "..."}
+    Movies → {"title": "...", "year": "..."}
+  Omit if nothing applies.
+
+Reply ONLY via the structured response schema. Never include explanations.
+```
+
+</div>
+
+*role: user* → `Talk is cheap. Show me the code.` &nbsp;·&nbsp; <span class="small">Der Capture ist **nur das Zitat** — den `author` füllt das Modell aus eigenem Wissen.</span>
+
+<!--
+[~45 s] Was wirklich ans Modell geht — Wortlaut aus dem Code.
+"Der System-Prompt definiert Rolle, die drei Skill-Optionen und das Ausgabeschema inklusive
+der entities für Zitate. Die Projektliste 'Available:' wird zur Laufzeit aus den Vikunja-
+Projekten gefüllt — in der Demo nur Inbox und Zitate. Die User-Nachricht ist hier nur das
+nackte Zitat; den Autor ergänzt das Modell aus eigenem Wissen in die entities. Antwort
+ausschliesslich über das strukturierte Schema, nie in Prosa."
+-->
+
+---
+
+<!-- _class: dense -->
+
+## System-Prompt ② — **Anreicherung** (Torvalds-Zitat)
+
+`ZitateEnricher.FetchBioAsync` → zweiter LLM-Call · *role: system* (`ZitateEnricherPrompts`) · `Temperature 0.2` · `MaxOutputTokens 280`
+
+```text
+You enrich a quotation for a personal knowledge tool. You are given an author and their
+quote. Write 2–4 factual sentences covering: who the author is (full name, life dates if
+known, nationality, and their role or field), and — ONLY if you genuinely know it — roughly
+when or in what context the quote was said or written (a year, decade, or occasion). If you
+do not recognise the author, reply with an empty string. Never invent facts, dates, or
+attributions.
+```
+
+*role: user* →
+```text
+Author: Linus Torvalds
+Quote: "Talk is cheap. Show me the code."
+```
+
+<div class="small">
+
+**Warum ein eigener Prompt?** Andere Aufgabe als Klassifikation → eigener, fokussierter Prompt. Input: nur `author` + `quote` aus den `entities` (der **Autor** wurde schon bei der Klassifikation erkannt; hier kommt die **Autor-Info** dazu). *„Never invent facts"* + Leerstring-bei-Unbekannt = **Halluzinations-Bremse**.
+
+**Warum `Temperature 0.2`?** Niedrige Temperatur = wenig Zufall bei der Token-Wahl → **faktentreue, reproduzierbare** Antworten statt „kreativer" Variation — genau richtig für eine Autoren-Bio (zusammen mit *„Never invent facts"*). `MaxOutputTokens 280` deckelt die Länge.
+
+</div>
+
+<!--
+[~40 s] Der zweite Prompt — bewusst getrennt.
+"Anreicherung ist eine andere Aufgabe, also ein eigener, knapper System-Prompt. Er sieht nur
+Autor und Zitat, nicht den ganzen Capture. Entscheidend ist die letzte Zeile: 'Never invent
+facts' und bei Unbekannten ein Leerstring — das ist die Halluzinations-Bremse. Das Resultat
+wird die Beschreibung des Vikunja-Tasks im Projekt Zitate."
+-->
+
+---
+
 ## Wiederfinden: semantische Suche
 
 Nicht nur reinwerfen — auch **per Bedeutung wiederfinden**, nicht per Stichwort.
@@ -136,6 +293,35 @@ Config tauschbar; ohne Key liefert die API sauber ein 503 statt zu raten.
 "Durchgehend .NET 10, Frontend Blazor – kein separates JS-Framework. KI über
 Microsoft.Extensions.AI, Provider per Config umschaltbar. Persistenz Postgres mit
 pgvector. Alles in Docker Compose, inkrementell über fünf Blöcke gebaut."
+-->
+
+---
+
+<!-- _class: dense -->
+
+## Genutzte **externe Services**
+
+![bg right:12%](assets/demo-qr.png)
+
+**🔴 Live-Demo:** **`https://demo.flowhub.freaxnx01.ch`** — QR rechts scannen.
+
+| Service | Rolle in FlowHub | Web |
+|---|---|---|
+| **Telegram** | Eingangskanal (Bot) | `telegram.org` |
+| **Vikunja** | To-do / Projekte (Inbox, Zitate …) | `vikunja.io` |
+| **Wallabag** | Read-Later für Artikel / URLs | `wallabag.org` |
+| **paperless-ngx** | Dokumenten-Management (DMS) | `docs.paperless-ngx.com` |
+| **OpenRouter** | LLM-Gateway — Klassifikation (Gemma) | `openrouter.ai` |
+| **Mistral** | Embeddings (1024-dim) → Suche | `mistral.ai` |
+
+<span class="small">Alt. Cloud-LLM-Adapter: **Anthropic** (Claude) · Hosting-Policy ADR 0007 (Default lokal **Ollama** geplant) · Persistenz **PostgreSQL + pgvector**.</span>
+
+<!--
+[~35 s] Was FlowHub draussen anbindet — nicht alle vorlesen.
+"FlowHub ist ein Hub: rein kommt's über Telegram, raus geht's je nach Skill an Vikunja,
+Wallabag oder paperless-ngx — alles self-hosted im Homelab. Die KI läuft in der Demo über
+OpenRouter und Mistral für die Embeddings. Anthropic ist als Alternativ-Adapter da; lokales
+Ollama ist die geplante Default-Hosting-Variante."
 -->
 
 ---
@@ -337,6 +523,51 @@ KI-gestützte Prüfungen finden, was die KI selbst übersieht."
 
 ---
 
+<!-- _class: dense -->
+
+## `agent-pipeline` — autonome **Issue → PR**
+
+Wiederverwendbarer GitHub-Actions-Workflow (`freaxnx01/agent-pipeline`); lokaler Einstieg `.github/workflows/claude.yml` ist nur ein dünner Stub.
+
+```text
+Issue --[Label: ai-implement]--> claude.yml   (Trigger, write-Rechte)
+                                    |  ruft reusable workflow auf
+                                    v
+           agent-pipeline / claude-implement.yml@main
+                                    |
+  Branch -> commit -> Claude implementiert -> Draft-PR
+                                    |
+  '--> Kommentar am Issue: Run-URL · Branch · PR-Link · Retry-Hinweise
+```
+
+<div class="cols small">
+<div>
+
+**Auslösen**
+- Issue mit **`ai-implement`** labeln — nur Write-Zugriff (Gate auf Public-Repo); oder manuell *Actions → Run workflow*.
+- `ubuntu-latest`, Timeout 60 min.
+
+</div>
+<div>
+
+**Retry-Policy**
+- `attempt`-Zähler, Reruns gedeckelt.
+- Rate-Limit / transient → **automatischer** Retry.
+- `max-turns`-Erschöpfung → Hinweis am Issue, **Mensch** entscheidet.
+
+</div>
+</div>
+
+<!--
+[~40 s] Die Pipeline einmal ganz.
+"Ein gelabeltes Issue startet einen GitHub-Actions-Workflow. Der lokale Stub reicht nur an
+die wiederverwendbare Pipeline weiter; die branched, committed, lässt Claude implementieren
+und öffnet einen Draft-PR. Alles Wichtige landet als Kommentar am Issue. Retries laufen
+automatisch bei Rate-Limits, nur die max-turns-Erschöpfung gibt zurück an den Menschen."
+-->
+
+---
+
 ## Wo die KI **glänzt** — und wo **nicht**
 
 Über alle Blöcke: **~85–95 % des Codes KI-generiert**.
@@ -374,6 +605,8 @@ Die KI schrieb den ganzen Deployment-Stack. Dann lief **ein** Befehl:
 - Leerstring-Modellname → `AssertNotNullOrEmpty`-Crash beim Start
 - Mistral lehnt das `dimensions`-Feld ab → 422
 - Passbolt-Refs vom Makefile überschattet → KI-Call erreichte nie den Provider
+
+**¡AI, caramba!** — fünf Bugs, die jeder für sich die Abgabe blockiert hätten.
 
 > KI schrieb den Code. Eine **KI-gestützte Prüfung** fand, was die KI übersah.
 > **Der Mensch bleibt im Loop — als Reviewer.**

@@ -19,6 +19,14 @@ Der digitale Alltag produziert ständig kleine Informationsfragmente: ein Film d
 
 FlowHub schafft einen einzigen Eingang für all diese Inputs und erledigt die Ablage automatisch – mit KI-Unterstützung und minimalem Aufwand für den Benutzer.
 
+**KI-Nutzen je Kernfunktion:**
+
+- **Erfassung:** Die KI ermöglicht die Ein-Schritt-Erfassung — der Benutzer muss im Moment des Capture nicht entscheiden, wohin die Information gehört.
+- **Klassifikation:** Ein LLM erkennt Typ und Ziel-Skill jedes Schnipsels, mit deterministischem Keyword-Matching als Fallback.
+- **Routing:** Profitiert direkt von der KI-Klassifikation — der passende Ziel-Dienst wird ohne Benutzer-Entscheid gewählt.
+- **Anreicherung:** Das LLM ergänzt Titel, Tags und (bei Zitaten) Kontext, die der Benutzer sonst manuell setzen müsste.
+- **Fallback & Retry:** Ist die KI-Klassifikation unsicher oder schlägt sie fehl, greift ein deterministischer Keyword-Floor; fehlgeschlagene Captures bleiben als Orphan retry-bar.
+
 ---
 
 ## 2. Stakeholder
@@ -436,6 +444,29 @@ public class ArticleSkillHandler : ISkillHandler
 - Selbstdokumentierend (Markdown human readable)
 - Zukunftsfähig: KI kann `SKILL.md` Files lesen und generieren
 
+> **Umsetzungshinweis (Stand der Implementierung).** Der oben skizzierte
+> deklarative `SKILL.md`-Loader stammt aus der **Konzeptphase (Februar 2026)**.
+> In der Umsetzung wurde das Skill-System bewusst vereinfacht: Skills sind
+> kompilierte **`ISkillIntegration`-Adapter** (ein Adapter je Ziel-Dienst), die
+> der `SkillRoutingConsumer` per `Name` auflöst. Die `SkillRegistry`
+> (`EfSkillRegistry`) hält Skill-**Metadaten** für Health/UI — sie lädt **keine**
+> `SKILL.md`-Dateien zur Laufzeit.
+>
+> **Warum kein deklarativer Loader:** Die Kommunikation mit dem Ziel-Dienst lebt
+> im Adapter selbst — HTTP-Pfad, Auth-Schema, Payload-Mapping und Response-Parsing
+> (z. B. `VikunjaSkillIntegration`: `PUT /api/v1/projects/{id}/tasks` mit
+> Bearer-Token; Wallabag: OAuth-Token-Refresh; Paperless: Dokument-Upload). Diese
+> dienst­spezifische Integrationslogik ist nicht deklarierbar, sie bleibt
+> zwingend Code. Eine `SKILL.md` könnte nur Trigger + Konfiguration beschreiben;
+> der typisierte Handler wäre weiterhin nötig — der deklarative Teil brachte also
+> kaum Mehrwert und wurde zugunsten eines einfacheren, vollständig getesteten
+> Routings descoped. Ein neuer Skill wird über eine Adapter-Klasse +
+> DI-Registrierung ergänzt.
+>
+> Begründung des Scopings: **ADR 0002**; die gebaute Architektur steht in
+> **Arc42 v2 (as built)**. Der laufzeit-deklarative Ansatz lebt als Roadmap-Idee
+> **„Marketplace for Skills"** weiter.
+
 ### 6.3 Technologie-Stack
 
 | Schicht | Technologie | Begründung |
@@ -523,6 +554,16 @@ Die nachfolgenden Einträge **PE-1 bis PE-7** (Plattform-Entscheidungen) sind be
 - Hybrid: Best of Both Worlds
 
 **Konsequenz:** Zwei Artefakte pro Skill (`SKILL.md` + Handler), aber maximale Flexibilität.
+
+> **Abweichung in der Umsetzung.** Realisiert wurde nur die typsichere Hälfte:
+> ein **`ISkillIntegration`-Adapter** je Skill, der die gesamte
+> Ziel-Dienst-Kommunikation (HTTP, Auth, Payload-Mapping) kapselt. Genau diese
+> Integrationslogik ist nicht deklarierbar — sie bleibt zwingend Code; eine
+> `SKILL.md` hätte den Handler nicht ersetzt, sondern nur ergänzt. Der
+> laufzeit-deklarative `SKILL.md`-Teil wurde deshalb zugunsten eines einfacheren,
+> vollständig getesteten Routings descoped (→ **ADR 0002**, **Arc42 v2**) und lebt
+> als Roadmap-Idee **„Marketplace for Skills"** weiter. Details siehe
+> Umsetzungshinweis in Abschnitt 6.2.
 
 ### PE-4: Docker Compose jetzt, k3s als Future Option
 
