@@ -116,16 +116,18 @@ This is a deliberate Block-4 decision (ADR 0005 §6 area): the operational conce
 
 | Column | Type | Index | Notes |
 |---|---|---|---|
-| `Captures.Embedding` | `vector(1024)` (pgvector) | `captures_embedding_hnsw_idx` (HNSW, `vector_cosine_ops`) | Populated asynchronously by `CaptureEmbeddingConsumer` via Mistral `mistral-embed`. Nullable — captures without an embedding fall back to keyword search. |
+| `Captures.Embedding` | `vector(384)` (pgvector) | `captures_embedding_hnsw_idx` (HNSW, `vector_cosine_ops`) | Populated asynchronously by `CaptureEmbeddingConsumer`; sized for a **multilingual-e5-small**-class embedder (as-built default). `mistral-embed` (1024-dim) is a documented swap. Nullable — captures without an embedding fall back to keyword search. |
 
 ## Migrations
 
-The schema is evolved exclusively through EF Core migrations (10 to date,
-`Migrations/20260506194548_0001_Initial.cs` … `…_0009_AddCaptureAttachment.cs`),
+The schema is evolved exclusively through EF Core migrations (14 to date,
+`Migrations/20260506194548_0001_Initial.cs` … `…_0013_ResizeEmbeddingTo384.cs`),
 applied migrations-first by the `flowhub.migrations` init job — never via
 `EnsureCreated`/auto-migrate at runtime (ADR 0005). Representative script — the
-Block-5 pgvector migration that backs the vector-search row above
-(`Migrations/20260507115906_0004_AddEmbedding.cs`):
+Block-5 pgvector migration that introduced the embedding column + HNSW index
+(`Migrations/20260507115906_0004_AddEmbedding.cs`; the column was later resized
+from `vector(1024)` to the as-built `vector(384)` by
+`…_0013_ResizeEmbeddingTo384.cs`, matching the multilingual-e5-small embedder):
 
 ```csharp
 protected override void Up(MigrationBuilder migrationBuilder)
