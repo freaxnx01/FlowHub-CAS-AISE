@@ -127,11 +127,11 @@ FlowHub sitzt zwischen **Eingangs-Kanälen** und **Ziel-Diensten**:
   konzipiert, aber **nicht umgesetzt**.
 - **Ziel-Dienste:** Wallabag (Read-Later), Vikunja (Tasks/Kanban) — beide als
   `ISkillIntegration`-Adapter **gebaut**; paperless-ngx (DMS) in der Live-Demo;
-  Obsidian/GitLab als Wissens-Ablage **geplant**. Fällt keine Zuordnung, bleibt
+  Obsidian/Git Forge als Wissens-Ablage **geplant**. Fällt keine Zuordnung, bleibt
   der Capture in der FlowHub-Inbox (PostgreSQL).
 
 Skill → Ziel-Dienst (Konzept-Mapping): Artikel → Wallabag; Homelab/Buch/Film →
-Vikunja; Dokument → paperless-ngx; Wissen/Zitat → Obsidian/GitLab; generisch →
+Vikunja; Dokument → paperless-ngx; Wissen/Zitat → Obsidian/Git Forge; generisch →
 Inbox. **Wired am Abgabestand:** Wallabag und Vikunja.
 
 ### 3.2 Technischer Kontext
@@ -319,7 +319,7 @@ Capture submitted
 - **Einen Skill ergänzen** (Erweiterungspunkt): `ISkillIntegration` in
   `FlowHub.Skills/<Service>/` implementieren, in den DI-Extensions registrieren,
   dem Classifier den neuen `MatchedSkill` beibringen. Roadmap: paperless-ngx,
-  Wekan, Obsidian/GitLab teilen denselben Vertrag.
+  Vikunja Kanban, Obsidian/Git Forge teilen denselben Vertrag.
 
 ### 5.5 Paketstruktur
 

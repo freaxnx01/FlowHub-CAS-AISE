@@ -77,7 +77,7 @@ URL-Muster und, wenn nötig, ein **LLM**.
 | heise.de-Artikel | ArticleSkill | **Wallabag** (read-later) ✅ |
 | „The Imitation Game", share.google/… | MovieSkill | **Vikunja** (Watchlist) ✅ |
 | nichts passt | GenericSkill | **Inbox** (PostgreSQL) ✅ |
-| jellyfin.org „ausprobieren" | HomelabSkill | **Wekan** (Kanban) · _geplant_ |
+| jellyfin.org „ausprobieren" | HomelabSkill | **Vikunja Kanban** · _geplant_ |
 | Foto einer Quittung | DocumentSkill | **paperless-ngx** (DMS) · _geplant_ |
 
 ✅ heute live · _geplant_ = Roadmap (gleiche `ISkillIntegration`-Schnittstelle).
