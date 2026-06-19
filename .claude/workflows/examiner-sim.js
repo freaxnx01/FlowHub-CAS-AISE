@@ -168,7 +168,7 @@ const BUCKETS = [
     read: ['docs/spec/acceptance-criteria.md', 'docs/spec/testing-strategy.md', 'tests', 'docs/insights'],
   },
   {
-    key: 'KI, Sub-Systeme & Reflexion', max: 30,
+    key: 'KI und Architektur', max: 30,
     items: [
       '"Wurden KI-unterstützende Werkzeuge verwendet und deren Nutzung beschrieben" (0/1/7/12)',
       '"Wurden mit Hilfe der KI intelligente und flexible Services gebaut" (0/2/6)',
@@ -191,7 +191,7 @@ const ARCH_SCHEMA = {
     risks:           { type: 'array', items: { type: 'string' }, description: 'architectural risks an examiner would probe' },
     evidence:        { type: 'array', items: { type: 'string' }, description: 'concrete citations: ADR id, diagram, source path, bundle page' },
     recommendations: { type: 'array', items: { type: 'string' } },
-    rubricImpact:    { type: 'string', description: 'which rubric items this lens informs (Entwurf, Programmierung-structure, KI-Sub-Systeme)' },
+    rubricImpact:    { type: 'string', description: 'which rubric items this lens informs (Entwurf, Programmierung-structure, KI und Architektur)' },
   },
 }
 const ARCH_LENSES = [
