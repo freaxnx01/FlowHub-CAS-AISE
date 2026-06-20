@@ -543,11 +543,14 @@ changelog:
     git-cliff --output CHANGELOG.md
     @echo "CHANGELOG.md updated."
 
-# Generate user-friendly release notes for the current version
+# Generate user-friendly release notes (RELEASENOTES.md) via Claude Code
 [group('release')]
+[unix]
 release-notes:
-    # TODO: implement per-project. Canonical recipe name; body is tool-specific.
-    @echo "release-notes: implement in your project justfile" && exit 1
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cur=$(sed -n 's|.*<Version>\([^<]*\)</Version>.*|\1|p' {{props_file}} | head -1)
+    claude -p "/release-notes v${cur}"
 
 # Tag release, regenerate changelog + release-notes, and commit
 [group('release')]
