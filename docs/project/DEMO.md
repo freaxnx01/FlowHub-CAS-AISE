@@ -18,7 +18,7 @@ A fully open, rate-limited, self-resetting FlowHub instance — designed so the 
 | AI provider | `google/gemma-4-31b-it:free` on OpenRouter, dedicated key with **$1/mo hard cap** |
 | AI fallback | Automatic — `KeywordClassifier` takes over when Gemma 429s or quota exhausts |
 | Embeddings | **Disabled** in demo profile — `/api/v1/captures/search` returns 503 ProblemDetails (transparent posture); the feature is demonstrated via API integration tests + ADR 0006, not run live on the demo |
-| Skill writes | **Vikunja: live** — `todo:` captures route to a self-contained demo Vikunja and appear as tasks (auto-provisioned, public read-only link-share, tasks cleared each reset). **Wallabag: disabled** — URL captures stop at `Unhandled`. |
+| Skill writes | **Three live integrations**, each to a self-contained demo instance (sandboxed — *not* the operator's real services), wiped each reset: **Vikunja** (`todo:` → tasks on a public link-share), **Wallabag** (URL captures → read-later entries), **Paperless** (captures with an attachment → documents). Captures reach `Completed` with a real `externalRef`; writes are bounded by the per-IP rate limit + 15-min reset. |
 | Observability | Prometheus + Grafana not exposed publicly — internal metrics only |
 
 ## Repo layout
