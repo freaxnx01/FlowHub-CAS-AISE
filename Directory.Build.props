@@ -9,7 +9,7 @@
     <WarningsAsErrors />
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <DebugType>embedded</DebugType>
     <Deterministic>true</Deterministic>
   </PropertyGroup>

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-06-20
 
 ### Added
 
@@ -143,6 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **presentation:** add repo QR code on the Fazit slide
 - **demo:** reconcile write-posture to the as-built three live integrations
 - **release:** add RELEASENOTES.md with v0.1.0 entry
+- **changelog:** regenerate CHANGELOG.md from Conventional Commits via git-cliff
 
 ### Fixed
 
