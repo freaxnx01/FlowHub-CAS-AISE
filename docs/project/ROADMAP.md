@@ -344,7 +344,7 @@ A Vikunja task has a single `done` boolean + one `done_at`. That's a one-shot mo
 2. **AI-to-AI handoff:** paperless-ngx runs its **own** OCR + (in recent versions) LLM-based title/tag/correspondent inference. FlowHub does the *routing* decision; paperless-ngx does the *document* enrichment. Optionally feed paperless-ngx's extracted text back as a follow-up Capture for cross-linking.
 3. **Attachment path:** the `Capture.Attachment` + `IAttachmentStorage` plumbing already exists for binary captures.
 
-**Architecture payoff:** one new `ISkillIntegration` class + options + DI line. Zero domain or pipeline change — the demo deliberately disables skill-writes, so this is purely a homelab-side adapter.
+**Architecture payoff:** one new `ISkillIntegration` class + options + DI line. Zero domain or pipeline change — this is purely a homelab-side adapter.
 
 ---
 
