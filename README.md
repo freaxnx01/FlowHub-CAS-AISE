@@ -224,4 +224,4 @@ This repository was developed with heavy AI-assisted engineering. Agent conventi
 Part of the same AI-assisted engineering toolchain:
 
 - [`freaxnx01/ai-instructions`](https://github.com/freaxnx01/ai-instructions) — reusable AI-agent instruction templates (base conventions + per-stack overlays) that this repo's [`CLAUDE.md`](CLAUDE.md), Copilot instructions, and `.ai/` skills are synced from (via the `sync-ai-instructions` skill).
-- [`freaxnx01/agent-pipeline`](https://github.com/freaxnx01/agent-pipeline) — reusable GitHub Actions workflow for autonomous issue → implementation that this repo delegates to via [`.github/workflows/claude.yml`](.github/workflows/claude.yml) (see [`docs/CLAUDE-PIPELINE.md`](docs/CLAUDE-PIPELINE.md)).
+- [`freaxnx01/agent-pipeline`](https://github.com/freaxnx01/agent-pipeline) — reusable GitHub Actions workflow for autonomous issue → implementation that this repo delegates to via [`.github/workflows/claude.yml`](.github/workflows/claude.yml) (see [`docs/AGENT-PIPELINE.md`](docs/AGENT-PIPELINE.md)).
