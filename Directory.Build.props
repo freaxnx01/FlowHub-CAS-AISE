@@ -7,10 +7,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    <!-- debt: demoted to warnings so Phase-1 CI is green; ratchet back to errors.
+    <!-- debt: demoted to a warning so CI is green; ratchet back to an error.
          CA1506 (class coupling, 104 violations) -> #95.
-         CA1502 (Program.cs Main complexity) -> #97. -->
-    <WarningsNotAsErrors>$(WarningsNotAsErrors);CA1502;CA1506</WarningsNotAsErrors>
+         (CA1502 was re-promoted to an error in #97.) -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);CA1506</WarningsNotAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <Version>0.2.0</Version>
