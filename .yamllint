@@ -1,0 +1,15 @@
+# yamllint config tuned so it does not fight GitHub Actions YAML.
+extends: default
+
+rules:
+  # GitHub Actions uses `on:` as a mapping key; the default truthy rule flags it.
+  truthy:
+    check-keys: false
+  # Workflow lines (expressions, run: commands) routinely run long.
+  line-length:
+    max: 160
+    level: warning
+  # Workflows and compose files rarely start with an explicit `---`.
+  document-start: disable
+  comments:
+    min-spaces-from-content: 1

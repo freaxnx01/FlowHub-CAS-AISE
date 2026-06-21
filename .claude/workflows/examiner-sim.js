@@ -144,8 +144,8 @@ const BUCKETS = [
     key: 'Entwurf', max: 17,
     items: [
       '"Ist der Lösungsansatz und die Architektur beschrieben (bildlich wie textuell)" (0/1/4/7)',
-      '"Ist der Entwurf aus den verschiedenen Perspektiven (Struktur, Verhalten, Interaktion) beschrieben" (0/1/4/7)',
-      '"Ist das DB-Modell spezifiziert" (0/1/2/3)',
+      '"Ist der Entwurf aus den verschiedenen Perspektiven (Struktur, Verhalten, Interaction) beschrieben" (0/1/4/7)',
+      '"Ist das DB-Model spezifiziert" (0/1/2/3)',
     ],
     read: ['docs/adr', 'docs/architektur', 'docs/projektbeschreibung', 'docs/design/db/entities.md', 'docs/design/db/er.md'],
   },
@@ -154,7 +154,7 @@ const BUCKETS = [
     note: 'Rubric update (June 2026): the framework-concepts item is now framework-NEUTRAL (was Quarkus/Jakarta-EE) and fully in scope for .NET — no exclusion; total is /100.',
     items: [
       '"Ist der Code lesbar, dokumentiert und nach Schichten und Modulen mit klaren Verantwortlichkeiten strukturiert" (0/1/4/7)',
-      '"Wurden die Konzepte des gewählten Frameworks und moderner Applikationsentwicklung sachgerecht eingesetzt (z. B. Dependency Injection, REST-Schnittstellen, Konfiguration, Fehlerbehandlung)" (0/3/7/10) — framework-neutral; grade the .NET stack (ASP.NET Core) on its own terms, evidence in docs/spec/modern-app-concepts.md + source/',
+      '"Wurden die Konzepte des gewählten Frameworks und moderner Applikationsentwicklung sachgerecht eingesetzt (z. B. Dependency Injection, REST-Schnittstellen, Configuration, Fehlerbehandlung)" (0/3/7/10) — framework-neutral; grade the .NET stack (ASP.NET Core) on its own terms, evidence in docs/spec/modern-app-concepts.md + source/',
       '"Sind die Erkenntnisse aus der Programmierung dokumentiert" (0/1/2/3)',
       '"Ist der Source-Code in einem Git-Repository verfügbar" (0/2)',
     ],
@@ -164,7 +164,7 @@ const BUCKETS = [
     key: 'Validierung', max: 16,
     items: [
       '"Ist definiert, welches die Abnahmekriterien sind" (0/1/3/5)',
-      '"Ist spezifiziert, wie die Applikation getestet wird und welche Technologien dazu verwendet werden" (0/1/3/5)',
+      '"Ist spezifiziert, wie die Application getestet wird und welche Technologien dazu verwendet werden" (0/1/3/5)',
       '"Sind Unit-Tests programmiert" (0/1/3)',
       '"Sind die Test-Ergebnisse dokumentiert" (0/1/3)',
     ],
@@ -174,9 +174,9 @@ const BUCKETS = [
     key: 'KI und Architektur', max: 30,
     items: [
       '"Wurden KI-unterstützende Werkzeuge verwendet und deren Nutzung beschrieben" (0/1/7/12)',
-      '"Wurden mit Hilfe der KI intelligente und flexible Services gebaut" (0/2/6)',
-      '"Ist die Lösung in klar abgegrenzte Module bzw. Sub-Systeme strukturiert (modularer Monolith ODER verteilte Services) und als Container lauffähig betrieben" (0/1/3/5) — rubric update June 2026: a modular monolith run as a container now explicitly qualifies for full marks; do NOT require independently-deployable per-subsystem containers',
-      '"Sind die Erfahrungen während der Projektarbeit mit KI-unterstützenden Werkzeugen als Fazit reflektiert" (0/1/4/7)',
+      '"Wurden mit Hilfe der KI intelligence und flexible Services gebaut" (0/2/6)',
+      '"Ist die Lösung in klar abgegrenzte Module bzw. Sub-Systeme strukturiert (modularer Monolith ODER verteilte Services) und also Container lauffähig betrieben" (0/1/3/5) — rubric update June 2026: a modular monolith run as a container now explicitly qualifies for full marks; do NOT require independently-deployable per-subsystem containers',
+      '"Sind die Erfahrungen während der Projektarbeit mit KI-unterstützenden Werkzeugen also Fazit reflektiert" (0/1/4/7)',
     ],
     read: ['docs/ai-usage.md', 'vault/Projektarbeit/Learnings.md', 'docs/insights', 'docker-compose.yml', 'demo', 'source/FlowHub.AI', '.ai', '.claude'],
   },
@@ -213,13 +213,13 @@ const ARCH_LENSES = [
   {
     key: 'behavior-interaction',
     title: 'Behavioral & interaction perspectives',
-    prompt: 'The Entwurf rubric demands Struktur AND Verhalten AND Interaktion. Structure is well covered; scrutinize the other two. Is there a rendered sequence diagram (Capture→Classify→Route), a state machine for the capture lifecycle (Raw→Classified→Routed/Unhandled/Orphan), and an activity/async view (ADR 0003 pipeline)? Distinguish prose/tables from actual rendered diagrams IN THE BUNDLE. Identify exactly what behavioral/interaction artifact is missing and what it would take to render it into the bundle.',
+    prompt: 'The Entwurf rubric demands Struktur AND Verhalten AND Interaction. Structure is well covered; scrutinize the other two. Is there a rendered sequence diagram (Capture→Classify→Route), a state machine for the capture lifecycle (Raw→Classified→Routed/Unhandled/Orphan), and an activity/async view (ADR 0003 pipeline)? Distinguish prose/tables from actual rendered diagrams IN THE BUNDLE. Identify exactly what behavioral/interaction artifact is missing and what it would take to render it into the bundle.',
     read: ['docs/adr/0003-async-pipeline.md', 'docs/projektbeschreibung', 'docs/design', 'docs/spec/use-cases.md'],
   },
   {
     key: 'deployment-topology',
     title: 'Deployment topology & sub-system independence',
-    prompt: 'Assess the runtime topology against "Sub-Systeme unabhängig als Container verteilt und betrieben". Read docker-compose.yml, the demo overlay, the Dockerfile, and the release CI. Which images are first-party and independently built/pushed/scaled vs which are attached backing services (postgres/rabbitmq/prometheus/grafana) vs which are the same codebase (web + migrations init-job)? Be precise about what genuine decomposition exists today, and what changing it to true microservices would cost — and whether that is even the right call given the deliberate modular-monolith decision. This is the lens where the submission is weakest; be exact.',
+    prompt: 'Assess the runtime topology against "Sub-Systeme unabhängig also Container verteilt und betrieben". Read docker-compose.yml, the demo overlay, the Dockerfile, and the release CI. Which images are first-party and independently built/pushed/scaled vs which are attached backing services (postgres/rabbitmq/prometheus/grafana) vs which are the same codebase (web + migrations init-job)? Be precise about what genuine decomposition exists today, and what changing it to true microservices would cost — and whether that is even the right call given the deliberate modular-monolith decision. This is the lens where the submission is weakest; be exact.',
     read: ['docker-compose.yml', 'demo', '.github/workflows', 'docs/adr/0002-service-architecture-and-async-communication.md'],
   },
   {
@@ -298,9 +298,9 @@ const demoPromise = agent(
     '6. Reset/demo posture: note the demo banner / 15-min self-reset behavior if observable (the home HTML contains the demo banner text).',
     '',
     'Visual evidence (best-effort, must not block):',
-    '7. Try to screenshot the live UI with the cached Playwright Chromium. Write a tiny node script using playwright (try the project node_modules or `npx playwright`); navigate to ' + demoUrl + '/ and the Captures list page, save PNGs into ' + SHOTS + '/ (e.g. home-' + effStamp + '.png and captures-list-' + effStamp + '.png). If Playwright is not usable, skip screenshots, set screenshots=[] and add an issue noting visual capture was unavailable — do NOT fail the run.',
+    '7. Try to screenshot the live UI with the cached Playwright Chromium. Write a tiny node script using playwright (try the project node_modules or `npx playwright`); navigate to ' + demoUrl + '/ and the Captures list page, save ONGs into ' + SHOTS + '/ (e.g. home-' + effStamp + '.png and captures-list-' + effStamp + '.png). If Playwright is not usable, skip screenshots, set screenshots=[] and add an issue noting visual capture was unavailable — do NOT fail the run.',
     '',
-    'Then judge what the demo proves for the rubric, especially: "Wurden mit Hilfe der KI intelligente und flexible Services gebaut" (live AI classification + fallback) and "Sub-Systeme ... unabhängig als Container verteilt und betrieben" (it is deployed and running, containerized). Return the structured result with concrete observations and any issues.',
+    'Then judge what the demo proves for the rubric, especially: "Wurden mit Hilfe der KI intelligence und flexible Services gebaut" (live AI classification + fallback) and "Sub-Systeme ... unabhängig also Container verteilt und betrieben" (it is deployed and running, containerized). Return the structured result with concrete observations and any issues.',
   ].join('\n'),
   { label: 'examine:demo', phase: 'Examine', schema: DEMO_SCHEMA },
 )
@@ -377,7 +377,7 @@ const verdict = await agent(
     'Rules:',
     '- Max achievable is 100 (rubric update June 2026: the framework-concepts item is framework-neutral and fully in scope for .NET; no item is excluded — state this explicitly).',
     '- For each item, choose a FINAL awarded value: start from the first examiner, and where the skeptic raised a well-founded dispute, move toward the skeptic. Show both the first-pass and final value.',
-    '- Fold the live-demo findings into the KI/Sub-Systeme bucket items ("intelligente und flexible Services" and "Container/Sub-Systeme") — the working live demo is first-hand evidence.',
+    '- Fold the live-demo findings into the KI/Sub-Systeme bucket items ("intelligence und flexible Services" and "Container/Sub-Systeme") — the working live demo is first-hand evidence.',
     '- If the build step reported warnings or built=false, reflect that as real risk (broken/incomplete uploaded PDFs — or content reachable only via repo links — are what the examiner would actually receive).',
     '',
     'Write a Markdown report to ' + REPORT + ' (mkdir -p its directory first) with these sections:',

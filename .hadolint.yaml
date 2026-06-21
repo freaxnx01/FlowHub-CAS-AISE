@@ -1,0 +1,5 @@
+# hadolint config. DL3018 (pin apk versions) is impractical for Alpine demo
+# images; DL3059 (consecutive RUN) is a style preference. Everything else gated.
+ignored:
+  - DL3018
+  - DL3059
