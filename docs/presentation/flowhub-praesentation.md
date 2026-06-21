@@ -368,6 +368,8 @@ mit KI zu bauen? Werkzeuge, Disziplin und die Learnings."
 
 ---
 
+<!-- _class: dense -->
+
 ## Der Harness — Überblick
 
 Die KI wurde nicht ad-hoc geprompted, sondern über einen **Tool-Workflow** gesteuert:

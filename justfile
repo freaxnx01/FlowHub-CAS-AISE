@@ -675,24 +675,27 @@ pdf-presentation:
 package-submission: pdf-submission pdf-arc42 pdf-projektbeschreibung pdf-reflexion pdf-eigenstaendigkeitserklaerung pdf-presentation
     #!/usr/bin/env bash
     set -euo pipefail
-    mkdir -p upload tools/build/deck
-    rm -f upload/*.pdf tools/build/deck/*.pdf
-    # Split the deck at the "Teil 2: Bauen mit KI" divider slide (found dynamically, so it survives slide edits).
+    # Outline-preserving PDF merge needs pypdf; provision a local venv on first run
+    # (pdfunite drops bookmarks, and qpdf/pdftk aren't assumed present).
+    VENV=tools/pdf-merge/.venv
+    if [ ! -x "$VENV/bin/python" ]; then python3 -m venv "$VENV"; "$VENV/bin/pip" install --quiet pypdf; fi
+    MERGE="$VENV/bin/python tools/pdf-merge/merge.py"
+    mkdir -p upload
+    rm -f upload/*.pdf
+    # Find the "Teil 2: Bauen mit KI" divider slide (dynamically, so it survives slide edits).
     DECK=docs/presentation/flowhub-praesentation.pdf
     N=$(pdfinfo "$DECK" | awk '/^Pages/{print $2}')
     B=0; for i in $(seq 1 "$N"); do if pdftotext -layout -f "$i" -l "$i" "$DECK" - 2>/dev/null | grep -q "Teil 2: Bauen mit KI"; then B=$i; break; fi; done
     [ "$B" -gt 1 ] || { echo "ERROR: 'Teil 2: Bauen mit KI' divider slide not found in $DECK — cannot split the deck." >&2; exit 1; }
-    pdfseparate "$DECK" tools/build/deck/pg-%d.pdf
-    pdfunite $(for i in $(seq 1 $((B-1))); do echo tools/build/deck/pg-$i.pdf; done) tools/build/deck/part1.pdf
-    pdfunite $(for i in $(seq "$B" "$N"); do echo tools/build/deck/pg-$i.pdf; done) tools/build/deck/part2.pdf
-    # Assemble the upload set (deck Teil leads each merged doc; text follows).
+    # Assemble the upload set. The deck Teil leads each merged doc (landscape), text follows
+    # (portrait); merge.py keeps a navigable outline (deck part + document headings).
     cp FlowHub_Uebersicht.pdf                       upload/00_FlowHub_Uebersicht.pdf
     cp docs/architektur/FlowHub_Arc42_v2.pdf        upload/01_FlowHub_Arc42.pdf
-    pdfunite tools/build/deck/part1.pdf docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf upload/02_FlowHub_Projektbeschreibung.pdf
-    pdfunite tools/build/deck/part2.pdf docs/reflexion/FlowHub_Reflexion.pdf                         upload/03_FlowHub_Reflexion.pdf
+    $MERGE upload/02_FlowHub_Projektbeschreibung.pdf "$DECK" 1 $((B-1)) docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf "Präsentation – Teil 1 (Produkt)" "Projektbeschreibung"
+    $MERGE upload/03_FlowHub_Reflexion.pdf "$DECK" "$B" "$N" docs/reflexion/FlowHub_Reflexion.pdf "Präsentation – Teil 2 (Bauen mit KI)" "Reflexion"
     cp "Eigenständigkeitserklärung.pdf"             upload/04_FlowHub_Eigenstaendigkeitserklaerung.pdf
     echo "Upload set ready in ./upload/ (00–04). Sign 04 before uploading."
-    echo "02 = Präsentation Teil 1 (Produkt) + Projektbeschreibung · 03 = Präsentation Teil 2 (Bauen mit KI) + Reflexion (mixed landscape/portrait)."
+    echo "02 = Präsentation Teil 1 (Produkt) + Projektbeschreibung · 03 = Präsentation Teil 2 (Bauen mit KI) + Reflexion (mixed landscape/portrait, with outline)."
     ls -1 upload/
 
 # Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
