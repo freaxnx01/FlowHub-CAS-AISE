@@ -506,6 +506,32 @@ A Vikunja task has a single `done` boolean + one `done_at`. That's a one-shot mo
 
 ---
 
+## Graph visualisation of vectorised captures
+
+**Status:** Idea — the *visual* sibling of [Semantic features on the existing pgvector index](#semantic-features-on-the-existing-pgvector-index); builds on ADR 0006.
+**Motivation:** Every Capture already carries an embedding, but that latent structure is invisible. A graph / semantic map turns the vector space into something you can *explore* — see clusters of related captures, nearest neighbours, and outliers at a glance, and navigate your inbox by meaning instead of by date.
+
+### Proposed shape
+
+Two complementary renderings, both read-only over the stored `Captures.Embedding` column:
+
+1. **Similarity graph** — nodes = captures, edges = k-nearest-neighbours above a cosine threshold (pgvector `ORDER BY embedding <=> … LIMIT k` per node). A force-directed layout surfaces clusters/communities; edge weight = similarity.
+2. **2-D semantic map** — project the high-dimensional embeddings to x/y (UMAP / t-SNE / PCA) and scatter-plot them; spatial proximity ≈ semantic similarity. Cheaper to render than a dense graph at higher counts.
+
+- **Compute split:** server computes edges/coordinates (kNN in SQL, or a batch projection), the frontend just renders. Blazor + a JS graph lib (sigma.js / cytoscape / d3-force) or a canvas scatter.
+- **Interaction:** click a node → Capture detail; colour by matched skill / project / tag; filter by time or skill.
+
+### Open questions
+
+- **Projection choice & stability** — PCA is stable but separates clusters weakly; UMAP/t-SNE separate well but re-runs move points (jarring on refresh). Possibly store derived 2-D coords as a column, recomputed on a cadence.
+- **Compute & refresh** — kNN edges are O(n·k); fine at personal scale, precompute/cache and recompute incrementally as captures arrive. Beyond a few thousand nodes, cluster/sample before rendering.
+- **Where the projection runs** — pure-.NET PCA in-process vs. an offline batch (Python `umap-learn`) writing coords back; decide if it's worth a second runtime.
+- **Demo caveat** — embeddings are **disabled** on the public demo (`/search` returns 503), so this can't run live there; demonstrate via local screenshots, like the rest of the semantic-search story.
+
+**Architecture payoff:** another read-side feature on the embedding infrastructure that already exists (`SearchByEmbeddingAsync` + the stored vector column) — a new UI page + a projection/kNN query, no new write path.
+
+---
+
 ## Independent worker split — modular monolith → distributed
 
 **Status:** Idea — explicitly the reversible path noted in ADR 0002.
