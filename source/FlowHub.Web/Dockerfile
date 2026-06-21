@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
 # Copy solution files first for layer caching
-COPY FlowHub.slnx Directory.Build.props Directory.Packages.props global.json .editorconfig ./
+COPY FlowHub.slnx Directory.Build.props Directory.Packages.props CodeMetricsConfig.txt global.json .editorconfig ./
 COPY source/ ./source/
 COPY tests/ ./tests/
 
