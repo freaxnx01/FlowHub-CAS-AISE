@@ -518,7 +518,7 @@ By Block 5 the implementer subagents own full slices. The human work concentrate
 
 The Block 1 assumption was that Claude would be "a fast typist with good library knowledge" — useful for boilerplate, suspect on architecture, basically a productivity multiplier rather than a workflow change. By Block 5 that's wrong by a wide margin in both directions.
 
-**Boilerplate is faster than expected.** The 95%+ AI-drafted share on production code isn't "AI did 95% of the work" — the 5% human input is concentrated at the high-judgment endpoints (scope, contracts, trade-offs). But the typing genuinely is a small fraction of the elapsed time. The bottleneck moved from implementation to spec writing and review — exactly the inversion SDD optimises for.
+**Boilerplate is faster than expected.** Practically 100% of production code was AI-generated (~5% needed human rework) — that isn't "AI did all the work": the 5% human input is concentrated at the high-judgment endpoints (scope, contracts, trade-offs). But the typing genuinely is a small fraction of the elapsed time. The bottleneck moved from implementation to spec writing and review — exactly the inversion SDD optimises for.
 
 **Architecture is more dangerous than expected.** The embedding-on-submit case is a one-paragraph rewrite that's obvious in retrospect: AI produced locally-correct code that broke a system-wide invariant, and a single-pass review would have shipped it. The deployment-shape failures are the same shape: locally correct, globally wrong. The human role at the architecture boundary didn't shrink; it grew, because the agent now produces enough code fast enough that the only meaningful filter is at design and review.
 
