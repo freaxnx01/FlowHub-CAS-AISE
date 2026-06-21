@@ -212,4 +212,39 @@ public sealed class WallabagSkillIntegrationTests
             .WithMessage("*non-public*");
         mock.GetMatchCount(mock.When("*")).Should().Be(0);
     }
+
+    [Fact]
+    public async Task HandleAsync_PublicIpLiteral_IsAllowed()
+    {
+        // The allow-path for IP literals: a public address is classified directly
+        // (no DNS) and proceeds to save. Covers the positive branch of IsPublic.
+        var (sut, mock) = Build();
+        mock.Expect(HttpMethod.Post, "https://wallabag.example.com/api/entries.json")
+            .WithPartialContent("\"url\":\"http://1.1.1.1/\"")
+            .Respond("application/json", """{"id":777}""");
+
+        var result = await sut.HandleAsync(UrlCapture("http://1.1.1.1/"), default);
+
+        result.Success.Should().BeTrue();
+        result.ExternalRef.Should().Be("777");
+        mock.VerifyNoOutstandingExpectation();
+    }
+
+    [Fact]
+    public async Task HandleAsync_ObfuscatedDecimalIpLiteral_IsNotTreatedAsPublicLiteral()
+    {
+        // http://2130706433/ is the legacy decimal form of 127.0.0.1. Whether .NET
+        // parses it as an IP literal or treats it as a name (it currently rejects the
+        // legacy form, so it resolves), the guard must refuse the loopback it denotes.
+        // The stub returns that loopback to lock the rejection against a future parser
+        // change silently letting the obfuscated form through to Wallabag.
+        var (sut, mock) = Build(
+            resolveHost: (_, _) => Task.FromResult<IPAddress[]>([IPAddress.Parse("127.0.0.1")]));
+
+        var act = () => sut.HandleAsync(UrlCapture("http://2130706433/"), default);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*non-public*");
+        mock.GetMatchCount(mock.When("*")).Should().Be(0);
+    }
 }
