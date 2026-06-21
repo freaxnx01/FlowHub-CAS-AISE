@@ -575,7 +575,7 @@ automatisch bei Rate-Limits, nur die max-turns-Erschöpfung gibt zurück an den 
 
 ## Wo die KI **glänzt** — und wo **nicht**
 
-Über alle Blöcke: **100 % des Codes KI-generiert** — ~5 % brauchten menschliche Nacharbeit.
+Über alle Blöcke: **~95 % des Codes KI-generiert**.
 
 ### Glänzt — **repetitiv & gut spezifiziert**
 7 `IEntityTypeConfiguration<T>`, EF-Migrations, CI-YAML;
@@ -589,11 +589,11 @@ automatisch bei Rate-Limits, nur die max-turns-Erschöpfung gibt zurück an den 
 
 <!--
 [~45 s] Ehrlich und konkret – überzeugt die Dozenten.
-"Praktisch der gesamte Code kam von der KI – aber rund 5 Prozent brauchten menschliche
-Nacharbeit. Wo sie glänzt: alles Repetitive und gut Spezifizierte – Konfigurationsklassen,
-Migrations, 16 Integrationstests gegen echtes Postgres, alle grün beim ersten Lauf. Wo sie
-scheitert: N+1-Abfragen, blind gesetzte CASCADE-Löschungen, veraltete Versionen, ständiger
-Feature-Drang."
+"Projektweit rund 95 Prozent KI-Anteil. Wo sie glänzt: alles
+Repetitive und gut Spezifizierte – Konfigurationsklassen, Migrations, 16 Integrationstests
+gegen echtes Postgres, alle grün beim ersten Lauf. Wo sie scheitert: N+1-Abfragen, blind
+gesetzte CASCADE-Löschungen, veraltete Versionen, ständiger Feature-Drang. Diese letzten
+Prozent Mensch entscheiden über Erfolg oder Desaster."
 -->
 
 ---
