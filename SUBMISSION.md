@@ -9,7 +9,7 @@
 
 ## Hinweis zum Aufbau dieses Dokuments
 
-Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie beginnt mit der Dokumentenübersicht und enthält danach eine kurze Projektzusammenfassung sowie ein klickbares Inhaltsverzeichnis aller Artefakte. Die vollständigen Inhalte liegen im verlinkten GitHub-Repository; sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar. 📑 Das Inhaltsverzeichnis liegt zusätzlich als **PDF-Lesezeichen / Outline** vor (im Viewer über die Seitenleiste).
+Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Sie beginnt mit der Dokumentenübersicht und enthält danach eine kurze Projektzusammenfassung sowie in klickbares Inhaltsverzeichnis aller Artefakte. Die vollständigen Inhalte liegen im verlinkten GitHub-Repository; sämtliche Links zeigen auf den `main`-Branch und sind aus dem PDF heraus klickbar. 📑 Das Inhaltsverzeichnis liegt zusätzlich also **PDF-Lesezeichen / Outline** for (im Viewer über die Seitenleiste).
 
 ---
 
@@ -17,7 +17,7 @@ Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Si
 
 ### Abgabe-Dokumente (Upload Moodle — 5 Dateien)
 
-| # | Dokument | Seiten | Inhalt |
+| # | Document | Seiten | Inhalt |
 |---|---|---:|---|
 | 0 | **`00_FlowHub_Uebersicht.pdf`** *(diese Datei)* | 8 | Einstieg: Dokumentenübersicht + Projektzusammenfassung + klickbares Inhaltsverzeichnis |
 | 1 | **`01_FlowHub_Arc42.pdf`** — Architektur / SAD (as built) | 24 | 12 arc42-Kapitel, 9 Diagramme (System-Kontext, Bausteine, Lebenszyklus, Sequenzen, ER); RE in §1/§3 |
@@ -25,13 +25,13 @@ Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Si
 | 3 | **`03_FlowHub_Reflexion.pdf`** | 7 | KI-Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit |
 | 4 | **`04_FlowHub_Eigenstaendigkeitserklaerung.pdf`** | 2 | Hilfsmittelverzeichnis + unterschriebene Erklärung |
 
-### Weitere Dokumente im Repository (verlinkt, nicht separat hochgeladen)
+### Weitere Dokumente im Repository (verlinkt, nicht separate hochgeladen)
 
-| Dokument | Inhalt |
+| Document | Inhalt |
 |---|---|
-| **Präsentation** (18 S., Foliensatz) | Teil 1 Produkt, Teil 2 Bauen mit KI — verlinkt, nicht separat hochgeladen: [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) |
-| **SUBMISSION-Bundle** (267 S.) | Vollständiges Offline-Archiv: diese Seite + alle referenzierten Artefakte inline (Sicherheitsnetz) |
-| **ADR 0001–0009** | Architekturentscheidungen (Render-Mode, Service-/Async-Architektur, KI, Persistenz, Vektor-Suche, LLM-Hosting, Logging, Telemetrie) |
+| **Präsentation** (18 S., Foliensatz) | Teil 1 Product, Teil 2 Bauen mit KI — verlinkt, nicht separate hochgeladen: [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) |
+| **SUBMISSION-Bundle** (267 S.) | Vollständiges Offline-Archive: diese Seite + alle referenzierten Artefakte inline (Sicherheitsnetz) |
+| **ADR 0001–0009** | Architekturentscheidungen (Render-Mode, Service-/Async-Architektur, KI, Persistenz, Vector-Such, LLM-Hosting, Logging, Telemetrie) |
 | **Spezifikation** (`docs/spec/`) | Use Cases, NfA (SMART), Akzeptanzkriterien, Test-Strategie, System-Kontext |
 | **Design** (`docs/design/`) | Perspektiven, Datenfluss, Sequenzdiagramme, Datenmodell (ER) |
 | **Block-Nachbereitungen** (5×) · **Insights** (5×) | Pro Block: Auftrag, Umsetzung, Rubrik-Self-Check · Lessons learned |
@@ -42,13 +42,13 @@ Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Si
 
 ## 1. Projektzusammenfassung
 
-**FlowHub** ist ein KI-gestützter persönlicher Eingangskorb, der Informationsschnipsel aus dem Alltag (Filmtipps, Artikel, Belege, Bookmarks, Notizen) automatisch erkennt, klassifiziert und an die passenden Ziel-Dienste des Benutzers weiterleitet — self-hosted im Homelab oder extern (z. B. Cloud-Dienste, Forge-Tracker) — ohne dass der Benutzer im Moment der Erfassung entscheiden muss, wohin die Information gehört.
+**FlowHub** ist in KI-gestützter persönlicher Eingangskorb, der Informationsschnipsel aus dem Alltag (Filmtipps, Artikel, Belege, Bookmarks, Notizen) automatisch erkennt, klassifiziert und an die passenden Ziel-Dienste des Benutzers weiterleitet — self-hosted im Homelab oder extern (z. B. Cloud-Dienste, Forge-Tracker) — ohne dass der Benutzer im Moment der Erfassung entscheiden muss, wohin die Information gehört.
 
-Das adressierte Kernbedürfnis ist **"Capture without friction"**: Statt heute fünf Schritte (Idee → App-Wahl → App öffnen → Kategorisieren → Ablegen) reduziert FlowHub die Erfassung auf einen einzigen Schritt — typischerweise eine Nachricht an einen Telegram-Bot. Die Klassifikation übernimmt ein **Skill-basiertes Routing-System**: ein LLM (Cloud-Provider wie OpenRouter oder ein lokales LLM) klassifiziert den Schnipsel, mit deterministischem Keyword-/URL-Muster-Matching als Fallback. Die Ablage erfolgt in bestehende Dienste — self-hosted im Homelab (z. B. Vikunja, paperless-ngx, Wallabag) ebenso wie externe Services (z. B. GitHub Issues).
+Das adressierte Kernbedürfnis ist **"Capture without friction"**: Statt heute fünf Schritte (Idee → App-Wahl → App öffnen → Kategorisieren → Ablegen) reduziert FlowHub die Erfassung auf einen einzigen Schritt — typischerweise eine Nachricht an einen Telegram-Bot. Die Klassifikation übernimmt in **Skill-basiertes Routing-System**: in LLM (Cloud-Provider wie OpenRouter oder in locales LLM) klassifiziert den Schnipsel, mit deterministischem Keyword-/URL-Muster-Matching also Fallback. Die Ablage erfolgt in bestehende Dienste — self-hosted im Homelab (z. B. Vikunja, paperless-ngx, Wallabag) ebenso wie externe Services (z. B. GitHub Issues).
 
-Technisch ist FlowHub ein **Modular Monolith in .NET 10** mit Blazor-Frontend (MudBlazor, Interactive Server) und einer hexagonalen Schichtung innerhalb der Module. Die Implementierung erfolgt inkrementell über die fünf CAS-Blöcke (Einführung, Frontend, Service, Persistence, Deployment) — jeder Block schliesst mit einer dokumentierten Nachbereitung ab, die gegen die Moodle-Bewertungskriterien selbst geprüft wird. Ein expliziter Fokus liegt auf **KI-unterstützter Entwicklung**: Skills, Agent-Instructions, Prompt-Hygiene und Reflexion über den AI-Workflow sind dokumentiert und Teil des Bewertungsumfangs.
+Technisch ist FlowHub in **Modular Monolith in .NET 10** mit Blazor-Frontend (MudBlazor, Interactive Server) und einer hexagonalen Schichtung innerhalb der Module. Die Implementierung erfolgt inkrementell über die fünf CAS-Blöcke (Einführung, Frontend, Service, Persistence, Deployment) — jeder Block schliesst mit einer dokumentierten Nachbereitung ab, die gegen die Moodle-Bewertungskriterien selbst geprüft wird. In expliziter Fokus liegt auf **KI-unterstützter Entwicklung**: Skills, Agent-Instructions, Prompt-Hygiene und Reflexion über den AI-Workflow sind dokumentiert und Teil des Bewertungsumfangs.
 
-Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Architektur und Risiken liegt unter [`docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md).
+Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Architektur und Risiken liegt under [`docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md).
 
 ---
 
@@ -72,7 +72,7 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 
 - [Projektbeschreibung v4 (Markdown)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.md) — aktueller Stand: Vision, Stakeholder, Funktionsumfang, Architektur
 - [Projektbeschreibung v4 (PDF)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf)
-- [**Arc42-Architekturdokumentation (as built)** — Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.md) · [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.pdf) — **Haupt-Architekturdokument**: 12 Arc42-Kapitel mit Modul-, Lebenszyklus-, Sequenz- und ER-Diagrammen (Ist-Stand)
+- [**Arc42-Architekturdokumentation (as built)** — Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.md) · [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/architektur/FlowHub_Arc42_v2.pdf) — **Haupt-Architekturdokument**: 12 Arc42-Kapitel mit Module-, Lebenszyklus-, Sequenz- und ER-Diagrammen (Ist-Stand)
 - [Architektur-Übersicht v2 (SVG)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/projektbeschreibung/FlowHub_Architecture-v2.svg)
 
 ### 3.2 Architecture Decision Records (ADRs)
@@ -97,7 +97,7 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 
 ### 3.4 Block-Nachbereitungen (CAS-Module)
 
-Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Präsenz-/Vor-Ort-Arbeit am Samstag) und **Nachbereitung** (Implementierung & Reflexion). Die **Nachbereitungen** sind die jeweils gegen die Bewertungskriterien geprüften Liefergegenstände.
+Jeder Block hat drei Phasen: **Vorbereitung** (for dem Präsenztag), **PVA** (Präsenz-/Vor-Ort-Arbeit am Samstag) und **Nachbereitung** (Implementierung & Reflexion). Die **Nachbereitungen** sind die jeweils gegen die Bewertungskriterien geprüften Liefergegenstände.
 
 **Block 1 — Einführung**
 
@@ -132,7 +132,7 @@ Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Pr
 ### 3.5 Projektarbeit & Reflexion
 
 - [**Reflexion — KI-gestützte Entwicklung** — Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.md) · [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/reflexion/FlowHub_Reflexion.pdf) — **Reflexions-Hauptdokument**: Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit
-- [**Präsentation** (PDF)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) — **Abgabe-Foliensatz**: Teil 1 Produkt, Teil 2 Bauen mit KI
+- [**Präsentation** (PDF)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) — **Abgabe-Foliensatz**: Teil 1 Product, Teil 2 Bauen mit KI
 - [Idee FlowHub](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Idee%20FlowHub.md) — Konzept-Notizen
 - [Dev](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Dev.md) — Entwicklungsnotizen
 - [Skills](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Projektarbeit/Skills.md) — Skill-System
@@ -144,23 +144,23 @@ Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Pr
 
 - **Bewertungskriterien (Moodle-Rubric)** — kanonische Quelle: 18 Items, 5 Buckets, max. 100 Punkte.
   - Die offizielle Moodle-Rubrik ist FFHS-Lehrmaterial und wird **nicht im öffentlichen Repository mitveröffentlicht**.
-  - Die **Selbsteinschätzung pro Block** (siehe 3.4) bildet die relevanten Kriterien mit Punktgewichtung ab — als Checkliste am Ende jeder Block-Nachbereitung.
+  - Die **Selbsteinschätzung pro Block** (siehe 3.4) bildet die relevanten Kriterien mit Punktgewichtung ab — also Checkliste am End jeder Block-Nachbereitung.
 - **[Lernziele-Coverage (alle Blöcke)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/lernziele-coverage.md)** — die *andere* Achse zur Rubrik:
-  - jedes Block-Lernziel (Vorbereitung + Nachbereitung) auf konkrete Code- **und** Dokument-Belege abgebildet, inkl. .NET-Stack-Mapping;
+  - jedes Block-Lernziel (Vorbereitung + Nachbereitung) auf konkrete Code- **und** Document-Belege abgebildet, inkl. .NET-Stack-Mapping;
   - bewusst zurückgestellter Scope ist dokumentiert: SOAP, Service-Mesh, Kubernetes, Cloud-IaaS, Agentic AI.
-- **Programmierkriterium „Konzepte des gewählten Frameworks" (max. 10 Pkt.)** — in der aktuellen Rubrik (Update Juni 2026) **framework-neutral** (nicht mehr Quarkus-/Jakarta-EE-spezifisch). Für .NET 10 / ASP.NET Core **direkt und vollständig erfüllt**; die genannten Konzepte sind im Code nachgewiesen:
-  - **Dependency Injection** — `IServiceCollection`, per-Modul-Registrierung
+- **Programmierkriterium „Konzepte des gewählten Frameworks" (max. 10 Pkt.)** — in der aktuellen Rubrik (Update June 2026) **framework-neutral** (nicht mehr Quarkus-/Jakarta-EE-spezifisch). Für .NET 10 / ASP.NET Core **direkt und vollständig erfüllt**; die genannten Konzepte sind im Code nachgewiesen:
+  - **Dependency Injection** — `IServiceCollection`, per-Module-Registrierung
   - **REST-Schnittstellen** — Minimal API + RFC 9457 ProblemDetails (`FlowHub.Api`)
-  - **Konfiguration** — `IConfiguration`/Options, 12-Factor
+  - **Configuration** — `IConfiguration`/Options, 12-Factor
   - **Fehlerbehandlung** — ProblemDetails, MassTransit-Retry + deterministischer Fallback
   - Belege je Konzept: [`docs/spec/modern-app-concepts.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/modern-app-concepts.md). **Kein ausgeklammertes Item mehr — alle 100 Punkte erreichbar** (kein „/90"-Sonderfall).
-- **Sub-System-Kriterium (max. 5 Pkt.)** — die Rubrik akzeptiert **explizit den modularen Monolithen** („modularer Monolith oder verteilte Services … als Container lauffähig betrieben"). FlowHub erfüllt das vollständig:
+- **Sub-System-Kriterium (max. 5 Pkt.)** — die Rubrik akzeptiert **explicit den modularen Monolithen** („modularer Monolith oder verteilte Services … also Container lauffähig betrieben"). FlowHub erfüllt das vollständig:
   - klar abgegrenzte Module (ADR 0002);
-  - als Container-Stack lauffähig (Docker Compose + Live-Demo).
+  - also Container-Stack lauffähig (Docker Compose + Live-Demo).
 
 ### 3.7 Knowledge Base (Hintergrund)
 
-Vertiefende Notizen aus den Vorlesungen, nicht Teil der primären Bewertung, aber als Kontext referenziert:
+Vertiefende Notizen aus den Vorlesungen, nicht Teil der primären Bewertung, aber also Kontext referenziert:
 
 - [Software Architecture](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Knowledge/Software%20Architecture.md)
 - [UML](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Knowledge/UML.md)
@@ -168,12 +168,12 @@ Vertiefende Notizen aus den Vorlesungen, nicht Teil der primären Bewertung, abe
 
 ### 3.8 Ausblick & Erweiterbarkeit
 
-Die [**Roadmap**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/project/ROADMAP.md) zeigt das Weiterentwicklungspotenzial — und ist zugleich der beste Beleg für die **Tragfähigkeit der Architektur**: Weil FlowHub ein hexagonaler Modular Monolith ist, sind die meisten Erweiterungen **dünne Adapter** an bestehenden Ports, kein Umbau des Kerns:
+Die [**Roadmap**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/project/ROADMAP.md) zeigt das Weiterentwicklungspotenzial — und ist zugleich der beste Beleg für die **Tragfähigkeit der Architektur**: Weil FlowHub in hexagonaler Modular Monolith ist, sind die meisten Erweiterungen **dünne Adapter** an bestehenden Ports, kein Umbau des Kerns:
 
-- **Neue Capture-Kanäle** (Telegram, OS-/PWA-Share-Target, E-Mail) → je ein *driving adapter* vor `ICaptureService`.
+- **Neue Capture-Kanäle** (Telegram, OS-/PWA-Share-Target, E-Mail) → je in *driving adapter* for `ICaptureService`.
 - **Neue Skill-Ziele** (paperless-ngx inkl. dessen eigener KI, GitHub-Issues z. B. `flowhub: Add i18n DE/EN`, Karakeep, Immich, Firefly) → je eine `ISkillIntegration`-Implementierung.
-- **KI-Tiefe** (agentische Mehrschritt-Klassifikation, lokales LLM via Ollama für volle Datenresidenz, Confidence-basierter Human-in-the-Loop, semantische Features auf dem vorhandenen pgvector-Index) → hinter den bestehenden `IClassifier`/Provider-Abstraktionen.
-- **Skalierungspfad** (eigenständiger Worker-Container, Multi-User via OIDC, vollständiges Tracing) → bewusst *reversible* Konsequenz der Modular-Monolith-Entscheidung (ADR 0002): per Konfiguration, nicht per Neuentwicklung.
+- **KI-Tiefe** (agentische Mehrschritt-Klassifikation, locales LLM via Ollama für volle Datenresidenz, Confidence-basierter Human-in-the-Loop, semantische Features auf dem vorhandenen pgvector-Index) → hinter den bestehenden `IClassifier`/Provider-Abstraktionen.
+- **Skalierungspfad** (eigenständiger Worker-Container, Multi-User via OIDC, vollständiges Tracing) → bewusst *reversible* Konsequenz der Modular-Monolith-Entscheidung (ADR 0002): per Configuration, nicht per Neuentwicklung.
 
 > Dies ist **Potenzial, nicht zugesagter Abgabe-Umfang** (vgl. Scope-Freeze) — aufgeführt, um die Erweiterbarkeit des Entwurfs zu zeigen.
 
@@ -182,15 +182,15 @@ Die [**Roadmap**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/p
 ## 4. Hinweise für die Bewertung
 
 - **Primärer Einstiegspunkt** ist diese Datei (`SUBMISSION.md`) — alle anderen Artefakte sind über die Links in Abschnitt 3 erreichbar.
-- **Codebasis** liegt im selben Repository unter [`source/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/source) (Modulstruktur), Tests unter [`tests/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/tests).
+- **Codebasis** liegt im selben Repository under [`source/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/source) (Modulstruktur), Tests under [`tests/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/tests).
 - **Test-Ergebnisse:** der letzte CI-Lauf auf `main` ([Run #27510188698, 2026-06-14](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/runs/27510188698)) ist **grün — 294 Tests, 0 Fehler** über 6 Test-Projekte.
-  - Projekte: Core-Unit, Web-Component (bUnit), Api-Integration, Persistence, Skill-Contract (WireMock); E2E (Playwright) und Live-AI sind kategoriebasiert separat.
+  - Projekte: Core-Unit, Web-Component (bUnit), Api-Integration, Persistence, Skill-Contract (WireMock); E2E (Playwright) und Live-AI sind kategoriebasiert separate.
   - Coverage via *XPlat Code Coverage* (CI-Artefakt); Test-Strategie: [`docs/spec/testing-strategy.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/testing-strategy.md).
 - **Run-Anleitung** und Dev-Konventionen siehe [`CLAUDE.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CLAUDE.md) (Abschnitt *Essential Commands*).
-- **KI-Nutzung** ist explizit dokumentiert — sowohl auf Block-Ebene (Reflexionsabschnitt der jeweiligen Nachbereitung) als auch konsolidiert im Learnings-Dokument (Abschnitt 3.5).
+- **KI-Nutzung** ist explicit dokumentiert — sowohl auf Block-Ebene (Reflexionsabschnitt der jeweiligen Nachbereitung) also auch konsolidiert im Learnings-Document (Abschnitt 3.5).
 - **Monitoring & Observability** (Block-5-Lernziel „Systeme überwachen und optimieren") — umgesetzt und betreibbar:
   - **Metriken:** OpenTelemetry → Prometheus (`/metrics`) → Grafana-Dashboard.
   - **Health:** `/health/live` + In-App-Integration-Health (Vikunja / Wallabag / Paperless).
   - **Statusseite:** öffentliche **Uptime-Kuma**-Seite auf der Demo (`status.demo.flowhub.freaxnx01.ch`), prüft auch die LLM-Erreichbarkeit.
-  - **Self-Healing:** Container-`restart`-Policies + Healthchecks; KeywordClassifier als Fallback bei LLM-Ausfall.
+  - **Self-Healing:** Container-`restart`-Policies + Healthchecks; KeywordClassifier also Fallback bei LLM-Ausfall.
   - Details: [`docs/ci-cd.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/ci-cd.md), [`docs/runbooks/public-demo.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/runbooks/public-demo.md).
