@@ -665,7 +665,7 @@ pdf-presentation:
     CHROME=$(find "$HOME/.cache/puppeteer" -type f -path '*chrome-linux64/chrome' 2>/dev/null | sort -V | tail -1)
     if [ -z "$CHROME" ]; then echo "ERROR: no puppeteer Chromium found — run 'just pdf-install' first." >&2; exit 1; fi
     cd docs/presentation
-    CHROME_PATH="$CHROME" npx --yes @marp-team/marp-cli --html --pdf --allow-local-files flowhub-praesentation.md -o flowhub-praesentation.pdf
+    CHROME_PATH="$CHROME" npx --yes @marp-team/marp-cli --html --pdf --pdf-outlines --pdf-outlines.pages=false --theme-set theme/flowhub.css --allow-local-files flowhub-praesentation.md -o flowhub-praesentation.pdf
     echo "wrote docs/presentation/flowhub-praesentation.pdf (no speaker notes)"
 
 # Assemble the numbered Moodle upload set (00–04) into ./upload/.

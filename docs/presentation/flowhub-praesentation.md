@@ -648,26 +648,3 @@ menschliche Führung bei allem, was Architektur und Domäne berührt. Die Rolle 
 verschoben – vom Tippen zum Entwerfen, Lenken, Reviewen. Der Mensch bleibt Architekt und
 Reviewer. Danke – Fragen?"
 -->
-
----
-
-<!-- _paginate: false -->
-
-## Anhang · Abkürzungen
-
-| Abk. | Bedeutung | Abk. | Bedeutung |
-|---|---|---|---|
-| KI / AI | Künstliche Intelligenz | MEAI | Microsoft.Extensions.AI |
-| SSR | Server-Side Rendering | LLM | Large Language Model |
-| EF Core | Entity Framework Core (ORM) | pgvector | Postgres-Vektor-Erweiterung |
-| HNSW | Approx.-Nearest-Neighbour-Index | ANN | Approximate Nearest Neighbour |
-| DI | Dependency Injection | TDD | Test-Driven Development |
-| RFC 9457 | HTTP Problem Details | ADR | Architecture Decision Record |
-| MVP | Minimum Viable Product | LTS | Long-Term Support |
-| DMS | Dokumentenmanagement-System | OIDC | OpenID Connect (geplant) |
-| FK | Foreign Key (Fremdschlüssel) | N+1 | N+1-Query-Problem |
-| 12-Factor | 12-Factor-App (Cloud-native-Prinzipien) | CI | Continuous Integration |
-
-<!--
-[Backup] Nur bei Nachfragen zeigen — Akronyme aus dem Deck.
--->
