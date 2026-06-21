@@ -100,8 +100,8 @@ test-watch:
 # Run all tests with coverage
 [group('test')]
 test-coverage:
-    dotnet test {{sln}} --collect:"XPlat Code Coverage" --results-directory ./coverage
-    @echo "Coverage reports in ./coverage/"
+    dotnet test {{sln}} --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory ./coverage
+    @echo "Coverage reports (Cobertura) in ./coverage/"
 
 # Start Postgres + FlowHub.Web, wait until ready, run Playwright happy-flow E2E, then stop the server
 [group('test')]
