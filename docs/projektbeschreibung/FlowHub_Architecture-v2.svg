@@ -41,6 +41,7 @@
 
   <!-- Arrow Input → Backend -->
   <line x1="600" y1="178" x2="600" y2="202" stroke="#3498DB" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <text x="607" y="194" font-size="9" fill="#666" font-style="italic">Capture</text>
 
   <!-- ═══════════════════════════════════════════════════════ -->
   <!-- 2. BACKEND CONTAINER -->
@@ -57,6 +58,7 @@
 
   <!-- Arrow Telegram → Skill-System -->
   <line x1="250" y1="305" x2="278" y2="305" stroke="#27AE60" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+  <text x="264" y="300" text-anchor="middle" font-size="8" fill="#666">Capture</text>
 
   <!-- ── SKILL-SYSTEM box ── -->
   <rect x="280" y="258" width="530" height="392" rx="12" fill="#FEF9E7" stroke="#F39C12" stroke-width="2" filter="url(#shadow-sm)"/>
@@ -148,9 +150,11 @@
   <!-- Bidirectional arrow Skills ↔ AI -->
   <line x1="810" y1="340" x2="832" y2="340" stroke="#F39C12" stroke-width="2" marker-end="url(#arrow-dark)"/>
   <line x1="832" y1="330" x2="810" y2="330" stroke="#F1C40F" stroke-width="2" marker-end="url(#arrow-dark)"/>
+  <text x="821" y="323" text-anchor="middle" font-size="8" fill="#666">IClassifier</text>
 
   <!-- Arrow Skills → REST Clients -->
   <line x1="810" y1="490" x2="832" y2="490" stroke="#E74C3C" stroke-width="2" marker-end="url(#arrow-dark)"/>
+  <text x="821" y="484" text-anchor="middle" font-size="8" fill="#666">Routing</text>
 
   <!-- ── Blazor SSR box ── -->
   <rect x="80" y="550" width="720" height="100" rx="10" fill="#E8F8F5" stroke="#1ABC9C" stroke-width="2" filter="url(#shadow-sm)"/>
@@ -164,10 +168,13 @@
   <!-- ═══════════════════════════════════════════════════════ -->
   <!-- → Persistence -->
   <line x1="230" y1="665" x2="230" y2="700" stroke="#2ECC71" stroke-width="3" marker-end="url(#arrow-teal)"/>
+  <text x="237" y="686" font-size="9" fill="#666" font-style="italic">EF Core</text>
   <!-- → Homelab -->
   <line x1="600" y1="665" x2="600" y2="700" stroke="#2ECC71" stroke-width="3" marker-end="url(#arrow-teal)"/>
+  <text x="607" y="686" font-size="9" fill="#666" font-style="italic">REST</text>
   <!-- REST Clients → Homelab -->
   <line x1="927" y1="665" x2="927" y2="700" stroke="#2ECC71" stroke-width="3" marker-end="url(#arrow-teal)"/>
+  <text x="934" y="686" font-size="9" fill="#666" font-style="italic">Refit</text>
 
   <!-- ═══════════════════════════════════════════════════════ -->
   <!-- 4. PERSISTENCE -->
