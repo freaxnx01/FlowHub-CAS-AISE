@@ -189,9 +189,10 @@ bei Architektur, und insgesamt ein Produktivitäts-Multiplikator, der den Workfl
 aber nicht grundlegend verändert. Bis Block 5 erwies sich diese Annahme in
 **beiden** Punkten als falsch — und zwar in entgegengesetzte Richtungen.
 
-**Beim Boilerplate wurde die KI unterschätzt.** Über 95 % des Produktionscodes
-sind KI-erstellt. Das heisst aber nicht „die KI hat 95 % der Arbeit gemacht": die
-verbleibenden ~5 % menschlicher Anteil verlagern sich fast vollständig auf
+**Beim Boilerplate wurde die KI unterschätzt.** Praktisch der gesamte
+Produktionscode (≈ 100 %) wurde KI-generiert, rund 5 % erforderten menschliche
+Nacharbeit. Das heisst aber nicht „die KI hat die ganze Arbeit gemacht": diese
+~5 % menschlicher Anteil verlagern sich fast vollständig auf
 Entscheidungen mit hohem Urteilsbedarf — Scope, Verträge, Trade-offs. Das reine
 Tippen ist nur noch ein kleiner Bruchteil der aufgewendeten Zeit.
 
