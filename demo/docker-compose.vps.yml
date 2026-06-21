@@ -46,7 +46,11 @@ services:
       - "traefik.http.routers.flowhub-wallabag.entrypoints=web-secure"
       - "traefik.http.routers.flowhub-wallabag.tls=true"
       - "traefik.http.routers.flowhub-wallabag.tls.certresolver=default"
+      - "traefik.http.routers.flowhub-wallabag.middlewares=flowhub-wallabag-ratelimit@docker"
       - "traefik.http.services.flowhub-wallabag.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.flowhub-wallabag-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.flowhub-wallabag-ratelimit.ratelimit.burst=200"
+      - "traefik.http.middlewares.flowhub-wallabag-ratelimit.ratelimit.period=1m"
       - "traefik.docker.network=web"
 
   paperless:
@@ -56,7 +60,11 @@ services:
       - "traefik.http.routers.flowhub-paperless.entrypoints=web-secure"
       - "traefik.http.routers.flowhub-paperless.tls=true"
       - "traefik.http.routers.flowhub-paperless.tls.certresolver=default"
+      - "traefik.http.routers.flowhub-paperless.middlewares=flowhub-paperless-ratelimit@docker"
       - "traefik.http.services.flowhub-paperless.loadbalancer.server.port=8000"
+      - "traefik.http.middlewares.flowhub-paperless-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.flowhub-paperless-ratelimit.ratelimit.burst=200"
+      - "traefik.http.middlewares.flowhub-paperless-ratelimit.ratelimit.period=1m"
       - "traefik.docker.network=web"
 
   uptime-kuma:
@@ -66,5 +74,9 @@ services:
       - "traefik.http.routers.flowhub-status.entrypoints=web-secure"
       - "traefik.http.routers.flowhub-status.tls=true"
       - "traefik.http.routers.flowhub-status.tls.certresolver=default"
+      - "traefik.http.routers.flowhub-status.middlewares=flowhub-status-ratelimit@docker"
       - "traefik.http.services.flowhub-status.loadbalancer.server.port=3001"
+      - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.average=100"
+      - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.burst=200"
+      - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.period=1m"
       - "traefik.docker.network=web"
