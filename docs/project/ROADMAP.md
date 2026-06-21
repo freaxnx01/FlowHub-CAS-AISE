@@ -391,9 +391,35 @@ A Vikunja task has a single `done` boolean + one `done_at`. That's a one-shot mo
 
 - **Telegram bot** — webhook → `ICaptureService.SubmitAsync(..., ChannelKind.Telegram)`. The original one-message-capture vision; realizes the `FlowHub.Telegram` placeholder.
 - **OS / PWA share-target** — register FlowHub as a share target so any app's "Share" sheet can send to it.
-- **Email-to-capture** — forward an email to a dedicated address → capture (IMAP poll or inbound webhook).
+- **Email-to-capture** — forward an email to a dedicated address → capture. Full treatment in [Email-to-Capture channel](#email-to-capture-channel) below.
 
 **Architecture payoff:** each is a **driving adapter** in front of the existing `ICaptureService` — no new domain, classification, or routing code. The `ChannelKind` enum + per-channel adapter is the only surface that grows.
+
+---
+
+## Email-to-Capture channel
+
+**Status:** Idea — the email leg of [More capture channels](#more-capture-channels--telegram-share-target-email), broken out because email carries specifics the others don't (spoofable sender, attachments, forwarded-mail chrome).
+**Motivation:** Email is the universal "send it somewhere" channel — every device has it, and "forward this to capture it" is zero-friction. Forward a newsletter, an order confirmation, a receipt PDF, or a *"remember this"* note to a dedicated address and it becomes a Capture that flows through the normal classify → route pipeline.
+
+### Proposed shape
+
+1. **New driving adapter** in front of `ICaptureService` — `ICaptureService.SubmitAsync(..., ChannelKind.Email)` (new `ChannelKind.Email`). No domain/classification/routing change; same seam as the Telegram/REST channels.
+2. **Two ingestion modes** (pick per deployment):
+   - **IMAP poll** — a background worker polls a dedicated mailbox (e.g. a homelab catch-all or a Gmail app-password account) on an interval, ingests unseen messages, marks them read. Simplest, works with any mailbox, no inbound DNS/MX. Fits the self-hosted posture.
+   - **Inbound webhook** — a mail provider (Mailgun / Postmark / SendGrid inbound-parse) or a self-hosted MX forwards parsed mail to an HTTP endpoint. Lower latency, no polling, but adds a provider + a public endpoint to secure.
+3. **Message → Capture mapping** — subject + a cleaned body become the Capture content; sender/Message-ID retained as metadata. **Forwarded-mail unwrapping**: strip the `Fwd:`/quoted-reply chrome and signatures so the *original* URL/text is what gets classified, not the forwarding envelope.
+4. **Attachments** — emails carry files; reuse the existing `Capture.Attachment` + `IAttachmentStorage` plumbing (already built for the paperless-ngx path). Enforce the same size cap + content-type allowlist at the boundary; a PDF receipt naturally routes onward to paperless.
+
+### Open questions
+
+- **Anti-spoofing / trust** *(the email-specific one)* — an email's `From` is trivially forged, so a publicly-known address is an open injection vector. Options: an **unguessable plus-token** address (`capture+<secret>@…`), a **sender allowlist**, and/or verifying **SPF/DKIM/DMARC** on inbound. Decide before exposing any address. Ties into [Confidence-driven human-in-the-loop](#confidence-driven-human-in-the-loop) for low-trust senders.
+- **Mailbox/domain** — dedicated homelab domain catch-all vs. a hosted inbox; who owns MX.
+- **Body extraction** — HTML→text, signature/disclaimer stripping, and which part wins on multipart `text/plain` + `text/html`.
+- **Loop & dedup safety** — idempotency by `Message-ID`; never auto-reply (avoid bounce/auto-responder loops).
+- **Privacy** — inbound mail content leaves to the LLM classifier like any Capture; same NfA-P1 consideration as elsewhere.
+
+**Architecture payoff:** one new driving adapter + `ChannelKind.Email`; the IMAP-poll variant needs no public endpoint at all. Attachment handling and routing already exist — this is additive, not a core change.
 
 ---
 
@@ -477,6 +503,32 @@ A Vikunja task has a single `done` boolean + one `done_at`. That's a one-shot mo
 - **Natural-language search** over all captures (already partially present; promote to a first-class UX).
 
 **Architecture payoff:** read-side features on infrastructure that already exists (`SearchByEmbeddingAsync`) — no new write path.
+
+---
+
+## Graph visualisation of vectorised captures
+
+**Status:** Idea — the *visual* sibling of [Semantic features on the existing pgvector index](#semantic-features-on-the-existing-pgvector-index); builds on ADR 0006.
+**Motivation:** Every Capture already carries an embedding, but that latent structure is invisible. A graph / semantic map turns the vector space into something you can *explore* — see clusters of related captures, nearest neighbours, and outliers at a glance, and navigate your inbox by meaning instead of by date.
+
+### Proposed shape
+
+Two complementary renderings, both read-only over the stored `Captures.Embedding` column:
+
+1. **Similarity graph** — nodes = captures, edges = k-nearest-neighbours above a cosine threshold (pgvector `ORDER BY embedding <=> … LIMIT k` per node). A force-directed layout surfaces clusters/communities; edge weight = similarity.
+2. **2-D semantic map** — project the high-dimensional embeddings to x/y (UMAP / t-SNE / PCA) and scatter-plot them; spatial proximity ≈ semantic similarity. Cheaper to render than a dense graph at higher counts.
+
+- **Compute split:** server computes edges/coordinates (kNN in SQL, or a batch projection), the frontend just renders. Blazor + a JS graph lib (sigma.js / cytoscape / d3-force) or a canvas scatter.
+- **Interaction:** click a node → Capture detail; colour by matched skill / project / tag; filter by time or skill.
+
+### Open questions
+
+- **Projection choice & stability** — PCA is stable but separates clusters weakly; UMAP/t-SNE separate well but re-runs move points (jarring on refresh). Possibly store derived 2-D coords as a column, recomputed on a cadence.
+- **Compute & refresh** — kNN edges are O(n·k); fine at personal scale, precompute/cache and recompute incrementally as captures arrive. Beyond a few thousand nodes, cluster/sample before rendering.
+- **Where the projection runs** — pure-.NET PCA in-process vs. an offline batch (Python `umap-learn`) writing coords back; decide if it's worth a second runtime.
+- **Demo caveat** — embeddings are **disabled** on the public demo (`/search` returns 503), so this can't run live there; demonstrate via local screenshots, like the rest of the semantic-search story.
+
+**Architecture payoff:** another read-side feature on the embedding infrastructure that already exists (`SearchByEmbeddingAsync` + the stored vector column) — a new UI page + a projection/kNN query, no new write path.
 
 ---
 

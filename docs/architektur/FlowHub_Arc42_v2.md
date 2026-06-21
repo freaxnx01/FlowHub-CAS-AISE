@@ -196,9 +196,9 @@ graph TD
     TelegramAPI -- "webhook" --> Telegram
     Web -- "in-process DI" --> Core
     Telegram -- "in-process DI" --> Core
-    Core --> AI
+    Core -- "IClassifier" --> AI
     AI -- "REST" --> Ollama
-    Core --> Skills
+    Core -- "ISkillIntegration" --> Skills
     Skills -- "REST" --> Wallabag
     Skills -- "REST" --> Vikunja
     Skills -- "REST" --> Paperless
@@ -273,18 +273,18 @@ flowchart TB
 
     cloud["Cloud-LLM<br/>OpenRouter / Mistral"]
 
-    web --> apilib
-    api --> apilib
-    apilib --> core
-    core --> pipe
-    enrich --> ai
+    web -->|Capture absenden| apilib
+    api -->|Capture absenden| apilib
+    apilib -->|CaptureService| core
+    core -->|publiziert Events| pipe
+    enrich -->|IClassifier| ai
     ai -.HTTP.-> cloud
-    route --> skills
+    route -->|ISkillIntegration| skills
     skills -.HTTP.-> ext["Wallabag / Vikunja"]
-    core --> persist
-    persist --> pg
-    pipe <--> mq
-    mig --> pg
+    core -->|Repository-Ports| persist
+    persist -->|EF Core| pg
+    pipe <-->|MassTransit| mq
+    mig -->|Migrationen| pg
 ```
 
 *Abbildung 2: Ist-Architektur — Bausteinsicht Ebene 1 (modularer Monolith)*

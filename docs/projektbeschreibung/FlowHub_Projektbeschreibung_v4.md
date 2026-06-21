@@ -328,18 +328,18 @@ flowchart TB
 
     cloud["Cloud-LLM<br/>OpenRouter / Mistral"]
 
-    web --> apilib
-    api --> apilib
-    apilib --> core
-    core --> pipe
-    enrich --> ai
+    web -->|Capture absenden| apilib
+    api -->|Capture absenden| apilib
+    apilib -->|CaptureService| core
+    core -->|publiziert Events| pipe
+    enrich -->|IClassifier| ai
     ai -.HTTP.-> cloud
-    route --> skills
+    route -->|ISkillIntegration| skills
     skills -.HTTP.-> ext["Wallabag / Vikunja"]
-    core --> persist
-    persist --> pg
-    pipe <--> mq
-    mig --> pg
+    core -->|Repository-Ports| persist
+    persist -->|EF Core| pg
+    pipe <-->|MassTransit| mq
+    mig -->|Migrationen| pg
 ```
 
 **Zielbild (Konzeptphase)** — enthält noch nicht gebaute Bausteine:
@@ -370,13 +370,15 @@ flowchart TB
         GL["Git Forge + Obsidian"]
     end
 
-    TG --> BOT --> REG --> DISP
-    DISP --> AI
-    DISP --> RC
-    RC --> WB
-    RC --> VK
-    RC --> PL
-    RC --> GL
+    TG -->|Webhook| BOT
+    BOT -->|Capture| REG
+    REG -->|registrierte Skills| DISP
+    DISP -->|Confidence-Score| AI
+    DISP -->|Routing| RC
+    RC -->|HTTP| WB
+    RC -->|HTTP| VK
+    RC -->|HTTP| PL
+    RC -->|HTTP / git| GL
     DISP -. persistiert .-> PG
     BOT -. pending .-> RD
     WEB -. verwaltet .-> PG
