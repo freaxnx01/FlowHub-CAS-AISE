@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 using System.Text.Json;
 using FlowHub.Core.Captures;
 using FlowHub.Skills.Wallabag;
@@ -10,7 +11,14 @@ namespace FlowHub.Skills.Tests.Wallabag;
 
 public sealed class WallabagSkillIntegrationTests
 {
-    private static (WallabagSkillIntegration sut, MockHttpMessageHandler mock) Build(WallabagOptions? options = null)
+    // Default resolver returns a fixed public IP so the success-path tests stay
+    // deterministic and offline; the SSRF tests inject a private/throwing resolver.
+    private static readonly Func<string, CancellationToken, Task<IPAddress[]>> PublicResolver =
+        (_, _) => Task.FromResult<IPAddress[]>([IPAddress.Parse("93.184.216.34")]);
+
+    private static (WallabagSkillIntegration sut, MockHttpMessageHandler mock) Build(
+        WallabagOptions? options = null,
+        Func<string, CancellationToken, Task<IPAddress[]>>? resolveHost = null)
     {
         options ??= new WallabagOptions
         {
@@ -37,7 +45,7 @@ public sealed class WallabagSkillIntegrationTests
             TimeProvider.System,
             NullLogger<WallabagTokenProvider>.Instance);
 
-        return (new WallabagSkillIntegration(http, tokenProvider, NullLogger<WallabagSkillIntegration>.Instance), mock);
+        return (new WallabagSkillIntegration(http, tokenProvider, NullLogger<WallabagSkillIntegration>.Instance, resolveHost ?? PublicResolver), mock);
     }
 
     private static Capture UrlCapture(string url) => new(
@@ -153,6 +161,55 @@ public sealed class WallabagSkillIntegrationTests
 
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*no http(s) url*");
+        mock.GetMatchCount(mock.When("*")).Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("http://169.254.169.254/latest/meta-data/")] // cloud metadata endpoint
+    [InlineData("http://127.0.0.1/")]                        // loopback
+    [InlineData("http://10.0.0.5/")]                         // RFC 1918
+    [InlineData("http://172.16.0.1/")]                       // RFC 1918
+    [InlineData("http://192.168.1.10/")]                     // RFC 1918
+    [InlineData("http://100.64.0.1/")]                       // CGNAT
+    [InlineData("http://[::1]/")]                            // IPv6 loopback
+    public async Task HandleAsync_NonPublicIpLiteral_ThrowsBeforeCallingServer(string url)
+    {
+        // SSRF guard: an IP-literal pointing at the internal network or cloud metadata
+        // must be refused before any token fetch or outbound call.
+        var (sut, mock) = Build();
+
+        var act = () => sut.HandleAsync(UrlCapture(url), default);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*non-public*");
+        mock.GetMatchCount(mock.When("*")).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task HandleAsync_NamedHostResolvingToPrivateIp_ThrowsBeforeCallingServer()
+    {
+        // DNS-based SSRF: a public-looking host that resolves to an internal address.
+        var (sut, mock) = Build(
+            resolveHost: (_, _) => Task.FromResult<IPAddress[]>([IPAddress.Parse("10.1.2.3")]));
+
+        var act = () => sut.HandleAsync(UrlCapture("http://intranet.attacker.example/"), default);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*non-public*");
+        mock.GetMatchCount(mock.When("*")).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task HandleAsync_UnresolvableHost_FailsClosed()
+    {
+        // A host that cannot be resolved is treated as non-routable, not passed through.
+        var (sut, mock) = Build(
+            resolveHost: (_, _) => throw new SocketException());
+
+        var act = () => sut.HandleAsync(UrlCapture("http://does-not-resolve.invalid/"), default);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*non-public*");
         mock.GetMatchCount(mock.When("*")).Should().Be(0);
     }
 }
