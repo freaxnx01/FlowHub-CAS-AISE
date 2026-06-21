@@ -126,6 +126,40 @@ Three vendor classes — commercial native (Anthropic), commercial aggregator (O
 
 ---
 
+## LiteLLM Proxy — provider gateway in front of the AI abstraction
+
+**Status:** Idea / open question — the infrastructure counterpart to [Additional AI Providers](#additional-ai-providers-gemma-apertus-hugging-face). Post-CAS (adds a non-.NET runtime dependency; out of the frozen submission scope).
+**Question on the table:** *Is it worth putting a [LiteLLM Proxy](https://github.com/BerriAI/litellm) between FlowHub and the LLM providers?*
+
+LiteLLM Proxy is an open-source gateway that exposes **one OpenAI-compatible endpoint** in front of 100+ providers (Anthropic, OpenAI, OpenRouter, Mistral, Bedrock/Vertex, Ollama, Hugging Face, …) and adds virtual keys, per-key **budgets + rate limits**, spend tracking, model-level **fallback / load-balancing / retries**, response caching, guardrails, and logging callbacks (Langfuse / OTel / Prometheus).
+
+### Why it's a near-zero-code fit
+
+FlowHub already abstracts providers in-process behind MEAI `IChatClient`, and the OpenAI-compatible adapter needs only a base URL + key + model. So pointing FlowHub at a proxy is exactly the **configurable `BaseUrl` refactor** the *Additional AI Providers* item already calls for — `Ai__OpenAi__BaseUrl=http://litellm:4000/v1` and done. No per-provider C# adapters.
+
+### What it would buy us (mapped to existing roadmap/Demo concerns)
+
+- **Subsumes most of *Additional AI Providers*** — adding Gemma / Apertus / an HF model becomes a **LiteLLM config edit**, not a FlowHub adapter + `AiProvider` enum value. The app stops growing provider classes.
+- **Hard cost caps** — the Demo's manual **$1 OpenRouter cap** (see `docs/project/DEMO.md`) and the [LLMeter](#llm-performance-benchmarking-llmeter) cost-guard become a virtual-key budget enforced at the gateway, not by hand.
+- **Gateway-level fallback / load-balancing** — Gemma → Llama failover without touching FlowHub; the deterministic `KeywordClassifier` stays the final in-app safety net (defence in depth, not replaced).
+- **Central spend + usage logging** — one place for `gen_ai.*` cost/usage, complementing (or partly overlapping) the in-app OpenTelemetry metrics from ADR 0004 — decide gateway-owns vs. app-owns.
+- **Prompt-level visibility for debugging** *(arguably the strongest single-operator pull)* — LiteLLM's request logs + Admin UI (and Langfuse / OTel callbacks) capture the **exact rendered system prompt, the raw Capture, the structured-output schema, and the model's raw JSON response** per call. That's precisely what FlowHub can't see today: the in-app `gen_ai.*` metrics record **token counts + latency, not message content** (ADR 0004 / `ClassifierTrace`), and the system prompt is built dynamically (the live bucket list is interpolated into `AiPrompts.BuildSystemPrompt`). Being able to replay *"what actually went to the model"* turns the `KeywordClassifier` fallbacks (log EventId 3010 — schema violation? what did the model emit?) and misclassifications into something **inspectable instead of guesswork**.
+
+### Why it's *not* obviously worth it
+
+- **A non-.NET runtime dependency** — LiteLLM is a Python/FastAPI service with its own Postgres (keys/spend). That's real operational weight against the lean **€4.50/mo single-operator** posture; the demo deliberately runs *fewer* moving parts.
+- **A second abstraction doing a similar job** — MEAI `IChatClient` already routes providers in-process. LiteLLM is a *second* indirection at the network boundary; the split must be deliberate (MEAI owns the typed call + structured output; LiteLLM owns routing / keys / budgets) or it's just layering.
+- **Structured-output + native-feature passthrough** — FlowHub leans on JSON-schema structured output (`GetResponseAsync<T>`) and some **Anthropic-native** behaviour (prompt caching, ADR 0004). Routing Anthropic through an OpenAI-compatible shape can drop vendor-specific features and must be verified to forward `response_format`/`json_schema` faithfully per upstream model — the same per-model asymmetry the *Additional AI Providers* and *Web Search Strategy* items already flag.
+- **Prompt logging *is* capture-content logging** — the flip side of the debugging win: seeing the input means the gateway now **stores Capture content** (and ships it to whatever Langfuse / OTel sink the callback targets). That collides head-on with the privacy NFR (**NfA-P1**, local-by-default — content shouldn't leave the homelab; ADR 0007 / [Local LLM via Ollama](#local-llm-via-ollama--full-data-residency-nfa-p1)) and with the demo's ephemeral-by-design 15-min reset, where logs could persist visitor-submitted text past the window. Acceptable only as **dev-profile or a local-only sink with redaction** — never on by default in prod/demo.
+
+### Recommendation
+
+**Defer, but record it as the preferred path *if* multi-provider + cost-governance ever becomes a real need** (e.g. the post-CAS product spinout serving multiple users/keys). For the single-operator homelab and the CAS demo, the in-app MEAI abstraction + `KeywordClassifier` fallback already covers provider-swap and resilience at zero extra infrastructure — a gateway is justified by **fleet/billing/governance** needs FlowHub doesn't have yet. When it does, LiteLLM largely replaces the *Additional AI Providers* refactor rather than competing with it.
+
+The one pull that's tempting **even today** is the prompt/response-level debugging — but if that's the only driver, it's lighter to reach it *without* a gateway: either flip on the OTel GenAI **message-content capture** (opt-in event logging, kept on a local-only sink) inside FlowHub's existing telemetry, or wire a small dev-profile `IChatClient` logging decorator. Adopt LiteLLM when you want *several* of {multi-provider, budgets, fallback, central spend, prompt logs} at once — not for prompt visibility alone. Either way, a short follow-up ADR should make the gateway-vs-in-app boundary (and the NfA-P1 content-logging line) explicit before adopting.
+
+---
+
 ## `USER.md` — human's personal context for skill generation
 
 **Status:** Idea — not scoped into any Block.
