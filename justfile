@@ -190,6 +190,12 @@ test-services:
 [group('test')]
 test-beta: test-services
 
+# Verify FlowHub's resolved config still catches the known-bad quality cases
+# (pulls canonical fixtures from agent-pipeline at a pinned ref). See issue #94.
+[group('test')]
+verify-gates:
+    bash tools/verify-gates.sh
+
 # ── Database ─────────────────────────────────────────────────────────────────
 
 # Start PostgreSQL in Docker (detached, waits until healthy)

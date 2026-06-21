@@ -1,10 +1,7 @@
 using FlowHub.Core.Captures;
 using FlowHub.Core.Skills;
-using FlowHub.Skills;
-using FlowHub.Skills.Wallabag;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace FlowHub.Skills.Tests;
 

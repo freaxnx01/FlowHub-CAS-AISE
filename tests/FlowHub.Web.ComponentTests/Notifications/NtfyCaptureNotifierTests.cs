@@ -1,5 +1,4 @@
 using System.Net;
-using FlowHub.Core.Captures;
 using FlowHub.Core.Events;
 using FlowHub.Web.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;

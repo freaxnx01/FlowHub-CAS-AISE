@@ -1,7 +1,4 @@
 // tests/FlowHub.Web.ComponentTests/Captures/CaptureCursorTests.cs
-using FlowHub.Core.Captures;
-using FluentAssertions;
-
 namespace FlowHub.Web.ComponentTests.Captures;
 
 public sealed class CaptureCursorTests

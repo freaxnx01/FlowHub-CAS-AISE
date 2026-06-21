@@ -1,11 +1,9 @@
 using FlowHub.AI;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Skills;
-using FluentAssertions;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 
 namespace FlowHub.Web.ComponentTests.Ai;
 

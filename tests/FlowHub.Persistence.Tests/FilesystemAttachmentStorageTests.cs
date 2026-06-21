@@ -1,9 +1,6 @@
 using FlowHub.Core.Captures;
-using FlowHub.Persistence;
-using FluentAssertions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 
 namespace FlowHub.Persistence.Tests;
 

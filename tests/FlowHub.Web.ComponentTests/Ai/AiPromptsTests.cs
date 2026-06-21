@@ -1,5 +1,4 @@
 using FlowHub.AI;
-using FluentAssertions;
 using Microsoft.Extensions.AI;
 
 namespace FlowHub.Web.ComponentTests.Ai;

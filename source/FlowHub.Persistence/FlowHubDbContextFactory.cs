@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Pgvector.EntityFrameworkCore;
 
 namespace FlowHub.Persistence;
 

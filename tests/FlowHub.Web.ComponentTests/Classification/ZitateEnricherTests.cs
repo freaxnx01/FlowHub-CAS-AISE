@@ -1,11 +1,7 @@
 using FlowHub.AI.Enrichers;
-using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
-using FluentAssertions;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
-using Xunit;
 
 namespace FlowHub.Web.ComponentTests.Classification;
 

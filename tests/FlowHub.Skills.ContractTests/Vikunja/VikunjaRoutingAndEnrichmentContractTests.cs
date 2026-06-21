@@ -1,5 +1,4 @@
 using FlowHub.Core.Captures;
-using FlowHub.Core.Skills;
 using FlowHub.Skills.Vikunja;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;

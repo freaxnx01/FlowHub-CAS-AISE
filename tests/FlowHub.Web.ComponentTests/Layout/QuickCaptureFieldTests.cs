@@ -1,10 +1,8 @@
 using FlowHub.Web.Components.Layout;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
-using NSubstitute;
 
 namespace FlowHub.Web.ComponentTests.Layout;
 

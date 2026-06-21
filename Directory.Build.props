@@ -7,11 +7,27 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
+    <!-- debt: demoted to warnings so Phase-1 CI is green; ratchet back to errors.
+         CA1506 (class coupling, 104 violations) -> #95.
+         CA1502 (Program.cs Main complexity) -> #97. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);CA1502;CA1506</WarningsNotAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <Version>0.2.0</Version>
     <DebugType>embedded</DebugType>
     <Deterministic>true</Deterministic>
+
+    <!-- .NET quality gates (seeded from ai-instructions/templates/dotnet) -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- IDE0005 is only reported on a command-line build when a doc file is
+         generated; silence the CS1591 noise that turns on with it. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CA1502/CA1506 read their thresholds from this file (single source). -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" />
+  </ItemGroup>
 
 </Project>

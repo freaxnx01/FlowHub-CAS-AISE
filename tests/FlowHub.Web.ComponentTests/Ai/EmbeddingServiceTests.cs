@@ -1,10 +1,7 @@
 using FlowHub.AI;
-using FlowHub.Core.Captures;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using FluentAssertions;
 
 namespace FlowHub.Web.ComponentTests.Ai;
 

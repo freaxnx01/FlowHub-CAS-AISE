@@ -1,5 +1,4 @@
 using FlowHub.Core.Classification;
-using FluentAssertions;
 
 namespace FlowHub.Web.ComponentTests.Classification;
 

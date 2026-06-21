@@ -2,11 +2,8 @@ using System.Text.Json;
 using FlowHub.AI;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Skills;
-using FluentAssertions;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
 namespace FlowHub.Web.ComponentTests.Ai;

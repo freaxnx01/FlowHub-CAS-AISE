@@ -1,9 +1,6 @@
-using FlowHub.Core.Captures;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using System.Net;
-using FluentAssertions;
 
 namespace FlowHub.Web.ComponentTests.Api;
 

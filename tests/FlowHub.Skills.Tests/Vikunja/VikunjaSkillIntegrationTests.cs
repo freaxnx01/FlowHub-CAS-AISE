@@ -1,11 +1,9 @@
 using System.Net;
-using System.Net.Http;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Skills;
 using FlowHub.Skills.Vikunja;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using RichardSzalay.MockHttp;
 
 namespace FlowHub.Skills.Tests.Vikunja;

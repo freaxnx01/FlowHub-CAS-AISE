@@ -1,10 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using FlowHub.Skills.Vikunja;
-using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Xunit;
 
 namespace FlowHub.Web.ComponentTests.Skills;
 

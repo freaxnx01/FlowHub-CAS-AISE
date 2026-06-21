@@ -1,0 +1,60 @@
+name: quality
+
+# .NET quality gate — calls the central dotnet-quality composite action.
+# Phase-1 adoption (see issue #94): analyzer gate + vulnerable-package scan +
+# diff-scope guard run live. Method-size and mutation are deferred:
+#   - method-size: the metrics generator (Metrics.exe) is Windows-only
+#     (agent-pipeline#91) — run-method-size: false until that's fixed.
+#   - mutation: Phase-2 ratchet (#96) — run-mutation: false for now.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0          # diff-scope guard needs history
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2  # v5.3.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Quality gate
+        uses: freaxnx01/agent-pipeline/.github/actions/dotnet-quality@c3977e1bd9b190be01b98eb93c260230495cfa1b  # agent-pipeline main (run-method-size support)
+        with:
+          solution: FlowHub.slnx
+          test-project: tests/FlowHub.Core.Tests/FlowHub.Core.Tests.csproj
+          max-added-cs-lines: "800"
+          max-method-lines: "40"
+          run-method-size: "false"   # deferred: Metrics.exe is Linux-incompatible (agent-pipeline#91)
+          run-mutation: "false"      # deferred to Phase-2 (#96)
+
+  verify-gates:
+    name: verify-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2  # v5.3.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Verify FlowHub's resolved config still catches the known-bad cases
+        run: bash tools/verify-gates.sh

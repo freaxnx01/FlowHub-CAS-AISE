@@ -1,5 +1,4 @@
 using FlowHub.AI.Pricing;
-using FlowHub.Core.Classification;
 using Microsoft.Extensions.Options;
 
 namespace FlowHub.Web.ComponentTests.Pricing;

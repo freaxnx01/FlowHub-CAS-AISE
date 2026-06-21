@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using FlowHub.AI;
-using FluentAssertions;
 
 namespace FlowHub.Web.ComponentTests.Ai;
 

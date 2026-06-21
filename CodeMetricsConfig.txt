@@ -1,0 +1,5 @@
+# Code Metrics thresholds — single source of truth for CA1502 / CA1506.
+# Seeded from ai-instructions/templates/dotnet/. Registered as an AdditionalFile
+# by Directory.Build.props.
+CA1502: 10
+CA1506: 20
