@@ -96,6 +96,7 @@ services:
     networks:
       - default
       - traefik_public
+      - backend
     ports: !reset []
 
   flowhub.demo-reset:
@@ -127,6 +128,9 @@ services:
         condition: service_healthy
       flowhub.migrations:
         condition: service_completed_successfully
+    networks:
+      - default
+      - backend
     restart: unless-stopped
 
   # Vikunja runs as uid 1000 but a fresh named volume is root-owned — chown it first.
@@ -352,6 +356,9 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    # redis is paperless' broker only — isolate it with paperless on `cache` so the
+    # Wallabag URL-fetcher (skills/default plane) cannot reach it via SSRF.
+    networks: [cache]
     ports: !reset []
 
   paperless:
@@ -386,6 +393,7 @@ services:
       - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}"
     networks:
       - default
+      - cache
       - traefik_public
     restart: unless-stopped
 
@@ -408,14 +416,27 @@ services:
 
   # Suppress public port exposure for backing services + observability stack;
   # internal compose network access is enough for the demo.
+  #
+  # SSRF hardening: these sensitive services move to an isolated, internet-less
+  # `backend` network. The skill targets (Wallabag/Vikunja/Paperless) stay on the
+  # project `default` network and are NOT attached to `backend`, so a server-side
+  # request forged through the Wallabag URL-fetcher cannot reach Postgres, RabbitMQ,
+  # Prometheus, or Grafana. (See docs/insights — Wallabag SSRF.)
   postgres:
+    networks: [backend]
     ports: !reset []
   rabbitmq:
+    networks: [backend]
     ports: !reset []
   prometheus:
+    networks: [backend]
     ports: !reset []
   grafana:
+    networks: [backend]
     ports: !reset []
+  # Migrations only ever talk to Postgres → backend plane only.
+  flowhub.migrations:
+    networks: [backend]
 
   # Uptime Kuma — lightweight, externally-reachable monitoring for the public demo.
   # The full Prometheus/Grafana stack stays internal (ports reset above); Kuma adds a
@@ -444,6 +465,13 @@ networks:
   traefik_public:
     external: true
     name: ${TRAEFIK_NETWORK:-traefik_public}
+  # Isolated internal planes (no internet egress) for the sensitive backends. The
+  # skill targets live on the project `default` network and are deliberately NOT
+  # attached here, so an SSRF from the Wallabag fetcher cannot route to them.
+  backend:
+    internal: true
+  cache:
+    internal: true
 
 volumes:
   # Vikunja sqlite DB (persists across restarts; tasks cleared via API each cycle).
