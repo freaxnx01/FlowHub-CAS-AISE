@@ -36,7 +36,7 @@ Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Si
 | **Design** (`docs/design/`) | Perspektiven, Datenfluss, Sequenzdiagramme, Datenmodell (ER) |
 | **Block-Nachbereitungen** (5×) · **Insights** (5×) | Pro Block: Auftrag, Umsetzung, Rubrik-Self-Check · Lessons learned |
 | **`docs/ai-usage.md`** · **Learnings** | Detaillierte blockweise KI-Nutzung · persönliche Lessons Learned |
-| **README · CHANGELOG · CLAUDE.md** | Projekt-Einstieg & Run-Anleitung · Changelog · Agent-Konventionen |
+| **README · CHANGELOG · Releases · CLAUDE.md** | Projekt-Einstieg & Run-Anleitung · [Changelog](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CHANGELOG.md) · [Release Notes](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases) · Agent-Konventionen |
 
 ---
 
@@ -57,7 +57,8 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 - **GitHub:** <https://github.com/freaxnx01/FlowHub-CAS-AISE>
 - **Branch (Abgabestand):** `main`
 - **Lizenz / README:** [`README.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/README.md)
-- **Changelog:** [`CHANGELOG.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CHANGELOG.md)
+- **Changelog:** [`CHANGELOG.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CHANGELOG.md) (Keep-a-Changelog, SemVer)
+- **Release Notes:** [GitHub Releases](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases) — [`v0.1.0`](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/tag/v0.1.0) (CAS-AISE Abgabe-Version) · [`v0.2.0`](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/tag/v0.2.0) (aktuell)
 - **Agent-Konventionen:** [`CLAUDE.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CLAUDE.md)
 - **🌐 Live-Demo:** <https://demo.flowhub.freaxnx01.ch> — öffentliche Instanz (Reset alle 15 min). Angebundene Ziel-Dienste: [Vikunja](https://vikunja.demo.flowhub.freaxnx01.ch) · [Wallabag](https://wallabag.demo.flowhub.freaxnx01.ch) · [paperless-ngx](https://paperless.demo.flowhub.freaxnx01.ch). Status: <https://status.demo.flowhub.freaxnx01.ch>
 
