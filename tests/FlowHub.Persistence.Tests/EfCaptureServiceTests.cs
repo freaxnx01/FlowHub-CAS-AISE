@@ -1,9 +1,6 @@
 using FlowHub.Core.Captures;
 using FlowHub.Core.Events;
-using FlowHub.Persistence;
 using MassTransit;
-using NSubstitute;
-using FluentAssertions;
 
 namespace FlowHub.Persistence.Tests;
 

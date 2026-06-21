@@ -1,12 +1,9 @@
 using FlowHub.AI;
-using FlowHub.Core.Captures;
 using FlowHub.Core.Skills;
 using FlowHub.Web.Stubs;
 using MassTransit;
-using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
 
 namespace FlowHub.Web.ComponentTests.Pipeline;
 

@@ -1,9 +1,7 @@
-using FlowHub.AI;
 using FlowHub.Core.Classification;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace FlowHub.AI.IntegrationTests;
 

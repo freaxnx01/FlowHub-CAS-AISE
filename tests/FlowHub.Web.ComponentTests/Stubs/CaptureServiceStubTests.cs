@@ -1,4 +1,3 @@
-using FlowHub.Core.Captures;
 using FlowHub.Core.Events;
 using FlowHub.Web.Stubs;
 using MassTransit;

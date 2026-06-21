@@ -1,7 +1,6 @@
 using FlowHub.Core.Captures;
 using FlowHub.Core.Events;
 using MassTransit;
-using Microsoft.Extensions.Logging;
 
 namespace FlowHub.Web.Pipeline;
 

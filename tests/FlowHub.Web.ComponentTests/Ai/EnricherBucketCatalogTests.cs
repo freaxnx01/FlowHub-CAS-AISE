@@ -1,5 +1,4 @@
 using FlowHub.AI;
-using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 
 namespace FlowHub.Web.ComponentTests.Ai;

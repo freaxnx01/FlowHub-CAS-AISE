@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using System.Text.Json;
 using FlowHub.Core.Captures;
 using FlowHub.Skills.Wallabag;
 using Microsoft.Extensions.Logging.Abstractions;

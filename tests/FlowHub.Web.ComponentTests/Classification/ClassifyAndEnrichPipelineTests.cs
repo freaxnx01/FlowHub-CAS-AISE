@@ -1,14 +1,10 @@
 using System.Text.Json;
 using FlowHub.AI;
 using FlowHub.AI.Enrichers;
-using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Skills;
-using FluentAssertions;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
-using Xunit;
 
 namespace FlowHub.Web.ComponentTests.Classification;
 

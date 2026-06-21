@@ -1,4 +1,3 @@
-using System.IO;
 using Bogus;
 using FlowHub.Core.Captures;
 using FlowHub.Core.Events;

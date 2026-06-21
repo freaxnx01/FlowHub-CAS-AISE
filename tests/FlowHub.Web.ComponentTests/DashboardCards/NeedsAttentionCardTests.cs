@@ -1,6 +1,4 @@
 using FlowHub.Web.Components.DashboardCards;
-using Microsoft.Extensions.DependencyInjection;
-using MudBlazor;
 using MudBlazor.Services;
 
 namespace FlowHub.Web.ComponentTests.DashboardCards;

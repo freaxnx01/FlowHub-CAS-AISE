@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- .NET quality gates: produces the Code Metrics XML the method-size check
+         consumes. GlobalPackageReference applies it to every project (CPM idiom). -->
+    <GlobalPackageReference Include="Microsoft.CodeAnalysis.Metrics" Version="4.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- UI -->
     <PackageVersion Include="MudBlazor" Version="8.5.1" />
 

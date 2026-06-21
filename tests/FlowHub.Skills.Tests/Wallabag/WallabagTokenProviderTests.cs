@@ -1,6 +1,5 @@
 using FlowHub.Skills.Wallabag;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using RichardSzalay.MockHttp;
 
 namespace FlowHub.Skills.Tests.Wallabag;

@@ -1,5 +1,4 @@
 using FlowHub.Core.Captures;
-using Pgvector.EntityFrameworkCore;
 using FlowHub.Core.Channels;
 using FlowHub.Core.Health;
 using FlowHub.Persistence.Repositories;

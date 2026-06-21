@@ -1,9 +1,6 @@
 using FlowHub.AI;
 using FlowHub.Api;
 using FlowHub.Api.Endpoints;
-using FlowHub.Core.Classification;
-using FlowHub.Core.Health;
-using FlowHub.Core.Skills;
 using FlowHub.Persistence;
 using FlowHub.Skills;
 using FlowHub.Web.Auth;

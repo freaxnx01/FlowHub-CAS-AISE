@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Configuration;
 using MudBlazor;
 
 namespace FlowHub.Web.Components.Layout;
