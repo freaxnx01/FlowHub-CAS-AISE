@@ -4,6 +4,16 @@
 
 # FlowHub
 
+<p align="center">
+  <a href="https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/freaxnx01/FlowHub-CAS-AISE/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white&style=flat-square" alt="CI" /></a>
+  <a href="https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/latest"><img src="https://img.shields.io/github/v/release/freaxnx01/FlowHub-CAS-AISE?label=release&logo=github&style=flat-square" alt="Latest release" /></a>
+  <a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white&style=flat-square" alt=".NET 10" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square" alt="License: AGPL-3.0" /></a>
+  <a href="https://demo.flowhub.freaxnx01.ch"><img src="https://img.shields.io/badge/live-demo-2ea44f?logo=icloud&logoColor=white&style=flat-square" alt="Live demo" /></a>
+  <a href="https://github.com/freaxnx01/FlowHub-CAS-AISE/commits/main"><img src="https://img.shields.io/github/last-commit/freaxnx01/FlowHub-CAS-AISE?style=flat-square" alt="Last commit" /></a>
+  <img src="https://img.shields.io/badge/CAS-AI--Assisted%20SW%20Eng-blue?style=flat-square" alt="CAS AISE · FFHS" />
+</p>
+
 **AI-assisted personal inbox** — captures everyday information snippets (movie tips, articles, receipts, bookmarks, notes), classifies them with a local/remote LLM, and routes them to the right self-hosted services in the user's homelab. Single user, modular monolith on .NET 10.
 
 Built as the project work for **CAS AI-Assisted Software Engineering (AISE)** at FFHS (FS26).
@@ -201,7 +211,9 @@ SemVer 2.0.0. Current submission tag: **`v0.1.0`** (matches `<Version>0.1.0</Ver
 
 ## License
 
-CAS-AISE project work — see repository owner.
+Licensed under the **GNU Affero General Public License v3.0** — see [`LICENSE`](LICENSE).
+
+Copyright © 2026 Andreas Imboden. AGPL-3.0 is a strong copyleft license: you may self-host, study, and modify FlowHub freely, but if you run a modified version as a network service you must make your source available under the same terms.
 
 ## Agent conventions
 
