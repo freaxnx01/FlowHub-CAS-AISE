@@ -23,6 +23,16 @@ services:
       - "traefik.http.middlewares.flowhub-demo-headers.headers.contenttypenosniff=true"
       - "traefik.http.middlewares.flowhub-demo-headers.headers.browserxssfilter=true"
       - "traefik.http.middlewares.flowhub-demo-headers.headers.referrerpolicy=strict-origin-when-cross-origin"
+      # Block the public /metrics route at the edge (see base demo/docker-compose.yml).
+      # Prometheus scrapes it internally over `backend`, never through Traefik.
+      - "traefik.http.routers.flowhub-demo-metrics.rule=Host(`demo.flowhub.freaxnx01.ch`) && PathPrefix(`/metrics`)"
+      - "traefik.http.routers.flowhub-demo-metrics.entrypoints=web-secure"
+      - "traefik.http.routers.flowhub-demo-metrics.tls=true"
+      - "traefik.http.routers.flowhub-demo-metrics.tls.certresolver=default"
+      - "traefik.http.routers.flowhub-demo-metrics.priority=100"
+      - "traefik.http.routers.flowhub-demo-metrics.service=flowhub-demo"
+      - "traefik.http.routers.flowhub-demo-metrics.middlewares=flowhub-demo-noexternal@docker"
+      - "traefik.http.middlewares.flowhub-demo-noexternal.ipallowlist.sourcerange=127.0.0.1/32"
       - "traefik.docker.network=web"
 
   vikunja:
