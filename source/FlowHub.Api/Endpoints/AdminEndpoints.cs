@@ -11,7 +11,7 @@ public static class AdminEndpoints
     public static IEndpointRouteBuilder MapAdminEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/v1/admin")
-            .RequireAuthorization()
+            .RequireAuthorization("Admin")
             .WithTags("Admin");
 
         group.MapPost("/embeddings/rebuild", RebuildEmbeddingsAsync)

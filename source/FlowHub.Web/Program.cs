@@ -26,7 +26,14 @@ builder.Services.AddMudServices();
 
 // Configuration-driven auth (real OIDC vs demo handler) — see ProgramRegistration.
 builder.AddFlowHubAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // Defence-in-depth: admin APIs require an explicit Admin role on top of
+    // authentication. The demo operator principal (DemoAuthHandler) is granted
+    // only "Operator" by default, so /api/v1/admin/* is inaccessible in the
+    // public demo unless Demo:Auth:Roles is widened deliberately. See issue #100.
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+});
 builder.Services.AddCascadingAuthenticationState();
 
 // Health checks — /health/live exposes liveness for the Docker healthcheck (see docker-compose.yml).
