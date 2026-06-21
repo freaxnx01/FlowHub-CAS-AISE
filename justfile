@@ -657,20 +657,42 @@ pdf-submission-bundle:
     tools/submission-bundle.sh tools/build/submission-bundle.md
     node {{pdf_renderer}} tools/build/submission-bundle.md SUBMISSION-bundle.pdf --title "FlowHub — CAS AISE Submission Bundle"
 
-# Assemble the numbered Moodle upload set (00–04) into ./upload/
+# Render the Marp slide deck to PDF (landscape, NO speaker notes — for the read/upload deck)
 [group('pdf')]
-package-submission: pdf-submission pdf-arc42 pdf-projektbeschreibung pdf-reflexion pdf-eigenstaendigkeitserklaerung
+pdf-presentation:
     #!/usr/bin/env bash
     set -euo pipefail
-    mkdir -p upload
-    rm -f upload/*.pdf
-    cp FlowHub_Uebersicht.pdf                                      upload/00_FlowHub_Uebersicht.pdf
-    cp docs/architektur/FlowHub_Arc42_v2.pdf                       upload/01_FlowHub_Arc42.pdf
-    cp docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf upload/02_FlowHub_Projektbeschreibung.pdf
-    cp docs/reflexion/FlowHub_Reflexion.pdf                        upload/03_FlowHub_Reflexion.pdf
-    cp "Eigenständigkeitserklärung.pdf"                            upload/04_FlowHub_Eigenstaendigkeitserklaerung.pdf
+    CHROME=$(find "$HOME/.cache/puppeteer" -type f -path '*chrome-linux64/chrome' 2>/dev/null | sort -V | tail -1)
+    if [ -z "$CHROME" ]; then echo "ERROR: no puppeteer Chromium found — run 'just pdf-install' first." >&2; exit 1; fi
+    cd docs/presentation
+    CHROME_PATH="$CHROME" npx --yes @marp-team/marp-cli --html --pdf --allow-local-files flowhub-praesentation.md -o flowhub-praesentation.pdf
+    echo "wrote docs/presentation/flowhub-praesentation.pdf (no speaker notes)"
+
+# Assemble the numbered Moodle upload set (00–04) into ./upload/.
+# The slide deck LEADS two docs as a mixed landscape/portrait PDF: Teil 1 (Produkt)
+# in front of the Projektbeschreibung, Teil 2 (Bauen mit KI) in front of the Reflexion.
+[group('pdf')]
+package-submission: pdf-submission pdf-arc42 pdf-projektbeschreibung pdf-reflexion pdf-eigenstaendigkeitserklaerung pdf-presentation
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p upload tools/build/deck
+    rm -f upload/*.pdf tools/build/deck/*.pdf
+    # Split the deck at the "Teil 2: Bauen mit KI" divider slide (found dynamically, so it survives slide edits).
+    DECK=docs/presentation/flowhub-praesentation.pdf
+    N=$(pdfinfo "$DECK" | awk '/^Pages/{print $2}')
+    B=0; for i in $(seq 1 "$N"); do if pdftotext -layout -f "$i" -l "$i" "$DECK" - 2>/dev/null | grep -q "Teil 2: Bauen mit KI"; then B=$i; break; fi; done
+    [ "$B" -gt 1 ] || { echo "ERROR: 'Teil 2: Bauen mit KI' divider slide not found in $DECK — cannot split the deck." >&2; exit 1; }
+    pdfseparate "$DECK" tools/build/deck/pg-%d.pdf
+    pdfunite $(for i in $(seq 1 $((B-1))); do echo tools/build/deck/pg-$i.pdf; done) tools/build/deck/part1.pdf
+    pdfunite $(for i in $(seq "$B" "$N"); do echo tools/build/deck/pg-$i.pdf; done) tools/build/deck/part2.pdf
+    # Assemble the upload set (deck Teil leads each merged doc; text follows).
+    cp FlowHub_Uebersicht.pdf                       upload/00_FlowHub_Uebersicht.pdf
+    cp docs/architektur/FlowHub_Arc42_v2.pdf        upload/01_FlowHub_Arc42.pdf
+    pdfunite tools/build/deck/part1.pdf docs/projektbeschreibung/FlowHub_Projektbeschreibung_v4.pdf upload/02_FlowHub_Projektbeschreibung.pdf
+    pdfunite tools/build/deck/part2.pdf docs/reflexion/FlowHub_Reflexion.pdf                         upload/03_FlowHub_Reflexion.pdf
+    cp "Eigenständigkeitserklärung.pdf"             upload/04_FlowHub_Eigenstaendigkeitserklaerung.pdf
     echo "Upload set ready in ./upload/ (00–04). Sign 04 before uploading."
-    echo "Note: the Präsentation is NOT uploaded — it is linked in the Übersicht (docs/presentation/ on GitHub)."
+    echo "02 = Präsentation Teil 1 (Produkt) + Projektbeschreibung · 03 = Präsentation Teil 2 (Bauen mit KI) + Reflexion (mixed landscape/portrait)."
     ls -1 upload/
 
 # Build Eigenständigkeitserklärung.pdf (FFHS Hilfsmittelverzeichnis + signed declaration; compact layout)
