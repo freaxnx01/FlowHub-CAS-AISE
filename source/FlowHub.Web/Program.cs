@@ -1,13 +1,17 @@
 using FlowHub.AI;
 using FlowHub.Api;
 using FlowHub.Api.Endpoints;
+using FlowHub.Core.Telemetry;
 using FlowHub.Persistence;
 using FlowHub.Skills;
 using FlowHub.Web;
 using FlowHub.Web.Components;
+using FlowHub.Web.Observability;
 using FlowHub.Web.Testing;
 using MudBlazor.Services;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,12 +32,32 @@ builder.Services.AddCascadingAuthenticationState();
 // Health checks — /health/live exposes liveness for the Docker healthcheck (see docker-compose.yml).
 builder.Services.AddHealthChecks();
 
-// Prometheus metrics endpoint — scraped by docker/prometheus/prometheus.yml at /metrics.
+// OpenTelemetry — metrics scraped at /metrics, traces exported via OTLP (if Otlp__Endpoint set)
+// and always to Console for in-build/demo visibility. PII policy enforced by
+// `TagAllowListProcessor` (ADR 0009 §1/§2/§4) as defense-in-depth.
+var otlpEndpoint = builder.Configuration["Otlp:Endpoint"];
 builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService(serviceName: "flowhub.web"))
     .WithMetrics(m => m
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
-        .AddPrometheusExporter());
+        .AddPrometheusExporter())
+    .WithTracing(t =>
+    {
+        t.AddSource(FlowHubActivityTags.Source)
+         .AddSource("MassTransit")
+         .AddSource("Experimental.Microsoft.Extensions.AI")
+         .AddAspNetCoreInstrumentation(o => o.RecordException = true)
+         .AddHttpClientInstrumentation(o => o.RecordException = true)
+         .AddEntityFrameworkCoreInstrumentation(o => o.SetDbStatementForText = false)
+         .AddProcessor(new TagAllowListProcessor())
+         .AddConsoleExporter();
+
+        if (!string.IsNullOrWhiteSpace(otlpEndpoint))
+        {
+            t.AddOtlpExporter(o => o.Endpoint = new Uri(otlpEndpoint));
+        }
+    });
 
 // Block 4 prep (Beta MVP) — EF Core SQLite persistence.
 // `AddFlowHubPersistence` registers FlowHubDbContext (scoped) + EfCaptureService as ICaptureService.
