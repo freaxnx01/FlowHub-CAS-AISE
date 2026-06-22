@@ -165,6 +165,8 @@ coverage*.info
 # Quality gates: scratch dir + generated metrics report (verify-gates / method-size)
 .verify-gates/
 code-metrics.xml
+# Stryker mutation testing report dir (issue #96)
+**/StrykerOutput/
 
 # Visual Studio code coverage results
 *.coverage
