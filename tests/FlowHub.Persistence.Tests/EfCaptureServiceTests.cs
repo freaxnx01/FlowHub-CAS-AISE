@@ -188,4 +188,150 @@ public sealed class EfCaptureServiceTests
             Arg.Is<Capture>(c => c.Stage == LifecycleStage.Raw && c.FailureReason == null),
             Arg.Any<CancellationToken>());
     }
+
+    // --- Pin previously-untested public methods (issue #96 ratchet) ---------
+
+    [Fact]
+    public async Task GetAllAsync_DelegatesToRepository()
+    {
+        var (repo, sut, _) = Build();
+        var caps = new[] { MakeCapture(), MakeCapture() };
+        repo.GetAllAsync(Arg.Any<CancellationToken>()).Returns(caps);
+
+        var result = await sut.GetAllAsync();
+
+        result.Should().BeEquivalentTo(caps);
+        await repo.Received(1).GetAllAsync(Arg.Any<CancellationToken>());
+    }
+
+    // --- Pin SubmitAsync published-message field mapping --------------------
+    // Existing test only asserted the CaptureId; the field-mapping mutants
+    // (Content, Source, CreatedAt → other values / null) survive that.
+
+    [Fact]
+    public async Task SubmitAsync_PublishesAllFieldsFromSavedCapture()
+    {
+        var (repo, sut, ep) = Build();
+        var saved = MakeCapture(stage: LifecycleStage.Raw) with { Source = ChannelKind.Api };
+        repo.AddAsync(Arg.Any<Capture>(), Arg.Any<CancellationToken>()).Returns(saved);
+
+        await sut.SubmitAsync("https://example.com/article", ChannelKind.Api);
+
+        await ep.Received(1).Publish(
+            Arg.Is<CaptureCreated>(m =>
+                m.CaptureId == saved.Id &&
+                m.Content == saved.Content &&
+                m.Source == saved.Source &&
+                m.CreatedAt == saved.CreatedAt),
+            Arg.Any<CancellationToken>());
+    }
+
+    // --- Pin Mark*Async null-coalescing semantics ---------------------------
+    // The Mark*Async overloads preserve existing values when the caller passes
+    // null for an optional param (e.g. `title ?? capture.Title`). Without these
+    // tests every `?? capture.X` mutant survives.
+
+    [Fact]
+    public async Task MarkClassifiedAsync_WhenOptionalsAreNull_PreservesExistingValues()
+    {
+        var (repo, sut, _) = Build();
+        var id = Guid.NewGuid();
+        var existing = MakeCapture(id) with
+        {
+            Title = "existing title",
+            VikunjaProject = "existing project",
+            EnrichmentDescription = "existing description",
+            ClassifierTrace = new FlowHub.Core.Classification.ClassifierTrace(
+                FlowHub.Core.Classification.ClassifierKind.Keyword, 1),
+        };
+        repo.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(existing);
+
+        await sut.MarkClassifiedAsync(id, "Wallabag");
+
+        await repo.Received(1).UpdateAsync(
+            Arg.Is<Capture>(c =>
+                c.Stage == LifecycleStage.Classified &&
+                c.MatchedSkill == "Wallabag" &&
+                c.Title == existing.Title &&
+                c.VikunjaProject == existing.VikunjaProject &&
+                c.EnrichmentDescription == existing.EnrichmentDescription &&
+                c.ClassifierTrace == existing.ClassifierTrace),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task MarkClassifiedAsync_WithExplicitValues_OverwritesExisting()
+    {
+        var (repo, sut, _) = Build();
+        var id = Guid.NewGuid();
+        repo.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(MakeCapture(id) with
+        {
+            Title = "old", VikunjaProject = "old-proj", EnrichmentDescription = "old-desc",
+        });
+        var trace = new FlowHub.Core.Classification.ClassifierTrace(
+            FlowHub.Core.Classification.ClassifierKind.Ai, 42, "anthropic", "claude-3");
+
+        await sut.MarkClassifiedAsync(id, "Vikunja", "new title", "new-proj", "new desc", trace);
+
+        await repo.Received(1).UpdateAsync(
+            Arg.Is<Capture>(c =>
+                c.MatchedSkill == "Vikunja" &&
+                c.Title == "new title" &&
+                c.VikunjaProject == "new-proj" &&
+                c.EnrichmentDescription == "new desc" &&
+                c.ClassifierTrace == trace),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task MarkCompletedAsync_WhenExternalRefIsNull_PreservesExistingValue()
+    {
+        var (repo, sut, _) = Build();
+        var id = Guid.NewGuid();
+        var existing = MakeCapture(id, LifecycleStage.Routed, "Wallabag") with { ExternalRef = "existing-ref" };
+        repo.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(existing);
+
+        await sut.MarkCompletedAsync(id, null);
+
+        await repo.Received(1).UpdateAsync(
+            Arg.Is<Capture>(c => c.Stage == LifecycleStage.Completed && c.ExternalRef == existing.ExternalRef),
+            Arg.Any<CancellationToken>());
+    }
+
+    // --- Pin "Capture not found" KeyNotFoundException for each Mark*Async ----
+    // Without these every `?? throw new KeyNotFoundException(...)` mutant survives
+    // (replacement could drop the throw or change the message).
+
+    public static IEnumerable<object[]> NotFoundCases() => new[]
+    {
+        new object[] { "MarkClassifiedAsync" },
+        new object[] { "MarkRoutedAsync" },
+        new object[] { "MarkCompletedAsync" },
+        new object[] { "MarkOrphanAsync" },
+        new object[] { "MarkUnhandledAsync" },
+        new object[] { "ResetForRetryAsync" },
+    };
+
+    [Theory]
+    [MemberData(nameof(NotFoundCases))]
+    public async Task MarkMethods_WhenCaptureMissing_ThrowsKeyNotFoundWithIdInMessage(string method)
+    {
+        var (repo, sut, _) = Build();
+        var id = Guid.NewGuid();
+        repo.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns((Capture?)null);
+
+        Func<Task> act = method switch
+        {
+            "MarkClassifiedAsync" => () => sut.MarkClassifiedAsync(id, "Wallabag"),
+            "MarkRoutedAsync"     => () => sut.MarkRoutedAsync(id),
+            "MarkCompletedAsync"  => () => sut.MarkCompletedAsync(id, "ref"),
+            "MarkOrphanAsync"     => () => sut.MarkOrphanAsync(id, "reason"),
+            "MarkUnhandledAsync"  => () => sut.MarkUnhandledAsync(id, "reason"),
+            "ResetForRetryAsync"  => () => sut.ResetForRetryAsync(id),
+            _ => throw new InvalidOperationException(method),
+        };
+
+        var ex = await act.Should().ThrowAsync<KeyNotFoundException>();
+        ex.Which.Message.Should().Contain(id.ToString());
+    }
 }
