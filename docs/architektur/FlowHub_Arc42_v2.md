@@ -19,7 +19,7 @@
 
 ## 1. Einführung und Ziele
 
-FlowHub ist ein **KI-gestützter persönlicher Eingangskorb**. Er nimmt
+FlowHub ist eine **KI-gestützte persönliche Inbox**. Sie nimmt
 Informationsschnipsel aus dem Alltag entgegen (ein Film-Tipp, ein Fachartikel,
 ein Beleg-Foto, eine Notiz), **erkennt und klassifiziert** sie automatisch und
 **leitet sie an den passenden Ziel-Dienst** weiter — ohne dass der Benutzer im
