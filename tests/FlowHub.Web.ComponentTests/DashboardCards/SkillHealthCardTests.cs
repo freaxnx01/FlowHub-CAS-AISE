@@ -45,4 +45,20 @@ public class SkillHealthCardTests : TestContext
         cut.Markup.Should().Contain("Zitate");
         cut.Markup.Should().Contain("degraded");
     }
+
+    [Fact]
+    public void Manage_ClickInvokesCallback()
+    {
+        var clicks = 0;
+        var cut = RenderComponent<SkillHealthCard>(p => p
+            .Add(c => c.Skills, Array.Empty<SkillHealth>())
+            .Add(c => c.OnManageClick, EventCallback.Factory.Create(this, () => clicks++)));
+
+        var button = cut.FindAll("button")
+            .FirstOrDefault(b => b.TextContent.Contains("Manage", StringComparison.OrdinalIgnoreCase));
+        button.Should().NotBeNull();
+        button!.Click();
+
+        clicks.Should().Be(1);
+    }
 }

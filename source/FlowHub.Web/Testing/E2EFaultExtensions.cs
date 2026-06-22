@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using FlowHub.Core.Health;
 
 namespace FlowHub.Web.Testing;
@@ -6,6 +7,10 @@ namespace FlowHub.Web.Testing;
 /// E2E-only DI hook. Activates only when <c>FLOWHUB_E2E_FAULTS_ENABLED=true</c>
 /// is set in the environment — invisible in any other deployment.
 /// </summary>
+// Excluded from coverage: by design only exercised by the E2E browser pipeline
+// (see <see cref="IsEnabled"/>); unit-testing it would test the env-var bridge,
+// not behaviour.
+[ExcludeFromCodeCoverage]
 public static class E2EFaultExtensions
 {
     public static bool IsEnabled =>
