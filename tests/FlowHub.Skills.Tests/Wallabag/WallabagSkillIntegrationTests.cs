@@ -246,4 +246,74 @@ public sealed class WallabagSkillIntegrationTests
             .WithMessage("*non-public*");
         mock.GetMatchCount(mock.When("*")).Should().Be(0);
     }
+
+    [Fact]
+    public async Task HandleAsync_RegexMatchButInvalidUri_FallsThroughAndThrows()
+    {
+        // The URL regex matches "https://" but Uri.TryCreate refuses an empty
+        // host, so the foreach body skips the assignment and the method falls
+        // through to the post-loop "return false" — i.e. covers the branch where
+        // a regex match exists but is not a valid absolute http(s) URL.
+        var (sut, mock) = Build();
+
+        // Regex matches "https://>" (TrimEnd('>') reduces it to "https://"), then
+        // Uri.TryCreate fails (no host) → the foreach body continues past the
+        // assignment, hitting the loop-end branch (L105), then falls through to
+        // the post-loop "return false" (L107).
+        var act = () => sut.HandleAsync(UrlCapture("check https://> seriously"), default);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*no http(s) url*");
+        mock.GetMatchCount(mock.When("*")).Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\n\t  ")]
+    public async Task HandleAsync_WhitespaceOrEmptyContent_ThrowsBeforeCallingServer(string content)
+    {
+        // Captures with no payload short-circuit in TryExtractUrl's early return.
+        var (sut, mock) = Build();
+
+        var act = () => sut.HandleAsync(UrlCapture(content), default);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*no http(s) url*");
+        mock.GetMatchCount(mock.When("*")).Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("http://[fc00::1]/")]  // IPv6 unique-local (RFC 4193)
+    [InlineData("http://[fe80::1]/")]  // IPv6 link-local
+    [InlineData("http://0.0.0.0/")]    // unspecified / 0.0.0.0/8
+    public async Task HandleAsync_NonPublicIpLiteral_AdditionalBranches_ThrowBeforeCallingServer(string url)
+    {
+        // Covers IPv6 ULA / link-local plus the 0.0.0.0 unspecified-block arm
+        // of the IPv4 switch — distinct branches from the existing SSRF table.
+        var (sut, mock) = Build();
+
+        var act = () => sut.HandleAsync(UrlCapture(url), default);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*non-public*");
+        mock.GetMatchCount(mock.When("*")).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task HandleAsync_PublicIpv6Literal_IsAllowed()
+    {
+        // Covers the "return true" tail for globally-routable IPv6 — distinct
+        // branch from the IPv4 success path already covered by 1.1.1.1.
+        var (sut, mock) = Build();
+        mock.Expect(HttpMethod.Post, "https://wallabag.example.com/api/entries.json")
+            .WithPartialContent("\"url\":\"http://[2606:4700:4700::1111]/\"")
+            .Respond("application/json", """{"id":888}""");
+
+        var result = await sut.HandleAsync(UrlCapture("http://[2606:4700:4700::1111]/"), default);
+
+        result.Success.Should().BeTrue();
+        result.ExternalRef.Should().Be("888");
+        mock.VerifyNoOutstandingExpectation();
+    }
 }

@@ -160,10 +160,11 @@ public sealed partial class WallabagSkillIntegration : ISkillIntegration
         if (ip.AddressFamily == AddressFamily.InterNetwork)
         {
             var b = ip.GetAddressBytes();
+            // 127.0.0.0/8 intentionally omitted: IsLoopback() above already catches
+            // every 127.x.x.x, so a defensive arm here would be dead code.
             return (b[0], b[1]) switch
             {
                 (10, _) => false,                 // 10.0.0.0/8
-                (127, _) => false,                // loopback (defensive)
                 (169, 254) => false,              // link-local incl. 169.254.169.254 metadata
                 (172, >= 16 and <= 31) => false,  // 172.16.0.0/12
                 (192, 168) => false,              // 192.168.0.0/16
