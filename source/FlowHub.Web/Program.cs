@@ -66,9 +66,10 @@ builder.Services.AddOpenTelemetry()
         }
     });
 
-// Block 4 prep (Beta MVP) — EF Core SQLite persistence.
 // `AddFlowHubPersistence` registers FlowHubDbContext (scoped) + EfCaptureService as ICaptureService.
-// Migrations apply at startup via the MigrationRunner IHostedService.
+// Migrations apply *before* startup via the `flowhub.migrations` Compose container
+// (see docker/migrations/Dockerfile — runs a `dotnet ef migrations bundle` binary);
+// the web container depends on it via `service_completed_successfully` (12-Factor XII).
 builder.Services.AddFlowHubPersistence(builder.Configuration);
 
 // Capture file uploads: bind options, register storage + policy.
