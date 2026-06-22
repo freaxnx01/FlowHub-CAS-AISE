@@ -2,8 +2,8 @@
   "stryker-config": {
     "project": "FlowHub.Skills.csproj",
     "test-projects": ["../../tests/FlowHub.Skills.Tests/FlowHub.Skills.Tests.csproj"],
-    "thresholds": { "high": 80, "low": 60, "break": 0 },
-    "reporters": ["cleartext", "html"],
+    "thresholds": { "high": 80, "low": 60, "break": 55 },
+    "reporters": ["cleartext", "html", "json"],
     "mutation-level": "Standard"
   }
 }
