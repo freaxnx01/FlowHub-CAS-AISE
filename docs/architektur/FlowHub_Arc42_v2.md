@@ -19,7 +19,7 @@
 
 ## 1. Einführung und Ziele
 
-FlowHub ist ein **KI-gestützter persönlicher Eingangskorb**. Er nimmt
+FlowHub ist eine **KI-gestützte persönliche Inbox**. Sie nimmt
 Informationsschnipsel aus dem Alltag entgegen (ein Film-Tipp, ein Fachartikel,
 ein Beleg-Foto, eine Notiz), **erkennt und klassifiziert** sie automatisch und
 **leitet sie an den passenden Ziel-Dienst** weiter — ohne dass der Benutzer im
@@ -762,6 +762,35 @@ In-Memory-Provider-Drift); Playwright für E2E; Live-KI-Tests sind trait-gegatet
 (`[Trait("Category","AI")]`) und aus der Default-Suite ausgeschlossen.
 Abgabestand: **294 Offline-Tests grün, 0 Fehler, 0 übersprungen**. Volltext und
 Reconciliation-Tabelle in `docs/spec/testing-strategy.md`.
+
+**Test der KI-Anteile (Guardrails, nicht nur Trait-Gating).** Über das
+Ausschliessen der nicht-deterministischen Live-Aufrufe hinaus ist das
+*Ausfallverhalten* der KI deterministisch getestet (`AiClassifierTests`): fünf
+Fallback-Pfad-Tests prüfen, dass der `AiClassifier` bei HttpRequest-,
+TaskCanceled- und JSON-/Schema-Fehlern auf den `KeywordClassifier` zurückfällt,
+dabei `EventId 3010` (Warning) loggt und **nie eine Exception zum Aufrufer
+durchreicht**. Ergänzend prüft eine **Schema-Validierung** den `MatchedSkill`
+gegen die erlaubten Werte (`Wallabag`/`Vikunja`/leer) — eine ungültige
+Modell-Antwort wird verworfen statt geroutet. Das nicht-deterministische
+KI-Verhalten ist damit nicht bloss ausgeklammert, sondern an seinen Guardrails
+abgesichert.
+
+### 8.9 Abnahmekriterien (Überblick)
+
+Die Lösung ist gegen **50 prüfbare Abnahmekriterien** (`AC-01-…`) abgenommen —
+je Kernfunktion, jedes mit verifizierendem Test und, wo einschlägig, NfA-Bezug.
+Auszug:
+
+| Kernfunktion | Abnahmekriterium (Auszug) | NfA-Bezug | Prüfung |
+|---|---|---|---|
+| Erfassung (UI/API) | `POST /api/v1/captures` → 201, p95 < 200 ms (AC-08-1) | NfA-01 / NF-09 | `Api.IntegrationTests` · `just smoke-prod` |
+| Klassifikation & Routing | URL-Capture → `Completed`, `MatchedSkill=Wallabag`, `ExternalRef` gesetzt (AC-09-1) | — | `Skills.ContractTests` · `just test-beta` |
+| KI-Fallback (Guardrail) | ungültiger API-Key → Capture erreicht `Classified` via KeywordClassifier; `EventId 3010` geloggt; nie Exception (AC-10-1…3) | Zuverlässigkeit | `AiClassifierTests` |
+| Suche & Filter | Deep-Link `/captures?lc=Orphan` filtert korrekt; Listen-Abfrage p95 < 100 ms (AC-05-1) | NfA-01 | bUnit `CapturesListPageTests` |
+| Deployment | `docker compose up --wait` → exit 0, alle `service_healthy`; `/health/live` 200 < 30 s (AC-17-1/3) | NfA-D3 | `just smoke-prod` |
+
+Vollständiger Katalog (50 AC mit *Verified-by* und NfA-Verknüpfung):
+`docs/spec/acceptance-criteria.md`.
 
 ---
 

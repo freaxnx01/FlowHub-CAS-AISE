@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Coverage settings for the XPlat Code Coverage collector.
+     Excludes generated / non-unit-testable code so the number reflects hand-written logic.
+     Usage: dotnet test ... [collect XPlat Code Coverage] [settings coverlet.runsettings] -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <ExcludeByFile>**/Migrations/*.cs,**/*.g.cs,**/*.Designer.cs</ExcludeByFile>
+          <ExcludeByAttribute>System.CodeDom.Compiler.GeneratedCodeAttribute,System.Runtime.CompilerServices.CompilerGeneratedAttribute,System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+          <SkipAutoProps>true</SkipAutoProps>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

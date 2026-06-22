@@ -476,3 +476,6 @@ source/FlowHub.Web/App_Data/uploads/
 
 # Numbered Moodle upload set (assembled on demand)
 upload/
+
+# pypdf venv for the outline-preserving upload merge (tools/pdf-merge/merge.py)
+tools/pdf-merge/.venv/
