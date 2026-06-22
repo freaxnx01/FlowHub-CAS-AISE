@@ -85,7 +85,9 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 ### 3.3 Spezifikation & Design
 
 - [System Context](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/system-context.md)
-- [Use Cases](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/use-cases.md)
+- [Use Cases (UC-01…UC-18)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/use-cases.md)
+- [Non-functional Attributes (SMART NfA)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/nfa.md)
+- [Acceptance Criteria (50 ACs, Verified-by + NfA-Linkage)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/acceptance-criteria.md)
 - [Testing Strategy](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/testing-strategy.md)
 - UI-Design-Output (Wireframes & Flows pro Feature):
   - [Dashboard](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/docs/design/dashboard)
