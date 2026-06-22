@@ -35,6 +35,14 @@ dotnet_diagnostic.CA1506.severity = none
 [**/{ProgramRegistration,*ServiceCollectionExtensions}.cs]
 dotnet_diagnostic.CA1506.severity = none
 
+# Razor component code-behinds are UI orchestration: each component naturally
+# touches its parameters, child components, injected services, the DTOs it
+# renders, and the MudBlazor types it composes. That coupling is by design
+# (same architectural pattern as the composition root); CA1506 doesn't usefully
+# measure component quality. See issue #95.
+[**/*.razor.cs]
+dotnet_diagnostic.CA1506.severity = none
+
 # Test code is held to a looser bar (high coupling / long arrange blocks).
 [**/*Tests/**.cs]
 dotnet_diagnostic.CA1506.severity = none
