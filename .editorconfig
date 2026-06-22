@@ -1,5 +1,9 @@
 root = true
 
+# --- General + .NET quality gates (seeded from ai-instructions/templates/dotnet) ---
+# Thresholds for CA1502/CA1506 live in CodeMetricsConfig.txt (single source).
+# Order matters in editorconfig (later sections override earlier ones), so the
+# baseline severities live HERE and the carve-outs come below.
 [*.cs]
 charset = utf-8
 end_of_line = lf
@@ -7,20 +11,29 @@ indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
 insert_final_newline = true
+dotnet_diagnostic.CA1502.severity = error    # excessive cyclomatic complexity
+dotnet_diagnostic.CA1506.severity = warning  # excessive class coupling (Phase-1 debt, see Directory.Build.props)
+dotnet_diagnostic.IDE0005.severity = error   # unnecessary using directive
 
 # EF Core migrations are scaffold-generated; numeric prefixes (0001_, 0002_) are intentional
 # CA1707: underscore in type name triggered by leading digit in migration class name
 # CA1825: zero-length array allocation in generated Up/Down methods
+# CA1506: generated Up/Down reference many entity/column types — inherent, not real coupling
 [**/Migrations/*.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1825.severity = none
+dotnet_diagnostic.CA1506.severity = none
 
-# --- .NET quality gates (seeded from ai-instructions/templates/dotnet) ---
-# Thresholds for CA1502/CA1506 live in CodeMetricsConfig.txt (single source).
-[*.cs]
-dotnet_diagnostic.CA1502.severity = error    # excessive cyclomatic complexity
-dotnet_diagnostic.CA1506.severity = warning  # excessive class coupling (Phase-1 debt, see Directory.Build.props)
-dotnet_diagnostic.IDE0005.severity = error   # unnecessary using directive
+# DI composition root — Program.cs and the *ServiceCollectionExtensions /
+# *Registration helpers wire dozens of services and inherently touch many types.
+# Coupling there is the design intent (a single composition root), not a code
+# smell, so CA1506 is silenced for these specific files (analogous to the
+# Migrations carve-out above). See issue #95.
+[source/FlowHub.Web/Program.cs]
+dotnet_diagnostic.CA1506.severity = none
+
+[**/{ProgramRegistration,*ServiceCollectionExtensions}.cs]
+dotnet_diagnostic.CA1506.severity = none
 
 # Test code is held to a looser bar (high coupling / long arrange blocks).
 [**/*Tests/**.cs]
