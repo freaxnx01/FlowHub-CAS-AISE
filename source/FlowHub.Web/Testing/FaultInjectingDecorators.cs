@@ -1,7 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using FlowHub.Core.Health;
 
 namespace FlowHub.Web.Testing;
 
+// E2E test scaffolding: only active when FLOWHUB_E2E_FAULTS_ENABLED=true.
+// Excluded from coverage because exercising it requires the E2E browser pipeline.
+[ExcludeFromCodeCoverage]
 internal sealed class FaultInjectingSkillRegistry : ISkillRegistry
 {
     private readonly ISkillRegistry _inner;
@@ -23,6 +27,7 @@ internal sealed class FaultInjectingSkillRegistry : ISkillRegistry
     }
 }
 
+[ExcludeFromCodeCoverage]
 internal sealed class FaultInjectingIntegrationHealthService : IIntegrationHealthService
 {
     private readonly IIntegrationHealthService _inner;
