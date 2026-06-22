@@ -43,6 +43,14 @@ dotnet_diagnostic.CA1506.severity = none
 [**/*.razor.cs]
 dotnet_diagnostic.CA1506.severity = none
 
+# Minimal-API endpoint classes are HTTP wiring: each method touches
+# Results<T,U>, TypedResults, HttpContext, request/DTO types and injected
+# services. Even after splitting per concern (read/write/retry — see #95
+# cluster 3), the union stays above 30 — same architectural reality as the
+# composition root, where coupling is the design intent. See issue #95.
+[**/Endpoints/*Endpoint{s,}.cs]
+dotnet_diagnostic.CA1506.severity = none
+
 # Test code is held to a looser bar (high coupling / long arrange blocks).
 [**/*Tests/**.cs]
 dotnet_diagnostic.CA1506.severity = none
