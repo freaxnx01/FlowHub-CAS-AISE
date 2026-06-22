@@ -729,13 +729,27 @@ in Prod (`Bus__Transport`). Jeder Consumer hat seine eigene Retry-Policy; der
 
 ### 8.4 Beobachtbarkeit
 
-OpenTelemetry instrumentiert ASP.NET Core und die .NET-Runtime; der
-Prometheus-Exporter liefert `/metrics` (`dotnet_*`- und `http_*`-Serien), Grafana
-ist provisioniert. Health-Endpunkte: `/health/live` und `/health/ready`. MEAI-
-(`gen_ai.*`) und MassTransit-Traces sowie der **OTLP**-Export (OpenTelemetry
-Protocol — das Wire-Format, um Traces/Metriken an einen Collector zu senden) sind
-**vorbereitet, im Abgabe-Build aber nicht aktiv** (ADR 0009) — siehe technische
-Schulden, Kapitel 11.
+OpenTelemetry instrumentiert ASP.NET Core, HttpClient, EF Core und die .NET-Runtime;
+der Prometheus-Exporter liefert `/metrics` (`dotnet_*`- und `http_*`-Serien), Grafana
+ist provisioniert. Health-Endpunkte: `/health/live` und `/health/ready`.
+
+**Tracing ist aktiv** (`Program.cs`): die `WithTracing(...)`-Pipeline trägt die
+ActivitySources `FlowHub`, `MassTransit` und `Experimental.Microsoft.Extensions.AI`,
+hinzu HTTP-/EF-Core-/ASP.NET-Core-Auto-Instrumentation. Der `TagAllowListProcessor`
+(ADR 0009 §1/§2/§4) läuft als `BaseProcessor<Activity>` *vor* den Exportern und
+strippt forbidden tags (HTTP-Bodies, `db.statement`, `gen_ai.prompt/completion`,
+`*.email`/`*.username`/`*.user.id`) sowie unbekannte `flowhub.*`-Keys; String-Werte
+>256 Zeichen werden zu `<redacted:length=N>`. Eigenwerte werden ausschliesslich
+über die Helper-Klasse `FlowHub.Core.Telemetry.FlowHubActivityTags` gesetzt
+(ADR 0009 §5). Export: Console immer aktiv (im Build sichtbar); OTLP zusätzlich,
+sobald `Otlp__Endpoint` gesetzt ist — z. B. an einen Collector/Tempo/Jaeger.
+Der Audit-Test `TagAllowListProcessorTests` (ADR 0009 §6, 12 Fälle) verriegelt
+die Policy gegen Regressionen.
+
+MEAI- (`gen_ai.*`) und MassTransit-Traces fliessen über die `WithTracing(...)`-
+Pipeline (ActivitySources `Experimental.Microsoft.Extensions.AI` und `MassTransit`);
+ein **OTLP**-Collector (OpenTelemetry Protocol — Wire-Format zum Senden von Traces
+an Tempo/Jaeger) wird durch Setzen von `Otlp__Endpoint` aktiviert.
 
 ### 8.5 Logging-Policy (ADR 0008)
 
@@ -856,7 +870,7 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 | Punkt | Art | Status / Mitigation |
 |---|---|---|
 | **EF-Outbox nicht verdrahtet** | Tech. Schuld | Crash zwischen Persist und Publish kann einen Capture in `Raw` zurücklassen; Mitigation: manueller Retry-Endpunkt + Dashboard-Sichtbarkeit (ADR 0003) |
-| **OTLP-Tracing / KI-Metriken nicht aktiv** | Tech. Schuld | Im Abgabe-Build deaktiviert; Allow-List/Helper vorbereitet (ADR 0009) |
+| **OTLP-Tracing** | Erledigt | Aktiv (ADR 0009): `WithTracing(...)` + `TagAllowListProcessor` + `FlowHubActivityTags`-Helper; Console-Export always-on, OTLP über `Otlp__Endpoint`; Audit-Test `TagAllowListProcessorTests` (12 Fälle) verriegelt die PII-Policy. KI-Metriken (Confidence-Score-Histogramm etc.) bleiben offen. |
 | **NfA-P1 / NfA-P2 offen** | Ziel offen | Cloud-LLM + Cloud-Embeddings sind Live-Default; kein lokaler Ollama-Adapter, keine KI-Badges und keine **Provenienz-Spalten** — also keine Herkunfts-Felder wie `ClassificationSource` (KI / Heuristik / Manuell), `ClassifiedAt`, `ConfidenceScore`, die festhalten, *wie* ein Capture klassifiziert wurde |
 | **Compliance-Audit-Tests geplant** | Tech. Schuld | `SerilogPiiAuditTests`, `TracingPiiAuditTests`, `OutboundCallAuditTests` als Block-5/geplant markiert |
 | **Semantische Suche auf Demo zurückgerollt** | Bewusste Einschränkung | Self-hosted Embedder getestet, dann entfernt (schwache Trennschärfe auf kleinem Datensatz); `/search` → 503; Pipeline + Tests bleiben als Deliverable (ADR 0006 Amendment) |
