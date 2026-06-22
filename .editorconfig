@@ -18,7 +18,7 @@ dotnet_diagnostic.CA1825.severity = none
 # --- .NET quality gates (seeded from ai-instructions/templates/dotnet) ---
 # Thresholds for CA1502/CA1506 live in CodeMetricsConfig.txt (single source).
 [*.cs]
-dotnet_diagnostic.CA1502.severity = warning  # cyclomatic complexity (Phase-1 debt, see Directory.Build.props)
+dotnet_diagnostic.CA1502.severity = error    # excessive cyclomatic complexity
 dotnet_diagnostic.CA1506.severity = warning  # excessive class coupling (Phase-1 debt, see Directory.Build.props)
 dotnet_diagnostic.IDE0005.severity = error   # unnecessary using directive
 

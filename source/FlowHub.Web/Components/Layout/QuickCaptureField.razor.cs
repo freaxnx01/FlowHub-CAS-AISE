@@ -31,7 +31,7 @@ public partial class QuickCaptureField : ComponentBase
     private static readonly (string Label, string Content)[] Examples =
     [
         ("🎬 The Matrix is a great movie", "The Matrix is a great movie"),
-        ("📜 ein Zitat", "\"Imagination is more important than knowledge.\" — Albert Einstein"),
+        ("📜 in Zitat", "\"Imagination is more important than knowledge.\" — Albert Einstein"),
         ("✅ todo: buy milk", "todo: buy milk"),
         ("🔗 example URL", "https://en.wikipedia.org/wiki/Personal_knowledge_management"),
     ];
