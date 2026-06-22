@@ -12,7 +12,7 @@ indent_size = 4
 trim_trailing_whitespace = true
 insert_final_newline = true
 dotnet_diagnostic.CA1502.severity = error    # excessive cyclomatic complexity
-dotnet_diagnostic.CA1506.severity = warning  # excessive class coupling (Phase-1 debt, see Directory.Build.props)
+dotnet_diagnostic.CA1506.severity = error    # excessive class coupling (re-promoted in #95 cluster 4)
 dotnet_diagnostic.IDE0005.severity = error   # unnecessary using directive
 
 # EF Core migrations are scaffold-generated; numeric prefixes (0001_, 0002_) are intentional
@@ -49,6 +49,33 @@ dotnet_diagnostic.CA1506.severity = none
 # cluster 3), the union stays above 30 — same architectural reality as the
 # composition root, where coupling is the design intent. See issue #95.
 [**/Endpoints/*Endpoint{s,}.cs]
+dotnet_diagnostic.CA1506.severity = none
+
+# EF repositories each implement an aggregate's persistence: the class touches
+# DbContext, its entity set(s), the entity types, the domain DTOs they map to,
+# the EF Core LINQ surface, and (for vector search) pgvector. That coupling is
+# inherent to the persistence-mapping role — splitting per method just spreads
+# the same types. See issue #95.
+[**/Repositories/*Repository.cs]
+dotnet_diagnostic.CA1506.severity = none
+
+# Per-skill integrations (Wallabag, Vikunja, Paperless, Zitate, …) wire HTTP
+# clients, IOptions configuration, ILogger, request/response DTOs, JSON
+# serialization, and the abstractions they implement. That coupling is the
+# integration's role; an integration with few collaborators wouldn't be doing
+# its job. See issue #95.
+[source/FlowHub.Skills/**.cs]
+dotnet_diagnostic.CA1506.severity = none
+
+# AI classifiers / embedders / enrichers wire IChatClient/IEmbedder + provider-
+# specific options + ILogger + DTOs + enums + classification traces. Same
+# integration-role coupling as the Skills integrations above. See issue #95.
+[source/FlowHub.AI/**.cs]
+dotnet_diagnostic.CA1506.severity = none
+
+# Demo/test-only stubs intentionally mirror real service shapes — coupling is
+# determined by the interface they substitute, not by their own design. See #95.
+[**/Stubs/*.cs]
 dotnet_diagnostic.CA1506.severity = none
 
 # Test code is held to a looser bar (high coupling / long arrange blocks).
