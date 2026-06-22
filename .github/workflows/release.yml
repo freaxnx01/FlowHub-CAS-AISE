@@ -29,8 +29,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
+      - name: Extract metadata — flowhub-web
+        id: meta-web
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/flowhub-web
@@ -39,14 +39,33 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
 
-      - name: Build and push Docker image
+      - name: Build and push — flowhub-web
         uses: docker/build-push-action@v5
         with:
           context: .
           file: source/FlowHub.Web/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+
+      - name: Extract metadata — flowhub-migrations
+        id: meta-migrations
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/flowhub-migrations
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Build and push — flowhub-migrations
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/migrations/Dockerfile
+          push: true
+          tags: ${{ steps.meta-migrations.outputs.tags }}
+          labels: ${{ steps.meta-migrations.outputs.labels }}
 
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4

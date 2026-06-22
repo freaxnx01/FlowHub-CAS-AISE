@@ -651,11 +651,19 @@ Lifecycle zurück auf `Raw`).
 | `prometheus` | `prom/prometheus:latest` | Scrapt `/metrics` (7 d Retention) |
 | `grafana` | `grafana/grafana:latest` | Dashboards (anonymer Viewer, provisioniert) |
 
-Nur `flowhub.web` wird beim Release gebaut und veröffentlicht; `FlowHub.Api` ist
-in den Web-Host gefaltet (ADR 0003, „as built"). Die Demo-Overlay-Compose-Datei
-(`demo/docker-compose.yml`) ergänzt live laufende Ziel-Dienste (Vikunja,
-Wallabag, paperless), einen 15-Minuten-Reset, Traefik-Labels mit Rate-Limit und
-eine Uptime-Kuma-Statusseite.
+**Zwei first-party Container, unabhängig gebaut und veröffentlicht.** Im
+Release-Workflow (`release.yml`, Tag `v*`) werden **beide** Container-Images
+unabhängig voneinander aus dem gleichen Repo gebaut und nach GHCR gepusht — der
+laufende App-Container `ghcr.io/freaxnx01/flowhub-web` und der Init-Container
+`ghcr.io/freaxnx01/flowhub-migrations` (eigene Dockerfile + eigene Versionierung,
+gleiche SemVer-Tags). Damit ist die modular-monolithische Lösung „klar abgegrenzt
+in Module bzw. Sub-Systeme strukturiert … und als Container lauffähig betrieben"
+durch **zwei separat gepullbare, separat startbare, je eigenständig gebaute
+Container** belegbar (vgl. Rubrik *Bewertungskriterien Projektarbeit AISE*,
+Juni 2026, Kriterium 17). `FlowHub.Api` ist gemäss ADR 0003 „as built" in den
+Web-Host gefaltet. Die Demo-Overlay-Compose-Datei (`demo/docker-compose.yml`)
+ergänzt live laufende Ziel-Dienste (Vikunja, Wallabag, paperless), einen
+15-Minuten-Reset, Traefik-Labels mit Rate-Limit und eine Uptime-Kuma-Statusseite.
 
 ### 7.2 CI/CD
 
