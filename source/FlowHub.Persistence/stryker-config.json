@@ -2,7 +2,7 @@
   "stryker-config": {
     "project": "FlowHub.Persistence.csproj",
     "test-projects": ["../../tests/FlowHub.Persistence.Tests/FlowHub.Persistence.Tests.csproj"],
-    "thresholds": { "high": 80, "low": 60, "break": 0 },
+    "thresholds": { "high": 80, "low": 60, "break": 45 },
     "reporters": ["cleartext", "html", "json"],
     "mutation-level": "Standard",
     "mutate": [
