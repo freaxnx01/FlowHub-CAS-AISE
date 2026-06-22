@@ -59,8 +59,9 @@ jobs:
           test-project: tests/FlowHub.Core.Tests/FlowHub.Core.Tests.csproj
           max-added-cs-lines: "800"
           max-method-lines: "40"
-          run-method-size: "false"   # deferred: Metrics.exe is Linux-incompatible (agent-pipeline#91)
-          run-mutation: "false"      # deferred to Phase-2 (#96)
+          run-method-size: "false"           # deferred: Metrics.exe is Linux-incompatible (agent-pipeline#91)
+          run-mutation: "true"               # enabled in #96 cluster 1 — break is 35 (just below the 37.21% baseline)
+          stryker-config-dir: "source/FlowHub.Core"   # config lives next to FlowHub.Core.csproj
 
   verify-gates:
     name: verify-gates
