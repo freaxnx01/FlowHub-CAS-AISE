@@ -242,4 +242,59 @@ public sealed class EfCaptureRepositoryTests(PostgresFixture fixture)
 
         read!.ClassifierTrace.Should().BeNull();
     }
+
+    // --- Pin previously-uncovered ListAsync filter branches (#96 ratchet) ----
+
+    [Fact]
+    public async Task ListAsync_FiltersBySearchTerm_CaseInsensitive()
+    {
+        var db = await fixture.CreateFreshDbAsync();
+        var repo = new EfCaptureRepository(db);
+        await repo.AddAsync(NewRawCapture("invoice for Acme Corp"));
+        await repo.AddAsync(NewRawCapture("random note"));
+
+        var page = await repo.ListAsync(new CaptureFilter(
+            Stages: null, Source: null, Limit: 50, Cursor: null, SearchTerm: "ACME"));
+
+        page.Items.Should().ContainSingle();
+        page.Items[0].Content.Should().Be("invoice for Acme Corp");
+    }
+
+    [Fact]
+    public async Task ListAsync_FiltersBySearchTerm_AlsoMatchesTitle()
+    {
+        var db = await fixture.CreateFreshDbAsync();
+        var repo = new EfCaptureRepository(db);
+        var c1 = NewRawCapture("content one");
+        var c2 = NewRawCapture("content two");
+        await repo.AddAsync(c1);
+        await repo.AddAsync(c2);
+        await repo.UpdateAsync(c1 with { Title = "Quarterly review", Stage = LifecycleStage.Classified, MatchedSkill = "Books" });
+        await repo.UpdateAsync(c2 with { Title = "Lunch menu", Stage = LifecycleStage.Classified, MatchedSkill = "Books" });
+
+        var page = await repo.ListAsync(new CaptureFilter(
+            Stages: null, Source: null, Limit: 50, Cursor: null, SearchTerm: "quarterly"));
+
+        page.Items.Should().ContainSingle();
+        page.Items[0].Title.Should().Be("Quarterly review");
+    }
+
+    [Fact]
+    public async Task ListAsync_FiltersByTag_ReturnsOnlyTaggedCaptures()
+    {
+        var db = await fixture.CreateFreshDbAsync();
+        var repo = new EfCaptureRepository(db);
+        var tags = new EfTagRepository(db);
+        var c1 = NewRawCapture("billing-content");
+        var c2 = NewRawCapture("other-content");
+        await repo.AddAsync(c1);
+        await repo.AddAsync(c2);
+        await tags.AddAsync(c1.Id, "billing");
+
+        var page = await repo.ListAsync(new CaptureFilter(
+            Stages: null, Source: null, Limit: 50, Cursor: null, Tag: "billing"));
+
+        page.Items.Should().ContainSingle();
+        page.Items[0].Id.Should().Be(c1.Id);
+    }
 }
