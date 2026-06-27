@@ -19,6 +19,31 @@ public static class E2EFaultExtensions
             "true",
             StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Conditional wrapper for <see cref="AddE2EFaultInjection"/>: registers the fault
+    /// scaffolding only when <see cref="IsEnabled"/>. Lives next to the env-var bridge
+    /// so Program.cs stays free of the <c>if (E2EFaultExtensions.IsEnabled)</c> noise
+    /// (and so coverlet doesn't flag those two lines forever).
+    /// </summary>
+    public static IServiceCollection AddE2EFaultInjectionIfEnabled(this IServiceCollection services)
+    {
+        if (IsEnabled)
+        {
+            services.AddE2EFaultInjection();
+        }
+        return services;
+    }
+
+    /// <summary>Conditional wrapper for <see cref="MapE2EFaultEndpoints"/>; same rationale.</summary>
+    public static IEndpointRouteBuilder MapE2EFaultEndpointsIfEnabled(this IEndpointRouteBuilder app)
+    {
+        if (IsEnabled)
+        {
+            app.MapE2EFaultEndpoints();
+        }
+        return app;
+    }
+
     public static IServiceCollection AddE2EFaultInjection(this IServiceCollection services)
     {
         services.AddSingleton<IFaultInjector, FaultInjector>();
