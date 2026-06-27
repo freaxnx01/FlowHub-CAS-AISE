@@ -2,4 +2,8 @@
 # Seeded from ai-instructions/templates/dotnet/. Registered as an AdditionalFile
 # by Directory.Build.props.
 CA1502: 10
-CA1506: 20
+# CA1506 threshold raised from the canonical 20 to 30: this is a MudBlazor app
+# where components, minimal-API endpoints, and EF repositories naturally touch
+# ~20-26 types. 30 still catches genuinely-over-coupled classes. (Deviation from
+# templates/dotnet documented per issue #95.)
+CA1506: 30

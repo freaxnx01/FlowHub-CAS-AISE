@@ -1,0 +1,12 @@
+{
+  "stryker-config": {
+    "project": "FlowHub.Persistence.csproj",
+    "test-projects": ["../../tests/FlowHub.Persistence.Tests/FlowHub.Persistence.Tests.csproj"],
+    "thresholds": { "high": 85, "low": 75, "break": 70 },
+    "reporters": ["cleartext", "html", "json"],
+    "mutation-level": "Standard",
+    "mutate": [
+      "!**/Migrations/*.cs"
+    ]
+  }
+}

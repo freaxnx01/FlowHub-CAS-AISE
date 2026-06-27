@@ -1,4 +1,5 @@
 using FlowHub.AI;
+using FlowHub.Core.Captures;
 using FlowHub.Core.Classification;
 using FlowHub.Core.Skills;
 using Microsoft.Extensions.AI;
@@ -125,5 +126,61 @@ public sealed class AiServiceCollectionExtensionsTests
         });
 
         sp.GetRequiredService<AiRegistrationOutcome>().Model.Should().Be("claude-sonnet-4-7");
+    }
+
+    [Fact]
+    public void AddFlowHubEmbeddings_NoApiKey_RegistersNothing()
+    {
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
+        var services = new ServiceCollection();
+
+        services.AddFlowHubEmbeddings(config);
+
+        services.Should().NotContain(d => d.ServiceType == typeof(IEmbeddingService));
+    }
+
+    [Fact]
+    public void AddFlowHubEmbeddings_WithApiKey_RegistersEmbeddingService_DefaultsToMistralEndpoint()
+    {
+        // Exercises the success path: when an API key is set, the OpenAI-compatible
+        // embedding client is wired up and AiEmbeddingService becomes resolvable.
+        // BaseUrl/Model/Dimensions defaults are accepted (Mistral, mistral-embed).
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Embeddings:ApiKey"] = "mistral-test-key",
+            })
+            .Build();
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        services.AddFlowHubEmbeddings(config);
+
+        using var sp = services.BuildServiceProvider();
+        sp.GetService<IEmbeddingService>().Should().NotBeNull();
+    }
+
+    [Fact]
+    public void AddFlowHubEmbeddings_WithCustomBaseUrlAndModel_RespectsConfig()
+    {
+        // Covers the explicit-BaseUrl branch (non-empty string → used as endpoint)
+        // and the explicit Model override.
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Embeddings:BaseUrl"] = "https://api.example.com/v1",
+                ["Embeddings:ApiKey"] = "test-key",
+                ["Embeddings:Model"] = "text-embedding-3-small",
+                ["Embeddings:Dimensions"] = "768",
+                ["Embeddings:TimeoutSeconds"] = "30",
+            })
+            .Build();
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        services.AddFlowHubEmbeddings(config);
+
+        using var sp = services.BuildServiceProvider();
+        sp.GetService<IEmbeddingService>().Should().NotBeNull();
     }
 }

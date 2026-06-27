@@ -43,7 +43,7 @@ FILES=(
   "2|Database model — entities|docs/design/db/entities.md"
   "2|Database model — ER diagram|docs/design/db/er.md"
 
-  "2|Design — Perspektiven (Struktur, Verhalten, Interaktion)|docs/design/perspectives.md"
+  "2|Design — Perspektiven (Struktur, Verhalten, Interaction)|docs/design/perspectives.md"
   "2|Design — Datenfluss|docs/design/data-flow.md"
   "2|Design — Sequenzdiagramme (Übersicht)|docs/design/sequences/README.md"
   "3|Sequenz — Capture-Intake|docs/design/sequences/capture-intake.md"
@@ -57,7 +57,7 @@ FILES=(
   "1|Block 1 — Nachbereitung|vault/Blöcke/01 Einführung/01 Einführung - c) Nachbereitung.md"
   "1|Block 2 — Nachbereitung|vault/Blöcke/02 Frontend/02 Frontend - c) Nachbereitung.md"
   "1|Block 3 — Nachbereitung|vault/Blöcke/03 Service/03 Service - c) Nachbereitung.md"
-  "1|Block 4 — Nachbereitung|vault/Blöcke/04 Persitence/04 Persitence - c) Nachbereitung.md"
+  "1|Block 4 — Nachbereitung|vault/Blöcke/04 Persitence/04 Persistence - c) Nachbereitung.md"
   "1|Block 5 — Nachbereitung|vault/Blöcke/05 Deployment/05 Deployment - c) Nachbereitung.md"
 
   "1|Operations — CI/CD|docs/ci-cd.md"

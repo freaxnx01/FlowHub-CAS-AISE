@@ -23,7 +23,11 @@ OUT="${BOOTSTRAP_OUT:-/bootstrap/wallabag.env}"
 # OAuth client credentials are provisioned by flowhub.wallabag-client.
 CLIENT_ENV="${WALLABAG_CLIENT_ENV:-/bootstrap/wallabag-client.env}"
 if [ -f "${CLIENT_ENV}" ]; then
-  set -a; . "${CLIENT_ENV}"; set +a
+  set -a
+  # Runtime-generated env file; path is dynamic, so shellcheck can't follow it.
+  # shellcheck disable=SC1090
+  . "${CLIENT_ENV}"
+  set +a
 fi
 CLIENT_ID="${WALLABAG_CLIENT_ID:?WALLABAG_CLIENT_ID required (from ${CLIENT_ENV})}"
 CLIENT_SECRET="${WALLABAG_CLIENT_SECRET:?WALLABAG_CLIENT_SECRET required (from ${CLIENT_ENV})}"

@@ -21,15 +21,17 @@ Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Si
 |---|---|---:|---|
 | 0 | **`00_FlowHub_Uebersicht.pdf`** *(diese Datei)* | 8 | Einstieg: Dokumentenübersicht + Projektzusammenfassung + klickbares Inhaltsverzeichnis |
 | 1 | **`01_FlowHub_Arc42.pdf`** — Architektur / SAD (as built) | 24 | 12 arc42-Kapitel, 9 Diagramme (System-Kontext, Bausteine, Lebenszyklus, Sequenzen, ER); RE in §1/§3 |
-| 2 | **`02_FlowHub_Projektbeschreibung.pdf`** | 27 | Umsetzung des SAD + Code-Struktur: Vision, Stakeholder, Funktionsumfang, Architektur, Risiken |
-| 3 | **`03_FlowHub_Reflexion.pdf`** | 7 | KI-Werkzeuge, Workflow-Entwicklung Block 1→5, Stärken/Fehlerquellen, Fazit |
+| 2 | **`02_FlowHub_Projektbeschreibung.pdf`** | ~36 | **Präsentation Teil 1 — Produkt** (Foliensatz, Querformat) **vorangestellt**, danach die Projektbeschreibung (Umsetzung des SAD + Code-Struktur: Vision, Funktionsumfang, Architektur, Risiken) |
+| 3 | **`03_FlowHub_Reflexion.pdf`** | ~22 | **Präsentation Teil 2 — Bauen mit KI** (Foliensatz, Querformat) **vorangestellt**, danach die Reflexion (KI-Werkzeuge, Workflow Block 1→5, Stärken/Fehlerquellen, Fazit) |
 | 4 | **`04_FlowHub_Eigenstaendigkeitserklaerung.pdf`** | 2 | Hilfsmittelverzeichnis + unterschriebene Erklärung |
+
+> 📐 **Dokumente 02 und 03 sind gemischt Quer-/Hochformat:** der jeweilige Präsentations-Teil (Querformat) **führt**, die ausführliche Textfassung (Hochformat) folgt. So ist der Foliensatz — der an der PVA nicht präsentiert werden konnte — vollständiger Teil der Abgabe.
 
 ### Weitere Dokumente im Repository (verlinkt, nicht separat hochgeladen)
 
 | Dokument | Inhalt |
 |---|---|
-| **Präsentation** (18 S., Foliensatz) | Teil 1 Produkt, Teil 2 Bauen mit KI — verlinkt, nicht separat hochgeladen: [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) |
+| **Präsentation — voller Foliensatz** (Querformat) | Im Upload den Dokumenten **02** (Teil 1 Produkt) und **03** (Teil 2 Bauen mit KI) **vorangestellt**; der zusammenhängende Foliensatz zusätzlich hier: [PDF](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.pdf) · [Markdown](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/presentation/flowhub-praesentation.md) |
 | **SUBMISSION-Bundle** (267 S.) | Vollständiges Offline-Archiv: diese Seite + alle referenzierten Artefakte inline (Sicherheitsnetz) |
 | **ADR 0001–0009** | Architekturentscheidungen (Render-Mode, Service-/Async-Architektur, KI, Persistenz, Vektor-Suche, LLM-Hosting, Logging, Telemetrie) |
 | **Spezifikation** (`docs/spec/`) | Use Cases, NfA (SMART), Akzeptanzkriterien, Test-Strategie, System-Kontext |
@@ -42,7 +44,7 @@ Diese Datei (`00_FlowHub_Uebersicht.pdf`) ist der **Einstieg in die Abgabe**: Si
 
 ## 1. Projektzusammenfassung
 
-**FlowHub** ist ein KI-gestützter persönlicher Eingangskorb, der Informationsschnipsel aus dem Alltag (Filmtipps, Artikel, Belege, Bookmarks, Notizen) automatisch erkennt, klassifiziert und an die passenden Ziel-Dienste des Benutzers weiterleitet — self-hosted im Homelab oder extern (z. B. Cloud-Dienste, Forge-Tracker) — ohne dass der Benutzer im Moment der Erfassung entscheiden muss, wohin die Information gehört.
+**FlowHub** ist eine KI-gestützte persönliche Inbox, die Informationsschnipsel aus dem Alltag (Filmtipps, Artikel, Belege, Bookmarks, Notizen) automatisch erkennt, klassifiziert und an die passenden Ziel-Dienste des Benutzers weiterleitet — self-hosted im Homelab oder extern (z. B. Cloud-Dienste, Forge-Tracker) — ohne dass der Benutzer im Moment der Erfassung entscheiden muss, wohin die Information gehört.
 
 Das adressierte Kernbedürfnis ist **"Capture without friction"**: Statt heute fünf Schritte (Idee → App-Wahl → App öffnen → Kategorisieren → Ablegen) reduziert FlowHub die Erfassung auf einen einzigen Schritt — typischerweise eine Nachricht an einen Telegram-Bot. Die Klassifikation übernimmt ein **Skill-basiertes Routing-System**: ein LLM (Cloud-Provider wie OpenRouter oder ein lokales LLM) klassifiziert den Schnipsel, mit deterministischem Keyword-/URL-Muster-Matching als Fallback. Die Ablage erfolgt in bestehende Dienste — self-hosted im Homelab (z. B. Vikunja, paperless-ngx, Wallabag) ebenso wie externe Services (z. B. GitHub Issues).
 
@@ -83,7 +85,9 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 ### 3.3 Spezifikation & Design
 
 - [System Context](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/system-context.md)
-- [Use Cases](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/use-cases.md)
+- [Use Cases (UC-01…UC-18)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/use-cases.md)
+- [Non-functional Attributes (SMART NfA)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/nfa.md)
+- [Acceptance Criteria (50 ACs, Verified-by + NfA-Linkage)](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/acceptance-criteria.md)
 - [Testing Strategy](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/testing-strategy.md)
 - UI-Design-Output (Wireframes & Flows pro Feature):
   - [Dashboard](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/docs/design/dashboard)

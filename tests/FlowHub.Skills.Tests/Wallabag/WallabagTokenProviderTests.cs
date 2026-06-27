@@ -85,6 +85,35 @@ public sealed class WallabagTokenProviderTests
         mock.VerifyNoOutstandingExpectation();
     }
 
+    [Fact]
+    public async Task GetTokenAsync_ServerReturns500_LogsAndRethrows()
+    {
+        // Exercises the catch arm (EventId 3040) — any HTTP/parse failure is logged
+        // with the exception type, then rethrown unchanged.
+        var mock = new MockHttpMessageHandler();
+        mock.Expect(HttpMethod.Post, "*/oauth/v2/token")
+            .Respond(System.Net.HttpStatusCode.InternalServerError);
+        using var sut = Build(mock, new MutableTimeProvider(DateTimeOffset.UtcNow));
+
+        var act = () => sut.GetTokenAsync(default);
+
+        await act.Should().ThrowAsync<HttpRequestException>();
+    }
+
+    [Fact]
+    public void Dispose_CanBeCalledRepeatedlyWithoutThrowing()
+    {
+        // Hits the Dispose() line and exercises the SemaphoreSlim's own
+        // idempotent disposal semantics.
+        var mock = new MockHttpMessageHandler();
+        var sut = Build(mock, new MutableTimeProvider(DateTimeOffset.UtcNow));
+
+        sut.Dispose();
+
+        var act = sut.Dispose;
+        act.Should().NotThrow();
+    }
+
     /// <summary>
     /// Hand-rolled controllable <see cref="TimeProvider"/>. The repo does not reference
     /// Microsoft.Extensions.TimeProvider.Testing, so we model a mutable "now" here.

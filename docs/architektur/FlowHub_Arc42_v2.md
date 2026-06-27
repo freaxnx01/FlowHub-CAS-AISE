@@ -19,7 +19,7 @@
 
 ## 1. Einführung und Ziele
 
-FlowHub ist ein **KI-gestützter persönlicher Eingangskorb**. Er nimmt
+FlowHub ist eine **KI-gestützte persönliche Inbox**. Sie nimmt
 Informationsschnipsel aus dem Alltag entgegen (ein Film-Tipp, ein Fachartikel,
 ein Beleg-Foto, eine Notiz), **erkennt und klassifiziert** sie automatisch und
 **leitet sie an den passenden Ziel-Dienst** weiter — ohne dass der Benutzer im
@@ -651,11 +651,19 @@ Lifecycle zurück auf `Raw`).
 | `prometheus` | `prom/prometheus:latest` | Scrapt `/metrics` (7 d Retention) |
 | `grafana` | `grafana/grafana:latest` | Dashboards (anonymer Viewer, provisioniert) |
 
-Nur `flowhub.web` wird beim Release gebaut und veröffentlicht; `FlowHub.Api` ist
-in den Web-Host gefaltet (ADR 0003, „as built"). Die Demo-Overlay-Compose-Datei
-(`demo/docker-compose.yml`) ergänzt live laufende Ziel-Dienste (Vikunja,
-Wallabag, paperless), einen 15-Minuten-Reset, Traefik-Labels mit Rate-Limit und
-eine Uptime-Kuma-Statusseite.
+**Zwei first-party Container, unabhängig gebaut und veröffentlicht.** Im
+Release-Workflow (`release.yml`, Tag `v*`) werden **beide** Container-Images
+unabhängig voneinander aus dem gleichen Repo gebaut und nach GHCR gepusht — der
+laufende App-Container `ghcr.io/freaxnx01/flowhub-web` und der Init-Container
+`ghcr.io/freaxnx01/flowhub-migrations` (eigene Dockerfile + eigene Versionierung,
+gleiche SemVer-Tags). Damit ist die modular-monolithische Lösung „klar abgegrenzt
+in Module bzw. Sub-Systeme strukturiert … und als Container lauffähig betrieben"
+durch **zwei separat gepullbare, separat startbare, je eigenständig gebaute
+Container** belegbar (vgl. Rubrik *Bewertungskriterien Projektarbeit AISE*,
+Juni 2026, Kriterium 17). `FlowHub.Api` ist gemäss ADR 0003 „as built" in den
+Web-Host gefaltet. Die Demo-Overlay-Compose-Datei (`demo/docker-compose.yml`)
+ergänzt live laufende Ziel-Dienste (Vikunja, Wallabag, paperless), einen
+15-Minuten-Reset, Traefik-Labels mit Rate-Limit und eine Uptime-Kuma-Statusseite.
 
 ### 7.2 CI/CD
 
@@ -721,13 +729,27 @@ in Prod (`Bus__Transport`). Jeder Consumer hat seine eigene Retry-Policy; der
 
 ### 8.4 Beobachtbarkeit
 
-OpenTelemetry instrumentiert ASP.NET Core und die .NET-Runtime; der
-Prometheus-Exporter liefert `/metrics` (`dotnet_*`- und `http_*`-Serien), Grafana
-ist provisioniert. Health-Endpunkte: `/health/live` und `/health/ready`. MEAI-
-(`gen_ai.*`) und MassTransit-Traces sowie der **OTLP**-Export (OpenTelemetry
-Protocol — das Wire-Format, um Traces/Metriken an einen Collector zu senden) sind
-**vorbereitet, im Abgabe-Build aber nicht aktiv** (ADR 0009) — siehe technische
-Schulden, Kapitel 11.
+OpenTelemetry instrumentiert ASP.NET Core, HttpClient, EF Core und die .NET-Runtime;
+der Prometheus-Exporter liefert `/metrics` (`dotnet_*`- und `http_*`-Serien), Grafana
+ist provisioniert. Health-Endpunkte: `/health/live` und `/health/ready`.
+
+**Tracing ist aktiv** (`Program.cs`): die `WithTracing(...)`-Pipeline trägt die
+ActivitySources `FlowHub`, `MassTransit` und `Experimental.Microsoft.Extensions.AI`,
+hinzu HTTP-/EF-Core-/ASP.NET-Core-Auto-Instrumentation. Der `TagAllowListProcessor`
+(ADR 0009 §1/§2/§4) läuft als `BaseProcessor<Activity>` *vor* den Exportern und
+strippt forbidden tags (HTTP-Bodies, `db.statement`, `gen_ai.prompt/completion`,
+`*.email`/`*.username`/`*.user.id`) sowie unbekannte `flowhub.*`-Keys; String-Werte
+>256 Zeichen werden zu `<redacted:length=N>`. Eigenwerte werden ausschliesslich
+über die Helper-Klasse `FlowHub.Core.Telemetry.FlowHubActivityTags` gesetzt
+(ADR 0009 §5). Export: Console immer aktiv (im Build sichtbar); OTLP zusätzlich,
+sobald `Otlp__Endpoint` gesetzt ist — z. B. an einen Collector/Tempo/Jaeger.
+Der Audit-Test `TagAllowListProcessorTests` (ADR 0009 §6, 12 Fälle) verriegelt
+die Policy gegen Regressionen.
+
+MEAI- (`gen_ai.*`) und MassTransit-Traces fliessen über die `WithTracing(...)`-
+Pipeline (ActivitySources `Experimental.Microsoft.Extensions.AI` und `MassTransit`);
+ein **OTLP**-Collector (OpenTelemetry Protocol — Wire-Format zum Senden von Traces
+an Tempo/Jaeger) wird durch Setzen von `Otlp__Endpoint` aktiviert.
 
 ### 8.5 Logging-Policy (ADR 0008)
 
@@ -762,6 +784,35 @@ In-Memory-Provider-Drift); Playwright für E2E; Live-KI-Tests sind trait-gegatet
 (`[Trait("Category","AI")]`) und aus der Default-Suite ausgeschlossen.
 Abgabestand: **294 Offline-Tests grün, 0 Fehler, 0 übersprungen**. Volltext und
 Reconciliation-Tabelle in `docs/spec/testing-strategy.md`.
+
+**Test der KI-Anteile (Guardrails, nicht nur Trait-Gating).** Über das
+Ausschliessen der nicht-deterministischen Live-Aufrufe hinaus ist das
+*Ausfallverhalten* der KI deterministisch getestet (`AiClassifierTests`): fünf
+Fallback-Pfad-Tests prüfen, dass der `AiClassifier` bei HttpRequest-,
+TaskCanceled- und JSON-/Schema-Fehlern auf den `KeywordClassifier` zurückfällt,
+dabei `EventId 3010` (Warning) loggt und **nie eine Exception zum Aufrufer
+durchreicht**. Ergänzend prüft eine **Schema-Validierung** den `MatchedSkill`
+gegen die erlaubten Werte (`Wallabag`/`Vikunja`/leer) — eine ungültige
+Modell-Antwort wird verworfen statt geroutet. Das nicht-deterministische
+KI-Verhalten ist damit nicht bloss ausgeklammert, sondern an seinen Guardrails
+abgesichert.
+
+### 8.9 Abnahmekriterien (Überblick)
+
+Die Lösung ist gegen **50 prüfbare Abnahmekriterien** (`AC-01-…`) abgenommen —
+je Kernfunktion, jedes mit verifizierendem Test und, wo einschlägig, NfA-Bezug.
+Auszug:
+
+| Kernfunktion | Abnahmekriterium (Auszug) | NfA-Bezug | Prüfung |
+|---|---|---|---|
+| Erfassung (UI/API) | `POST /api/v1/captures` → 201, p95 < 200 ms (AC-08-1) | NfA-01 / NF-09 | `Api.IntegrationTests` · `just smoke-prod` |
+| Klassifikation & Routing | URL-Capture → `Completed`, `MatchedSkill=Wallabag`, `ExternalRef` gesetzt (AC-09-1) | — | `Skills.ContractTests` · `just test-beta` |
+| KI-Fallback (Guardrail) | ungültiger API-Key → Capture erreicht `Classified` via KeywordClassifier; `EventId 3010` geloggt; nie Exception (AC-10-1…3) | Zuverlässigkeit | `AiClassifierTests` |
+| Suche & Filter | Deep-Link `/captures?lc=Orphan` filtert korrekt; Listen-Abfrage p95 < 100 ms (AC-05-1) | NfA-01 | bUnit `CapturesListPageTests` |
+| Deployment | `docker compose up --wait` → exit 0, alle `service_healthy`; `/health/live` 200 < 30 s (AC-17-1/3) | NfA-D3 | `just smoke-prod` |
+
+Vollständiger Katalog (50 AC mit *Verified-by* und NfA-Verknüpfung):
+`docs/spec/acceptance-criteria.md`.
 
 ---
 
@@ -819,7 +870,7 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 | Punkt | Art | Status / Mitigation |
 |---|---|---|
 | **EF-Outbox nicht verdrahtet** | Tech. Schuld | Crash zwischen Persist und Publish kann einen Capture in `Raw` zurücklassen; Mitigation: manueller Retry-Endpunkt + Dashboard-Sichtbarkeit (ADR 0003) |
-| **OTLP-Tracing / KI-Metriken nicht aktiv** | Tech. Schuld | Im Abgabe-Build deaktiviert; Allow-List/Helper vorbereitet (ADR 0009) |
+| **OTLP-Tracing** | Erledigt | Aktiv (ADR 0009): `WithTracing(...)` + `TagAllowListProcessor` + `FlowHubActivityTags`-Helper; Console-Export always-on, OTLP über `Otlp__Endpoint`; Audit-Test `TagAllowListProcessorTests` (12 Fälle) verriegelt die PII-Policy. KI-Metriken (Confidence-Score-Histogramm etc.) bleiben offen. |
 | **NfA-P1 / NfA-P2 offen** | Ziel offen | Cloud-LLM + Cloud-Embeddings sind Live-Default; kein lokaler Ollama-Adapter, keine KI-Badges und keine **Provenienz-Spalten** — also keine Herkunfts-Felder wie `ClassificationSource` (KI / Heuristik / Manuell), `ClassifiedAt`, `ConfidenceScore`, die festhalten, *wie* ein Capture klassifiziert wurde |
 | **Compliance-Audit-Tests geplant** | Tech. Schuld | `SerilogPiiAuditTests`, `TracingPiiAuditTests`, `OutboundCallAuditTests` als Block-5/geplant markiert |
 | **Semantische Suche auf Demo zurückgerollt** | Bewusste Einschränkung | Self-hosted Embedder getestet, dann entfernt (schwache Trennschärfe auf kleinem Datensatz); `/search` → 503; Pipeline + Tests bleiben als Deliverable (ADR 0006 Amendment) |

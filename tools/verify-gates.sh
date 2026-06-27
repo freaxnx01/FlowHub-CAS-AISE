@@ -9,11 +9,10 @@
 # *inside* FlowHub's tree (so they inherit FlowHub's Directory.Build.props /
 # .editorconfig) and asserts each ENFORCED gate fires.
 #
-# Enforced gates checked here: CA1502 (re-promoted in #97), IDE0005, and the
-# method-size check. CA1506 is still demoted to a warning (debt #95) so it is not
-# asserted as a build-failure yet — add it below when #95 re-promotes it. (The
-# method-size action step is deferred on Linux — agent-pipeline#91 — but the
-# check script itself is Linux-safe and verified here.)
+# Enforced gates checked here: CA1502 (re-promoted in #97), CA1506 (re-promoted
+# in #95 cluster 4), IDE0005, and the method-size check. (The method-size action
+# step is deferred on Linux — agent-pipeline#91 — but the check script itself is
+# Linux-safe and verified here.)
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -53,6 +52,17 @@ if dotnet build "${SCRATCH}/ca1502/Complexity.csproj" -c Release --nologo -v q >
   fail=1
 else
   printf 'OK: CA1502 fired\n'
+fi
+
+# --- CA1506: re-promoted to an error in #95 cluster 4 ------------------------
+note "CA1506 fixture must FAIL the build under FlowHub's resolved config"
+fetch "gate-tests/build-failures/Coupling/Coupling.cs"     "ca1506/Coupling.cs"
+fetch "gate-tests/build-failures/Coupling/Coupling.csproj" "ca1506/Coupling.csproj"
+if dotnet build "${SCRATCH}/ca1506/Coupling.csproj" -c Release --nologo -v q >/dev/null 2>&1; then
+  printf '::error::CA1506 did NOT fail the build — the gate is dead in FlowHub\n'
+  fail=1
+else
+  printf 'OK: CA1506 fired\n'
 fi
 
 # --- Method-size check (Linux-safe; independent of the Metrics.exe generator) -

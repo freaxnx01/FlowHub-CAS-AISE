@@ -18,6 +18,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: '3.12'
+
+      - name: Install pre-commit
+        run: python -m pip install --disable-pip-version-check pre-commit
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure
+
   quality:
     name: quality
     runs-on: ubuntu-latest
@@ -40,8 +59,9 @@ jobs:
           test-project: tests/FlowHub.Core.Tests/FlowHub.Core.Tests.csproj
           max-added-cs-lines: "800"
           max-method-lines: "40"
-          run-method-size: "false"   # deferred: Metrics.exe is Linux-incompatible (agent-pipeline#91)
-          run-mutation: "false"      # deferred to Phase-2 (#96)
+          run-method-size: "false"           # deferred: Metrics.exe is Linux-incompatible (agent-pipeline#91)
+          run-mutation: "true"               # enabled in #96 cluster 1 — break is 35 (just below the 37.21% baseline)
+          stryker-config-dir: "source/FlowHub.Core"   # config lives next to FlowHub.Core.csproj
 
   verify-gates:
     name: verify-gates

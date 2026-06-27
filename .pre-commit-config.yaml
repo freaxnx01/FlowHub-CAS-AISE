@@ -1,0 +1,82 @@
+# Polyglot lint gate (pre-commit) — canonical template.
+#
+# Seeded into a repo root by /sync-ai-instructions. Runs as a local git hook and
+# in CI via `pre-commit run --all-files`. See base-instructions.md
+# ("Polyglot Lint") for what each hook catches and the Docker caveat.
+#
+# Pin every rev with `pre-commit autoupdate` — no floating refs.
+# Hooks marked "needs Docker" have binary/system alternatives noted in the standard.
+
+default_language_version:
+  python: python3
+
+# These trees are German academic deliverables, archives, and the Obsidian
+# vault — not maintained source. Exclude them from all hooks so the gate lints
+# code (source/ tests/ tools/ scripts/ .github/ + root configs), not submission
+# prose. markdownlint and typos would otherwise flood on German text.
+exclude: |
+  (?x)^(
+    docs/|
+    nachbereitung/|
+    vorbereitung/|
+    video/|
+    vault/|
+    upload/|
+    bruno/|
+    poc/
+  )
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # docker-compose files use merge keys / env interpolation that the
+        # strict pyyaml safe-loader rejects; they're validated by `docker compose`.
+        exclude: (^|/)docker-compose.*\.ya?ml$
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: mixed-line-ending
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint-docker   # needs Docker; binary variant: id "actionlint"
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint            # reads .yamllint at the repo root
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning"]   # gate on warning+; info-level style nits are advisory
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.18
+    hooks:
+      - id: ruff
+      - id: ruff-format
+
+  # markdownlint-cli2 and typos are intentionally OMITTED here: this is a German
+  # academic submission repo (≈195 German-prose Markdown files + an Obsidian
+  # vault). markdownlint's structural rules would force a churny reformat of
+  # submission deliverables, and typos' English dictionary flags ordinary German
+  # words (ist, Sie, oder, alle, …) as errors. They are kept in the canonical
+  # template for English/code repos; re-add them here if a German-aware
+  # dictionary/scope is configured. See issue #98.
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
+    hooks:
+      - id: hadolint-docker     # needs Docker; binary variant: id "hadolint"
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks

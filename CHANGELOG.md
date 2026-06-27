@@ -121,7 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **roadmap:** add "Terminzettel → Calendar" skill idea (#76)
 - add Obsidian vault as 2nd brain (AI read & write) (#77)
 - **next:** correct stale test count 234 → 294 in the authoritative header (#78)
-- **presentation:** give "Vault als 2nd Brain" its own slide (fix overflow) (#79)
+- **presentation:** give "Vault also 2nd Brain" its own slide (fix overflow) (#79)
 - **reflexion:** clarify wording per review feedback (#80)
 - **submission:** add Dokumentenübersicht; include presentation in upload set (#81)
 - **arc42:** clarity + renderer layout fixes; add live-demo URL to hub (#82)
@@ -397,7 +397,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **next:** log CI failure + supersede stale 2026-05-12 snapshot
 - **submission:** consolidate acceptance criteria + fix bundle TOC
 - **vault:** track Coursework-Glossary EN↔DE vocabulary
-- **termine:** add Block 5 / final submission deadline
+- **determine:** add Block 5 / final submission deadline
 - **submission:** flesh out 5 short stubs flagged by preflight
 - **next:** announce cas-aise-submission-preflight v0.1.1
 - **env:** document Skills__Vikunja__/Wallabag__ keys in .env.example
@@ -503,4 +503,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### release
 
 - **v0.1.0:** regenerate v4 PDF + finalize CHANGELOG release section
-
