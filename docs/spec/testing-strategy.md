@@ -86,7 +86,7 @@ double-counts).
 | FlowHub.Api | 100.0 % | 87.5 % | — |
 | FlowHub.AI | 100.0 % | 94.8 % | Defensive `_ => throw` arms in `AiServiceCollectionExtensions` covered via reflection |
 | FlowHub.Persistence | 100.0 % | 97.2 % | **Testcontainers run is what makes this measurable** — the unit-only number is ~9 %. `FlowHubDbContextFactory` (design-time `IDesignTimeDbContextFactory`) is `[ExcludeFromCodeCoverage]`. Union with `FlowHub.Api.IntegrationTests` (InMemory) covers the `FlowHubDbContext.OnModelCreating` non-Npgsql arm |
-| FlowHub.Web | 100.0 % | 93.7 % | `[ExcludeFromCodeCoverage]` on `E2EFaultExtensions` (env-var-gated E2E scaffolding) |
+| FlowHub.Web | 100.0 % | 93.7 % | `[ExcludeFromCodeCoverage]` on `E2EFaultExtensions` + `FaultInjectingSkillRegistry` / `FaultInjectingIntegrationHealthService` (all env-var-gated E2E scaffolding) |
 
 The CI coverage gate (`tools/check-coverage.py`) enforces per-assembly
 floors set ~1 % below these measured values as a noise guard — see
