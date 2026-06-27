@@ -58,4 +58,19 @@ public class SkillsTests : TestContext
         cut.Markup.Should().Contain("registry down");
         cut.Markup.Should().Contain("Retry");
     }
+
+    [Fact]
+    public void Render_WhileLoading_ShowsSkeletonPlaceholders()
+    {
+        // Same pattern as IntegrationsTests.Render_WhileLoading: hold GetHealthAsync
+        // pending so the `_skills is null` skeleton block stays rendered.
+        var tcs = new TaskCompletionSource<IReadOnlyList<SkillHealth>>();
+        _skillRegistry.GetHealthAsync(Arg.Any<CancellationToken>()).Returns(tcs.Task);
+
+        var cut = RenderComponent<SkillsPage>();
+
+        cut.FindAll(".mud-skeleton").Should().NotBeEmpty();
+        cut.Markup.Should().NotContain("No skills configured yet");
+        cut.Markup.Should().NotContain("Could not load skills");
+    }
 }

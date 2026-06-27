@@ -58,4 +58,20 @@ public class IntegrationsTests : TestContext
         cut.Markup.Should().Contain("upstream timeout");
         cut.Markup.Should().Contain("Retry");
     }
+
+    [Fact]
+    public void Render_WhileLoading_ShowsSkeletonPlaceholders()
+    {
+        // Hold GetHealthAsync open so the page stays in its `_integrations is null`
+        // state — covers the for-loop that renders MudSkeleton placeholders.
+        var tcs = new TaskCompletionSource<IReadOnlyList<IntegrationHealth>>();
+        _service.GetHealthAsync(Arg.Any<CancellationToken>()).Returns(tcs.Task);
+
+        var cut = RenderComponent<IntegrationsPage>();
+
+        cut.FindAll(".mud-skeleton").Should().NotBeEmpty();
+        // Sanity: not yet showing data or empty/error states.
+        cut.Markup.Should().NotContain("No integrations configured yet");
+        cut.Markup.Should().NotContain("Could not load integrations");
+    }
 }
