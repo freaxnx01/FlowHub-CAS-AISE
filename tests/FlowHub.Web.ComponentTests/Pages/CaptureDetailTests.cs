@@ -1,6 +1,7 @@
 using FlowHub.Core.Classification;
 using FlowHub.Web.Components.Pages;
 using FlowHub.Web.Demo;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MudBlazor;
@@ -166,6 +167,58 @@ public class CaptureDetailTests : TestContext
 
         cut.Markup.Should().Contain("Classification trace");
         cut.Markup.Should().Contain("OpenRouter");
+    }
+
+    [Fact]
+    public void BackButton_NavigatesToCapturesList()
+    {
+        var id = Guid.NewGuid();
+        _captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(new Capture(id, ChannelKind.Web, "any", DateTimeOffset.UtcNow,
+                LifecycleStage.Completed, "Books"));
+        var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
+        var nav = Services.GetRequiredService<NavigationManager>();
+
+        cut.FindAll("button").First(b => b.TextContent.Contains("Back to Captures")).Click();
+
+        nav.Uri.Should().EndWith("/captures");
+    }
+
+    [Fact]
+    public void RetryRouting_OnOrphan_TriggersStubActionSnackbarMessage()
+    {
+        // The "Retry routing" button (and the Reassign / Ignore buttons) all wire
+        // to the StubAction handler, which posts an Info snackbar. Click the most
+        // visible one and assert the snackbar received it.
+        var id = Guid.NewGuid();
+        _captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(new Capture(id, ChannelKind.Web, "stuck", DateTimeOffset.UtcNow,
+                LifecycleStage.Orphan, null, "no skill matched"));
+
+        var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
+        cut.FindAll("button").First(b => b.TextContent.Contains("Retry routing")).Click();
+
+        var snackbar = Services.GetRequiredService<ISnackbar>();
+        snackbar.ShownSnackbars.Should()
+            .Contain(s => s.Message != null && s.Message.Contains("backend Skills are wired"));
+    }
+
+    [Theory]
+    [InlineData(0, "now")]
+    [InlineData(5 * 60, "5 m ago")]
+    [InlineData(3 * 3600, "3 h ago")]
+    [InlineData(2 * 86400, "2 d ago")]
+    public void Render_FormatRelative_BucketsTimeDeltaIntoExpectedToken(int secondsAgo, string expectedToken)
+    {
+        var id = Guid.NewGuid();
+        var when = DateTimeOffset.UtcNow.AddSeconds(-secondsAgo);
+        _captureService.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(new Capture(id, ChannelKind.Web, "x", when,
+                LifecycleStage.Completed, "Books", null, "title"));
+
+        var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, id));
+
+        cut.Markup.Should().Contain(expectedToken);
     }
 
     [Fact]
