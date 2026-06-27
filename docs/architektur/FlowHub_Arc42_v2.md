@@ -439,11 +439,11 @@ hängen beide am `CaptureCreated` und laufen damit parallel.
 
 ```
 Capture submitted
-  → IClassifier.ClassifyAsync(content)           (Driving-Port, FlowHub.Core)
+  → IClassifier.ClassifyAsync(content)        (Driving-Port)
       → ClassificationResult { MatchedSkill, Tags, Title? }
   → CaptureClassified (MassTransit-Event)
   → SkillRoutingConsumer
-      → ISkillIntegration where Name == MatchedSkill   (Driven-Port, FlowHub.Core)
+      → ISkillIntegration · Name == MatchedSkill  (Driven-Port)
       → integration.HandleAsync(capture) → SkillResult
 ```
 
