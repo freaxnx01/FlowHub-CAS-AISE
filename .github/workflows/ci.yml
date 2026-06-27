@@ -28,12 +28,19 @@ jobs:
         run: dotnet build FlowHub.slnx --no-restore --configuration Release
 
       - name: Test
+        # --settings coverlet.runsettings applies the project's coverlet config —
+        # most importantly ExcludeByAttribute=[CompilerGenerated|GeneratedCode|
+        # ExcludeFromCodeCoverage] so async-state-machine / lambda-closure types
+        # and source-generated OpenAPI XML helpers don't inflate the denominator.
+        # Without it the Coverage gate reads 30 %+ low on Web/Api (artifacts vs.
+        # hand-written code). Keep in sync with `just test-coverage`.
         run: |
           dotnet test FlowHub.slnx \
             --no-build \
             --configuration Release \
             --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E" \
             --collect:"XPlat Code Coverage" \
+            --settings coverlet.runsettings \
             --results-directory ./coverage \
             --logger "trx"
 
