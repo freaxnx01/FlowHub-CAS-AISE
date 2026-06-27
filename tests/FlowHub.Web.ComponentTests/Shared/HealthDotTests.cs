@@ -21,4 +21,16 @@ public class HealthDotTests : TestContext
 
         cut.Markup.Should().Contain(expectedClass);
     }
+
+    [Fact]
+    public void Render_UnknownStatus_FallsBackToHelpIcon_AndDefaultColor()
+    {
+        // The `_ => (Help, Default)` arm is unreachable via the public enum surface,
+        // but coverage counts it: cast an out-of-range int to exercise the fallback.
+        var cut = RenderComponent<HealthDot>(p => p.Add(c => c.Status, (HealthStatus)99));
+
+        cut.Markup.Should().NotContain("mud-success-text");
+        cut.Markup.Should().NotContain("mud-warning-text");
+        cut.Markup.Should().NotContain("mud-error-text");
+    }
 }
