@@ -86,9 +86,11 @@ FlowHub ist bewusst ein **Single-Operator-System**, keine Multi-User-Plattform
 ### 1.4 Anwendungsfälle (Überblick)
 
 Die funktionalen Anforderungen sind als 18 Anwendungsfälle (UC-01…UC-18) — mit
-Akteur, Auslöser, Ablauf, Nachbedingung und Akzeptanzkriterien (inkl. prüfendem
-Test) — in `docs/spec/use-cases.md` spezifiziert. Überblick (Status: ✅ gebaut ·
-⏳ geplant):
+Akteur, Auslöser, Vorbedingung, Ablauf, Nachbedingung, Fehlerfällen und
+Akzeptanzkriterien (inkl. prüfendem Test) — vollständig in `docs/spec/use-cases.md`
+spezifiziert. Den Überblick gibt Tabelle 3; **fünf Kernfunktionen** sind in
+Kap. 1.5 mit der vollen Struktur direkt in diesem Dokument ausformuliert. Status:
+✅ gebaut · ⏳ geplant:
 
 *Tabelle 3: Anwendungsfälle (UC-Überblick)*
 
@@ -112,6 +114,111 @@ Test) — in `docs/spec/use-cases.md` spezifiziert. Überblick (Status: ✅ geba
 | UC-16 | Integration-Health-Historie ansehen | Operator | ✅ |
 | UC-17 | Deployment via Docker Compose | Operator | ✅ |
 | UC-18 | Semantische Suche über Captures (REST; Cloud-Embedding-Key nötig) | Operator | ✅ |
+
+### 1.5 Ausgewählte Anwendungsfälle (Detail)
+
+Die folgenden fünf Kernfunktionen sind mit voller UC-Struktur (Akteur · Auslöser ·
+Vorbedingung · Ablauf · Nachbedingung · Fehler · Akzeptanzkriterien) direkt im
+Dokument ausformuliert. Sie decken die operatorseitige Erfassung (UC-01), den
+programmatischen Eingangskanal (UC-08), die zentrale KI-Pipeline (UC-09), den
+KI-Fallback-Schutz (UC-10) und die Fehler-Wiedervorlage (UC-11) ab. Die übrigen
+13 Anwendungsfälle stehen in identischer Struktur in `docs/spec/use-cases.md`.
+
+#### UC-01 — Capture via Web-UI erfassen (Quick)
+
+- **Akteur:** Operator
+- **Auslöser:** Operator fügt eine URL ein oder tippt Text in das Quick-Capture-Feld der AppBar.
+- **Vorbedingung:** Operator ist authentifiziert (`DevAuthHandler` in Dev, Authentik OIDC in Prod).
+- **Ablauf:**
+  1. Operator gibt Inhalt in das Quick-Capture-Feld ein.
+  2. Operator drückt Enter oder klickt das Submit-Icon.
+  3. System legt einen neuen Capture mit `source = Web`, `stage = Raw` an.
+  4. System zeigt eine Erfolgs-Snackbar mit Link auf die Capture-Detailseite.
+  5. Das Eingabefeld leert sich für die nächste Eingabe.
+- **Nachbedingung:** Ein neuer Capture mit `LifecycleStage.Raw` existiert.
+- **Fehler:** Leerer Inhalt → Inline-Hinweis „Type something first"; kein Capture angelegt.
+- **Fehler:** Service-Fehler → Snackbar „Capture failed: {reason}", Feldinhalt bleibt erhalten.
+- **Akzeptanzkriterien:**
+  - Nach Enter erscheint binnen 2 s eine `Captured ✓`-Snackbar (Playwright `HappyFlowTests.QuickCapture_TodoEntry_AppearsInCapturesListAndDetail`).
+  - Die erfasste Zeile erscheint auf `/captures`, die Detailseite zeigt denselben Inhalt.
+  - Leerer Inhalt → keine Zeile, Inline-Hinweis sichtbar.
+
+#### UC-08 — Capture via REST-API erfassen
+
+- **Akteur:** Nicht-UI-Client (Automations-Skript, Telegram-Bot-Modul, künftiger Mobile-Client)
+- **Auslöser:** Client sendet `POST /api/v1/captures` mit JSON-Body.
+- **Vorbedingung:** Client hält ein gültiges Bearer-Token (Dev-Bypass in Dev; Authentik-OIDC-Token in Prod).
+- **Ablauf:**
+  1. Client sendet `POST /api/v1/captures` mit `{ "content": "…", "source": "Telegram|Web|Api", "skillOverride": "<SkillId|null>" }`.
+  2. FluentValidation an der API-Grenze prüft: `content` nicht leer, `source` ist ein bekannter Enum-Wert. Bei Fehler → `400 Bad Request` als RFC 9457 ProblemDetails (`type`-URI aus `FlowHubProblemTypes`).
+  3. Application-Service legt einen `Capture` mit `stage = Raw` an und persistiert ihn.
+  4. Service publiziert das Event `CaptureCreated` auf dem internen Bus.
+  5. API antwortet `201 Created` mit `Location: /api/v1/captures/{id}` und dem vollständigen Capture-Body.
+- **Nachbedingung:** Ein Capture mit `LifecycleStage.Raw` existiert; `CaptureCreated` liegt auf dem Bus und stösst die Async-Pipeline (UC-09) an.
+- **Fehler:** Fehlender/ungültiger `content` → `400` ProblemDetails mit `errors`-Map.
+- **Fehler:** Unbekannter `source`-Wert → `400` ProblemDetails.
+- **Fehler:** Auth fehlt/ungültig → `401 Unauthorized`.
+- **Akzeptanzkriterien:**
+  - Gültiger Body → 201 binnen NfA (`p95 < 200 ms` serverseitig); verifiziert durch `just smoke-prod` Schritt [5/6] und `tests/FlowHub.Api.IntegrationTests/`.
+  - Response-Body entspricht dem `Capture`-Schema; `Location`-Header vorhanden.
+  - Fehlender `content` / unbekannter `source` → 400 ValidationProblem (`type` = `validation.md`).
+
+#### UC-09 — Capture KI-klassifizieren & routen (Async-Pipeline)
+
+- **Akteur:** System (keine menschliche Interaktion)
+- **Auslöser:** Event `CaptureCreated` auf dem MassTransit-In-Process-Bus.
+- **Vorbedingung:** Capture in `Raw`-Stage; MassTransit-Bus läuft.
+- **Ablauf:**
+  1. Bus liefert `CaptureCreated` an `CaptureEnrichmentConsumer`.
+  2. Consumer ruft `IClassifier.ClassifyAsync(capture)`.
+  3. Ist ein Provider-Key konfiguriert, sendet `AiClassifier` den Inhalt an das LLM (`MaxOutputTokens=300`, `Temperature=0.2`); sonst direkt `KeywordClassifier`.
+  4. `IClassifier` liefert ein `ClassificationResult` mit `MatchedSkill` (nullable) und Tags.
+  5. Consumer setzt `stage = Classified` und publiziert `CaptureClassified`.
+  6. `SkillRoutingConsumer` löst die `ISkillIntegration` per `Name == MatchedSkill` auf. Treffer → `HandleAsync`, bei Erfolg `stage = Routed → Completed`; kein Treffer → `stage = Orphan`.
+  7. Bei Integration-Fehler greift die MassTransit-Retry-Policy (NfA-10); nach Erschöpfung setzt `LifecycleFaultObserver` `stage = Unhandled` mit `FailureReason`.
+- **Nachbedingung:** Capture erreicht einen Terminal-Zustand (`Completed`, `Orphan` oder `Unhandled`); Dashboard-Zähler aktualisieren beim nächsten Laden.
+- **Fehler:** Provider-Fehler → deterministischer Fallback (UC-10), kein Pipeline-Abbruch.
+- **Fehler:** Kein passender Adapter → `Unhandled` nach Retry-Erschöpfung.
+- **Akzeptanzkriterien:**
+  - URL-Capture erreicht `Completed` mit `MatchedSkill = "Wallabag"` und nicht-leerem `ExternalRef` (Skills.ContractTests + `just test-beta`).
+  - Todo-Capture erreicht `Completed` mit `MatchedSkill = "Vikunja"` und nicht-leerem `ExternalRef`.
+  - MassTransit-Harness-Tests (`tests/FlowHub.Web.ComponentTests/Pipeline/*`) belegen die Consumer-Hops in Reihenfolge.
+
+#### UC-10 — Graceful Fallback auf Keyword-Klassifikation
+
+- **Akteur:** System (keine menschliche Interaktion)
+- **Auslöser:** `AiClassifier.ClassifyAsync` läuft in einen Fehler: Netzwerk-Exception, HTTP-Timeout, JSON-Parse-Fehler, Schema-Verletzung oder generische Exception.
+- **Vorbedingung:** AI-Provider konfiguriert; `CaptureEnrichmentConsumer` verarbeitet ein `CaptureCreated`.
+- **Ablauf:**
+  1. `AiClassifier.ClassifyAsync` führt den LLM-Aufruf in einem try/catch über alle Exception-Typen aus.
+  2. Bei einer Exception loggt `AiClassifier` auf Warning mit EventId `3010` (`AiClassifierFellBackToKeyword`), inkl. Exception-Message und Capture-Id.
+  3. `AiClassifier` delegiert sofort an `KeywordClassifier.ClassifyAsync` und liefert dessen Ergebnis (`Title = null`).
+  4. `CaptureEnrichmentConsumer` fährt normal fort — er erhält ein gültiges `ClassificationResult`, unabhängig vom erzeugenden Classifier.
+- **Nachbedingung:** Der Capture ist stets klassifiziert; ein Provider-Ausfall mindert die Qualität, verursacht aber keinen Verfügbarkeitsverlust. Das Warning-Log (EventId 3010) liefert operative Sichtbarkeit.
+- **Fehler:** `AiClassifier` wirft nie an den Aufrufer — `ClassifyAsync` liefert immer ein `ClassificationResult`.
+- **Akzeptanzkriterien:**
+  - Mit absichtlich ungültigem `Ai__OpenRouter__ApiKey` erreicht ein Capture (UC-08) dennoch `Classified` — via `KeywordClassifier` (`tests/FlowHub.Web.ComponentTests/Ai/AiClassifierTests.cs`).
+  - EventId `3010 AiClassifierFellBackToKeyword` wird auf Warning mit Exception-Typ und Capture-Id geloggt.
+  - `AiClassifier.ClassifyAsync` wirft unter keinen Umständen an den Aufrufer.
+
+#### UC-11 — Fehlgeschlagenen Capture per Dashboard erneut routen
+
+- **Akteur:** Operator
+- **Auslöser:** Operator öffnet die Detailseite (`/captures/{id}`) eines `Orphan`/`Unhandled`-Captures und klickt „Retry".
+- **Vorbedingung:** Capture in `Orphan`- oder `Unhandled`-Stage; Operator authentifiziert.
+- **Ablauf:**
+  1. UI ruft `POST /api/v1/captures/{id}/retry`.
+  2. Application-Service setzt `stage = Raw` zurück und löscht `FailureReason`.
+  3. Service publiziert ein neues `CaptureCreated` für dieselbe Capture-Id.
+  4. Die volle Async-Pipeline (UC-09) läuft erneut von vorn.
+  5. API antwortet `202 Accepted`; UI zeigt Snackbar „Capture queued for retry" und lädt die Detailseite neu.
+- **Nachbedingung:** Der Capture durchläuft die Enrichment-Pipeline erneut; die Lifecycle-Stage wird abhängig vom Ergebnis erneut auf `Routed`, `Orphan` oder `Unhandled` gesetzt.
+- **Fehler:** Capture nicht gefunden → `404` ProblemDetails.
+- **Fehler:** Stage nicht retry-bar (`Raw`, `Classified`, `Completed`) → `409 Conflict` ProblemDetails.
+- **Akzeptanzkriterien:**
+  - `POST …/retry` auf einem `Orphan` → 202 Accepted, Body zeigt `stage = Raw`, `failureReason = null` (`tests/FlowHub.Api.IntegrationTests/CaptureRetryEndpointTests.cs`).
+  - Derselbe Aufruf auf einem `Completed` → 409 (`type` = `capture-not-retryable.md`).
+  - Derselbe Aufruf mit unbekannter Id → 404 (`type` = `capture-not-found.md`).
 
 ---
 
@@ -426,6 +533,83 @@ Approximate-Nearest-Neighbour-Index für schnelle Vektor-Ähnlichkeitssuche — 
 Cosine-Distanz) kam in Block 5 hinzu; auf der öffentlichen Demo sind
 Embeddings deaktiviert (`/search` → 503), siehe ADR 0006 (inkl. Amendment).
 
+### 5.7 Schnittstellensicht — Interaktions-/Vertragsperspektive
+
+Die Bausteinsicht (Abb. 2) zeigt die **Struktur** (welche Bausteine existieren), die
+Laufzeitsicht (Kap. 6) das **Verhalten** (zeitliche Abläufe). Die folgende
+Schnittstellensicht ist die dritte, eigenständige Perspektive: die
+**Interaktion** — die *Verträge* an den Baustein-Grenzen. Sie beantwortet nicht
+„was läuft wann ab", sondern „welche Operation, über welches Protokoll, mit
+welcher Nutzlast und in welcher Richtung" ein Baustein anbietet bzw. aufruft. Drei
+Vertragsarten reihen sich von aussen nach innen:
+
+1. **REST-Vertrag** (synchron, extern): `FlowHub.Api` exponiert `/api/v1` als
+   OpenAPI-3-Kontrakt (browsbar unter `/scalar`); jede Operation hat ein
+   typisiertes Request-/Response-Schema und meldet Fehler einheitlich als
+   RFC 9457 ProblemDetails.
+2. **Port-Vertrag** (synchron, in-process): Treiber- und getriebene Ports in
+   `FlowHub.Core` (`ICaptureService`, `IClassifier`, `ISkillIntegration`,
+   `ICaptureRepository`) — Methodensignaturen statt HTTP.
+3. **Event-Vertrag** (asynchron): `CaptureCreated` und `CaptureClassified` als
+   MassTransit-Nachrichtentypen entkoppeln Erfassung von Verarbeitung.
+
+```mermaid
+flowchart TB
+    client["REST-Client / Blazor-UI"]
+    api["FlowHub.Api<br/>REST-Vertrag /api/v1<br/>OpenAPI 3 (Scalar)<br/>Fehler: RFC 9457 ProblemDetails"]
+    core["FlowHub.Core<br/>Port-Verträge:<br/>ICaptureService, IClassifier,<br/>ISkillIntegration, ICaptureRepository"]
+    bus["MassTransit<br/>Event-Verträge:<br/>CaptureCreated, CaptureClassified"]
+    ai["AiClassifier /<br/>KeywordClassifier"]
+    skills["WallabagSkill /<br/>VikunjaSkill"]
+    repo["EfCaptureRepository"]
+    llm["Cloud-LLM<br/>OpenRouter / Mistral"]
+    ext["Wallabag, Vikunja"]
+    db[("PostgreSQL + pgvector")]
+
+    client -- "C1-C6: HTTPS REST (JSON-Request), Antwort JSON / RFC 9457" --> api
+    api -- "C7-C9: in-proc, SubmitAsync / RetryAsync / QueryAsync" --> core
+    core -- "C10: publish (Event CaptureCreated)" --> bus
+    bus -- "C11: consume, ruft ClassifyAsync" --> ai
+    ai -- "C12: HTTPS REST, IChatClient chat/completions" --> llm
+    ai -- "C13: publish (Event CaptureClassified)" --> bus
+    bus -- "C14: consume, ruft HandleAsync (Name gleich MatchedSkill)" --> skills
+    skills -- "C15: HTTPS REST, POST entries/tasks (Bearer-Token)" --> ext
+    core -- "C16: in-proc, Repository-Port" --> repo
+    repo -- "C17: TCP 5432, EF Core SQL + pgvector" --> db
+```
+
+*Abbildung 4: Schnittstellen-/Interaktionssicht — Vertrags-Kontrakte an den Baustein-Grenzen (REST, Ports, Events)*
+
+> **Lesehilfe.** Jeder Pfeil trägt Protokoll, Operation und Richtung; die
+> Kontrakt-Nummern (C1–C17) verweisen auf Tabelle 4, die Request-/Response-Nutzlast
+> und Fehlerfälle je Schnittstelle ausformuliert. Diese Sicht ergänzt — und
+> doppelt nicht — die Sequenzdiagramme: Kap. 6 zeigt die *Reihenfolge* der Aufrufe
+> über die Zeit, Abb. 4 die *statischen Kontrakte* der Schnittstellen unabhängig
+> vom Ablauf. Der vollständige REST-Vertrag ist als OpenAPI unter `/scalar`
+> browsbar; die Port-Signaturen liegen in `FlowHub.Core`.
+
+*Tabelle 4: Schnittstellen-Verträge (Detail zu Abbildung 4)*
+
+| # | Schnittstelle (Pfeil) | Protokoll | Operation | Request → Response / Fehler |
+|---|---|---|---|---|
+| C1 | Client → Api | HTTPS POST | `/api/v1/captures` | `{content, source}` → 201 Created + `Location` / 400 ProblemDetails |
+| C2 | Client → Api | HTTPS GET | `/api/v1/captures` | Query `stage, tag, q` → 200 Capture-Liste |
+| C3 | Client → Api | HTTPS GET | `/api/v1/captures/{id}` | → 200 Capture / 404 ProblemDetails |
+| C4 | Client → Api | HTTPS POST | `/api/v1/captures/{id}/retry` | → 202 Accepted / 404 / 409 ProblemDetails |
+| C5 | Client → Api | HTTPS GET | `/api/v1/captures/search` | Query `q, limit` → 200 Treffer / 400 / 503 ProblemDetails |
+| C6 | Client → Api | HTTPS GET | `/health/live`, `/health/ready` | → 200 Healthy (Liveness / Readiness) |
+| C7 | Api → Core | in-proc | `ICaptureService.SubmitAsync(content, source, ct)` | → `CaptureId` |
+| C8 | Api → Core | in-proc | `ICaptureService.RetryAsync(id, ct)` | → void (publiziert neues `CaptureCreated`) |
+| C9 | Api → Core | in-proc | `ICaptureRepository.QueryAsync / SearchAsync(filter, ct)` | → Capture-Liste |
+| C10 | Core → Bus | publish | Event `CaptureCreated` | Capture-Id + Inhalt → Enrichment + Embedding |
+| C11 | Bus → AiClassifier | consume | `IClassifier.ClassifyAsync(content, ct)` | → `ClassificationResult (MatchedSkill, Tags, Title)` |
+| C12 | AiClassifier → LLM | HTTPS REST | `IChatClient` chat/completions | Prompt → JSON-Schema-Antwort (`MaxOutputTokens=300`) |
+| C13 | AiClassifier → Bus | publish | Event `CaptureClassified` | nur bei erfolgreicher Klassifikation |
+| C14 | Bus → SkillIntegration | consume | `ISkillIntegration.HandleAsync(capture, ct)` | Auflösung `Name == MatchedSkill` → `SkillResult (Success, ExternalRef)` |
+| C15 | SkillIntegration → extern | HTTPS REST | `POST` entries/tasks (Bearer-Token) | Capture-Inhalt → `ExternalRef` |
+| C16 | Core → Repository | in-proc | Repository-Port (`ICaptureRepository` u. a.) | EF-Core-Aufruf |
+| C17 | Repository → DB | TCP 5432 | EF Core SQL + pgvector | Query / Write, Vektor-Suche per Cosine-Distanz |
+
 ---
 
 ## 6. Laufzeitsicht
@@ -445,7 +629,7 @@ stateDiagram-v2
     Completed --> [*]
 ```
 
-*Abbildung 4: Capture-Lebenszyklus (Zustandsdiagramm)*
+*Abbildung 5: Capture-Lebenszyklus (Zustandsdiagramm)*
 
 `Raw → Classified → Routed → Completed` ist der Happy Path; `Orphan` (kein Skill /
 Enrichment-Fault) und `Unhandled` (kein Adapter / Routing-Fault) sind die
@@ -496,7 +680,7 @@ sequenceDiagram
     Route->>DB: UPDATE stage=Completed, ExternalRef
 ```
 
-*Abbildung 5: Hot-Path — Submit bis Skill-Write (Sequenz)*
+*Abbildung 6: Hot-Path — Submit bis Skill-Write (Sequenz)*
 
 Wesentlich: Die HTTP-Antwort (201) erfolgt **vor** Klassifikation und Routing —
 der Submit-Pfad bleibt schnell, die teure Arbeit läuft asynchron. Enrichment und
@@ -537,7 +721,7 @@ sequenceDiagram
     end
 ```
 
-*Abbildung 6: Enrichment — Happy Path (Sequenz)*
+*Abbildung 7: Enrichment — Happy Path (Sequenz)*
 
 ### 6.4 Enrichment — Fallback (Provider-Fehler → KeywordClassifier)
 
@@ -564,7 +748,7 @@ sequenceDiagram
     AI-->>Consumer: ClassificationResult (Title=null)
 ```
 
-*Abbildung 7: Enrichment — Fallback auf KeywordClassifier (Sequenz)*
+*Abbildung 8: Enrichment — Fallback auf KeywordClassifier (Sequenz)*
 
 ### 6.5 Skill-Routing — Erfolg
 
@@ -592,7 +776,7 @@ sequenceDiagram
     end
 ```
 
-*Abbildung 8: Skill-Routing — Erfolg (Sequenz)*
+*Abbildung 9: Skill-Routing — Erfolg (Sequenz)*
 
 ### 6.6 Skill-Routing — Retry-Erschöpfung → Fault-Observer
 
@@ -620,7 +804,7 @@ sequenceDiagram
     Note over Observer: Stage=Unhandled — sichtbar im Dashboard + API-Filter
 ```
 
-*Abbildung 9: Skill-Routing — Retry-Erschöpfung & Fault-Observer (Sequenz)*
+*Abbildung 10: Skill-Routing — Retry-Erschöpfung & Fault-Observer (Sequenz)*
 
 Ein steckengebliebener `Unhandled`-Capture kann über `POST
 /api/v1/captures/{id}/retry` neu eingereiht werden (re-published `CaptureCreated`,
@@ -822,7 +1006,7 @@ Volltext je ADR in `docs/adr/`. Alle neun ADRs haben den Status *Accepted* —
 d. h. die Entscheidung wurde getroffen und ist in der Lösung umgesetzt (im
 Gegensatz zu *Proposed*, *Rejected* oder *Superseded*).
 
-*Tabelle 4: Architekturentscheidungen (ADR-Übersicht)*
+*Tabelle 5: Architekturentscheidungen (ADR-Übersicht)*
 
 | ADR | Titel | Entscheidung (Kurz) |
 |---|---|---|
@@ -845,7 +1029,7 @@ Entscheidungen (PE-1…PE-7), entkoppelt von den Implementierungs-ADRs.
 
 SMART-Anforderungen aus `docs/spec/nfa.md`:
 
-*Tabelle 5: Qualitätsanforderungen (SMART-NfA)*
+*Tabelle 6: Qualitätsanforderungen (SMART-NfA)*
 
 | ID | Kategorie | Ziel | Messung |
 |---|---|---|---|
@@ -865,7 +1049,7 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 
 ## 11. Risiken und technische Schulden
 
-*Tabelle 6: Risiken und technische Schulden*
+*Tabelle 7: Risiken und technische Schulden*
 
 | Punkt | Art | Status / Mitigation |
 |---|---|---|
@@ -918,21 +1102,23 @@ SMART-Anforderungen aus `docs/spec/nfa.md`:
 - **Abbildung 1:** System-Kontext (C4 Level 1) — Kap. 3.2
 - **Abbildung 2:** Ist-Architektur — Bausteinsicht Ebene 1 (modularer Monolith) — Kap. 5.1
 - **Abbildung 3:** Datenmodell (Entity-Relationship) — Kap. 5.6
-- **Abbildung 4:** Capture-Lebenszyklus (Zustandsdiagramm) — Kap. 6.1
-- **Abbildung 5:** Hot-Path — Submit bis Skill-Write (Sequenz) — Kap. 6.2
-- **Abbildung 6:** Enrichment — Happy Path (Sequenz) — Kap. 6.3
-- **Abbildung 7:** Enrichment — Fallback auf KeywordClassifier (Sequenz) — Kap. 6.4
-- **Abbildung 8:** Skill-Routing — Erfolg (Sequenz) — Kap. 6.5
-- **Abbildung 9:** Skill-Routing — Retry-Erschöpfung & Fault-Observer (Sequenz) — Kap. 6.6
+- **Abbildung 4:** Schnittstellen-/Interaktionssicht — Vertrags-Kontrakte (REST, Ports, Events) — Kap. 5.7
+- **Abbildung 5:** Capture-Lebenszyklus (Zustandsdiagramm) — Kap. 6.1
+- **Abbildung 6:** Hot-Path — Submit bis Skill-Write (Sequenz) — Kap. 6.2
+- **Abbildung 7:** Enrichment — Happy Path (Sequenz) — Kap. 6.3
+- **Abbildung 8:** Enrichment — Fallback auf KeywordClassifier (Sequenz) — Kap. 6.4
+- **Abbildung 9:** Skill-Routing — Erfolg (Sequenz) — Kap. 6.5
+- **Abbildung 10:** Skill-Routing — Retry-Erschöpfung & Fault-Observer (Sequenz) — Kap. 6.6
 
 ## Tabellenverzeichnis
 
 - **Tabelle 1:** Qualitätsziele (Auszug) — Kap. 1.2
 - **Tabelle 2:** Stakeholder — Kap. 1.3
 - **Tabelle 3:** Anwendungsfälle (UC-Überblick) — Kap. 1.4
-- **Tabelle 4:** Architekturentscheidungen (ADR-Übersicht) — Kap. 9
-- **Tabelle 5:** Qualitätsanforderungen (SMART-NfA) — Kap. 10
-- **Tabelle 6:** Risiken und technische Schulden — Kap. 11
+- **Tabelle 4:** Schnittstellen-Verträge (Detail zu Abbildung 4) — Kap. 5.7
+- **Tabelle 5:** Architekturentscheidungen (ADR-Übersicht) — Kap. 9
+- **Tabelle 6:** Qualitätsanforderungen (SMART-NfA) — Kap. 10
+- **Tabelle 7:** Risiken und technische Schulden — Kap. 11
 
 ## Literaturverzeichnis
 
