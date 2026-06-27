@@ -59,4 +59,25 @@ public class QuickCaptureFieldUploadTests : TestContext
         cut.Markup.Should().Contain("too large");
         capture.DidNotReceiveWithAnyArgs().SubmitAsync(default, default, default, default);
     }
+
+    [Fact]
+    public void StagingFileWithDisallowedContentType_ShowsTypeNotAllowedError_AndBlocksSubmit()
+    {
+        // Drives the second arm of ValidateFile — Size is OK but ContentType isn't
+        // in AllowedContentTypes — so we hit the "Type X not allowed" return.
+        var capture = Substitute.For<ICaptureService>();
+        var policy = Substitute.For<IUploadPolicy>();
+        policy.MaxBytes.Returns(1_048_576L);
+        policy.AllowedContentTypes.Returns(new[] { "application/pdf" });
+        policy.AcceptAttribute.Returns("application/pdf");
+        Services.AddSingleton(capture);
+        Services.AddSingleton(policy);
+
+        var cut = RenderComponent<QuickCaptureField>();
+        var file = InputFileContent.CreateFromBinary(new byte[8], "evil.exe", null, "application/octet-stream");
+        cut.FindComponent<InputFile>().UploadFiles(file);
+
+        cut.Markup.Should().Contain("Type application/octet-stream not allowed");
+        capture.DidNotReceiveWithAnyArgs().SubmitAsync(default, default, default, default);
+    }
 }
