@@ -481,3 +481,7 @@ upload/
 
 # pypdf venv for the outline-preserving upload merge (tools/pdf-merge/merge.py)
 tools/pdf-merge/.venv/
+
+# examiner-sim screenshots — only the curated ones already committed are kept;
+# new run captures (dated PNGs) stay local
+nachbereitung/examiner-sim/screenshots/
