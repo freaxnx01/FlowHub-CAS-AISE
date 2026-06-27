@@ -540,3 +540,30 @@ bruno/
 - Keep requests in sync with endpoints — when adding/changing an API endpoint, update or add the corresponding Bruno request
 - Include example request bodies with realistic test data
 - Add assertions in Bruno where useful (status code, response shape)
+
+## Search discipline — runs on shared agent-dev, do NOT OOM the host
+
+This repo is worked on from the agent-dev LXC (201), which shares `cirrus-pve`'s
+RAM with ~11 other guests. CT 201 has a 12 GB cgroup cap, but **filling that cap
+still swap-thrashes the whole node** — constant cgroup reclaim saturates host IO,
+drives load into the triple digits, and wedges SSH + `mosh-server` for every
+guest. On 2026-06-27 an unbounded `ugrep` in the `examiner-sim` slot hit ~9.8 GB
+RSS and took the node down twice (knocking out authentik, vaultwarden, git, …).
+So when searching repo / presentation / demo content:
+
+- Use `rg` (ripgrep), never bare `ugrep` / `grep -r`. rg respects `.gitignore`,
+  skips binaries, and is memory-bounded by default.
+- NEVER use open-ended `-o -E .{0,N}(…).{0,N}` context windows — they buffer
+  enormous match output. Use a small fixed context (`-C2`) instead.
+- Scope the path to what you need (`vault/`, `docs/`, `nachbereitung/`), never
+  the worktree root, `$HOME`, or `/tmp/wt-*`.
+- Exclude heavy trees: `.git`, `node_modules`, `.venv`, `.dotnet`, `bin/`,
+  `obj/`, `upload/`, and generated PDFs.
+- Cap it: add `--max-filesize=2M` and `-m <count>`.
+- Do not run a build (`just package-submission`, dotnet) and a broad search at
+  the same time — they compound memory pressure.
+
+Replacement for the search that caused the outage:
+
+    rg -n -C2 -g'!{node_modules,.venv,.dotnet,upload,bin,obj}' \
+       -e 'demo|reset|15\.?min|banner|wiped|sandbox' vault docs
