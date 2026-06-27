@@ -91,6 +91,18 @@ jobs:
             cat coverage/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      # Per-assembly coverage floor — fails the job on regression.
+      # See docs/spec/coverage-gate.md for thresholds rationale and how to
+      # ratchet them upward as new tests land.
+      - name: Coverage gate
+        if: always()
+        run: |
+          pip install --quiet --user defusedxml
+          python3 tools/check-coverage.py \
+            --reports 'coverage/**/coverage.cobertura.xml' \
+            --thresholds coverage.thresholds.json \
+            --summary "$GITHUB_STEP_SUMMARY"
+
       - name: Upload coverage
         uses: actions/upload-artifact@v7
         if: always()

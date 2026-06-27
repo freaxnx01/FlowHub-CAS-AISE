@@ -1,0 +1,20 @@
+{
+  "_comment": [
+    "Per-assembly coverage floor enforced by tools/check-coverage.py in CI.",
+    "Values are minimums, not targets — see docs/spec/coverage-gate.md.",
+    "Bump them upward as new tests land; the gate only fails on a DROP below.",
+    "",
+    "Aspirational targets (per issue #126):",
+    "  Core, Skills, Api : 100% line",
+    "  AI                : >= 99% line",
+    "  Web               : >= 95% line",
+    "  Persistence       : baseline-or-better"
+  ],
+
+  "FlowHub.Core":        { "line": 100, "branch": 95 },
+  "FlowHub.Skills":      { "line": 100, "branch": 90 },
+  "FlowHub.Api":         { "line": 100, "branch": 85 },
+  "FlowHub.AI":          { "line": 99,  "branch": 85 },
+  "FlowHub.Persistence": { "line": 95,  "branch": 85 },
+  "FlowHub.Web":         { "line": 80,  "branch": 70 }
+}
