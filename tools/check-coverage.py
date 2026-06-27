@@ -25,6 +25,7 @@ Usage
 Exits 0 when every configured assembly meets both line and branch
 thresholds; non-zero (and prints a per-assembly miss table) otherwise.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -51,11 +52,17 @@ class AssemblyCoverage:
 
     @property
     def line_percent(self) -> float:
-        return 100.0 * self.lines_covered / self.lines_total if self.lines_total else 0.0
+        return (
+            100.0 * self.lines_covered / self.lines_total if self.lines_total else 0.0
+        )
 
     @property
     def branch_percent(self) -> float:
-        return 100.0 * self.branches_covered / self.branches_total if self.branches_total else 0.0
+        return (
+            100.0 * self.branches_covered / self.branches_total
+            if self.branches_total
+            else 0.0
+        )
 
 
 def aggregate(report_paths: list[str]) -> dict[str, AssemblyCoverage]:
@@ -77,7 +84,9 @@ def aggregate(report_paths: list[str]) -> dict[str, AssemblyCoverage]:
         try:
             root = ET.parse(path).getroot()
         except ET.ParseError as err:
-            print(f"::error file={path}::malformed cobertura XML: {err}", file=sys.stderr)
+            print(
+                f"::error file={path}::malformed cobertura XML: {err}", file=sys.stderr
+            )
             raise SystemExit(2) from err
 
         for pkg in root.findall(".//package"):
@@ -139,7 +148,9 @@ def evaluate(
         if cov is None:
             # Threshold configured but no coverage data — usually means the
             # assembly's tests didn't run. Treat as a miss; CI should fail loudly.
-            report_lines.append(f"| {asm} | n/a | {min_line} | n/a | {min_branch} | ❌ no data |")
+            report_lines.append(
+                f"| {asm} | n/a | {min_line} | n/a | {min_branch} | ❌ no data |"
+            )
             passed = False
             continue
 
@@ -160,13 +171,26 @@ def evaluate(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--reports", required=True,
-                        help="glob matching cobertura XML reports (e.g. 'coverage/**/coverage.cobertura.xml')")
-    parser.add_argument("--thresholds", required=True, type=Path,
-                        help="JSON file mapping assembly name → {line, branch} percentages")
-    parser.add_argument("--summary", type=Path, default=None,
-                        help="optional Markdown summary file to append to (e.g. $GITHUB_STEP_SUMMARY)")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--reports",
+        required=True,
+        help="glob matching cobertura XML reports (e.g. 'coverage/**/coverage.cobertura.xml')",
+    )
+    parser.add_argument(
+        "--thresholds",
+        required=True,
+        type=Path,
+        help="JSON file mapping assembly name → {line, branch} percentages",
+    )
+    parser.add_argument(
+        "--summary",
+        type=Path,
+        default=None,
+        help="optional Markdown summary file to append to (e.g. $GITHUB_STEP_SUMMARY)",
+    )
     args = parser.parse_args(argv)
 
     report_paths = glob.glob(args.reports, recursive=True)

@@ -3,6 +3,7 @@
 Run with `python3 -m unittest tools.test_check_coverage` from repo root, or
 `python3 tools/test_check_coverage.py` directly. CI invokes the latter.
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -10,7 +11,6 @@ import json
 import subprocess
 import sys
 import tempfile
-import textwrap
 import unittest
 from pathlib import Path
 
@@ -22,7 +22,9 @@ def _load_module():
     look up the owning module's __dict__ to walk the class's bases.
     """
     here = Path(__file__).parent
-    spec = importlib.util.spec_from_file_location("check_coverage", here / "check-coverage.py")
+    spec = importlib.util.spec_from_file_location(
+        "check_coverage", here / "check-coverage.py"
+    )
     module = importlib.util.module_from_spec(spec)
     sys.modules["check_coverage"] = module
     spec.loader.exec_module(module)
@@ -111,8 +113,10 @@ class EvaluateTests(unittest.TestCase):
         return {
             "FlowHub.Demo": cc.AssemblyCoverage(
                 name="FlowHub.Demo",
-                lines_total=line_total, lines_covered=line_covered,
-                branches_total=branch_total, branches_covered=branch_covered,
+                lines_total=line_total,
+                lines_covered=line_covered,
+                branches_total=branch_total,
+                branches_covered=branch_covered,
             )
         }
 
@@ -129,7 +133,7 @@ class EvaluateTests(unittest.TestCase):
             {"FlowHub.Demo": {"line": 95, "branch": 80}},
         )
         self.assertFalse(passed)
-        self.assertTrue(any("❌" in l for l in lines))
+        self.assertTrue(any("❌" in line for line in lines))
 
     def test_fails_when_branch_below_threshold(self):
         passed, _ = cc.evaluate(
@@ -152,7 +156,7 @@ class EvaluateTests(unittest.TestCase):
             {"FlowHub.Missing": {"line": 80}},
         )
         self.assertFalse(passed)
-        self.assertTrue(any("no data" in l for l in lines))
+        self.assertTrue(any("no data" in line for line in lines))
 
 
 class CliTests(unittest.TestCase):
@@ -164,17 +168,26 @@ class CliTests(unittest.TestCase):
             json.dump(thresholds, f)
             thresholds_path = f.name
         return subprocess.run(
-            [sys.executable, str(here / "check-coverage.py"),
-             "--reports", reports_glob,
-             "--thresholds", thresholds_path],
-            capture_output=True, text=True,
+            [
+                sys.executable,
+                str(here / "check-coverage.py"),
+                "--reports",
+                reports_glob,
+                "--thresholds",
+                thresholds_path,
+            ],
+            capture_output=True,
+            text=True,
         )
 
     def test_exits_zero_when_thresholds_met(self):
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / "a.xml").write_text(REPORT_NPGSQL)
             (Path(d) / "b.xml").write_text(REPORT_INMEMORY)
-            r = self._run(str(Path(d) / "*.xml"), {"FlowHub.Persistence": {"line": 95, "branch": 95}})
+            r = self._run(
+                str(Path(d) / "*.xml"),
+                {"FlowHub.Persistence": {"line": 95, "branch": 95}},
+            )
         self.assertEqual(r.returncode, 0, msg=r.stdout + r.stderr)
 
     def test_exits_nonzero_when_threshold_missed(self):
@@ -196,7 +209,9 @@ class CliTests(unittest.TestCase):
         # workflow-annotated `::error::` line and exit 2, not blow up with an
         # uncaught ParseError stack trace.
         with tempfile.TemporaryDirectory() as d:
-            (Path(d) / "broken.xml").write_text("<coverage><packages><pack")  # truncated
+            (Path(d) / "broken.xml").write_text(
+                "<coverage><packages><pack"
+            )  # truncated
             r = self._run(str(Path(d) / "*.xml"), {"FlowHub.Persistence": {"line": 95}})
         self.assertEqual(r.returncode, 2)
         self.assertIn("malformed cobertura XML", r.stderr)
@@ -225,7 +240,7 @@ class BranchAttributeCaseInsensitivityTests(unittest.TestCase):
             p = Path(d) / "lower.xml"
             p.write_text(self.LOWERCASE_BRANCH)
             asm = cc.aggregate([str(p)])["FlowHub.Persistence"]
-        self.assertEqual(asm.branches_total, 2, "branch=\"true\" (lowercase) must count")
+        self.assertEqual(asm.branches_total, 2, 'branch="true" (lowercase) must count')
         self.assertEqual(asm.branches_covered, 1)
 
 
