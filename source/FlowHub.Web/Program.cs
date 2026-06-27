@@ -66,9 +66,10 @@ builder.Services.AddOpenTelemetry()
         }
     });
 
-// Block 4 prep (Beta MVP) — EF Core SQLite persistence.
 // `AddFlowHubPersistence` registers FlowHubDbContext (scoped) + EfCaptureService as ICaptureService.
-// Migrations apply at startup via the MigrationRunner IHostedService.
+// Migrations apply *before* startup via the `flowhub.migrations` Compose container
+// (see docker/migrations/Dockerfile — runs a `dotnet ef migrations bundle` binary);
+// the web container depends on it via `service_completed_successfully` (12-Factor XII).
 builder.Services.AddFlowHubPersistence(builder.Configuration);
 
 // Capture file uploads: bind options, register storage + policy.
@@ -108,11 +109,9 @@ builder.Services.AddFlowHubApi();
 
 // E2E-only: fault-injection decorators (no-op unless FLOWHUB_E2E_FAULTS_ENABLED=true).
 // Used by the J26 / J28 Playwright specs to force ISkillRegistry / IIntegrationHealthService
-// to throw — bUnit owns the same negative path at the component level.
-if (E2EFaultExtensions.IsEnabled)
-{
-    builder.Services.AddE2EFaultInjection();
-}
+// to throw — bUnit owns the same negative path at the component level. The IsEnabled
+// guard lives inside the wrapper so this file stays env-var-free.
+builder.Services.AddE2EFaultInjectionIfEnabled();
 
 var maxUpload = builder.Configuration.GetValue<long?>("FlowHub:Uploads:MaxBytes")
     ?? FlowHub.Core.Captures.UploadOptions.DefaultMaxBytes;
@@ -144,10 +143,8 @@ app.MapOpenApi("/openapi/v1.json");
 app.MapScalarApiReference();
 
 // E2E-only test endpoints: POST /test/faults/{skills|integrations}/{arm|disarm}.
-if (E2EFaultExtensions.IsEnabled)
-{
-    app.MapE2EFaultEndpoints();
-}
+// Wrapper hides the IsEnabled guard so Program.cs doesn't reference env-vars directly.
+app.MapE2EFaultEndpointsIfEnabled();
 
 // Liveness — anonymous so the Docker healthcheck (and OIDC mode) doesn't get a 302/401.
 app.MapHealthChecks("/health/live").AllowAnonymous();

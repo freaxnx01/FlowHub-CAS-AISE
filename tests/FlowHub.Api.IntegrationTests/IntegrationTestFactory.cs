@@ -48,17 +48,6 @@ public sealed class IntegrationTestFactory : WebApplicationFactory<Program>
                 services.RemoveAll(efDbContextOptsConfigType);
             }
 
-            // Surgically remove only the MigrationRunner hosted service.
-            // Wholesale RemoveAll<IHostedService>() would also drop MassTransit's bus-control
-            // hosted service, causing consumer pipeline tests to fail.
-            var runners = services
-                .Where(d => d.ImplementationType == typeof(MigrationRunner))
-                .ToList();
-            foreach (var d in runners)
-            {
-                services.Remove(d);
-            }
-
             services.AddDbContext<FlowHubDbContext>(options =>
                 options.UseInMemoryDatabase(_dbName));
         });

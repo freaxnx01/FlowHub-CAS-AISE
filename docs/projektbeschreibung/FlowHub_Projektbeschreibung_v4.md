@@ -431,7 +431,8 @@ public class ArticleSkillHandler : ISkillHandler
         _wallabag = wallabag;
     }
 
-    public async Task<SkillResult> ExecuteAsync(InputItem input, SkillConfig config)
+    public async Task<SkillResult> ExecuteAsync(
+        InputItem input, SkillConfig config)
     {
         await _wallabag.SaveEntryAsync(input.Url, config.WallabagTag);
         return new SkillResult { Success = true };

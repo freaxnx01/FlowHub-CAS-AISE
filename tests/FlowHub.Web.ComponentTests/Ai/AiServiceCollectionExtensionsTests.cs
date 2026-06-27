@@ -183,4 +183,60 @@ public sealed class AiServiceCollectionExtensionsTests
         using var sp = services.BuildServiceProvider();
         sp.GetService<IEmbeddingService>().Should().NotBeNull();
     }
+
+    // ── Defensive `_ => throw` arms ─────────────────────────────────────────────
+    //
+    // `DefaultModelFor` and `BuildChatClient` each carry a default switch arm that
+    // throws ArgumentOutOfRangeException for unknown AiProvider values. The C#
+    // compiler requires it (a switch over an enum can't be exhaustive without a
+    // default — out-of-range casts are always possible), but the public path never
+    // reaches it: `AddFlowHubAi` parses with Enum.TryParse, which only accepts
+    // known names.
+    //
+    // The methods are private static implementation details, so we invoke them
+    // via reflection rather than leaking them to internal solely for these tests.
+
+    [Fact]
+    public void DefaultModelFor_UnknownProvider_ThrowsArgumentOutOfRange()
+    {
+        var method = typeof(AiServiceCollectionExtensions).GetMethod(
+            "DefaultModelFor",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+
+        var act = () =>
+        {
+            try { method.Invoke(null, new object?[] { (AiProvider)999 }); }
+            catch (System.Reflection.TargetInvocationException ex) when (ex.InnerException is not null)
+            {
+                throw ex.InnerException;
+            }
+        };
+
+        act.Should().Throw<ArgumentOutOfRangeException>()
+            .WithParameterName("provider");
+    }
+
+    [Fact]
+    public void BuildChatClient_UnknownProvider_ThrowsArgumentOutOfRange()
+    {
+        var method = typeof(AiServiceCollectionExtensions).GetMethod(
+            "BuildChatClient",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+        var config = new ConfigurationBuilder().Build();
+
+        var act = () =>
+        {
+            try
+            {
+                method.Invoke(null, new object?[] { (AiProvider)999, "any-key", "any-model", config });
+            }
+            catch (System.Reflection.TargetInvocationException ex) when (ex.InnerException is not null)
+            {
+                throw ex.InnerException;
+            }
+        };
+
+        act.Should().Throw<ArgumentOutOfRangeException>()
+            .WithParameterName("provider");
+    }
 }
