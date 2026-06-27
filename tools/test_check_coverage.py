@@ -191,6 +191,43 @@ class CliTests(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
         self.assertIn("no cobertura reports matched", r.stderr)
 
+    def test_exits_nonzero_with_clean_error_when_xml_is_malformed(self):
+        # A truncated cobertura (mid-emit test crash) must fail loudly with a
+        # workflow-annotated `::error::` line and exit 2, not blow up with an
+        # uncaught ParseError stack trace.
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "broken.xml").write_text("<coverage><packages><pack")  # truncated
+            r = self._run(str(Path(d) / "*.xml"), {"FlowHub.Persistence": {"line": 95}})
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("malformed cobertura XML", r.stderr)
+
+
+class BranchAttributeCaseInsensitivityTests(unittest.TestCase):
+    """Some coverlet builds / competing tools emit `branch="true"` instead of
+    `"True"`. The tool must accept either — a silent case mismatch would zero
+    out all branch totals and let the gate pass vacuously on a regression."""
+
+    LOWERCASE_BRANCH = """\
+<?xml version="1.0" encoding="utf-8"?>
+<coverage line-rate="1" branch-rate="0.5" version="1.9">
+  <packages><package name="FlowHub.Persistence" line-rate="1" branch-rate="0.5">
+    <classes><class name="X" filename="X.cs">
+      <lines>
+        <line number="10" hits="1" branch="true" condition-coverage="50% (1/2)" />
+      </lines>
+    </class></classes>
+  </package></packages>
+</coverage>
+"""
+
+    def test_lowercase_branch_attribute_is_recognised(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "lower.xml"
+            p.write_text(self.LOWERCASE_BRANCH)
+            asm = cc.aggregate([str(p)])["FlowHub.Persistence"]
+        self.assertEqual(asm.branches_total, 2, "branch=\"true\" (lowercase) must count")
+        self.assertEqual(asm.branches_covered, 1)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

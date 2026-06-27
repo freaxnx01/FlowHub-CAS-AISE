@@ -72,7 +72,14 @@ def aggregate(report_paths: list[str]) -> dict[str, AssemblyCoverage]:
     branches_covered: dict[str, set[tuple[str, str, int]]] = defaultdict(set)
 
     for path in sorted(report_paths):
-        root = ET.parse(path).getroot()
+        # A truncated / partial cobertura (e.g. a test crash mid-emit) must fail
+        # the gate loudly, not blow up with an uncaught ParseError stack trace.
+        try:
+            root = ET.parse(path).getroot()
+        except ET.ParseError as err:
+            print(f"::error file={path}::malformed cobertura XML: {err}", file=sys.stderr)
+            raise SystemExit(2) from err
+
         for pkg in root.findall(".//package"):
             asm = pkg.get("name") or ""
             for cls in pkg.findall(".//class"):
@@ -83,7 +90,12 @@ def aggregate(report_paths: list[str]) -> dict[str, AssemblyCoverage]:
                     if int(line.get("hits", "0")) > 0:
                         lines_covered[asm].add((cname, lno))
 
-                    if line.get("branch") == "True":
+                    # cobertura's branch attribute is spelled "True" by current
+                    # coverlet but the spec is case-insensitive; older coverlet
+                    # versions and competing tools emit "true". Lowercase before
+                    # comparing so a future coverlet bump doesn't silently zero
+                    # out branch totals (which would make the gate pass vacuously).
+                    if (line.get("branch") or "").lower() == "true":
                         cc = line.get("condition-coverage", "")
                         if "(" not in cc:
                             continue
