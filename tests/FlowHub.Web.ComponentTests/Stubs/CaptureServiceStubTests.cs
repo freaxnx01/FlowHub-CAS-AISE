@@ -240,6 +240,23 @@ public sealed class CaptureServiceStubTests
         page.Items.Should().OnlyContain(c => c.Stage == LifecycleStage.Orphan);
     }
 
+    [Fact]
+    public async Task ListAsync_FilterBySource_ReturnsOnlyMatchingChannel()
+    {
+        // Drives the `if (filter.Source is ChannelKind src)` branch.
+        var sut = new CaptureServiceStub(NoopPublishEndpoint.Instance);
+        await sut.SubmitAsync("via-web", ChannelKind.Web);
+        await sut.SubmitAsync("via-api-1", ChannelKind.Api);
+        await sut.SubmitAsync("via-api-2", ChannelKind.Api);
+
+        var page = await sut.ListAsync(
+            new CaptureFilter(null, Source: ChannelKind.Api, Limit: 50, Cursor: null), default);
+
+        page.Items.Should().NotBeEmpty();
+        page.Items.Should().OnlyContain(c => c.Source == ChannelKind.Api);
+        page.Items.Select(c => c.Content).Should().Contain(new[] { "via-api-1", "via-api-2" });
+    }
+
     // ── ResetForRetryAsync ──
 
     [Fact]

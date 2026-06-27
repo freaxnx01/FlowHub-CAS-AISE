@@ -59,4 +59,14 @@ public class LifecycleBadgeTests : TestContext
 
         cut.Markup.Should().NotContain("→");
     }
+
+    [Fact]
+    public void Render_UnknownStage_FallsBackToQuestionMarkLabel()
+    {
+        // `_ => ("?", Color.Default)` arm is unreachable via valid enum values;
+        // an out-of-range cast exercises the defensive default.
+        var cut = RenderComponent<LifecycleBadge>(p => p.Add(c => c.Stage, (LifecycleStage)99));
+
+        cut.Markup.Should().Contain(">?<");
+    }
 }
