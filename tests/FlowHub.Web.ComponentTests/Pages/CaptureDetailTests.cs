@@ -136,6 +136,24 @@ public class CaptureDetailTests : TestContext
     }
 
     [Fact]
+    public void Render_WhileLoading_ShowsSkeletonCard()
+    {
+        // Hold GetByIdAsync open so the page stays in `_isLoading == true` between the
+        // initial render and LoadAsync's completion — covers the else-if skeleton block
+        // in CaptureDetail.razor (the only state where the four-skeleton card renders).
+        var tcs = new TaskCompletionSource<Capture?>();
+        _captureService.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(tcs.Task);
+
+        var cut = RenderComponent<CaptureDetail>(p => p.Add(c => c.Id, Guid.NewGuid()));
+
+        cut.FindAll(".mud-skeleton").Should().NotBeEmpty();
+        // Sanity: we're in the loading state, not the loaded / not-found / error state.
+        cut.Markup.Should().NotContain("Capture not found");
+        cut.Markup.Should().NotContain("Could not load capture");
+    }
+
+    [Fact]
     public void Render_TraceGateOn_ShowsClassificationTracePanel()
     {
         using var ctx = new TestContext();
