@@ -70,6 +70,30 @@ Output of `just test` (`dotnet test FlowHub.slnx --filter "Category!=AI&Category
 real PostgreSQL container via Testcontainers (not InMemory). AI- and E2E-tagged
 suites are trait-gated and excluded from this default run.
 
+### Verified coverage baseline (per-assembly, post #126)
+
+Cross-project coverage measured with the CI-equivalent run
+(`dotnet test FlowHub.slnx --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E" --collect:"XPlat Code Coverage"`),
+aggregated through `tools/check-coverage.py` (dedupes by class name +
+line — same source class is emitted under different `filename=` shapes
+by different test projects, so naive filename-keyed merging
+double-counts).
+
+| Assembly | Line | Branch | Notes |
+|---|---:|---:|---|
+| FlowHub.Core | 100.0 % | 100.0 % | — |
+| FlowHub.Skills | 100.0 % | 95.2 % | — |
+| FlowHub.Api | 100.0 % | 87.5 % | — |
+| FlowHub.AI | 100.0 % | 94.8 % | Defensive `_ => throw` arms in `AiServiceCollectionExtensions` covered via reflection |
+| FlowHub.Persistence | 100.0 % | 97.2 % | **Testcontainers run is what makes this measurable** — the unit-only number is ~9 %. `FlowHubDbContextFactory` (design-time `IDesignTimeDbContextFactory`) is `[ExcludeFromCodeCoverage]`. Union with `FlowHub.Api.IntegrationTests` (InMemory) covers the `FlowHubDbContext.OnModelCreating` non-Npgsql arm |
+| FlowHub.Web | 100.0 % | 93.7 % | `[ExcludeFromCodeCoverage]` on `E2EFaultExtensions` + `FaultInjectingSkillRegistry` / `FaultInjectingIntegrationHealthService` (all env-var-gated E2E scaffolding) |
+
+The CI coverage gate (`tools/check-coverage.py`) enforces per-assembly
+floors set ~1 % below these measured values as a noise guard — see
+`coverage.thresholds.json` and `docs/spec/coverage-gate.md`. Numbers
+will drift downward only if new code lands without tests, in which
+case the next CI run fails on a quantified miss.
+
 ### What's implemented
 
 - **99 default-suite tests** passing on `just test` (excluding `Category=AI`):
