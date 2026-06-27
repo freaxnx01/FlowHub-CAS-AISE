@@ -8,6 +8,15 @@
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
           <Format>cobertura</Format>
+          <!-- Explicit Include captures ALL FlowHub.* assemblies regardless of
+               which test project loaded them. Without it, coverlet's default
+               "module under test" heuristic only instruments the test project's
+               directly-referenced assembly, so a transitive dep (e.g. FlowHub.AI
+               loaded by Web.ComponentTests via FlowHub.Web) reads 0% on CI
+               even when its tests run. Local sometimes works without this
+               (different default behaviour by env) but the gate needs
+               determinism — `[FlowHub.*]*` makes it deterministic across both. -->
+          <Include>[FlowHub.*]*</Include>
           <ExcludeByFile>**/Migrations/*.cs,**/*.g.cs,**/*.Designer.cs</ExcludeByFile>
           <ExcludeByAttribute>System.CodeDom.Compiler.GeneratedCodeAttribute,System.Runtime.CompilerServices.CompilerGeneratedAttribute,System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
           <SkipAutoProps>true</SkipAutoProps>
