@@ -65,6 +65,15 @@ services:
     entrypoint: ["/bin/sh", "-c", "set -a; for f in /bootstrap/vikunja.env /bootstrap/wallabag.env /bootstrap/paperless.env; do [ -f \"$$f\" ] && . \"$$f\"; done; set +a; exec dotnet FlowHub.Web.dll"]
     volumes:
       - vikunja-bootstrap:/bootstrap:ro
+      # Bound demo upload disk growth: attachments land on a size-capped tmpfs at the
+      # app's upload root (StoragePath defaults to App_Data/uploads under /app). The DB
+      # reset every 15 min drops the Capture rows; the 64 MiB cap + clear-on-restart keep
+      # orphaned files on disk from growing unbounded. (issue #100)
+      - type: tmpfs
+        target: /app/App_Data/uploads
+        tmpfs:
+          size: 67108864
+          mode: 1777
     depends_on:
       flowhub.vikunja-bootstrap:
         condition: service_completed_successfully
@@ -91,6 +100,17 @@ services:
       - "traefik.http.middlewares.flowhub-demo-headers.headers.contenttypenosniff=true"
       - "traefik.http.middlewares.flowhub-demo-headers.headers.browserxssfilter=true"
       - "traefik.http.middlewares.flowhub-demo-headers.headers.referrerpolicy=strict-origin-when-cross-origin"
+      # Block the public /metrics route at the edge. Prometheus scrapes flowhub.web:5070/metrics
+      # internally over the `backend` network (never through Traefik), so external access is
+      # unnecessary — a dedicated higher-priority router 403s it via an allow-loopback-only IP list.
+      - "traefik.http.routers.flowhub-demo-metrics.rule=Host(`demo.flowhub.freaxnx01.ch`) && PathPrefix(`/metrics`)"
+      - "traefik.http.routers.flowhub-demo-metrics.entrypoints=websecure"
+      - "traefik.http.routers.flowhub-demo-metrics.tls=true"
+      - "traefik.http.routers.flowhub-demo-metrics.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.flowhub-demo-metrics.priority=100"
+      - "traefik.http.routers.flowhub-demo-metrics.service=flowhub-demo"
+      - "traefik.http.routers.flowhub-demo-metrics.middlewares=flowhub-demo-noexternal@docker"
+      - "traefik.http.middlewares.flowhub-demo-noexternal.ipallowlist.sourcerange=127.0.0.1/32"
       # Network the VPS-DE Traefik is on (set this to whatever your dispatcher uses).
       - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}"
     networks:

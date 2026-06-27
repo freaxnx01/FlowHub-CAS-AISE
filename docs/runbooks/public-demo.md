@@ -14,7 +14,8 @@ A fully open, rate-limited, self-resetting FlowHub instance at <https://demo.flo
 | AI provider | OpenRouter `google/gemma-4-31b-it:free` only. KeywordClassifier auto-fallback on 429/error. `KeywordClassifier` is also the demo's safety net if the daily quota runs out. |
 | Embeddings | **Disabled** — `Embeddings__*` unset → `Captures.Embedding` stays NULL and `GET /api/v1/captures/search` returns 503 ProblemDetails (transparent posture). The semantic-search feature is demonstrated via the API contract + integration tests + ADR 0006, not run live on the public demo (a self-hosted embedder was trialled but pulled — it didn't earn its VPS memory / ranking quality). |
 | Skill integrations | **Three live integrations**, each a self-contained demo instance provisioned at deploy by a bootstrap sidecar that injects `Skills__<svc>__*` from a shared `/bootstrap` env file (none touch the operator's real homelab services): **Vikunja** (sqlite — `todo:` → tasks on a public **writable** link-share, visitors can tick tasks done), **Wallabag** (URL captures → read-later entries; self-refreshing OAuth client), **Paperless** (captures with an attachment → documents). Captures reach `Completed` with a real `externalRef`; all demo data is wiped every reset. See "Demo Vikunja" below. |
-| Observability | Prometheus + Grafana **not exposed publicly** — operator metrics stay scrapable via the VPS internal network. A lightweight **Uptime Kuma** instance *is* exposed (`status.demo.flowhub.freaxnx01.ch`) as the public-facing uptime monitor + status page — see [§ Uptime monitoring](#uptime-monitoring). |
+| Observability | Prometheus + Grafana **not exposed publicly** — operator metrics stay scrapable via the VPS internal network. `flowhub.web`'s `/metrics` route is **blocked at the Traefik edge** (internal scrapes only); a lightweight **Uptime Kuma** instance *is* exposed (`status.demo.flowhub.freaxnx01.ch`) as the public-facing uptime monitor + status page — see [§ Uptime monitoring](#uptime-monitoring). |
+| Hardening | STRIDE follow-ups from the post-SSRF pass (issue #100) — see [§ Hardening](#hardening-stride-follow-ups). |
 
 ## Topology
 
@@ -169,7 +170,7 @@ A self-hosted **Uptime Kuma** (`louislam/uptime-kuma`) ships in the demo overlay
    | Monitor | Type | Target | Notes |
    |---|---|---|---|
    | FlowHub app | HTTP(s) – keyword | `https://demo.flowhub.freaxnx01.ch/health/live` | expect `Healthy` |
-   | FlowHub metrics | HTTP(s) – keyword | `https://demo.flowhub.freaxnx01.ch/metrics` | expect `dotnet` — a runtime metric, present on every scrape; confirms the OTel→Prometheus pipeline is alive end-to-end, not just that the app responds |
+   | FlowHub metrics | HTTP(s) – keyword | `http://flowhub.web:5070/metrics` | expect `dotnet` — a runtime metric, present on every scrape; confirms the OTel→Prometheus pipeline is alive end-to-end. **Internal target**: the public `/metrics` route is blocked at the Traefik edge (see [§ Hardening](#hardening-stride-follow-ups)); Kuma reaches `flowhub.web` directly over the `default` network. |
    | LLM reachability | HTTP(s) | `https://openrouter.ai/api/v1/models` | provider up? (a down LLM is graceful-degradation, not an app outage) |
    | Vikunja | HTTP(s) | `https://vikunja.demo.flowhub.freaxnx01.ch` | skill target |
    | Wallabag | HTTP(s) | `https://wallabag.demo.flowhub.freaxnx01.ch` | skill target |
@@ -178,6 +179,27 @@ A self-hosted **Uptime Kuma** (`louislam/uptime-kuma`) ships in the demo overlay
 3. Create a **public status page** bundling these monitors — link it from the demo banner / submission as the live monitoring artifact.
 
 > The LLM monitor pings the provider directly because FlowHub has no dedicated LLM health endpoint yet; adding an AI `IHealthCheck` (so the provider also surfaces in `/health`) is a tracked follow-up.
+
+## Hardening (STRIDE follow-ups)
+
+Defensive follow-ups from the post-SSRF STRIDE pass over the public demo (issue #100).
+Each is bounded by the demo's sandboxing + 15-min reset, so none is urgent — but they are
+done (or tracked as operator actions) for defence-in-depth. Context:
+`docs/insights/wallabag-ssrf-hardening.md` and the network isolation from #93.
+
+| Item | Status | Where |
+|---|---|---|
+| **Rate-limit every public router** | ✅ done | Traefik `ratelimit` middleware on `flowhub.web`, `vikunja`, `wallabag`, `paperless`, `uptime-kuma` (base + vps overlay). |
+| **Restrict `/metrics`** | ✅ done | A higher-priority Traefik router 403s `Host(demo…) && /metrics` via an allow-loopback-only `ipallowlist`. Internal Prometheus (over `backend`) and Kuma (over `default`, target `flowhub.web:5070/metrics`) are unaffected — they never traverse Traefik. |
+| **Role-gate `/api/v1/admin/*`** | ✅ done | The admin API group requires the `Admin` authorization policy; `DemoAuthHandler` grants only `Operator` by default (`Demo:Auth:Roles`), so the surface 403s in the demo. Defence-in-depth — the one endpoint is a demo no-op. |
+| **Bound upload disk growth** | ✅ done | `flowhub.web`'s upload root (`/app/App_Data/uploads`) is a 64 MiB size-capped `tmpfs`; cleared on restart, capped between resets. |
+| **Rotate demo creds off the published default** | ⚠️ operator | Set non-default `*_DEMO_PASSWORD` / `PAPERLESS_ADMIN_PASSWORD` in `.env` (the demo banner shows whatever they are). Vikunja **open registration stays on** — the bootstrap registers the demo user via `POST /register`, so it strictly needs it. |
+| **Origin firewall** | ⚠️ operator (VPS) | Confirm the VPS only accepts `:443` from Cloudflare IP ranges and Traefik trusts CF's forwarded IPs, so per-IP rate-limiting can't be bypassed by reaching the origin directly. Pair with the host egress-deny on the demo bridge subnet (link-local + RFC1918) from the SSRF backstop (layer 2 in the SSRF insight). |
+
+**Operator checklist (not in repo):**
+
+- [ ] Set non-default service passwords in `.env` (`VIKUNJA_DEMO_PASSWORD`, `WALLABAG_DEMO_PASSWORD`, `PAPERLESS_ADMIN_PASSWORD`, plus `POSTGRES_PASSWORD` / `RABBITMQ_PASSWORD`).
+- [ ] Restrict the VPS origin firewall to Cloudflare `:443` ranges; verify Traefik `forwardedHeaders.trustedIPs` covers the CF ranges.
 
 ## Out of scope
 

@@ -605,6 +605,23 @@ package:
 pdf-install:
     cd {{pdf_tool_dir}} && npm install --no-fund --no-audit
 
+# Check the markdown→PDF submission docs for content that would CLIP at the print
+# width (wide code/<pre>, un-wrappable tokens, over-wide tables). Lays each doc out
+# in headless Chrome at the exact A4-minus-margins width and fails if any element
+# overflows its box. Catches clips that "did it render?" checks miss. Gates
+# package-submission. (Covers the render.mjs docs; the Marp slide deck is separate.)
+[group('pdf')]
+pdf-layout-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d "{{pdf_tool_dir}}/node_modules" ]; then just pdf-install; fi
+    node {{pdf_tool_dir}}/check-layout.mjs \
+      SUBMISSION.md \
+      docs/architektur/FlowHub_Arc42_v2.md \
+      {{projbeschr_md}} \
+      docs/reflexion/FlowHub_Reflexion.md
+    node {{pdf_tool_dir}}/check-layout.mjs --compact docs/submission/eigenstaendigkeitserklaerung.md
+
 # Render an arbitrary Markdown file to PDF. Usage: just pdf docs/foo.md [docs/foo.pdf]
 [group('pdf')]
 pdf file out='':
@@ -672,7 +689,7 @@ pdf-presentation:
 # The slide deck LEADS two docs as a mixed landscape/portrait PDF: Teil 1 (Produkt)
 # in front of the Projektbeschreibung, Teil 2 (Bauen mit KI) in front of the Reflexion.
 [group('pdf')]
-package-submission: pdf-submission pdf-arc42 pdf-projektbeschreibung pdf-reflexion pdf-eigenstaendigkeitserklaerung pdf-presentation
+package-submission: pdf-layout-check pdf-submission pdf-arc42 pdf-projektbeschreibung pdf-reflexion pdf-eigenstaendigkeitserklaerung pdf-presentation
     #!/usr/bin/env bash
     set -euo pipefail
     # Outline-preserving PDF merge needs pypdf; provision a local venv on first run

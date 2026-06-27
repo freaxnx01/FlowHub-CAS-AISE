@@ -48,10 +48,6 @@ public partial class Captures : ComponentBase
         }
     }
 
-    private void OnFilterChanged(LifecycleStage? _) => ApplyFilters();
-
-    private void OnFilterChanged(ChannelKind? _) => ApplyFilters();
-
     private void ApplyFilters()
     {
         if (_allCaptures is null)
