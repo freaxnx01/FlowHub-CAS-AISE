@@ -13,6 +13,9 @@ come from moving repo-only content into the rendered submission PDFs — no new 
   Add a dedicated interaction/interface-contract diagram (OpenAPI/contract view or a
   component-interface diagram) *inline in the Arc42 PDF*. Today the contract is prose-only in
   the rendered submission; the OpenAPI/Scalar surface is repo-only. **Highest-leverage gap.**
+  - [ ] Diagram quality: when drawing blocks-and-lines, **label every arrow** (relationship /
+    protocol / data direction) — unlabeled connectors are a recurring arc42 review deduction.
+    Applies to *all* submission diagrams, not just the new interaction view.
 - [ ] **+1 pt — Full use-case structure inline in Arc42** (Spezifikation · Use-Cases, 4→5).
   Render the full UC structure (Actor / Trigger / Precondition / Flow / Postcondition / Error /
   Akzeptanzkriterien) for ≥3–5 core functions *in the Arc42 PDF*, not only via the
