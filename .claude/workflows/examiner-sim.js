@@ -319,6 +319,8 @@ const examinePrompt = (b) => [
   'The canonical rubric is ' + RUBRIC + ' — open it and use the EXACT scales. Your items in this bucket:',
   b.items.map((i) => '  - ' + i).join('\n'),
   '',
+  'ANKER-REGEL (rubric update June 2026): every level has concrete Bewertungsanker in ' + RUBRIC + '. A level counts as reached ONLY when ALL anchors of that level are satisfied; if the anchors are only partially met, award the NEXT-LOWER level. Read the per-level anchors for each item, choose the highest level whose anchors are fully met, and justify the choice explicitly against that level\'s anchor (and against the next level\'s unmet anchor).',
+  '',
   'Grade against the REAL rendered submission, exactly as the examiner receives it:',
   '  - PRIMARY source: the text of the 5 uploaded PDFs at ' + UPLOAD_TXT + ' (grep/Read it) — Übersicht, Arc42, Projektbeschreibung, Reflexion, Eigenständigkeitserklärung. This is literally what Moodle receives.',
   '  - The examiner also has the GitHub repo, linked from the Übersicht. The bundle text at ' + BUNDLE_TXT + ' inlines those repo-only artifacts (full use-cases, design docs, all ADRs, Block-Nachbereitungen) as a SUPERSET. Content found ONLY in the bundle (not in ' + UPLOAD_TXT + ') is reachable by the real examiner only by following a repo link — treat it as weaker/secondary evidence and say so when a score leans on it.',
