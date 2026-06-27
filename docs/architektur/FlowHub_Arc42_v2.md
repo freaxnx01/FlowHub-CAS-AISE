@@ -590,25 +590,25 @@ flowchart TB
 
 *Tabelle 4: Schnittstellen-Verträge (Detail zu Abbildung 4)*
 
-| # | Schnittstelle (Pfeil) | Protokoll | Operation | Request → Response / Fehler |
-|---|---|---|---|---|
-| C1 | Client → Api | HTTPS POST | `/api/v1/captures` | `{content, source}` → 201 Created + `Location` / 400 ProblemDetails |
-| C2 | Client → Api | HTTPS GET | `/api/v1/captures` | Query `stage, tag, q` → 200 Capture-Liste |
-| C3 | Client → Api | HTTPS GET | `/api/v1/captures/{id}` | → 200 Capture / 404 ProblemDetails |
-| C4 | Client → Api | HTTPS POST | `/api/v1/captures/{id}/retry` | → 202 Accepted / 404 / 409 ProblemDetails |
-| C5 | Client → Api | HTTPS GET | `/api/v1/captures/search` | Query `q, limit` → 200 Treffer / 400 / 503 ProblemDetails |
-| C6 | Client → Api | HTTPS GET | `/health/live`, `/health/ready` | → 200 Healthy (Liveness / Readiness) |
-| C7 | Api → Core | in-proc | `ICaptureService.SubmitAsync(content, source, ct)` | → `CaptureId` |
-| C8 | Api → Core | in-proc | `ICaptureService.RetryAsync(id, ct)` | → void (publiziert neues `CaptureCreated`) |
-| C9 | Api → Core | in-proc | `ICaptureRepository.QueryAsync / SearchAsync(filter, ct)` | → Capture-Liste |
-| C10 | Core → Bus | publish | Event `CaptureCreated` | Capture-Id + Inhalt → Enrichment + Embedding |
-| C11 | Bus → AiClassifier | consume | `IClassifier.ClassifyAsync(content, ct)` | → `ClassificationResult (MatchedSkill, Tags, Title)` |
-| C12 | AiClassifier → LLM | HTTPS REST | `IChatClient` chat/completions | Prompt → JSON-Schema-Antwort (`MaxOutputTokens=300`) |
-| C13 | AiClassifier → Bus | publish | Event `CaptureClassified` | nur bei erfolgreicher Klassifikation |
-| C14 | Bus → SkillIntegration | consume | `ISkillIntegration.HandleAsync(capture, ct)` | Auflösung `Name == MatchedSkill` → `SkillResult (Success, ExternalRef)` |
-| C15 | SkillIntegration → extern | HTTPS REST | `POST` entries/tasks (Bearer-Token) | Capture-Inhalt → `ExternalRef` |
-| C16 | Core → Repository | in-proc | Repository-Port (`ICaptureRepository` u. a.) | EF-Core-Aufruf |
-| C17 | Repository → DB | TCP 5432 | EF Core SQL + pgvector | Query / Write, Vektor-Suche per Cosine-Distanz |
+| Vertrag (Pfeil) | Protokoll · Operation | Request → Response / Fehler |
+|---|---|---|
+| **C1** — Client → Api | HTTPS POST · `/api/v1/captures` | `{content, source}` → 201 Created + `Location` / 400 ProblemDetails |
+| **C2** — Client → Api | HTTPS GET · `/api/v1/captures` | Query `stage, tag, q` → 200 Capture-Liste |
+| **C3** — Client → Api | HTTPS GET · `/api/v1/captures/{id}` | → 200 Capture / 404 ProblemDetails |
+| **C4** — Client → Api | HTTPS POST · `/api/v1/captures/{id}/retry` | → 202 Accepted / 404 / 409 ProblemDetails |
+| **C5** — Client → Api | HTTPS GET · `/api/v1/captures/search` | Query `q, limit` → 200 Treffer / 400 / 503 ProblemDetails |
+| **C6** — Client → Api | HTTPS GET · `/health/live`, `/health/ready` | → 200 Healthy (Liveness / Readiness) |
+| **C7** — Api → Core | in-proc · `ICaptureService.SubmitAsync(content, source, ct)` | → `CaptureId` |
+| **C8** — Api → Core | in-proc · `ICaptureService.RetryAsync(id, ct)` | → void (publiziert neues `CaptureCreated`) |
+| **C9** — Api → Core | in-proc · `ICaptureRepository.QueryAsync / SearchAsync(filter, ct)` | → Capture-Liste |
+| **C10** — Core → Bus | publish · Event `CaptureCreated` | Capture-Id + Inhalt → Enrichment + Embedding |
+| **C11** — Bus → AiClassifier | consume · `IClassifier.ClassifyAsync(content, ct)` | → `ClassificationResult (MatchedSkill, Tags, Title)` |
+| **C12** — AiClassifier → LLM | HTTPS REST · `IChatClient` chat/completions | Prompt → JSON-Schema-Antwort (`MaxOutputTokens=300`) |
+| **C13** — AiClassifier → Bus | publish · Event `CaptureClassified` | nur bei erfolgreicher Klassifikation |
+| **C14** — Bus → SkillIntegration | consume · `ISkillIntegration.HandleAsync(capture, ct)` | Auflösung `Name == MatchedSkill` → `SkillResult (Success, ExternalRef)` |
+| **C15** — SkillIntegration → extern | HTTPS REST · `POST` entries/tasks (Bearer-Token) | Capture-Inhalt → `ExternalRef` |
+| **C16** — Core → Repository | in-proc · Repository-Port (`ICaptureRepository` u. a.) | EF-Core-Aufruf |
+| **C17** — Repository → DB | TCP 5432 · EF Core SQL + pgvector | Query / Write, Vektor-Suche per Cosine-Distanz |
 
 ---
 
