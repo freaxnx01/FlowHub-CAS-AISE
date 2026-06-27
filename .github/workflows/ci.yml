@@ -28,12 +28,23 @@ jobs:
         run: dotnet build FlowHub.slnx --no-restore --configuration Release
 
       - name: Test
+        # Coverage notes:
+        # 1. `--settings coverlet.runsettings` is mandatory — without it the
+        #    [CompilerGenerated|GeneratedCode|ExcludeFromCodeCoverage] exclusions
+        #    don't fire and the denominator balloons with state-machine types +
+        #    source-generated OpenAPI helpers (Web/Api drop ~30%).
+        # 2. We intentionally drop `--no-build --configuration Release` here:
+        #    coverlet's XPlat data collector misses FlowHub.AI's lines under
+        #    Release-mode optimisation (other assemblies work fine, but AI's
+        #    Microsoft.Extensions.AI / OpenAI / Anthropic.SDK glue trips it up).
+        #    Running this step in Debug means a rebuild — the wall-clock cost
+        #    (~30s) is the price of trustworthy coverage numbers. Keep in sync
+        #    with `just test-coverage` (same invocation, no --no-build).
         run: |
           dotnet test FlowHub.slnx \
-            --no-build \
-            --configuration Release \
             --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E" \
             --collect:"XPlat Code Coverage" \
+            --settings coverlet.runsettings \
             --results-directory ./coverage \
             --logger "trx"
 
@@ -90,6 +101,18 @@ jobs:
           if [ -f coverage/report/SummaryGithub.md ]; then
             cat coverage/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # Per-assembly coverage floor — fails the job on regression.
+      # See docs/spec/coverage-gate.md for thresholds rationale and how to
+      # ratchet them upward as new tests land.
+      - name: Coverage gate
+        if: always()
+        run: |
+          pip install --quiet --user defusedxml
+          python3 tools/check-coverage.py \
+            --reports 'coverage/**/coverage.cobertura.xml' \
+            --thresholds coverage.thresholds.json \
+            --summary "$GITHUB_STEP_SUMMARY"
 
       - name: Upload coverage
         uses: actions/upload-artifact@v7

@@ -161,6 +161,8 @@ _TeamCity*
 coverage*.json
 coverage*.xml
 coverage*.info
+# …but the per-assembly threshold config IS tracked (gate-controlled).
+!coverage.thresholds.json
 
 # Quality gates: scratch dir + generated metrics report (verify-gates / method-size)
 .verify-gates/
