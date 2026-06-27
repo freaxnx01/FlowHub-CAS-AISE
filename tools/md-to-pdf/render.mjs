@@ -18,7 +18,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer";
 import MarkdownIt from "markdown-it";
 import anchor from "markdown-it-anchor";
@@ -49,7 +49,7 @@ function parseArgs(argv) {
   return args;
 }
 
-async function loadCss() {
+export async function loadCss() {
   const githubCss = await fs.readFile(
     path.join(__dirname, "node_modules/github-markdown-css/github-markdown-light.css"),
     "utf8",
@@ -61,7 +61,7 @@ async function loadCss() {
   return githubCss + "\n" + hljsCss;
 }
 
-function buildMarkdownIt() {
+export function buildMarkdownIt() {
   const md = new MarkdownIt({
     html: true,
     // linkify off: it auto-linked domain-like text such as "ASP.NET" / ".NET".
@@ -108,7 +108,7 @@ function buildMarkdownIt() {
   return md;
 }
 
-function wrapHtml({ title, body, css, compact }) {
+export function wrapHtml({ title, body, css, compact }) {
   const escapedTitle = (title ?? "").replace(/[<>&]/g, (c) =>
     c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&amp;",
   );
@@ -168,6 +168,81 @@ ${body}
 </html>`;
 }
 
+// Open a puppeteer page with the document HTML fully laid out: mermaid diagrams
+// rendered (served offline from the vendored package) and verified. Shared by the
+// PDF writer (main) and the layout checker (check-layout.mjs) so both measure the
+// exact same DOM.
+export async function preparePage(browser, fullHtml) {
+  const page = await browser.newPage();
+  // Serve mermaid.js (and its lazily-loaded diagram chunks) from the locally
+  // vendored package instead of the CDN, so diagram rendering works fully
+  // offline and can't be broken by CDN/egress issues at build time. The page
+  // still `import`s the jsdelivr URL (see wrapHtml); we intercept and fulfil it
+  // from node_modules/mermaid/dist, which keeps the relative chunk imports
+  // resolving to the same intercepted base.
+  const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/";
+  const mermaidDist = path.join(__dirname, "node_modules", "mermaid", "dist");
+  await page.setRequestInterception(true);
+  page.on("request", async (req) => {
+    const url = req.url();
+    if (url.startsWith(MERMAID_CDN)) {
+      try {
+        const rel = url.slice(MERMAID_CDN.length).split("?")[0];
+        const body = await fs.readFile(path.join(mermaidDist, rel));
+        // The setContent page has a `null` origin, so the cross-origin module
+        // fetch needs CORS headers (the real jsdelivr sends `*`).
+        await req.respond({
+          status: 200,
+          contentType: "text/javascript",
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body,
+        });
+      } catch (e) {
+        console.error(`failed to serve vendored mermaid asset (${url}): ${e.message}`);
+        await req.abort();
+      }
+      return;
+    }
+    await req.continue();
+  });
+  await page.setContent(fullHtml, { waitUntil: "networkidle0" });
+  // Wait for client-side mermaid render to finish (rendering is offline via the
+  // vendored package, so this is fast; the timeout only bounds a genuine hang).
+  try {
+    await page.waitForFunction("window.__mermaidDone === true", { timeout: 30_000 });
+  } catch {
+    console.error("mermaid render timed out — proceeding with whatever is rendered");
+  }
+  // Guard: every ```mermaid``` block must have rendered to an <svg>. A CDN
+  // failure (mermaid.js is fetched at build time), a render timeout, or a
+  // diagram syntax error leaves the raw source in the <div class="mermaid">.
+  // Fail loudly rather than silently shipping a PDF with broken diagrams —
+  // this PDF is the self-contained submission artefact.
+  const mermaidFailures = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("div.mermaid"))
+      .map((el, i) => {
+        const svg = el.querySelector("svg");
+        const ok = !!svg && !/syntax error/i.test(svg.textContent || "");
+        return { i, ok, snippet: (el.textContent || "").trim().slice(0, 60) };
+      })
+      .filter((b) => !b.ok),
+  );
+  if (mermaidFailures.length > 0) {
+    console.error(
+      `mermaid render guard: ${mermaidFailures.length} diagram(s) did not render ` +
+        "(CDN unreachable, timeout, or syntax error):",
+    );
+    for (const f of mermaidFailures) {
+      console.error(`  - block #${f.i}: ${f.snippet}…`);
+    }
+    throw new Error(
+      "refusing to write a PDF with unrendered mermaid diagrams — " +
+        "rebuild with network access to cdn.jsdelivr.net, or fix the diagram syntax",
+    );
+  }
+  return page;
+}
+
 async function main() {
   const { input, output, title, compact } = parseArgs(process.argv.slice(2));
   const inputAbs = path.resolve(input);
@@ -185,73 +260,7 @@ async function main() {
     args: ["--no-sandbox", "--disable-dev-shm-usage"],
   });
   try {
-    const page = await browser.newPage();
-    // Serve mermaid.js (and its lazily-loaded diagram chunks) from the locally
-    // vendored package instead of the CDN, so diagram rendering works fully
-    // offline and can't be broken by CDN/egress issues at build time. The page
-    // still `import`s the jsdelivr URL (see wrapHtml); we intercept and fulfil it
-    // from node_modules/mermaid/dist, which keeps the relative chunk imports
-    // resolving to the same intercepted base.
-    const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/";
-    const mermaidDist = path.join(__dirname, "node_modules", "mermaid", "dist");
-    await page.setRequestInterception(true);
-    page.on("request", async (req) => {
-      const url = req.url();
-      if (url.startsWith(MERMAID_CDN)) {
-        try {
-          const rel = url.slice(MERMAID_CDN.length).split("?")[0];
-          const body = await fs.readFile(path.join(mermaidDist, rel));
-          // The setContent page has a `null` origin, so the cross-origin module
-          // fetch needs CORS headers (the real jsdelivr sends `*`).
-          await req.respond({
-            status: 200,
-            contentType: "text/javascript",
-            headers: { "Access-Control-Allow-Origin": "*" },
-            body,
-          });
-        } catch (e) {
-          console.error(`failed to serve vendored mermaid asset (${url}): ${e.message}`);
-          await req.abort();
-        }
-        return;
-      }
-      await req.continue();
-    });
-    await page.setContent(fullHtml, { waitUntil: "networkidle0" });
-    // Wait for client-side mermaid render to finish (rendering is offline via the
-    // vendored package, so this is fast; the timeout only bounds a genuine hang).
-    try {
-      await page.waitForFunction("window.__mermaidDone === true", { timeout: 30_000 });
-    } catch {
-      console.error("mermaid render timed out — proceeding with whatever is rendered");
-    }
-    // Guard: every ```mermaid``` block must have rendered to an <svg>. A CDN
-    // failure (mermaid.js is fetched at build time), a render timeout, or a
-    // diagram syntax error leaves the raw source in the <div class="mermaid">.
-    // Fail loudly rather than silently shipping a PDF with broken diagrams —
-    // this PDF is the self-contained submission artefact.
-    const mermaidFailures = await page.evaluate(() =>
-      Array.from(document.querySelectorAll("div.mermaid"))
-        .map((el, i) => {
-          const svg = el.querySelector("svg");
-          const ok = !!svg && !/syntax error/i.test(svg.textContent || "");
-          return { i, ok, snippet: (el.textContent || "").trim().slice(0, 60) };
-        })
-        .filter((b) => !b.ok),
-    );
-    if (mermaidFailures.length > 0) {
-      console.error(
-        `mermaid render guard: ${mermaidFailures.length} diagram(s) did not render ` +
-          "(CDN unreachable, timeout, or syntax error):",
-      );
-      for (const f of mermaidFailures) {
-        console.error(`  - block #${f.i}: ${f.snippet}…`);
-      }
-      throw new Error(
-        "refusing to write a PDF with unrendered mermaid diagrams — " +
-          "rebuild with network access to cdn.jsdelivr.net, or fix the diagram syntax",
-      );
-    }
+    const page = await preparePage(browser, fullHtml);
     await page.emulateMediaType("print");
     const printMargin = compact
       ? { top: "12mm", right: "14mm", bottom: "14mm", left: "14mm" }
@@ -283,7 +292,10 @@ async function main() {
   console.error(`wrote ${outputAbs}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Run only when invoked directly (not when imported by check-layout.mjs).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
