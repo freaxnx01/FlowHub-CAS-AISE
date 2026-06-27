@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- ProgramRegistration is internal — unit tests live in the ComponentTests project. -->
+    <InternalsVisibleTo Include="FlowHub.Web.ComponentTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MudBlazor" />
     <PackageReference Include="Bogus" />
     <PackageReference Include="MassTransit" />
