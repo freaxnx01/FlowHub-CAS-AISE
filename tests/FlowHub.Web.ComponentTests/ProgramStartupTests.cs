@@ -15,33 +15,36 @@ public sealed class ProgramStartupTests
     // that wires `UseExceptionHandler("/Error", …)` + `UseHsts()`. The factory default
     // environment is "Development", so we have to override it explicitly to hit this arm.
     //
-    // We can't assert the `Strict-Transport-Security` header on a response because
-    // TestServer serves over HTTP and HSTS middleware only writes the header on HTTPS
-    // requests — so instead we resolve IOptions<HstsOptions> from the test host and
-    // confirm the production-only pipeline configured it (default `MaxAge` is 30 days).
+    // Proof-of-life for UseHsts(): send an HTTPS request (TestServer's `BaseAddress`
+    // with `https://` scheme makes `Request.IsHttps` true, which is what HstsMiddleware
+    // gates on) and assert `Strict-Transport-Security` is present on the response.
+    // Inspecting `IOptions<HstsOptions>.Value.MaxAge` won't do — `HstsOptions.MaxAge`
+    // has a type-level initializer of 30 days, so it reads positive even in Development
+    // where `UseHsts()` was never called.
     [Fact]
-    public async Task ProductionEnvironment_ConfiguresHstsOptions_AndPipelineStartsCleanly()
+    public async Task ProductionEnvironment_EmitsStrictTransportSecurityHeader()
     {
         await using var factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(b => b.UseEnvironment("Production"));
+            .WithWebHostBuilder(b => b
+                .UseEnvironment("Production")
+                // HstsOptions.ExcludedHosts defaults to {localhost, 127.0.0.1, [::1]} —
+                // the loopback exemption that production legitimately wants but that
+                // would suppress the header for our in-memory TestServer client
+                // (BaseAddress is localhost). Clear it so the assertion below can
+                // observe what real prod traffic would receive.
+                .ConfigureServices(s => s.Configure<HstsOptions>(o => o.ExcludedHosts.Clear())));
 
         var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
-            // HTTPS redirection would otherwise turn /health/live into a 307.
+            BaseAddress = new Uri("https://localhost/"),
             AllowAutoRedirect = false,
         });
         var response = await client.GetAsync(new Uri("/health/live", UriKind.Relative));
 
-        // 307 = HTTPS redirect (production wires UseHttpsRedirection); 200 means the
-        // probe reached the endpoint. Either proves the pipeline assembled.
-        ((int)response.StatusCode).Should().BeOneOf((int)HttpStatusCode.OK, (int)HttpStatusCode.TemporaryRedirect);
-
-        // The key assertion: in Production the host registered HstsOptions; in
-        // Development it would not (UseHsts is only called in the !IsDevelopment branch).
-        // MaxAge defaults to 30 days when UseHsts() is called without an override.
-        var hsts = factory.Services.GetRequiredService<IOptions<HstsOptions>>().Value;
-        hsts.MaxAge.Should().BeGreaterThan(TimeSpan.Zero,
-            "UseHsts() must have wired the production-only HSTS middleware");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Headers.Should().Contain(h => h.Key == "Strict-Transport-Security",
+            "UseHsts() must run in the !IsDevelopment branch of Program.cs — a regression " +
+            "that dropped the call would leave responses unsigned in production.");
     }
 
     // Covers Program.cs line 56-59: `if (!string.IsNullOrWhiteSpace(otlpEndpoint))
