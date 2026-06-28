@@ -13,9 +13,10 @@ Index of all ADRs for the FlowHub project.
 | [0007](0007-llm-hosting.md) | LLM Hosting | Accepted | 2026-05-24 |
 | [0008](0008-logging-policy.md) | Logging Policy | Accepted | 2026-05-24 |
 | [0009](0009-telemetry-pii-policy.md) | Telemetry & PII Policy | Accepted | 2026-05-24 |
+| [0010](0010-llm-agentic-threat-model.md) | LLM & Agentic Threat Model (OWASP) | Accepted | 2026-06-28 |
 
 > Dates match each ADR's own header. ADRs 0001–0006 are inlined in the submission
-> bundle; 0007–0009 live in this directory in the repository.
+> bundle; 0007–0010 live in this directory in the repository.
 
 ## Why ADRs
 
