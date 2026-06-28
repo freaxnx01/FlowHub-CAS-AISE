@@ -567,3 +567,31 @@ Replacement for the search that caused the outage:
 
     rg -n -C2 -g'!{node_modules,.venv,.dotnet,upload,bin,obj}' \
        -e 'demo|reset|15\.?min|banner|wiped|sandbox' vault docs
+
+### Hard guard in place (2026-06-28) — `swap=0` OOM containment
+
+The rules above are advisory and were ignored on **two** consecutive runs
+(2026-06-27 and 2026-06-28). Root cause of the 2026-06-28 recurrence, confirmed
+from the workflow transcript: **Claude Code ≥ 2.1.19x ships a shell-snapshot
+function that silently rewrites `grep` to its own bundled ugrep engine** —
+
+    ( exec -a ugrep "$_cc_bin" -G --ignore-files --hidden -I \
+        --exclude-dir=.git --exclude-dir=.svn … ${1+"$@"} )
+
+So a subagent running a plain `grep` now actually runs ugrep (the process shows
+`comm=<claude-version>`), which buffered ~12 GB and filled the cgroup. The
+weeks-ago runs were fine only because the **older** Claude Code used the real
+memory-bounded `/usr/bin/grep`. The workflow did not change — Claude's `grep`
+behaviour did. Treat **`grep` itself as ugrep** under current Claude: the
+"use `rg`, scope the path, cap with `--max-filesize`/`-m`" rules apply to every
+`grep` invocation too, not just bare `ugrep`.
+
+Enforcement (so a runaway can no longer wedge the node): **CT 201 now runs with
+`swap: 0`** (`pct set 201 --swap 0` on cirrus-pve, plus live
+`memory.swap.max=0`). ugrep's match buffers are anonymous memory that can only
+spill to swap; with swap=0 the cgroup OOM-killer kills the single runaway
+process at the 12 GB boundary in ~1 s instead of swap-thrashing the whole node.
+Verified 2026-06-28 with a controlled 300 MB/swap-0 scope (process got SIGKILL,
+host load/pressure stayed flat). A ballooning search now fails just that one
+tool call (`… Killed`) and the workflow continues — it can no longer take the
+node down.
