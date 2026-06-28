@@ -594,6 +594,43 @@ Two complementary renderings, both read-only over the stored `Captures.Embedding
 
 ---
 
+## n8n Interop — FlowHub as the AI brain, n8n as the no-code glue
+
+**Status:** Idea — not scoped into any Block.
+**Motivation:** FlowHub is deliberately **"Kein IFTTT/n8n Clone — code-based, not no-code"** (Projektbeschreibung §Abgrenzung), yet the original `Idee FlowHub.md` lists n8n as an *integrated* service. Both are true: FlowHub never *becomes* n8n; it *interops* with it. FlowHub stays the **AI brain** (capture → classify → route); n8n is the **no-code long-tail glue** for the thousands of services FlowHub will never natively integrate and the recurring/scheduled automations FlowHub deliberately doesn't do. This *strengthens* the positioning rather than contradicting it. All three directions below bolt onto an existing seam — a new adapter, not a core change — so they tell a clean **bidirectional** story: FlowHub *drives* n8n (A), n8n *feeds* FlowHub (B), n8n *consumes* FlowHub's intelligence (C).
+
+### A — n8n as downstream target (driven adapter) · *recommended first slice*
+
+A new `N8nSkillIntegration : ISkillIntegration { Name = "n8n" }` in `FlowHub.Skills/N8n/` POSTs the classified Capture to a configured n8n **webhook URL**. The classifier learns to emit `MatchedSkill = "n8n"` for "automate this" intents (and/or as the catch-all just before the `Unhandled` terminal state). Auth: optional static header / HMAC signature on the webhook — no inbound surface to secure, so this has **no auth dependency** and reuses the dispatcher untouched.
+
+*Real-life examples:*
+- **Long-tail fan-out** — capture *"renew car insurance, policy #4471"* → classified `n8n` → one n8n flow creates a Google Calendar event **and** a Vikunja task **and** a Telegram reminder; three nodes FlowHub doesn't own.
+- **Recurring automation FlowHub deliberately doesn't do** — capture a product URL → tagged `shopping` → n8n scrapes the price daily and pings Telegram on a drop. FlowHub did the *understanding*; n8n did the *scheduling*.
+
+### B — n8n as capture source (driving adapter)
+
+n8n ingests from anywhere (IMAP, RSS, cron, third-party webhooks) and POSTs to FlowHub's inbound capture API — `ICaptureService.SubmitAsync(..., ChannelKind.N8n)`. The submit endpoint largely exists already (`FlowHub.Api`); the real work is a **machine-to-machine auth story** (API key / signed webhook), since `DevAuthHandler` is dev-only and real OIDC lands in Block 5.
+
+*Real-life examples:*
+- **RSS firehose with a brain** — n8n polls 30 feeds and POSTs each item; instead of n8n's dumb keyword filters, *FlowHub's AI* decides what's worth keeping vs. dropping. n8n is just the cheap poller.
+- **Voice / IoT** — a Home Assistant automation or a Telegram voice note hits n8n, which transcribes and POSTs to FlowHub. n8n handles the protocol mess; FlowHub stays the single classification brain.
+
+### C — classification-as-a-service (new API surface)
+
+Expose `IClassifier` over HTTP — `POST /api/classify` → `ClassificationResult { MatchedSkill, Tags, Title }` — so n8n workflows call FlowHub as a reusable **AI node** inside *their own* flows. Inverts the relationship; smallest standalone value, but cleanly demonstrates the hexagonal driving port reused as a public endpoint. Shares B's M2M-auth dependency.
+
+*Real-life examples:*
+- **Drop-in AI routing** — someone already has a big n8n support-email workflow; they add one HTTP node calling `/api/classify` and branch on the returned skill/tags, gaining FlowHub's tuned classifier without rebuilding their pipeline.
+- **Form triage** — n8n receives a contact-form webhook, calls FlowHub to classify priority/category, then routes to the right Vikunja project — FlowHub as a "smart label" microservice.
+
+### Shared prerequisite
+
+**B and C both block on the same thing** — a non-dev **inbound M2M auth** mechanism (API key or signed webhook), because `DevAuthHandler` is dev-only. Tie this to **Block 5 OIDC**. **A has no such dependency** (outbound only), which is the main reason it's the recommended first slice.
+
+**Architecture payoff:** A and B are thin adapters on the existing `ISkillIntegration` / `ICaptureService` seams; C reuses the existing `IClassifier` port as a public endpoint. Promote A to an ADR + implementation plan first; B and C follow once Block 5 auth exists.
+
+---
+
 ## References
 
 - ADR 0002 — Service Architecture & Async Communication (`docs/adr/0002-service-architecture-and-async-communication.md`)
