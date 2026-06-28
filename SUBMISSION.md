@@ -187,9 +187,10 @@ Die [**Roadmap**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/p
 
 - **Primärer Einstiegspunkt** ist diese Datei (`SUBMISSION.md`) — alle anderen Artefakte sind über die Links in Abschnitt 3 erreichbar.
 - **Codebasis** liegt im selben Repository unter [`source/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/source) (Modulstruktur), Tests unter [`tests/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/tests).
-- **Test-Ergebnisse:** der letzte CI-Lauf auf `main` ([Run #27510188698, 2026-06-14](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/runs/27510188698)) ist **grün — 294 Tests, 0 Fehler** über 6 Test-Projekte.
+- **Test-Ergebnisse:** der letzte CI-Lauf ([Run #28324376313, 2026-06-28](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/runs/28324376313)) ist **grün — 540 Tests, 0 Fehler** über 6 Test-Projekte.
   - Projekte: Core-Unit, Web-Component (bUnit), Api-Integration, Persistence, Skill-Contract (WireMock); E2E (Playwright) und Live-AI sind kategoriebasiert separat.
-  - Coverage via *XPlat Code Coverage* (CI-Artefakt); Test-Strategie: [`docs/spec/testing-strategy.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/testing-strategy.md).
+  - **Coverage: 100 % Line (1652/1652), 94,6 % Branch (425/449)** über alle 6 Assemblies, per-Assembly-Gate erzwungen ([`coverage.thresholds.json`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/coverage.thresholds.json)). Collection via *XPlat Code Coverage*.
+  - **HTML-Coverage-Report** liegt committet im Repo und ist im Submission-Bundle direkt öffenbar: [`docs/coverage/index.html`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/docs/coverage) — gerendert über GitHub Pages unter <https://freaxnx01.github.io/FlowHub-CAS-AISE/coverage/>, lokal reproduzierbar mit `just test-coverage`. Test-Strategie: [`docs/spec/testing-strategy.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/testing-strategy.md).
 - **Run-Anleitung** und Dev-Konventionen siehe [`CLAUDE.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CLAUDE.md) (Abschnitt *Essential Commands*).
 - **KI-Nutzung** ist explizit dokumentiert — sowohl auf Block-Ebene (Reflexionsabschnitt der jeweiligen Nachbereitung) als auch konsolidiert im Learnings-Dokument (Abschnitt 3.5).
 - **Monitoring & Observability** (Block-5-Lernziel „Systeme überwachen und optimieren") — umgesetzt und betreibbar:
