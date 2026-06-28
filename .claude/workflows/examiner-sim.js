@@ -25,6 +25,23 @@ const archFocus = focus === 'architecture'
 // Pass an absolute path (e.g. another worktree) to grade a different branch.
 const REPO    = (args && args.repoDir) || '.'
 
+// agent-dev runs on a memory-capped LXC (shared Proxmox node). Under current
+// Claude Code, bare `grep`/`find` are shimmed to a bundled ugrep/bfs engine that
+// can balloon to many GB and OOM the host (see CLAUDE.md "Search discipline").
+// Every examiner prompt carries this guard so agents search with ripgrep only.
+const SEARCH_GUARD = 'SEARCH SAFETY (shared host): when you search files, ALWAYS use `rg` (ripgrep) — never `grep`, `ugrep`, or `grep -r`. Scope `rg` to the specific file or dir you need. ripgrep is memory-bounded; bare `grep` is shimmed here to an engine that has OOM-ed the host.'
+
+// ── Progress (overall %) ──────────────────────────────────────────────────────
+// Coarse but honest: emit a running percentage at each phase boundary that
+// actually resolves. Architecture only counts on a focus==='architecture' run.
+const TOTAL_STEPS = archFocus ? 4 : 3
+let stepDone = 0
+const progress = (label) => {
+  stepDone++
+  const pct = Math.round((stepDone / TOTAL_STEPS) * 100)
+  log('[' + pct + '% · step ' + stepDone + '/' + TOTAL_STEPS + '] ' + label)
+}
+
 const RUBRIC      = REPO + '/vault/Organisation/Bewertungskriterien.md'
 const WORK        = REPO + '/tools/build/examiner-sim'
 const BUNDLE_TXT  = WORK + '/bundle.txt'        // convenience superset (repo-only safety net, NOT uploaded)
@@ -234,7 +251,8 @@ const archPrompt = (L) => [
   '',
   L.prompt,
   '',
-  'The repository checkout you are grading is at: ' + REPO + ' (cd there for shell tools; use absolute paths). Ground every claim in evidence. Primary source is the real rendered bundle text at ' + BUNDLE_TXT + ' (grep it), but for architecture you SHOULD also open the actual repo artifacts: ' + L.read.map((p) => REPO + '/' + p).join(', ') + '. Distinguish what is documented from what is implemented from what is merely asserted. Be rigorous and specific — this is an architecture deep-dive, not a checklist. Return the structured finding.',
+  SEARCH_GUARD,
+  'The repository checkout you are grading is at: ' + REPO + ' (cd there for shell tools; use absolute paths). Ground every claim in evidence. Primary source is the real rendered bundle text at ' + BUNDLE_TXT + ' (search it with `rg`), but for architecture you SHOULD also open the actual repo artifacts: ' + L.read.map((p) => REPO + '/' + p).join(', ') + '. Distinguish what is documented from what is implemented from what is merely asserted. Be rigorous and specific — this is an architecture deep-dive, not a checklist. Return the structured finding.',
 ].join('\n')
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -275,6 +293,7 @@ const focusSuffix = archFocus ? '-architecture' : ''
 const REPORT    = REPO + '/nachbereitung/examiner-sim/report-' + effStamp + focusSuffix + '.md'
 
 log('Build: ' + (build && build.built ? 'PDFs rebuilt (' + build.bundlePages + 'p) @ ' + effCommit : 'BUILD ISSUE — see report') + ' [focus=' + focus + ']')
+progress('Build complete — ' + (build && build.built ? build.bundlePages + 'p PDFs @ ' + effCommit : 'build issue, see report'))
 
 // ════════════════════════════════════════════════════════════════════════════
 // Phase 1 — Examine (5 rubric buckets in a verify-pipeline) + live demo (parallel)
@@ -316,13 +335,14 @@ const examinePrompt = (b) => [
   b.note ? ('NOTE: ' + b.note) : '',
   '',
   'The repository checkout you are grading is at: ' + REPO + ' — use these absolute paths (cd there for shell tools).',
+  SEARCH_GUARD,
   'The canonical rubric is ' + RUBRIC + ' — open it and use the EXACT scales. Your items in this bucket:',
   b.items.map((i) => '  - ' + i).join('\n'),
   '',
   'ANKER-REGEL (rubric update June 2026): every level has concrete Bewertungsanker in ' + RUBRIC + '. A level counts as reached ONLY when ALL anchors of that level are satisfied; if the anchors are only partially met, award the NEXT-LOWER level. Read the per-level anchors for each item, choose the highest level whose anchors are fully met, and justify the choice explicitly against that level\'s anchor (and against the next level\'s unmet anchor).',
   '',
   'Grade against the REAL rendered submission, exactly as the examiner receives it:',
-  '  - PRIMARY source: the text of the 5 uploaded PDFs at ' + UPLOAD_TXT + ' (grep/Read it) — Übersicht, Arc42, Projektbeschreibung, Reflexion, Eigenständigkeitserklärung. This is literally what Moodle receives.',
+  '  - PRIMARY source: the text of the 5 uploaded PDFs at ' + UPLOAD_TXT + ' (search it with `rg`, or Read it) — Übersicht, Arc42, Projektbeschreibung, Reflexion, Eigenständigkeitserklärung. This is literally what Moodle receives.',
   '  - The examiner also has the GitHub repo, linked from the Übersicht. The bundle text at ' + BUNDLE_TXT + ' inlines those repo-only artifacts (full use-cases, design docs, all ADRs, Block-Nachbereitungen) as a SUPERSET. Content found ONLY in the bundle (not in ' + UPLOAD_TXT + ') is reachable by the real examiner only by following a repo link — treat it as weaker/secondary evidence and say so when a score leans on it.',
   '  - You MAY also open the underlying repo files for depth/cross-check: ' + b.read.map((p) => REPO + '/' + p).join(', ') + '.',
   '',
@@ -336,7 +356,8 @@ const skepticPrompt = (b, examined) => [
   'You are an adversarial second examiner (the skeptical co-grader) for the CAS-AISE bucket "' + b.key + '". A first examiner produced these scores:',
   JSON.stringify(examined, null, 2),
   '',
-  'Your job is to challenge over-generous scoring. For each item, verify the cited evidence actually exists at the claimed strength in the real uploaded-PDF text (' + UPLOAD_TXT + ', grep for the cited terms; the bundle ' + BUNDLE_TXT + ' is only a repo-link superset — push back on any score that leans on bundle-only content). Where the first examiner awarded a level the evidence does not fully support, recommend a lower (or, rarely, higher) value with a crisp reason. Default to challenging: if evidence is vague, hand-wavy, or merely asserted, push the score down. Compute the adjusted bucket total. Be specific and cite what you checked.',
+  SEARCH_GUARD,
+  'Your job is to challenge over-generous scoring. For each item, verify the cited evidence actually exists at the claimed strength in the real uploaded-PDF text (' + UPLOAD_TXT + ', search for the cited terms with `rg`; the bundle ' + BUNDLE_TXT + ' is only a repo-link superset — push back on any score that leans on bundle-only content). Where the first examiner awarded a level the evidence does not fully support, recommend a lower (or, rarely, higher) value with a crisp reason. Default to challenging: if evidence is vague, hand-wavy, or merely asserted, push the score down. Compute the adjusted bucket total. Be specific and cite what you checked.',
 ].join('\n')
 
 // Pipeline: each bucket is graded, then immediately challenged by the skeptic.
@@ -353,7 +374,8 @@ const graded = await pipeline(
 const demo = await demoPromise
 const archFindings = (await archPromise).filter(Boolean)
 const buckets = graded.filter(Boolean)
-if (archFocus) log('Architecture lenses complete: ' + archFindings.length + '/' + ARCH_LENSES.length)
+progress('Examine + Skeptic complete — ' + buckets.length + '/' + BUCKETS.length + ' rubric buckets graded & challenged; demo ' + (demo && demo.reachable ? 'reached' : 'unreached'))
+if (archFocus) progress('Architecture lenses complete — ' + archFindings.length + '/' + ARCH_LENSES.length)
 
 // ════════════════════════════════════════════════════════════════════════════
 // Phase 2 — Verdict: aggregate into the grade sheet and write the report
@@ -424,6 +446,7 @@ const verdict = await agent(
 )
 
 log('Verdict: ' + (verdict ? verdict.totalAwarded + '/' + verdict.max + ' — ' + verdict.band : 'no verdict produced'))
+progress('Verdict complete — ' + (verdict ? verdict.totalAwarded + '/' + verdict.max + ' (' + verdict.band + ')' : 'no verdict'))
 
 return {
   focus,
