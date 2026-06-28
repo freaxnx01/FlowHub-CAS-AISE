@@ -56,7 +56,7 @@ Do NOT add frontmatter to pages that are only being read, not modified.
 After creating or editing vault pages, commit and push from the FlowHub repo root:
 
 ```bash
-cd /home/freax/projects/repos/github/freaxnx01/public/FlowHub-CAS-AISE
+cd /home/freax/repos/github/freaxnx01/public/FlowHub-CAS-AISE
 git add vault/
 git commit -m "docs(vault/<scope>): <description>"
 git push
