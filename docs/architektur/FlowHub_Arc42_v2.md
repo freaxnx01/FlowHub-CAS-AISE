@@ -966,7 +966,7 @@ Blazor-Komponenten, NSubstitute für Mocks, FluentAssertions, xUnit;
 **Testcontainers gegen echtes PostgreSQL** für Repository-Tests (kein
 In-Memory-Provider-Drift); Playwright für E2E; Live-KI-Tests sind trait-gegatet
 (`[Trait("Category","AI")]`) und aus der Default-Suite ausgeschlossen.
-Abgabestand: **294 Offline-Tests grün, 0 Fehler, 0 übersprungen**. Volltext und
+Abgabestand: **540 Offline-Tests grün, 0 Fehler, 0 übersprungen**. Volltext und
 Reconciliation-Tabelle in `docs/spec/testing-strategy.md`.
 
 **Test der KI-Anteile (Guardrails, nicht nur Trait-Gating).** Über das

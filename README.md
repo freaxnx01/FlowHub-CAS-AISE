@@ -91,7 +91,7 @@ Requires .NET 10 SDK (`global.json` pins the version). The `justfile` exposes ev
 
 ```bash
 just build       # build the full solution (warnings as errors)
-just test        # run the default suite — 294 tests (excludes live AI / BetaSmoke / E2E)
+just test        # run the default suite — 540 tests (excludes live AI / BetaSmoke / E2E)
 just run         # run FlowHub.Web on http://localhost:5070
 just watch       # same, with hot reload
 ```
