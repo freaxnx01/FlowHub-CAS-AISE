@@ -4,6 +4,102 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-28
+
+### Added
+
+- **quality:** adopt dotnet-quality gates + verify-gates in FlowHub (Phase-1) (#99)
+- **quality:** adopt polyglot pre-commit gate (German-aware scoping) (#109)
+- **quality:** wire Stryker mutation gate (Phase-1 baseline, break=35) (#124)
+- **observability:** activate OTel tracing with ADR-0009 PII processor (+3 Programmierung)
+- **quality:** widen Stryker to FlowHub.Persistence (scheduled mutation gate) (#131)
+- **quality:** widen Stryker to FlowHub.Skills (extend mutation-extended matrix) (#132)
+
+### CI/CD
+
+- **coverage:** wire per-assembly coverage gate (closes #126 §C) (#142)
+- **coverage:** ratchet thresholds to 100% line + measured branch floors (#150)
+
+### Changed
+
+- **web:** move E2E fault guards into excluded helpers (refs #126) (#146)
+
+### Documentation
+
+- add AGPL-3.0 license and README badges
+- **submission:** link changelog & release notes
+- **roadmap:** add Ausflug-Assistant and LiteLLM Proxy entries
+- **roadmap:** add Email-to-Capture channel entry
+- **diagrams:** label every connecting line in the block-and-line diagrams
+- **roadmap:** add graph visualisation of vectorised captures
+- **presentation:** revise AI-generated share to 100% code, ~5% human rework
+- **presentation:** reframe AI share as 100% generated, ~5% human rework
+- align AI-generated share to 100% generated, ~5% human rework
+- **readme:** fix stale pipeline-doc link (CLAUDE-PIPELINE.md -> AGENT-PIPELINE.md)
+- **arc42:** surface acceptance criteria + KI-guardrail tests into the SAD (Validierung)
+- align tagline »Eingangskorb« → »Inbox« across submission docs (closes #101)
+- **submission:** link NfA + AC catalogues in Übersicht §3.3; document Otlp__Endpoint
+- examiner-sim 96/100 report + path-to-100 actions + agent-dev search guardrail (#145)
+- **arc42:** path to 100/100 — interaction diagram + inline use cases + bundle fix (#153)
+- **testing:** record per-assembly coverage baseline post #126 (#151)
+- fix stale ~/projects path to ~/repos in CLAUDE.md (#155)
+- **roadmap:** add n8n interop — FlowHub as AI brain, n8n as no-code glue (#156)
+- **adr:** 0010 LLM & Agentic threat model (OWASP LLM-10 + Agentic-10) (#158)
+- **vault:** file the tiered model-routing recommendation (#157)
+- **coverage:** commit HTML coverage report and cite it in SUBMISSION (#163)
+
+### Fixed
+
+- **skills:** guard Wallabag integration against SSRF
+- **demo:** isolate backends from skill targets to contain SSRF
+- **docker:** copy CodeMetricsConfig.txt into the build image
+- **quality:** reduce Program.cs complexity, re-promote CA1502 to error (#108)
+- **submission:** theme the deck in the package build + drop the duplicate Abkürzungen
+- **submission:** outline-preserving merge + fit the Harness slide
+- **quality:** CA1506 cluster 1 — realistic threshold + composition-root carve-outs (#114)
+- **quality:** CA1506 cluster 2 — carve out Razor component code-behinds (#115)
+- **quality:** CA1506 cluster 3 — split CaptureEndpoints + carve endpoint classes (#117)
+- **quality:** CA1506 cluster 4 — architectural carve-outs + re-promote to error (#123)
+- **quality:** tune Skills Stryker break to 55 (CI baseline 61.97%); add json reporter (#133)
+- **quality:** tune Persistence Stryker break to 45 (CI baseline 50.15%) (#134)
+- **integration-tests:** drop MigrationRunner DI removal (type deleted)
+
+### Miscellaneous
+
+- gitignore examiner-sim screenshots dir
+
+### Testing
+
+- **skills:** cover public-IP-literal allow + obfuscated-literal reject
+- **coverage:** enable coverlet tooling + bring FlowHub.Core to 100%
+- **coverage:** cover SkillsBootLogger (FlowHub.Skills 87% -> 94%)
+- **coverage:** finish FlowHub.Skills tail (94% -> 100%)
+- **coverage:** bring FlowHub.AI to ~99% (boot logger + embeddings registration)
+- **coverage:** bring FlowHub.Api to 100% (validator + write/retry endpoints)
+- **coverage:** FlowHub.Web phase 1 — pipeline consumers, SkillHealthCard.Manage, E2E exclusions
+- **quality:** raise FlowHub.Core mutation score 37 → 86, lift break above canonical 60 (#125)
+- **core:** cover FlowHubActivityTags helpers to lift Stryker mutation score
+- **quality:** Persistence ratchet (1/2) — service-level + Tag/SkillRun/Channel tests (part of #96) (#138)
+- **quality:** Persistence ratchet (2/2) — Integration/Skill/ListAsync + break=70 (closes #96) (#139)
+- **coverage:** FlowHub.Web MainLayout 0%→100% (refs #126)
+- **coverage:** Persistence wiring — cover DI extension, drop dead MigrationRunner (refs #126 §B)
+- **coverage:** FlowHub.Web Captures.razor ~36%→100% (refs #126)
+- **coverage:** Web small-tails sweep — 7 files to 100% (refs #126) (#143)
+- **coverage:** Web pages remainder — 4 of 5 to 100%, CaptureDetail 67.9%→92.9% (refs #126) (#144)
+- **coverage:** FlowHub.AI 99.1% → 100% — cover defensive throws (refs #126) (#148)
+- **coverage:** Web — ProgramRegistration 58%→100%, Program 87.7%→92.6% (#140)
+- **coverage:** CaptureDetail.razor 81.8% → 100% — cover loading skeleton (refs #126) (#149)
+
+### build
+
+- **submission:** make the presentation a major, layout-preserving part of the upload
+- **release:** publish flowhub-migrations image too; surface two-container topology in Arc42 §7
+- **pdf:** automated layout check (clip detection) + fix two real clips (#152)
+
+### harden
+
+- **demo:** add Traefik rate-limit to wallabag/paperless/status routers
+- **demo:** STRIDE follow-ups — /metrics edge-block, admin role gate, upload cap (#100)
 ## [0.2.0] - 2026-06-20
 
 ### Added
