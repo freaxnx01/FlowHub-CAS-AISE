@@ -102,4 +102,13 @@
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
   </ItemGroup>
 
+  <ItemGroup Label="Security transitive pins">
+    <!-- Force patched transitive versions to clear NuGetAudit (NU1903) high-severity
+         advisories. Transitive pinning is enabled above (CentralPackageTransitivePinningEnabled). -->
+    <!-- Microsoft.OpenApi 2.0.0 (via Microsoft.AspNetCore.OpenApi) → GHSA-v5pm-xwqc-g5wc -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" />
+    <!-- Scriban.Signed 5.5.0 (via WireMock.Net, test-only) → GHSA-24c8-4792-22hx -->
+    <PackageVersion Include="Scriban.Signed" Version="7.2.0" />
+  </ItemGroup>
+
 </Project>
