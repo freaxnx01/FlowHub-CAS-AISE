@@ -1,0 +1,17 @@
+# gitleaks allowlist — reviewed false positives.
+#
+# Each entry is a gitleaks finding fingerprint (commit:path:rule:line) that was
+# manually reviewed and confirmed NOT to be a real credential. Reviewed 2026-07-03.
+# Format: one fingerprint per line; see https://github.com/gitleaks/gitleaks#gitleaksignore
+
+# Makefile (no longer in the tree — history only). gitleaks' curl-auth-user rule
+# flagged a RabbitMQ health-ping `curl -u "$USER:$PASS"` whose password DEFAULTS to
+# the local-dev value `dev-secret` for a localhost broker. Not a credential to any
+# real system — a dev fallback overridden by env in every real deployment.
+e03d0cebe05bda8775479d1d0329733301481b28:Makefile:curl-auth-user:180
+
+# tools/wallabag-token.sh — OAUTH_CLIENT_RESOURCE is a Passbolt *resource UUID*
+# (an identifier that points to a secret stored in Passbolt), NOT the secret itself.
+# Retrieving the actual value still requires authenticated Passbolt access; the UUID
+# alone is inert. See docs/runbooks/test-services.md § Secrets.
+5eafafb427a6ebc61cf12fb191bf43f58a4d0c98:tools/wallabag-token.sh:generic-api-key:25
