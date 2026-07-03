@@ -631,10 +631,28 @@ Expose `IClassifier` over HTTP — `POST /api/classify` → `ClassificationResul
 
 ---
 
+# Security & AI-risk hardening — tracked residual gaps
+
+Unlike the exploratory ideas above, these are **known residual gaps** surfaced by the LLM/agentic threat model in **ADR 0010** (deliverable of #121). Each is mapped to an OWASP category, filed as an issue, and consciously deferred — acceptable **only** because FlowHub runs single-user/anonymous behind `DevAuthHandler` in the CAS demo. They become prerequisites the moment real auth or real user data lands (Block 5 OIDC / a post-CAS multi-user spinout). Listing them here is deliberate: the threat model's value is the honest backlog it produced, not a claim of zero risk.
+
+| Gap | OWASP | Issue | What's missing | Trigger to fix |
+|---|---|---|---|---|
+| **G1** | LLM02 — Sensitive Information Disclosure | [#159](https://github.com/freaxnx01/FlowHub-CAS-AISE/issues/159) | `AiClassifier` sends Capture content **verbatim** to the provider (OpenRouter). No outbound redaction/PII guardrail before content leaves the process. | Any real-data (non-anonymous) deployment |
+| **G2** | LLM08 — Vector & Embedding Weaknesses | [#160](https://github.com/freaxnx01/FlowHub-CAS-AISE/issues/160) | Capture reads + `SearchByEmbeddingAsync` are **not tenant-scoped** — any authenticated caller can read/search all captures. *Highest-priority residual gap.* | Multi-user (OIDC, Block 5) |
+| **G3** | LLM10 — Unbounded Consumption | [#161](https://github.com/freaxnx01/FlowHub-CAS-AISE/issues/161) | The OpenRouter **$1/mo cap is account-side, not code-enforced**; the only in-repo control is the Traefik rate-limit. Needs an operator runbook making the split explicit. | Now (doc-only) |
+| **G4** | ASI03 — Identity & Privilege Abuse | [#162](https://github.com/freaxnx01/FlowHub-CAS-AISE/issues/162) | Each `ISkillIntegration` acts with a static, system-scoped token; no end-user identity is delegated. Confused-deputy surface needs review once real auth exists. | Block 5 OIDC |
+
+**Sequencing:** G3 is doc-only and can land any time. G2 is the priority once OIDC exists (it's a data-isolation flaw, not just hardening). G1 gates real-data use. G4 is a review + decision (propagate identity vs. keep skills system-scoped), naturally bundled with the [Multi-user / multi-tenant](#multi-user--multi-tenant) work. All four extend ADR 0010's agency-boundary table rather than introducing new architecture.
+
+**Related code-quality debt:** [#167](https://github.com/freaxnx01/FlowHub-CAS-AISE/issues/167) — reduce the cyclomatic complexity of `WallabagSkillIntegration.IsPublic` (the SSRF guard, complexity 38 / 100% covered) without changing behaviour. Security-sensitive but behaviour-preserving; tracked separately from the threat-model gaps above.
+
+---
+
 ## References
 
 - ADR 0002 — Service Architecture & Async Communication (`docs/adr/0002-service-architecture-and-async-communication.md`)
 - ADR 0004 — AI Integration in Services (`docs/adr/0004-ai-integration-in-services.md`)
 - ADR 0006 — Vector Search (`docs/adr/0006-vector-search.md`)
 - ADR 0007 — LLM Hosting (`docs/adr/0007-llm-hosting.md`)
+- ADR 0010 — LLM/Agentic Threat Model (`docs/adr/0010-llm-agentic-threat-model.md`) — source of gaps G1–G4 above
 - `source/FlowHub.Web/Pipeline/CaptureEnrichmentConsumer.cs` — current classify-only "enrichment" consumer
