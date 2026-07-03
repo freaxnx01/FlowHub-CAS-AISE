@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-07-03
+
+### Fixed
+
+- **deps:** pin patched transitive Microsoft.OpenApi (2.7.5) + Scriban.Signed (7.2.0) to clear high-severity NuGetAudit advisories (GHSA-v5pm-xwqc-g5wc, GHSA-24c8-4792-22hx) (#172)
+
+### Documentation
+
+- **roadmap:** add tracked security & AI-risk hardening section (G1–G4 + #167) (#173)
+- **examiner-sim:** add 2026-06-28 balanced grade sheet (98/100) (#171)
+- **tests:** align offline test count 294 -> 540 (current verified suite) (#170)
+- **agent-dev:** swap=0 OOM guard + Claude grep->ugrep root cause (#169)
+- **skills:** enrich #167 — spec + plan for IsPublic simplification (#168)
+- **coverage:** point coverage links to canonical https Pages URL (#166)
+
 ## [0.3.0] - 2026-06-28
 
 ### Added
