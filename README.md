@@ -77,7 +77,7 @@ Requires Docker (Compose v2). Boots Web + Postgres + RabbitMQ + Prometheus + Gra
 ```bash
 git clone https://github.com/freaxnx01/FlowHub-CAS-AISE.git
 cd FlowHub-CAS-AISE
-git checkout v0.1.0          # the submission tag
+git checkout v0.3.1          # the submission tag
 cp .env.example .env         # fill in Postgres password, OIDC, AI keys
 docker compose up -d --wait
 # → http://localhost:5070  (health: /health/live · metrics: /metrics · API docs: /scalar)
@@ -96,7 +96,7 @@ just run         # run FlowHub.Web on http://localhost:5070
 just watch       # same, with hot reload
 ```
 
-CI build for `v0.1.0`: [GitHub Actions runs](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml?query=branch%3Amain).
+CI on `main`: [GitHub Actions runs](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/workflows/ci.yml?query=branch%3Amain).
 
 ---
 
@@ -110,10 +110,9 @@ source/                 ← application code (one project per capability)
   FlowHub.AI/           ← LLM-backed classifier + embeddings (MEAI)
   FlowHub.Persistence/  ← EF Core + Npgsql + pgvector
   FlowHub.Skills/       ← Wallabag + Vikunja ISkillIntegration adapters
-  FlowHub.Telegram/     ← Telegram capture channel
-tests/                  ← 9 test projects (unit, component, integration, E2E)
+tests/                  ← 10 test projects (unit, component, integration, E2E)
 docs/                   ← architecture, specs, runbooks, insights
-  adr/                  ← 6 Architecture Decision Records
+  adr/                  ← 10 Architecture Decision Records
   spec/                 ← use-cases, NfA (SMART), acceptance criteria, DB model, testing strategy
   insights/             ← per-block lessons learned (Block 1–5)
   runbooks/             ← acceptance, demo, OIDC setup, test services
@@ -207,7 +206,7 @@ Never commit secrets. See [`docs/runbooks/authentik-oidc-setup.md`](docs/runbook
 
 ## Versioning
 
-SemVer 2.0.0. Current submission tag: **`v0.1.0`** (matches `<Version>0.1.0</Version>` in `Directory.Build.props`). See [`CHANGELOG.md`](CHANGELOG.md).
+SemVer 2.0.0. Current release: **`v0.3.1`** (matches `<Version>0.3.1</Version>` in `Directory.Build.props`). See [`CHANGELOG.md`](CHANGELOG.md).
 
 ## License
 
