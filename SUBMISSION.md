@@ -60,7 +60,7 @@ Die ausführliche Projektbeschreibung mit Stakeholdern, Funktionsumfang, Archite
 - **Branch (Abgabestand):** `main`
 - **Lizenz / README:** [`README.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/README.md)
 - **Changelog:** [`CHANGELOG.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CHANGELOG.md) (Keep-a-Changelog, SemVer)
-- **Release Notes:** [GitHub Releases](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases) — [`v0.1.0`](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/tag/v0.1.0) (CAS-AISE Abgabe-Version) · [`v0.2.0`](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/tag/v0.2.0) (aktuell)
+- **Release Notes:** [GitHub Releases](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases) — [`v0.1.0`](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/tag/v0.1.0) (CAS-AISE Abgabe-Version) · [`v0.3.1`](https://github.com/freaxnx01/FlowHub-CAS-AISE/releases/tag/v0.3.1) (aktuell)
 - **Agent-Konventionen:** [`CLAUDE.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/CLAUDE.md)
 - **🌐 Live-Demo:** <https://demo.flowhub.freaxnx01.ch> — öffentliche Instanz (Reset alle 15 min). Angebundene Ziel-Dienste: [Vikunja](https://vikunja.demo.flowhub.freaxnx01.ch) · [Wallabag](https://wallabag.demo.flowhub.freaxnx01.ch) · [paperless-ngx](https://paperless.demo.flowhub.freaxnx01.ch). Status: <https://status.demo.flowhub.freaxnx01.ch>
 
@@ -187,7 +187,7 @@ Die [**Roadmap**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/p
 
 - **Primärer Einstiegspunkt** ist diese Datei (`SUBMISSION.md`) — alle anderen Artefakte sind über die Links in Abschnitt 3 erreichbar.
 - **Codebasis** liegt im selben Repository unter [`source/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/source) (Modulstruktur), Tests unter [`tests/`](https://github.com/freaxnx01/FlowHub-CAS-AISE/tree/main/tests).
-- **Test-Ergebnisse:** der letzte CI-Lauf auf `main` ([Run #28324532702, 2026-06-28](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/runs/28324532702)) ist **grün — 540 Tests, 0 Fehler** über 6 Test-Projekte.
+- **Test-Ergebnisse:** der letzte CI-Lauf auf `main` ([Run #28650780158, 2026-07-03](https://github.com/freaxnx01/FlowHub-CAS-AISE/actions/runs/28650780158)) ist **grün — 540 Tests, 0 Fehler** über 6 Test-Projekte.
   - Projekte: Core-Unit, Web-Component (bUnit), Api-Integration, Persistence, Skill-Contract (WireMock); E2E (Playwright) und Live-AI sind kategoriebasiert separat.
   - **Coverage: 100 % Line (1652/1652), 94,6 % Branch (425/449)** über alle 6 Assemblies, per-Assembly-Gate erzwungen ([`coverage.thresholds.json`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/coverage.thresholds.json)). Collection via *XPlat Code Coverage*.
   - **HTML-Coverage-Report** — gerendert öffenbar unter [`github.freaxnx01.ch/FlowHub-CAS-AISE/coverage/`](https://github.freaxnx01.ch/FlowHub-CAS-AISE/coverage/) (<https://github.freaxnx01.ch/FlowHub-CAS-AISE/coverage/>); liegt zudem committet unter `docs/coverage/` und ist im Submission-Bundle direkt öffenbar, lokal reproduzierbar mit `just test-coverage`. Test-Strategie: [`docs/spec/testing-strategy.md`](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/docs/spec/testing-strategy.md).
