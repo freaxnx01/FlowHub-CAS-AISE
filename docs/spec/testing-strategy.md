@@ -44,27 +44,29 @@ graph TD
 > | This section / Block 3 | 3 | `Category!=AI` (default suite) | 99 |
 > | Block 4 Nachbereitung (`docs/insights/block-4.md`) | 4 | `FullyQualifiedName!~E2ETests` (incl. AI + integration) | 223 (6 skipped) |
 > | Block 5 Nachbereitung (`docs/insights/block-5.md`) | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | 171 (0 skipped) |
-> | **Submission build (this doc)** | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | **294 (0 skipped)** |
+> | **Submission build (this doc)** | 5 | `Category!=AI&!=BetaSmoke&!=E2E` (offline default suite) | **540 (0 skipped)** |
 >
-> **Canonical figure at submission:** **294 offline tests green, 0 failed, 0
-> skipped** (the default CI suite), and the suite additionally passes the AI +
-> live-service integration tests when their categories are enabled (E2E excluded).
-> The lower historical numbers are earlier per-block snapshots, retained in the
-> Nachbereitungen as a progress record.
+> **Canonical figure at submission:** **540 offline tests green, 0 failed, 0
+> skipped** (the default CI suite — the same `Category!=AI&!=BetaSmoke&!=E2E`
+> filter as the latest `main` CI run #28324532702), and the suite additionally
+> passes the AI + live-service integration tests when their categories are enabled
+> (E2E excluded). The lower historical numbers (incl. the earlier 294-test
+> snapshot) are earlier per-block snapshots, retained in the Nachbereitungen as a
+> progress record.
 
 ### Verified test run (rendered evidence)
 
-Output of `just test` (`dotnet test FlowHub.slnx --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E"`), run **2026-06-16**:
+Output of `just test` (`dotnet test FlowHub.slnx --filter "Category!=AI&Category!=BetaSmoke&Category!=E2E"`), run **2026-06-28**:
 
 | Test project | Passed | Failed | Skipped |
 |---|---:|---:|---:|
-| FlowHub.Core.Tests | 6 | 0 | 0 |
+| FlowHub.Core.Tests | 59 | 0 | 0 |
 | FlowHub.Skills.ContractTests | 17 | 0 | 0 |
-| FlowHub.Api.IntegrationTests | 21 | 0 | 0 |
-| FlowHub.Skills.Tests | 31 | 0 | 0 |
-| FlowHub.Web.ComponentTests (bUnit) | 181 | 0 | 0 |
-| FlowHub.Persistence.Tests (Testcontainers, real PostgreSQL) | 38 | 0 | 0 |
-| **Total** | **294** | **0** | **0** |
+| FlowHub.Api.IntegrationTests | 23 | 0 | 0 |
+| FlowHub.Skills.Tests | 54 | 0 | 0 |
+| FlowHub.Web.ComponentTests (bUnit) | 282 | 0 | 0 |
+| FlowHub.Persistence.Tests (Testcontainers, real PostgreSQL) | 105 | 0 | 0 |
+| **Total** | **540** | **0** | **0** |
 
 `Passed! - Failed: 0, …` for every assembly; the persistence suite runs against a
 real PostgreSQL container via Testcontainers (not InMemory). AI- and E2E-tagged
@@ -198,7 +200,7 @@ public sealed class AnthropicHaikuLiveTests
 #### Trait filtering strategy
 
 Tests use `[Trait("Category", "AI")]` to partition:
-- **Default suite** (`Category!=AI&Category!=BetaSmoke&Category!=E2E`): 294 tests, runs every build, no external dependencies
+- **Default suite** (`Category!=AI&Category!=BetaSmoke&Category!=E2E`): 540 tests, runs every build, no external dependencies
 - **Live AI suite** (`Category=AI`): 4 tests, runs on-demand, requires real API credentials
 
 ## Test Naming Convention

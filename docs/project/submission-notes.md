@@ -66,7 +66,7 @@ Walk this list top-to-bottom. Each step is gated by the previous.
       since the June-2026 update), gaps consciously accepted are documented
 - [ ] **Remaining CAS todos cleared**: `cas-aise-todo-list full` — no open
       submission-gating `- [ ]` items
-- [ ] `just test` green: **294 / 294** across the 6 offline test projects
+- [ ] `just test` green: **540 / 540** across the 6 offline test projects
 - [ ] `just build` clean with warnings-as-errors enforced
 - [ ] `git status` clean on `main`; no uncommitted/untracked files
 - [ ] Last CI run on `main` is green: `gh run list --workflow=ci.yml --branch=main --limit 1`
