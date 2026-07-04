@@ -26,6 +26,22 @@ Built as the project work for **CAS AI-Assisted Software Engineering (AISE)** at
 
 ---
 
+## 🎧 Audio-Podcasts (Deutsch)
+
+> **🇩🇪 Diese drei Podcasts sind auf Deutsch.** — Three AI-generated audio deep-dives on FlowHub, produced with **Google NotebookLM** from this repository's own documents. The narration is **in German**.
+
+| # | Episode | Basis | Länge | Anhören |
+|---|---------|-------|-------|---------|
+| 1 | **„FlowHub sortiert Zettelchaos automatisch per Telegram"** | [Projektbeschreibung](docs/projektbeschreibung/) | ~2 min | ▶️ [MP3](docs/assets/audio/flowhub-podcast-1-projektbeschreibung.mp3) |
+| 2 | **„FlowHub: Architektur zwischen Resilienz und Over-Engineering"** | [arc42](docs/architektur/FlowHub_Arc42_v2.md) | ~26 min | ▶️ [MP3](docs/assets/audio/flowhub-podcast-2-architektur-arc42.mp3) |
+| 3 | **„Architektur als neuer Engpass der KI-Softwareentwicklung"** | [Reflexion / Learnings](vault/Projektarbeit/Learnings.md) | ~27 min | ▶️ [MP3](docs/assets/audio/flowhub-podcast-3-reflexion.mp3) |
+
+Click a ▶️ **MP3** link to open GitHub's built-in audio player. The files also live in the repo under [`docs/assets/audio/`](docs/assets/audio/).
+
+<sub>**Provenance:** Generated with Google NotebookLM from FlowHub's own documentation (Projektbeschreibung · arc42 · Reflexion). As AI-generated output the audio carries no separate copyright claim; the underlying source documents are part of this repository. Sprache / language: **Deutsch**.</sub>
+
+---
+
 ## Features
 
 - **Capture** — app-bar quick-capture, REST API (`POST /api/v1/captures`), and file upload; any text/URL/file becomes a *Capture*.
