@@ -77,14 +77,28 @@ services:
       - "traefik.http.middlewares.flowhub-paperless-ratelimit.ratelimit.period=1m"
       - "traefik.docker.network=web"
 
+  # Split access at the edge: /status/* stays public, everything else (admin) is
+  # basic-auth gated. See the base demo/docker-compose.yml uptime-kuma comment.
+  # Set KUMA_BASICAUTH_USERS in .env (htpasswd -nbB output); unset ⇒ admin 401s.
   uptime-kuma:
     labels: !override
       - "traefik.enable=true"
+      # Public status page — read-only paths Kuma needs to render /status/<slug>.
+      - "traefik.http.routers.flowhub-status-public.rule=Host(`status.demo.flowhub.freaxnx01.ch`) && (PathPrefix(`/status`) || PathPrefix(`/assets`) || PathPrefix(`/api/status-page`) || PathPrefix(`/api/badge`) || PathPrefix(`/upload`) || Path(`/favicon.ico`) || Path(`/icon.svg`) || Path(`/manifest.json`) || Path(`/apple-touch-icon.png`))"
+      - "traefik.http.routers.flowhub-status-public.priority=100"
+      - "traefik.http.routers.flowhub-status-public.entrypoints=web-secure"
+      - "traefik.http.routers.flowhub-status-public.tls=true"
+      - "traefik.http.routers.flowhub-status-public.tls.certresolver=default"
+      - "traefik.http.routers.flowhub-status-public.middlewares=flowhub-status-ratelimit@docker"
+      - "traefik.http.routers.flowhub-status-public.service=flowhub-status"
+      # Catch-all — the admin UI, basic-auth gated on top of the rate limit.
       - "traefik.http.routers.flowhub-status.rule=Host(`status.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-status.priority=1"
       - "traefik.http.routers.flowhub-status.entrypoints=web-secure"
       - "traefik.http.routers.flowhub-status.tls=true"
       - "traefik.http.routers.flowhub-status.tls.certresolver=default"
-      - "traefik.http.routers.flowhub-status.middlewares=flowhub-status-ratelimit@docker"
+      - "traefik.http.routers.flowhub-status.middlewares=flowhub-status-ratelimit@docker,flowhub-status-auth@docker"
+      - "traefik.http.middlewares.flowhub-status-auth.basicauth.users=${KUMA_BASICAUTH_USERS:-}"
       - "traefik.http.services.flowhub-status.loadbalancer.server.port=3001"
       - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.average=100"
       - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.burst=200"

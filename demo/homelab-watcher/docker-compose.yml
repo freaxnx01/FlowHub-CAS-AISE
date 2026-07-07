@@ -1,0 +1,44 @@
+# FlowHub demo — homelab "outside watcher" (Uptime Kuma)
+# ---------------------------------------------------------------------------
+# WHY THIS EXISTS
+# The Uptime Kuma on the VPS-DE (status.demo.flowhub.freaxnx01.ch) monitors each
+# demo service, but it CANNOT alert when the VPS itself dies — the monitor dies
+# with the host. This second Kuma runs in the HOMELAB and probes the VPS demo
+# from the outside, pushing to the homelab ntfy. It is the layer that catches a
+# total VPS / network outage right before an exam.
+#
+# Its job (probe VPS + push ntfy) is entirely OUTBOUND, so it needs no inbound
+# route to function. The optional Traefik labels / host port below only expose
+# its own admin UI at status.home.freaxnx01.ch for convenience.
+#
+# DEPLOY: drop this into the target LXC's docker stack (e.g. ~/mydocker) and
+# `docker compose up -d`. Ensure COMPOSE_PROJECT_NAME=mydocker is set in that
+# LXC's .env (see homelab-service-routing skill, Critical Rule 2 — avoids
+# orphaned volumes on down/up). Then configure monitors + ntfy per README.md.
+services:
+  flowhub-watcher:
+    image: louislam/uptime-kuma:1
+    container_name: flowhub-watcher
+    restart: unless-stopped
+    volumes:
+      - flowhub-watcher-data:/app/data
+    # Fallback access with zero routing: reach the UI at http://<lxc-ip>:3011.
+    # Kuma listens on 3001 inside the container; mapped to 3011 on the host to
+    # avoid clashing with any local service already on 3001.
+    ports:
+      - "3011:3001"
+    # OPTIONAL — expose the admin UI at status.home.freaxnx01.ch via the LXC's
+    # LOCAL Traefik (HTTP mode; local Traefik terminates TLS via dnschallenge,
+    # the dispatcher TCP-passthrough-routes the hostname to this LXC:443).
+    # Uncomment and adapt the network/entrypoint names to the host LXC's Traefik.
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.flowhub-watcher.rule=Host(`status.home.freaxnx01.ch`)"
+    #   - "traefik.http.routers.flowhub-watcher.entrypoints=web-secure"
+    #   - "traefik.http.routers.flowhub-watcher.tls=true"
+    #   - "traefik.http.routers.flowhub-watcher.tls.certresolver=dnschallenge"
+    #   - "traefik.http.services.flowhub-watcher.loadbalancer.server.port=3001"
+
+volumes:
+  # Kuma config + monitor history (SQLite). Persists monitors + notifications.
+  flowhub-watcher-data:

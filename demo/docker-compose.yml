@@ -473,6 +473,15 @@ services:
   # public status page that probes the demo's health endpoints, the skill-target
   # services, and the LLM provider. Monitors are configured on first boot —
   # see docs/runbooks/public-demo.md § Uptime monitoring.
+  #
+  # Kuma serves BOTH the public status page and the admin UI from the same host/port,
+  # so access is split at the Traefik edge by path (see also demo/docker-compose.vps.yml,
+  # which !override-s these labels for the live VPS-DE Traefik):
+  #   * flowhub-status-public (priority 100) — the status-page read paths, no auth.
+  #   * flowhub-status        (catch-all)     — everything else (admin, /dashboard,
+  #     socket.io, setup) behind HTTP basic-auth. Set KUMA_BASICAUTH_USERS in .env to
+  #     an `htpasswd -nbB <user> <pass>` line; if unset the admin fails closed (401)
+  #     while the status page stays public.
   uptime-kuma:
     image: louislam/uptime-kuma:1
     volumes:
@@ -480,11 +489,22 @@ services:
     labels:
       # Generic labels (overridden for VPS-DE in demo/docker-compose.vps.yml).
       - "traefik.enable=true"
+      # Public status page — read-only paths Kuma needs to render /status/<slug>.
+      - "traefik.http.routers.flowhub-status-public.rule=Host(`status.demo.flowhub.freaxnx01.ch`) && (PathPrefix(`/status`) || PathPrefix(`/assets`) || PathPrefix(`/api/status-page`) || PathPrefix(`/api/badge`) || PathPrefix(`/upload`) || Path(`/favicon.ico`) || Path(`/icon.svg`) || Path(`/manifest.json`) || Path(`/apple-touch-icon.png`))"
+      - "traefik.http.routers.flowhub-status-public.priority=100"
+      - "traefik.http.routers.flowhub-status-public.entrypoints=websecure"
+      - "traefik.http.routers.flowhub-status-public.tls=true"
+      - "traefik.http.routers.flowhub-status-public.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.flowhub-status-public.middlewares=flowhub-status-ratelimit@docker"
+      - "traefik.http.routers.flowhub-status-public.service=flowhub-status"
+      # Catch-all — the admin UI. Basic-auth gated on top of the rate limit.
       - "traefik.http.routers.flowhub-status.rule=Host(`status.demo.flowhub.freaxnx01.ch`)"
+      - "traefik.http.routers.flowhub-status.priority=1"
       - "traefik.http.routers.flowhub-status.entrypoints=websecure"
       - "traefik.http.routers.flowhub-status.tls=true"
       - "traefik.http.routers.flowhub-status.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.flowhub-status.middlewares=flowhub-status-ratelimit@docker"
+      - "traefik.http.routers.flowhub-status.middlewares=flowhub-status-ratelimit@docker,flowhub-status-auth@docker"
+      - "traefik.http.middlewares.flowhub-status-auth.basicauth.users=${KUMA_BASICAUTH_USERS:-}"
       - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.average=100"
       - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.burst=200"
       - "traefik.http.middlewares.flowhub-status-ratelimit.ratelimit.period=1m"
