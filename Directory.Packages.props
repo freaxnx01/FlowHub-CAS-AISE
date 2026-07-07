@@ -107,8 +107,9 @@
          advisories. Transitive pinning is enabled above (CentralPackageTransitivePinningEnabled). -->
     <!-- Microsoft.OpenApi 2.0.0 (via Microsoft.AspNetCore.OpenApi) → GHSA-v5pm-xwqc-g5wc -->
     <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" />
-    <!-- Scriban.Signed 5.5.0 (via WireMock.Net, test-only) → GHSA-24c8-4792-22hx -->
-    <PackageVersion Include="Scriban.Signed" Version="7.2.0" />
+    <!-- Scriban.Signed (via WireMock.Net, test-only) → GHSA-24c8-4792-22hx,
+         GHSA-6q7j-xr26-3h2c, GHSA-q6rr-fm2g-g5x8 (patched in 7.2.1) -->
+    <PackageVersion Include="Scriban.Signed" Version="7.2.5" />
   </ItemGroup>
 
 </Project>
