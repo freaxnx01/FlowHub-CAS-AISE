@@ -163,7 +163,7 @@ Pflichtcheck am Ende jeder Nachbereitung — die offizielle Moodle-Rubrik aus [[
 ## Verweise
 
 - Repo: [[Repository]] — `github.com/freaxnx01/FlowHub-CAS-AISE`
-- Block 4 Vorbereitung: [[04 Persitence - a) Vorbereitung]]
+- Block 4 Vorbereitung: [[04 Persistence - a) Vorbereitung]]
 - Block 3 Nachbereitung: [[03 Service - c) Nachbereitung]]
 - Block 5 Nachbereitung: [[05 Deployment - c) Nachbereitung]]
 - ADR 0001: `docs/adr/0001-frontend-render-mode-and-architecture.md`
