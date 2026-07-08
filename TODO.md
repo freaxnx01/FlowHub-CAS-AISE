@@ -21,11 +21,3 @@ items below are **follow-ups**, not unfinished in-tree work.
   `docs/superpowers/plans/*`, `nachbereitung/examiner-sim/report-2026-06-27*`,
   and the `docs/project/TODO.md` narrative of the earlier manifest fix. Leave
   as-is; rewriting them would falsify the record.
-
-## Sibling repo `flowhub` (product split — separate repo, out of scope here)
-
-- [ ] `~/repos/github/freaxnx01/public/flowhub` has an uncommitted `TODO.md`
-  change and a recorded **Release NU1903 blocker** (vulnerable-package warning
-  failing the Release build). Investigate there, not in this frozen archive.
-  This repo (`FlowHub-CAS-AISE`) is **not** blocked — `dotnet list package
-  --vulnerable` is clean; the NU1903 pins are already in `Directory.Packages.props`.
