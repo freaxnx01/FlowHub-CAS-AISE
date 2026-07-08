@@ -123,9 +123,9 @@ Jeder Block hat drei Phasen: **Vorbereitung** (vor dem Präsenztag), **PVA** (Pr
 
 **Block 4 — Persistence**
 
-- [Vorbereitung](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Bl%C3%B6cke/04%20Persitence/04%20Persitence%20-%20a%29%20Vorbereitung.md)
-- [PVA](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Bl%C3%B6cke/04%20Persitence/04%20Persitence%20-%20b%29%20PVA.md)
-- [**Nachbereitung**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Bl%C3%B6cke/04%20Persitence/04%20Persitence%20-%20c%29%20Nachbereitung.md)
+- [Vorbereitung](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Bl%C3%B6cke/04%20Persistence/04%20Persistence%20-%20a%29%20Vorbereitung.md)
+- [PVA](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Bl%C3%B6cke/04%20Persistence/04%20Persistence%20-%20b%29%20PVA.md)
+- [**Nachbereitung**](https://github.com/freaxnx01/FlowHub-CAS-AISE/blob/main/vault/Bl%C3%B6cke/04%20Persistence/04%20Persistence%20-%20c%29%20Nachbereitung.md)
 
 **Block 5 — Deployment**
 

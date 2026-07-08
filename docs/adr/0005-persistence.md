@@ -29,7 +29,7 @@ The Quarkus / Hibernate / Panache / Jakarta-Data programming criterion remains
 course's nominal Hibernate / Panache / Jakarta Data vocabulary is the teacher's
 reference stack; FlowHub's .NET-native equivalents (EF Core 10, `DbSet<T>` + LINQ,
 `IQueryable<T>` + Expression Trees) are presented in their own terms and the
-mapping is recorded in `vault/Blöcke/04 Persitence/04 Persitence - c) Nachbereitung.md`'s
+mapping is recorded in `vault/Blöcke/04 Persistence/04 Persistence - c) Nachbereitung.md`'s
 intro.
 
 ---
@@ -396,7 +396,7 @@ Items the Beta intentionally did NOT do, deferred to Block 4 or Block 5:
 - ADR 0003: `docs/adr/0003-async-pipeline.md` — EventId namespacing
 - ADR 0004: `docs/adr/0004-ai-integration-in-services.md` — promised AI audit fields
 - AI Usage living doc: `docs/ai-usage.md` (Block 4 prep — Beta MVP section)
-- Block 4 Nachbereitung: `vault/Blöcke/04 Persitence/04 Persitence - c) Nachbereitung.md`
+- Block 4 Nachbereitung: `vault/Blöcke/04 Persistence/04 Persistence - c) Nachbereitung.md`
 - Bewertungskriterien: `vault/Organisation/Bewertungskriterien.md`
 - EF Core 10 docs: https://learn.microsoft.com/en-us/ef/core/
 - 12-Factor XII (Admin processes): https://12factor.net/admin-processes

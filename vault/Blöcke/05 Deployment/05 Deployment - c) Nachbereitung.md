@@ -163,7 +163,7 @@ Abschlussphase — die Lösung betriebsbereit machen und einreichen:
 
 - Repo: [[Repository]] — `github.com/freaxnx01/FlowHub-CAS-AISE`
 - Block 5 Vorbereitung: [[05 Deployment - a) Vorbereitung]]
-- Block 4 Nachbereitung: [[04 Persitence - c) Nachbereitung]]
+- Block 4 Nachbereitung: [[04 Persistence - c) Nachbereitung]]
 - Bewertungskriterien: [[Bewertungskriterien]]
 - ADR 0001: `docs/adr/0001-frontend-render-mode-and-architecture.md`
 - ADR 0002: `docs/adr/0002-service-architecture-and-async-communication.md`
