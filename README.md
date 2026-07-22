@@ -1,3 +1,6 @@
+> **This repository is archived.** It preserves the CAS AISE project work as submitted.
+> Active development continues in **[freaxnx01/flowhub](https://github.com/freaxnx01/flowhub)**.
+
 <p align="center">
   <img src="docs/assets/flowhub-logo.png" alt="FlowHub" width="420" />
 </p>
