@@ -53,7 +53,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Quality gate
-        uses: freaxnx01/agent-pipeline/.github/actions/dotnet-quality@c3977e1bd9b190be01b98eb93c260230495cfa1b  # agent-pipeline main (run-method-size support)
+        uses: freaxnx01/agent-workflow/.github/actions/dotnet-quality@c3977e1bd9b190be01b98eb93c260230495cfa1b  # agent-pipeline main (run-method-size support)
         with:
           solution: FlowHub.slnx
           test-project: tests/FlowHub.Core.Tests/FlowHub.Core.Tests.csproj
